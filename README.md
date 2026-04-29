@@ -45,8 +45,7 @@ Or non-interactively:
 | 3 | **Metasploitable2** | Linux VM with intentionally vulnerable services | `8081`, `2222`, `445`… |
 | 4 | **WebGoat** | Lesson-based Java security training | `8888` |
 | 5 | **HTB Style** | CTFd scoreboard + Struts2 CVE-2017-5638 | `8000`, `8090` |
-| 6 | **Kioptrix** | Classic VulnHub boot2root | `8082`, `4445` |
-| 7 | **VulnAD** | Vulnerable Active Directory via Samba4 | `389`, `88`, `4445` |
+| 6 | **VulnAD** | Vulnerable Active Directory via Samba4 | `389`, `88`, `4445` |
 
 ---
 
