@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BreachSQL Fire Range{{ block_title }}</title>
+<style>
+  :root {
+    --bg:#0d1117; --surface:#161b22; --border:#30363d;
+    --text:#e6edf3; --muted:#8b949e; --accent:#f78166;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;padding-bottom:56px}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  nav{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:24px}
+  nav .brand{font-size:1.2rem;font-weight:700;color:var(--accent);letter-spacing:.04em}
+  nav a{color:var(--text);font-size:.9rem}
+  .container{max-width:1100px;margin:0 auto;padding:32px 24px}
+  h1{font-size:1.8rem;margin-bottom:8px}
+  .subtitle{color:var(--muted);margin-bottom:32px;font-size:.95rem}
+  .tier-section{margin-bottom:40px}
+  .tier-heading{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .tier-badge{padding:4px 12px;border-radius:12px;font-size:.75rem;font-weight:700;color:#fff}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:8px}
+  .card-title{font-size:1rem;font-weight:600}
+  .card-desc{font-size:.85rem;color:var(--muted);flex:1}
+  .card-meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+  .card-technique{font-size:.75rem;background:#21262d;padding:3px 8px;border-radius:4px;color:var(--muted)}
+  .card-points{font-size:.9rem;font-weight:700;color:var(--accent)}
+  .card-endpoint{font-size:.72rem;color:var(--muted);word-break:break-all}
+  details.hint{margin-top:6px;font-size:.8rem}
+  details.hint summary{cursor:pointer;color:var(--muted);font-size:.75rem;user-select:none;list-style:none;display:flex;align-items:center;gap:6px}
+  details.hint summary::-webkit-details-marker{display:none}
+  details.hint summary::before{content:'▶';font-size:.6rem;transition:transform .15s;display:inline-block}
+  details.hint[open] summary::before{transform:rotate(90deg)}
+  details.hint .hint-body{margin-top:6px;padding:8px 10px;background:#1c2128;border-left:2px solid var(--border);border-radius:0 4px 4px 0;color:var(--muted);font-style:italic;line-height:1.5}
+  .card-ui-link{display:inline-block;margin-top:8px;font-size:.75rem;background:#21262d;border:1px solid var(--border);color:var(--accent);padding:3px 10px;border-radius:4px}
+  .card-ui-link:hover{background:#2d333b;text-decoration:none}
+  details.backend{margin-bottom:32px}
+  details.backend>summary{cursor:pointer;list-style:none;user-select:none;display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:20px}
+  details.backend>summary::-webkit-details-marker{display:none}
+  details.backend>summary .backend-arrow{font-size:.75rem;color:var(--muted);transition:transform .15s;display:inline-block}
+  details.backend[open]>summary .backend-arrow{transform:rotate(90deg)}
+  details.backend>summary .backend-title{font-size:1.1rem;font-weight:700}
+  details.backend>summary .backend-meta{font-size:.82rem;color:var(--muted);margin-left:auto}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th,td{padding:10px 14px;border-bottom:1px solid var(--border);text-align:left}
+  th{color:var(--muted);font-weight:600}
+  tr:hover td{background:#1c2128}
+  .rank{font-weight:700;color:var(--muted)}
+  .rank.gold{color:#ffd700} .rank.silver{color:#c0c0c0} .rank.bronze{color:#cd7f32}
+  .score-bar{position:fixed;bottom:0;left:0;right:0;height:48px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:24px;font-size:.85rem;z-index:100}
+  .score-bar .player-label{color:var(--muted)}
+  .score-bar .player-score{font-weight:700;color:var(--accent);font-size:1rem}
+  .score-bar .solved-count{color:var(--muted)}
+  .score-bar form{display:flex;gap:8px;margin-left:auto}
+  .score-bar input{background:#21262d;border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:4px;font-size:.82rem;width:140px}
+  .score-bar button{background:var(--accent);color:#0d1117;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:.82rem;font-weight:700}
+  #flag-result{font-size:.82rem;padding:4px 8px;border-radius:4px;display:none}
+  #flag-result.ok{background:#1a4a2e;color:#56d364}
+  #flag-result.fail{background:#4a1a1a;color:#f85149}
+  /* UI card pages */
+  .ui-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:32px;max-width:480px;margin:0 auto}
+  .ui-card h2{font-size:1.2rem;margin-bottom:4px}
+  .ui-card .subtitle{color:var(--muted);font-size:.85rem;margin-bottom:24px}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+  .field label{font-size:.85rem;color:var(--muted)}
+  .field input,.field textarea{background:#21262d;border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:4px;font-size:.9rem;font-family:inherit}
+  .field textarea{resize:vertical;min-height:80px}
+  .btn{background:var(--accent);color:#0d1117;border:none;padding:8px 20px;border-radius:4px;cursor:pointer;font-size:.9rem;font-weight:700;width:100%}
+  .response-box{margin-top:20px;background:#21262d;border:1px solid var(--border);border-radius:4px;padding:12px;font-size:.82rem;font-family:monospace;white-space:pre-wrap;word-break:break-all;color:var(--text);display:none}
+  .back-link{display:block;margin-top:16px;font-size:.82rem;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<nav>
+  <span class="brand">&#x1F525; BreachSQL Fire Range</span>
+  <a href="/">Challenges</a>
+  <a href="/scoreboard">Scoreboard</a>
+</nav>
+<div class="container">
+  {{ block_content | safe }}
+</div>
+
+<div class="score-bar" id="score-bar">
+  <span class="player-label">Player:</span>
+  <span class="player-score" id="sb-score">&#x2014;</span>
+  <span class="solved-count" id="sb-solved"></span>
+  <form id="flag-form" onsubmit="return submitFlag(event)">
+    <input id="player-input" placeholder="your name" maxlength="32">
+    <input id="chal-input"   placeholder="challenge id" maxlength="8">
+    <input id="flag-input"   placeholder="FIRE{...}" maxlength="128">
+    <button type="submit">Submit</button>
+  </form>
+  <span id="flag-result"></span>
+</div>
+
+<script>
+const PLAYER_KEY = 'fr_player';
+let currentPlayer = localStorage.getItem(PLAYER_KEY) || '';
+document.getElementById('player-input').value = currentPlayer;
+
+async function loadScore() {
+  if (!currentPlayer) return;
+  const r = await fetch('/api/scoreboard');
+  const board = await r.json();
+  const me = board.find(x => x.player === currentPlayer);
+  if (me) {
+    document.getElementById('sb-score').textContent = me.total + ' pts';
+    document.getElementById('sb-solved').textContent = me.solved + ' solved';
+  } else {
+    document.getElementById('sb-score').textContent = '0 pts';
+    document.getElementById('sb-solved').textContent = '0 solved';
+  }
+}
+
+async function submitFlag(ev) {
+  ev.preventDefault();
+  const player = document.getElementById('player-input').value.trim();
+  const cid    = document.getElementById('chal-input').value.trim();
+  const flag   = document.getElementById('flag-input').value.trim();
+  if (!player || !cid || !flag) return false;
+  localStorage.setItem(PLAYER_KEY, player);
+  currentPlayer = player;
+  const r = await fetch('/api/submit-flag', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({player, challenge_id: cid, flag}),
+  });
+  const data = await r.json();
+  const el = document.getElementById('flag-result');
+  el.style.display = 'block';
+  if (data.correct) {
+    el.className = 'ok';
+    el.textContent = data.first_blood
+      ? '\u{1FA78} First blood! +' + data.points_awarded + ' pts'
+      : '\u2713 Already solved';
+    document.getElementById('flag-input').value = '';
+    loadScore();
+  } else {
+    el.className = 'fail';
+    el.textContent = '\u2717 ' + (data.message || 'Incorrect flag');
+  }
+  return false;
+}
+
+loadScore();
+setInterval(loadScore, 15000);
+</script>
+</body>
+</html>

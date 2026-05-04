@@ -36,6 +36,7 @@ LABS=(
   "4|WebGoat|webgoat.sh|OWASP WebGoat - PortSwigger-style lesson-based labs"
   "5|HTB Style|htb_style.sh|HackTheBox-style CTFd platform + vulnerable challenge"
   "6|VulnAD|vulnad.sh|Vulnerable Active Directory - Samba4 AD with AD attack paths"
+  "7|BreachSQL Fire Range|breachsql.sh|Tiered SQL injection challenges (T1-T5) for BreachSQL benchmarking"
 )
 
 # ---------------- dependency checks ------------------------------------------
@@ -130,20 +131,15 @@ all_action() {
     local stopped=()
     for entry in "${LABS[@]}"; do
       IFS='|' read -r id name lscript _desc <<< "$entry"
-      # Check if this lab has any running containers before stopping
-      local had_container=false
-      if docker ps -a --format '{{.Names}}' | grep -q "^octorig-"; then
-        # Source just the variable declarations to get container name(s)
-        local cnames
-        cnames=$(grep '^CONTAINER_NAME=\|^CTFD_CONTAINER=\|^CHALLENGE_CONTAINER=' \
-          "${LABS_DIR}/${lscript}" | sed 's/.*="\(.*\)"/\1/')
-        while IFS= read -r cname; do
-          if [[ -n "$cname" ]] && docker inspect "$cname" &>/dev/null; then
-            had_container=true
-            break
-          fi
-        done <<< "$cnames"
-      fi
+      # Extract all container name values from the lab script
+      local cnames had_container=false
+      cnames=$(grep -oP '(?<==")(octorig-[^"]+)(?=")' "${LABS_DIR}/${lscript}" | sort -u)
+      while IFS= read -r cname; do
+        if [[ -n "$cname" ]] && docker inspect "$cname" &>/dev/null; then
+          had_container=true
+          break
+        fi
+      done <<< "$cnames"
       bash "${LABS_DIR}/${lscript}" stop &>/dev/null
       [[ "$had_container" == true ]] && stopped+=("$name")
     done
