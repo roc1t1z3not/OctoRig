@@ -157,3 +157,12 @@ CREATE TABLE IF NOT EXISTS pg_pipe_vault (
 );
 INSERT INTO pg_pipe_vault (level, flag) VALUES
     ('legend', 'FIRE{pg4b_pg_pipe_concat}');
+
+-- pg4c: crawl-and-conquer hidden endpoint
+CREATE TABLE IF NOT EXISTS pg_crawl_hidden (
+    id    SERIAL       PRIMARY KEY,
+    token VARCHAR(64)  NOT NULL,
+    flag  VARCHAR(256) NOT NULL
+);
+INSERT INTO pg_crawl_hidden (token, flag) VALUES
+    ('secret', 'FIRE{pg4c_pg_crawl_and_conquer}');

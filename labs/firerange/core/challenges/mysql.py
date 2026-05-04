@@ -38,6 +38,14 @@ def my1_notes():
     return jsonify(mysql(sql))
 
 
+@bp.get("/challenges/my1/typecheck")
+def my1_typecheck():
+    """MY1-E: Type-cast error-based — string column vs integer comparison."""
+    username = request.args.get("username", "admin")
+    sql = f"SELECT id, username FROM my1_users WHERE username = {username}"
+    return jsonify(mysql(sql))
+
+
 # ── Tier 2 — Intermediate ────────────────────────────────────────────────
 
 @bp.get("/challenges/my2/lookup")
@@ -275,6 +283,27 @@ def my4_casefilter():
         if kw in id_:
             return jsonify({"error": "blocked"}), 403
     sql = f"SELECT id, label FROM my4_entries WHERE id = {id_}"
+    return jsonify(mysql(sql))
+
+
+@bp.get("/challenges/my4/doublelock")
+def my4_doublelock():
+    """MY4-K: Compound WAF — strips spaces AND blocks lowercase keywords."""
+    id_ = request.args.get("id", "1")
+    id_ = re.sub(r" ", "", id_)   # strip spaces
+    for kw in ["select", "union", "where", "from", "or", "and"]:
+        if kw in id_:
+            return jsonify({"error": "blocked"}), 403
+    sql = f"SELECT id, label FROM my4_entries WHERE id = {id_}"
+    return jsonify(mysql(sql))
+
+
+@bp.get("/challenges/my5/oob")
+def my5_oob():
+    """MY5-D: OOB teaser — LOAD_FILE / INTO OUTFILE surface; errors are instructive."""
+    id_ = request.args.get("id", "1")
+    # Intentionally allows LOAD_FILE() / UNION SELECT LOAD_FILE(...) to surface errors
+    sql = f"SELECT id, note FROM my5_oob_notes WHERE id = {id_}"
     return jsonify(mysql(sql))
 
 

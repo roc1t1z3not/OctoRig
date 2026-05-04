@@ -103,6 +103,9 @@ def init_sq_db() -> None:
                 INSERT INTO sq_profiles (username, bio, flag) VALUES
                     ('admin', '', 'FIRE{sq2h_sq_second_order}'),
                     ('alice', '', 'not_the_flag');
+
+                INSERT INTO sq_crawl_hidden (token, flag) VALUES
+                    ('secret', 'FIRE{sq3b_sq_crawl_and_conquer}');
             """)
 
 

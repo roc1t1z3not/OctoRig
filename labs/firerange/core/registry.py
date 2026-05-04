@@ -242,6 +242,24 @@ CHALLENGES: list[dict] = [
          points=600, flag="FIRE{sq2e_sqlite_login}",
          ui_endpoint="/challenges/sq2e/ui"),
 
+    dict(challenge_id="sq2j", tier=11, title="Lite No Space",
+         description="A SQLite lookup where the WAF strips every space character. Find a substitute.",
+         hint="SQLite, like MySQL, accepts /**/ as whitespace between tokens.",
+         technique="WAF bypass (/**/ spaces, SQLite)", endpoint="/challenges/sq/nospace?id=1",
+         points=600, flag="FIRE{sq2j_sq_no_space_bypass}"),
+
+    dict(challenge_id="sq2k", tier=11, title="Lite Quote Evade",
+         description="A SQLite search endpoint that removes all single-quote characters from the input.",
+         hint="SQLite's CHAR() function builds strings without any quote characters.",
+         technique="WAF bypass (CHAR() quotes, SQLite)", endpoint="/challenges/sq/quotefilter?id=1",
+         points=600, flag="FIRE{sq2k_sq_quote_filter_bypass}"),
+
+    dict(challenge_id="sq3b", tier=12, title="Lite Crawl",
+         description="A hidden SQLite endpoint — not linked from the challenge list. Find it first, then exploit it.",
+         hint="The index page hides a link with opacity:0. Crawl or view-source to find it.",
+         technique="Crawl + SQLite", endpoint="/challenges/sq/hidden?token=secret",
+         points=3000, flag="FIRE{sq3b_sq_crawl_and_conquer}"),
+
     dict(challenge_id="sq3a", tier=12, title="Lite Legend",
          description="A SQLite vault. The full technique set applies — prove your mastery.",
          hint="The vault row is there. Any of the five techniques will surface it.",
@@ -249,6 +267,12 @@ CHALLENGES: list[dict] = [
          points=3000, flag="FIRE{sq3a_sqlite_legend}"),
 
     # ── MySQL — new challenges ────────────────────────────────────────────────
+    dict(challenge_id="my1e", tier=1, title="Type Mismatch",
+         description="A user lookup by username. The column is a string — but what happens when you compare it to an integer?",
+         hint="Inject a value that forces a type-cast error. The error message leaks internal data.",
+         technique="Error-based (type cast)", endpoint="/challenges/my1/typecheck?username=admin",
+         points=100, flag="FIRE{my1e_type_cast_error}"),
+
     dict(challenge_id="my1d", tier=1, title="What's Your Version",
          description="A user directory endpoint. The server is running something. What exactly?",
          hint="@@version is a string. A UNION with the right column count will surface it.",
@@ -292,6 +316,18 @@ CHALLENGES: list[dict] = [
          hint="SeLeCt is not select. MySQL's parser is case-insensitive; the WAF is not.",
          technique="Case-mixing WAF bypass", endpoint="/challenges/my4/casefilter?id=1",
          points=1000, flag="FIRE{my4j_case_mixing_bypass}"),
+
+    dict(challenge_id="my4k", tier=4, title="Double Lock",
+         description="A lookup endpoint with two simultaneous filters: spaces are stripped AND keywords are lowercased-blocked. Break both at once.",
+         hint="/**/ handles the space problem. MiXeD cAsE handles the keyword problem. Use both together.",
+         technique="WAF bypass (compound)", endpoint="/challenges/my4/doublelock?id=1",
+         points=1000, flag="FIRE{my4k_compound_waf_bypass}"),
+
+    dict(challenge_id="my5d", tier=5, title="Outbound",
+         description="Some MySQL deployments allow the server to reach outward — writing files or making DNS calls. This challenge rewards knowing the technique, not executing it.",
+         hint="LOAD_FILE() reads server-side files. SELECT ... INTO OUTFILE writes them. MySQL's LOAD DATA can be aimed at a UNC path on Windows. Recognise the surface; the flag is your reward for knowing.",
+         technique="OOB / file-read teaser", endpoint="/challenges/my5/oob?id=1",
+         points=2500, flag="FIRE{my5d_oob_technique_recognised}"),
 
     dict(challenge_id="my5c", tier=5, title="Broken Words",
          description="A vault endpoint where SQL keywords are stripped once. Break them apart.",
@@ -339,6 +375,12 @@ CHALLENGES: list[dict] = [
          technique="Header injection (PG)", endpoint="/challenges/pg/agent",
          points=1200, flag="FIRE{pg3e_pg_header_injection}",
          ui_endpoint="/challenges/pg3e/ui"),
+
+    dict(challenge_id="pg4c", tier=9, title="PG Crawl",
+         description="A hidden PostgreSQL endpoint — not visible in the challenge list. Crawl to find it, then extract the flag.",
+         hint="The index page contains an invisible link. Crawl or view-source.",
+         technique="Crawl + PostgreSQL", endpoint="/challenges/pg/hidden?token=secret",
+         points=3000, flag="FIRE{pg4c_pg_crawl_and_conquer}"),
 
     dict(challenge_id="pg4b", tier=9, title="Pipe Dream",
          description="A PostgreSQL vault query built with || string concatenation.",

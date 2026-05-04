@@ -264,6 +264,15 @@ CREATE TABLE IF NOT EXISTS my5_kwvault (
 INSERT INTO my5_kwvault (level, flag) VALUES
     ('legend', 'FIRE{my5c_keyword_doubling}');
 
+-- my5d: OOB teaser
+CREATE TABLE IF NOT EXISTS my5_oob_notes (
+    id   INT          NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    note VARCHAR(512) NOT NULL,
+    flag VARCHAR(256) NOT NULL
+);
+INSERT INTO my5_oob_notes (note, flag) VALUES
+    ('MySQL supports LOAD_FILE() and SELECT INTO OUTFILE for file-based OOB exfiltration.', 'FIRE{my5d_oob_technique_recognised}');
+
 -- ============================================================
 -- Challenge registry (informational — app uses registry.py)
 -- ============================================================

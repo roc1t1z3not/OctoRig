@@ -25,7 +25,7 @@
   .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
 
   /* Card */
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:8px;transition:border-color .2s}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:8px}
   .card.solved{border-color:var(--solved-border)}
   .card-title-row{display:flex;align-items:center;gap:8px}
   .card-title{font-size:1rem;font-weight:600}
@@ -101,6 +101,28 @@
     .score-bar .flag-group{margin-left:0;width:100%}
     .score-bar input.inp-flag{flex:1;min-width:0}
   }
+
+  /* Index toolbar (search + progress) */
+  .index-toolbar{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
+  .search-input{width:100%;max-width:480px;background:#21262d;border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:6px;font-size:.9rem;outline:none}
+  .search-input:focus{border-color:var(--accent)}
+
+  /* Card filter transitions — fade + shrink instead of instant display:none */
+  .card{transition:opacity .25s ease, transform .25s ease, border-color .2s}
+  .card.hidden-by-search{opacity:0;transform:scale(.95);pointer-events:none;position:absolute;visibility:hidden}
+
+  /* Tier section fade-out when all its cards are hidden */
+  .tier-section{transition:opacity .3s ease, max-height .35s ease;overflow:hidden}
+  .tier-section.search-empty{opacity:0;max-height:0 !important;margin:0;padding:0;pointer-events:none}
+
+  /* Backend accordion fade when all tiers inside are empty */
+  details.backend{transition:opacity .3s ease}
+  details.backend.search-empty{opacity:0;pointer-events:none;max-height:0;overflow:hidden;margin:0}
+
+  .progress-bar-wrap{display:flex;align-items:center;gap:10px;max-width:480px}
+  .progress-bar-track{flex:1;height:8px;background:#21262d;border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+  .progress-bar-fill{height:100%;background:var(--solved-border);border-radius:4px;transition:width .4s ease}
+  .progress-label{font-size:.8rem;color:var(--muted);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -173,6 +195,7 @@ async function loadSolvedAndMark() {
         if (badge) badge.style.display = 'none';
       }
     });
+    updateProgressBar();
   } catch(_) {}
 }
 
@@ -278,6 +301,72 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+// ── Progress bar ──────────────────────────────────────────────────────────
+function updateProgressBar() {
+  const wrap = document.getElementById('progress-wrap');
+  if (!wrap) return;
+  const allCards = document.querySelectorAll('.card[data-cid]');
+  if (!allCards.length) return;
+  const total = allCards.length;
+  const solved = [...allCards].filter(c => c.classList.contains('solved')).length;
+  wrap.style.display = solved > 0 || currentPlayer ? 'flex' : 'none';
+  const pct = total > 0 ? Math.round((solved / total) * 100) : 0;
+  const fill = document.getElementById('progress-fill');
+  const label = document.getElementById('progress-label');
+  if (fill) fill.style.width = pct + '%';
+  if (label) label.textContent = solved + ' / ' + total + ' solved (' + pct + '%)';
+}
+
+// ── Card search/filter ────────────────────────────────────────────────────
+function filterCards(query) {
+  const q = query.toLowerCase().trim();
+
+  // 1. Show/hide individual cards
+  document.querySelectorAll('.card[data-cid]').forEach(card => {
+    if (!q) {
+      card.classList.remove('hidden-by-search');
+      return;
+    }
+    const title = (card.querySelector('.card-title')?.textContent || '').toLowerCase();
+    const tech  = (card.querySelector('.card-technique')?.textContent || '').toLowerCase();
+    const cid   = (card.dataset.cid || '').toLowerCase();
+    const desc  = (card.querySelector('.card-desc')?.textContent || '').toLowerCase();
+    const match = title.includes(q) || tech.includes(q) || cid.includes(q) || desc.includes(q);
+    card.classList.toggle('hidden-by-search', !match);
+  });
+
+  // 2. Collapse tier-sections where every card is hidden
+  document.querySelectorAll('.tier-section').forEach(section => {
+    const cards = section.querySelectorAll('.card[data-cid]');
+    if (!cards.length) return;
+    // set an explicit max-height so the CSS transition has something to collapse to
+    if (!q) {
+      section.style.maxHeight = '';
+      section.classList.remove('search-empty');
+      return;
+    }
+    const allHidden = [...cards].every(c => c.classList.contains('hidden-by-search'));
+    if (allHidden) {
+      section.classList.add('search-empty');
+    } else {
+      section.style.maxHeight = section.scrollHeight + 'px';
+      section.classList.remove('search-empty');
+    }
+  });
+
+  // 3. Collapse backend <details> where every tier-section inside is collapsed
+  document.querySelectorAll('details.backend').forEach(details => {
+    const sections = details.querySelectorAll('.tier-section');
+    if (!sections.length) return;
+    if (!q) {
+      details.classList.remove('search-empty');
+      return;
+    }
+    const allEmpty = [...sections].every(s => s.classList.contains('search-empty'));
+    details.classList.toggle('search-empty', allEmpty);
+  });
+}
 
 // ── Init ──────────────────────────────────────────────────────────────────
 document.getElementById('player-input').addEventListener('change', () => {

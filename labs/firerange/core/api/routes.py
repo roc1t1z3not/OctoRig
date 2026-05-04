@@ -2,10 +2,14 @@
 # Copyright (c) 2026 CommonHuman-Lab
 """API endpoints, health probe, and HTML UI."""
 from __future__ import annotations
+import collections
+import time
 
 from flask import Blueprint, jsonify, render_template, request
 
 from core.db.mysqldb import _mysql_conn
+from core.db.pgdb import _pg_conn
+from core.db.sqdb import _sq_conn
 from core.registry import (
     all_challenges, challenge_by_id,
     get_scoreboard, award_points, get_player_solved,
@@ -13,18 +17,48 @@ from core.registry import (
 
 bp = Blueprint("api", __name__)
 
+# In-memory rate-limit store: player -> deque of submission timestamps
+_SUBMIT_HISTORY: dict[str, collections.deque] = collections.defaultdict(
+    lambda: collections.deque()
+)
+_RATE_LIMIT = 10    # max submissions
+_RATE_WINDOW = 60   # per N seconds
+
 # ---------------------------------------------------------------------------
 # Health
 # ---------------------------------------------------------------------------
 
 @bp.get("/health")
 def health():
+    status = {}
+    mysql_ok = False
+
+    # MySQL — gates the startup readiness check in breachsql.sh
     try:
-        cx = _mysql_conn()
-        cx.close()
-        return jsonify({"status": "ok"})
+        cx = _mysql_conn(); cx.close()
+        status["mysql"] = "ok"
+        mysql_ok = True
     except Exception as exc:
-        return jsonify({"status": "db_unavailable", "detail": str(exc)}), 503
+        status["mysql"] = str(exc)
+
+    # PostgreSQL — informational only; does not block startup
+    try:
+        cx = _pg_conn(); cx.close()
+        status["postgres"] = "ok"
+    except Exception as exc:
+        status["postgres"] = str(exc)
+
+    # SQLite — informational only; does not block startup
+    try:
+        cx = _sq_conn(); cx.close()
+        status["sqlite"] = "ok"
+    except Exception as exc:
+        status["sqlite"] = str(exc)
+
+    overall = "ok" if all(v == "ok" for v in status.values()) else "degraded"
+    if mysql_ok:
+        return jsonify({"status": overall, "backends": status})
+    return jsonify({"status": "db_unavailable", "backends": status}), 503
 
 
 # ---------------------------------------------------------------------------
@@ -59,6 +93,15 @@ def api_submit_flag():
 
     if not player or not challenge_id or not flag:
         return jsonify({"correct": False, "message": "player, challenge_id and flag are required"}), 400
+
+    # Rate limit: max 10 submissions per player per 60 s
+    now = time.time()
+    hist = _SUBMIT_HISTORY[player]
+    while hist and hist[0] < now - _RATE_WINDOW:
+        hist.popleft()
+    if len(hist) >= _RATE_LIMIT:
+        return jsonify({"correct": False, "message": "Rate limit exceeded — slow down."}), 429
+    hist.append(now)
 
     chal = challenge_by_id(challenge_id)
     if chal is None:
@@ -112,6 +155,13 @@ def _build_index_html(by_tier: dict, total: int, max_pts: int) -> str:
     parts = [
         f'<h1>Challenge Index</h1>'
         f'<p class="subtitle">{total} challenges &mdash; {max_pts} total points available.</p>'
+        f'<div class="index-toolbar">'
+        f'<input id="search-box" class="search-input" type="search" placeholder="&#x1F50D; filter by title, technique, or ID…" oninput="filterCards(this.value)">'
+        f'<div class="progress-bar-wrap" id="progress-wrap" style="display:none">'
+        f'<div class="progress-bar-track"><div class="progress-bar-fill" id="progress-fill"></div></div>'
+        f'<span class="progress-label" id="progress-label"></span>'
+        f'</div>'
+        f'</div>'
     ]
 
     for backend_name, tier_range, open_default in _BACKENDS:
@@ -183,10 +233,16 @@ def _build_index_html(by_tier: dict, total: int, max_pts: int) -> str:
 
         parts.append('</details>')
 
-    # my5b "Crawl & Conquer" — the flag endpoint is intentionally hidden from
-    # the challenge cards but is still linked from this page for crawlers.
+    # my5b / pg4c / sq3b "Crawl & Conquer" — endpoints are intentionally hidden
+    # from the challenge cards but still linked from this page for crawlers.
     parts.append(
         '<a href="/challenges/my5/dashboard?key=secret"'
+        ' style="position:absolute;opacity:0;pointer-events:none"'
+        ' aria-hidden="true" tabindex="-1"></a>'
+        '<a href="/challenges/pg/hidden?token=secret"'
+        ' style="position:absolute;opacity:0;pointer-events:none"'
+        ' aria-hidden="true" tabindex="-1"></a>'
+        '<a href="/challenges/sq/hidden?token=secret"'
         ' style="position:absolute;opacity:0;pointer-events:none"'
         ' aria-hidden="true" tabindex="-1"></a>'
     )

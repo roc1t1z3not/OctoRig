@@ -150,4 +150,18 @@ case "$1" in
     container_status "$MYSQL_CONTAINER"
     container_status "$PG_CONTAINER"
     ;;
+
+  reset)
+    header "Resetting scores..."
+    # Stop all containers first
+    for cname in "$APP_CONTAINER" "$MYSQL_CONTAINER" "$PG_CONTAINER"; do
+      docker rm -f "$cname" &>/dev/null
+    done
+    if docker volume rm "$SCORES_VOLUME" &>/dev/null; then
+      good "Scores volume '${SCORES_VOLUME}' removed — all scores wiped."
+    else
+      warn "Volume '${SCORES_VOLUME}' not found (nothing to reset)."
+    fi
+    info "Run './breachsql.sh start' to bring the lab back up with a clean scoreboard."
+    ;;
 esac

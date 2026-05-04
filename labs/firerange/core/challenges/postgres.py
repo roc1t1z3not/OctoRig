@@ -163,6 +163,14 @@ def pg_agent():
     return jsonify({"logged": True})
 
 
+@bp.get("/challenges/pg/hidden")
+def pg_hidden():
+    """PG4-C: Crawl-discovered hidden PostgreSQL endpoint."""
+    token = request.args.get("token", "secret")
+    sql = f"SELECT id, flag FROM pg_crawl_hidden WHERE token = '{token}'"
+    return jsonify(pg(sql))
+
+
 @bp.get("/challenges/pg/vault")
 def pg_vault():
     """PG4-B: Pipe-concat obfuscation vault."""

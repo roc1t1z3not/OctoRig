@@ -4,6 +4,8 @@
 from __future__ import annotations
 import time
 
+import re
+
 from flask import Blueprint, jsonify, request, current_app
 
 from core.db.sqdb import sq
@@ -104,6 +106,32 @@ def sq_profile_read():
     """SQ2-H (read leg): surfaces the last stored bio."""
     username = request.args.get("username", "alice")
     sql = f"SELECT bio FROM sq_profiles WHERE username = '{username}'"
+    return jsonify(sq(sql))
+
+
+@bp.get("/challenges/sq/nospace")
+def sq_nospace():
+    """SQ2-J: WAF strips spaces — bypass with /**/ between keywords."""
+    id_ = request.args.get("id", "1")
+    id_ = re.sub(r" ", "", id_)   # strip spaces only
+    sql = f"SELECT id, label FROM sq_char_store WHERE id = {id_}"
+    return jsonify(sq(sql))
+
+
+@bp.get("/challenges/sq/quotefilter")
+def sq_quotefilter():
+    """SQ2-K: Single-quote filter — bypass with CHAR() function."""
+    id_ = request.args.get("id", "1")
+    id_ = id_.replace("'", "")   # strip single quotes
+    sql = f"SELECT id, label FROM sq_char_store WHERE id = {id_}"
+    return jsonify(sq(sql))
+
+
+@bp.get("/challenges/sq/hidden")
+def sq_hidden():
+    """SQ3-B: Crawl-discovered hidden SQLite endpoint."""
+    token = request.args.get("token", "secret")
+    sql = f"SELECT id, flag FROM sq_crawl_hidden WHERE token = '{token}'"
     return jsonify(sq(sql))
 
 
