@@ -1,1 +1,6 @@
-labs/vulnad/__pycache__/
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
