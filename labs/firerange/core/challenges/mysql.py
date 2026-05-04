@@ -145,8 +145,13 @@ def my4_filtered():
 
 @bp.post("/challenges/my4/api/user")
 def my4_api_user():
-    """MY4-B: JSON body injection — user_id field embedded raw."""
-    body    = request.get_json(silent=True) or {}
+    """MY4-B: JSON body injection — user_id field embedded raw.
+    Falls back to form data so the HTML UI page can also submit here.
+    """
+    body    = request.get_json(silent=True)
+    if body is None:
+        # form fallback (used by the browser UI page)
+        body = request.form.to_dict()
     user_id = body.get("user_id", 1)
     sql     = f"SELECT user_id, username FROM my4_api_users WHERE user_id = {user_id}"
     return jsonify(mysql(sql))

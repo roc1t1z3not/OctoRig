@@ -148,12 +148,19 @@ def _build_index_html(by_tier: dict, total: int, max_pts: int) -> str:
                 ui_html = ""
                 if c.get("ui_endpoint"):
                     ui_html = f'<a class="card-ui-link" href="{c["ui_endpoint"]}">Try it in browser &rsaquo;</a>'
+                # Render the endpoint as a clickable link when it has a query
+                # string (GET challenges) so the crawler can discover it.
+                ep = c["endpoint"]
+                if "?" in ep:
+                    endpoint_html = f'<a class="card-endpoint-link" href="{ep}"><code>{ep}</code></a>'
+                else:
+                    endpoint_html = f'<code>{ep}</code>'
                 parts.append(
                     f'<div class="card">'
                     f'<div class="card-title">{c["title"]}</div>'
                     f'<div class="card-desc">{c["description"]}</div>'
                     f'{hint_html}'
-                    f'<div class="card-endpoint"><code>{c["endpoint"]}</code></div>'
+                    f'<div class="card-endpoint">{endpoint_html}</div>'
                     f'<div class="card-meta">'
                     f'<span class="card-technique">{c["technique"]}</span>'
                     f'<span class="card-points">{c["points"]} pts</span>'
@@ -167,6 +174,13 @@ def _build_index_html(by_tier: dict, total: int, max_pts: int) -> str:
 
         parts.append('</details>')
 
+    # my5b "Crawl & Conquer" — the flag endpoint is intentionally hidden from
+    # the challenge cards but is still linked from this page for crawlers.
+    parts.append(
+        '<a href="/challenges/my5/dashboard?key=secret"'
+        ' style="position:absolute;opacity:0;pointer-events:none"'
+        ' aria-hidden="true" tabindex="-1"></a>'
+    )
     return "\n".join(parts)
 
 

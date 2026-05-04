@@ -109,8 +109,12 @@ def sq_profile_read():
 
 @bp.post("/challenges/sq/api/member")
 def sq_api_member():
-    """SQ2-I: JSON body injection — member_id embedded raw."""
-    body      = request.get_json(silent=True) or {}
+    """SQ2-I: JSON body injection — member_id embedded raw.
+    Falls back to form data so an HTML form can also reach this endpoint.
+    """
+    body      = request.get_json(silent=True)
+    if body is None:
+        body = request.form.to_dict()
     member_id = body.get("member_id", 1)
     sql = f"SELECT id, username FROM sq_members WHERE id = {member_id}"
     return jsonify(sq(sql))
