@@ -46,7 +46,7 @@ Or non-interactively:
 | 4 | **WebGoat** | Lesson-based Java security training | `8888` |
 | 5 | **HTB Style** | CTFd scoreboard + Struts2 CVE-2017-5638 | `8000`, `8090` |
 | 6 | **VulnAD** | Vulnerable Active Directory via Samba4 | `389`, `88`, `4445` |
-| 7 | **BreachSQL Firerange** | CTF with scoreboard | `17476` |
+| 7 | **BreachSQL Firerange** | SQL CTF with scoreboard | `17476` |
 
 ---
 
