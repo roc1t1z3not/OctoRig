@@ -36,7 +36,8 @@ LABS=(
   "4|WebGoat|webgoat.sh|OWASP WebGoat - PortSwigger-style lesson-based labs"
   "5|HTB Style|htb_style.sh|HackTheBox-style CTFd platform + vulnerable challenge"
   "6|VulnAD|vulnad.sh|Vulnerable Active Directory - Samba4 AD with AD attack paths"
-  "7|BreachSQL Fire Range|breachsql.sh|Tiered SQL injection challenges (T1-T5) for BreachSQL benchmarking"
+  "7|BreachSQL Fire Range|breachsql.sh|Tiered SQL injection challenges (T1-T5) for SQLi practice"
+  "8|StingXSS Fire Range|stingxss.sh|Tiered XSS challenges (T1-T8) for XSS injection practice"
 )
 
 # ---------------- dependency checks ------------------------------------------

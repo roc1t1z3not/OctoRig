@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StingXSS Fire RangeBLOCK_TITLE</title>
+  <style>
+    :root {
+      --bg:      #0d1117;
+      --surface: #161b22;
+      --border:  #30363d;
+      --text:    #e6edf3;
+      --muted:   #8b949e;
+      --accent:  #f78166;
+      --link:    #58a6ff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      padding-bottom: 72px; /* room for score bar */
+    }
+
+    /* ── Top nav ── */
+    .topnav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 12px 32px;
+    }
+    .topnav .brand {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--accent);
+      text-decoration: none;
+      letter-spacing: .02em;
+    }
+    .topnav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .9rem;
+    }
+    .topnav a:hover { color: var(--text); }
+
+    /* ── Main content ── */
+    .main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: .9rem;
+      margin-bottom: 24px;
+    }
+
+    /* ── Index toolbar ── */
+    .index-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .search-input {
+      flex: 1;
+      min-width: 240px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: .9rem;
+    }
+    .search-input:focus { outline: 2px solid var(--accent); }
+
+    /* Progress bar */
+    .progress-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 240px;
+    }
+    .progress-bar-track {
+      flex: 1;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 4px;
+      transition: width .4s;
+    }
+    .progress-label { font-size: .78rem; color: var(--muted); white-space: nowrap; }
+
+    /* ── Backend groups / details ── */
+    .backend {
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .backend summary {
+      padding: 0;
+      background: var(--surface);
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }
+    .backend summary::-webkit-details-marker { display: none; }
+    .backend summary::marker { display: none; }
+    .backend-summary-inner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+    }
+    .backend[open] .backend-arrow { transform: rotate(90deg); }
+    .backend-arrow {
+      color: var(--muted);
+      font-size: .75rem;
+      transition: transform .2s;
+      width: 12px;
+      flex-shrink: 0;
+    }
+    .backend-title {
+      font-weight: 600;
+      font-size: .95rem;
+      flex: 1;
+    }
+    .backend-meta { font-size: .78rem; color: var(--muted); }
+
+    /* ── Tier section ── */
+    .tier-section { padding: 16px; border-top: 1px solid var(--border); }
+    .tier-heading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .tier-badge {
+      display: inline-block;
+      font-size: .7rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 10px;
+      color: #fff;
+    }
+
+    /* ── Challenge cards ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      transition: border-color .15s;
+    }
+    .card:hover { border-color: #58a6ff; }
+    .card.solved { border-color: #3fb950; }
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .card-ui-btn {
+      font-size: .9rem;
+      text-decoration: none;
+      color: var(--muted);
+    }
+    .card-ui-btn:hover { color: var(--link); }
+    .card-title {
+      font-weight: 600;
+      font-size: .92rem;
+      flex: 1;
+    }
+    .card-solved-badge {
+      font-size: .7rem;
+      color: #3fb950;
+      font-weight: 600;
+    }
+    .card-desc { font-size: .8rem; color: var(--muted); margin-bottom: 8px; }
+    .card-endpoint { margin-bottom: 8px; }
+    .card-endpoint-link { color: var(--link); font-size: .78rem; text-decoration: none; }
+    .card-endpoint-link:hover { text-decoration: underline; }
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: .75rem;
+    }
+    .card-technique { color: var(--muted); }
+    .card-points { color: var(--accent); font-weight: 600; }
+
+    /* Hint */
+    .hint { margin-top: 8px; }
+    .hint summary {
+      font-size: .75rem;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+      list-style: none;
+    }
+    .hint summary::-webkit-details-marker { display: none; }
+    .hint-body {
+      margin-top: 4px;
+      font-size: .78rem;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px 10px;
+    }
+
+    /* ── Scoreboard ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .9rem;
+    }
+    th {
+      border-bottom: 2px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    .player-row { cursor: pointer; }
+    .player-row:hover td { background: var(--surface); }
+    .rank { font-weight: 700; width: 40px; }
+    .rank.gold   { color: #f1c40f; }
+    .rank.silver { color: #bdc3c7; }
+    .rank.bronze { color: #cd7f32; }
+    .solved-list {
+      display: none;
+      padding: 8px 12px 12px;
+      background: var(--surface);
+    }
+    .solved-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .solved-chip {
+      background: var(--border);
+      border-radius: 10px;
+      padding: 2px 10px;
+      font-size: .72rem;
+      color: var(--text);
+    }
+
+    /* ── Score bar ── */
+    #score-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 1000;
+      font-size: .85rem;
+    }
+    #score-bar .player-input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: .83rem;
+      width: 140px;
+    }
+    #score-bar .flag-input {
+      flex: 1;
+      min-width: 180px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: .83rem;
+    }
+    #score-bar .submit-btn {
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      padding: 5px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: .83rem;
+      white-space: nowrap;
+    }
+    #score-bar .score-display {
+      color: var(--muted);
+      white-space: nowrap;
+      font-size: .8rem;
+    }
+    #score-bar .score-display strong { color: var(--accent); }
+    #score-bar .msg {
+      font-size: .78rem;
+      min-width: 80px;
+    }
+    #score-bar .msg.ok  { color: #3fb950; }
+    #score-bar .msg.err { color: #f85149; }
+    #score-bar .sb-link {
+      color: var(--link);
+      text-decoration: none;
+      white-space: nowrap;
+      font-size: .8rem;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="brand" href="/">&#128027; StingXSS Fire Range</a>
+  <a href="/">Challenges</a>
+  <a href="/scoreboard">Scoreboard</a>
+</nav>
+
+<main class="main">
+  BLOCK_CONTENT
+</main>
+
+<!-- ── Persistent score bar ── -->
+<div id="score-bar">
+  <input class="player-input" id="sb-player" type="text" placeholder="Player name"
+         value="" autocomplete="off">
+  <input class="flag-input" id="sb-flag" type="text" placeholder="STING{…} flag"
+         autocomplete="off">
+  <button class="submit-btn" onclick="submitFlag()">Submit flag</button>
+  <span class="score-display">Score: <strong id="sb-score">—</strong></span>
+  <span class="msg" id="sb-msg"></span>
+  <a class="sb-link" href="/scoreboard">Scoreboard &#8594;</a>
+</div>
+
+<script>
+// ── Persist player name across pages ──────────────────────────────────────
+const PLAYER_KEY = 'stingxss-player';
+const playerInput = document.getElementById('sb-player');
+playerInput.value = localStorage.getItem(PLAYER_KEY) || '';
+playerInput.addEventListener('input', () => {
+  localStorage.setItem(PLAYER_KEY, playerInput.value.trim());
+  refreshScore();
+});
+
+// ── Flag submission ───────────────────────────────────────────────────────
+async function submitFlag() {
+  const player = playerInput.value.trim();
+  const flag   = document.getElementById('sb-flag').value.trim();
+  const msg    = document.getElementById('sb-msg');
+
+  if (!player) { showMsg('Set a player name first', true); return; }
+  if (!flag)   { showMsg('Enter a flag', true); return; }
+
+  // Parse challenge_id from flag: STING{cid_...}
+  const m = flag.match(/^STING\{([^_]+)/);
+  const cid = m ? m[1] : '';
+
+  try {
+    const r = await fetch('/api/submit-flag', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({player, challenge_id: cid, flag}),
+    });
+    const d = await r.json();
+    showMsg(d.message, !d.correct);
+    if (d.correct) {
+      document.getElementById('sb-flag').value = '';
+      refreshScore();
+      markSolved(cid);
+    }
+  } catch (e) {
+    showMsg('Network error', true);
+  }
+}
+
+function showMsg(text, isErr) {
+  const el = document.getElementById('sb-msg');
+  el.textContent = text;
+  el.className = 'msg ' + (isErr ? 'err' : 'ok');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.textContent = ''; el.className = 'msg'; }, 4000);
+}
+
+// ── Score refresh ─────────────────────────────────────────────────────────
+async function refreshScore() {
+  const player = playerInput.value.trim();
+  if (!player) { document.getElementById('sb-score').textContent = '—'; return; }
+  try {
+    const r = await fetch('/api/scoreboard');
+    const d = await r.json();
+    const p = d.find(x => x.player === player);
+    document.getElementById('sb-score').textContent = p ? p.total : 0;
+  } catch {}
+}
+refreshScore();
+setInterval(refreshScore, 15000);
+
+// ── Progress bar (index page only) ───────────────────────────────────────
+async function refreshProgress() {
+  const player = playerInput.value.trim();
+  const wrap = document.getElementById('progress-wrap');
+  if (!wrap) return;
+  if (!player) { wrap.style.display = 'none'; return; }
+
+  try {
+    const r = await fetch('/api/player/' + encodeURIComponent(player) + '/solved');
+    const d = await r.json();
+    const solved = (d.solved_ids || []);
+    const total  = document.querySelectorAll('.card[data-cid]').length;
+    if (!total) return;
+    const pct = Math.round(solved.length / total * 100);
+    wrap.style.display = 'flex';
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent =
+      solved.length + '/' + total + ' (' + pct + '%)';
+
+    // Mark solved cards
+    solved.forEach(cid => markSolved(cid));
+  } catch {}
+}
+refreshProgress();
+playerInput.addEventListener('input', refreshProgress);
+
+function markSolved(cid) {
+  const card = document.querySelector('.card[data-cid="' + cid + '"]');
+  if (card) {
+    card.classList.add('solved');
+    const badge = card.querySelector('.card-solved-badge');
+    if (badge) badge.style.display = 'inline';
+  }
+}
+
+// ── Card filter ───────────────────────────────────────────────────────────
+function filterCards(q) {
+  const lq = q.toLowerCase();
+  document.querySelectorAll('.card[data-cid]').forEach(card => {
+    const txt = card.textContent.toLowerCase();
+    card.style.display = (!lq || txt.includes(lq)) ? '' : 'none';
+  });
+  // open details if any child is visible
+  document.querySelectorAll('details.backend').forEach(det => {
+    if (!lq) return;
+    const any = [...det.querySelectorAll('.card[data-cid]')]
+                  .some(c => c.style.display !== 'none');
+    det.open = any;
+  });
+}
+
+// ── Scoreboard drill-down ────────────────────────────────────────────────
+async function togglePlayerRow(player, detailId) {
+  const div = document.getElementById(detailId);
+  if (!div) return;
+  if (div.style.display === 'block') { div.style.display = 'none'; return; }
+  div.style.display = 'block';
+
+  const chipsEl = div.querySelector('.solved-chips');
+  chipsEl.innerHTML = '<span style="color:var(--muted);font-size:.75rem">Loading…</span>';
+  try {
+    const r = await fetch('/api/player/' + encodeURIComponent(player) + '/solved');
+    const d = await r.json();
+    if (!d.solved_ids || !d.solved_ids.length) {
+      chipsEl.innerHTML = '<span style="color:var(--muted);font-size:.75rem">None yet.</span>';
+      return;
+    }
+    chipsEl.innerHTML = d.solved_ids
+      .map(id => '<span class="solved-chip">' + id + '</span>')
+      .join('');
+  } catch {
+    chipsEl.innerHTML = '<span style="color:var(--muted);font-size:.75rem">Error loading.</span>';
+  }
+}
+
+// Scoreboard auto-refresh
+if (window.location.pathname === '/scoreboard') {
+  setInterval(() => fetch('/scoreboard').then(r => r.text()).then(html => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    const newMain = tmp.querySelector('main');
+    if (newMain) document.querySelector('main').innerHTML = newMain.innerHTML;
+  }), 15000);
+}
+</script>
+</body>
+</html>
