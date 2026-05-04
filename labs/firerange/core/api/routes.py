@@ -8,7 +8,7 @@ from flask import Blueprint, jsonify, render_template, request
 from core.db.mysqldb import _mysql_conn
 from core.registry import (
     all_challenges, challenge_by_id,
-    get_scoreboard, award_points,
+    get_scoreboard, award_points, get_player_solved,
 )
 
 bp = Blueprint("api", __name__)
@@ -42,6 +42,12 @@ def api_challenges():
 @bp.get("/api/scoreboard")
 def api_scoreboard():
     return jsonify(get_scoreboard())
+
+
+@bp.get("/api/player/<player>/solved")
+def api_player_solved(player: str):
+    solved_ids = get_player_solved(player)
+    return jsonify({"player": player, "solved_ids": solved_ids})
 
 
 @bp.post("/api/submit-flag")
@@ -145,9 +151,9 @@ def _build_index_html(by_tier: dict, total: int, max_pts: int) -> str:
                         f'<div class="hint-body">{c["hint"]}</div>'
                         f'</details>'
                     )
-                ui_html = ""
+                ui_btn = ""
                 if c.get("ui_endpoint"):
-                    ui_html = f'<a class="card-ui-link" href="{c["ui_endpoint"]}">Try it in browser &rsaquo;</a>'
+                    ui_btn = f'<a class="card-ui-btn" href="{c["ui_endpoint"]}" title="Try in browser">&#x1F310;</a>'
                 # Render the endpoint as a clickable link when it has a query
                 # string (GET challenges) so the crawler can discover it.
                 ep = c["endpoint"]
@@ -156,8 +162,12 @@ def _build_index_html(by_tier: dict, total: int, max_pts: int) -> str:
                 else:
                     endpoint_html = f'<code>{ep}</code>'
                 parts.append(
-                    f'<div class="card">'
-                    f'<div class="card-title">{c["title"]}</div>'
+                    f'<div class="card" data-cid="{c["challenge_id"]}">'
+                    f'<div class="card-title-row">'
+                    f'{ui_btn}'
+                    f'<span class="card-title">{c["title"]}</span>'
+                    f'<span class="card-solved-badge" style="display:none">&#x2713; solved</span>'
+                    f'</div>'
                     f'<div class="card-desc">{c["description"]}</div>'
                     f'{hint_html}'
                     f'<div class="card-endpoint">{endpoint_html}</div>'
@@ -167,7 +177,6 @@ def _build_index_html(by_tier: dict, total: int, max_pts: int) -> str:
                     f'</div>'
                     f'<div style="font-size:.72rem;color:var(--muted);margin-top:4px">'
                     f'ID: <code>{c["challenge_id"]}</code></div>'
-                    f'{ui_html}'
                     f'</div>'
                 )
             parts.append('</div></div>')
@@ -189,18 +198,26 @@ def _build_scoreboard_html(players: list) -> str:
     if players:
         for i, p in players:
             cls = {1: "gold", 2: "silver", 3: "bronze"}.get(i, "")
+            safe_name = p["player"].replace("'", "&#39;")
+            detail_id = f"detail-{i}"
             rows += (
-                f'<tr><td class="rank {cls}">{i}</td>'
+                f'<tr class="player-row" onclick="togglePlayerRow(\'{safe_name}\',\'{detail_id}\')" title="Click to see solved challenges">'
+                f'<td class="rank {cls}">{i}</td>'
                 f'<td>{p["player"]}</td>'
                 f'<td>{p["solved"]}</td>'
                 f'<td><strong>{p["total"]}</strong></td></tr>'
+                f'<tr><td colspan="4" style="padding:0">'
+                f'<div id="{detail_id}" class="solved-list">'
+                f'<span style="font-size:.75rem;color:var(--muted)">Solved challenges:</span>'
+                f'<div class="solved-chips"></div>'
+                f'</div></td></tr>'
             )
     else:
         rows = ('<tr><td colspan="4" style="color:var(--muted);text-align:center;padding:32px">'
                 'No scores yet — be the first!</td></tr>')
     return (
         '<h1>Scoreboard</h1>'
-        '<p class="subtitle">Live rankings — refreshes every 15 s.</p>'
+        '<p class="subtitle">Live rankings &mdash; click a player to see their solved challenges. Refreshes every 15 s.</p>'
         '<table><thead><tr><th>#</th><th>Player</th><th>Solved</th><th>Points</th></tr></thead>'
         f'<tbody>{rows}</tbody></table>'
     )

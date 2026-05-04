@@ -60,7 +60,8 @@ CHALLENGES: list[dict] = [
          description="A staff directory with uniform responses. The clock is the only channel.",
          hint="If the output never changes, make the server wait instead.",
          technique="Time-blind", endpoint="/challenges/my2/search?name=admin",
-         points=500, flag="FIRE{my3a_time_blind_confirmed}"),
+         points=500, flag="FIRE{my3a_time_blind_confirmed}",
+         ui_endpoint="/challenges/my3a/ui"),
 
     dict(challenge_id="my3b", tier=3, title="Hidden Corridor",
          description="An item catalogue with a clean-looking URL. The parameter is part of the path.",
@@ -122,7 +123,8 @@ CHALLENGES: list[dict] = [
          description="A request logger that records who visited. The log field is injectable.",
          hint="The injection surface is an HTTP header your browser sends on every request.",
          technique="Header injection", endpoint="/challenges/my4/agent",
-         points=1000, flag="FIRE{my4f_header_injection}"),
+         points=1000, flag="FIRE{my4f_header_injection}",
+         ui_endpoint="/challenges/my4f/ui"),
 
     dict(challenge_id="my5a", tier=5, title="Full Chain",
          description="A high-privilege reporting endpoint. Every technique in your arsenal applies here.",
@@ -134,7 +136,8 @@ CHALLENGES: list[dict] = [
          description="The endpoint that holds the flag isn't listed anywhere obvious. Find it first.",
          hint="The index page links to things the challenge list does not.",
          technique="Crawl + Error", endpoint="/challenges/my5/dashboard?key=secret",
-         points=2500, flag="FIRE{my5b_crawl_and_conquer}"),
+         points=2500, flag="FIRE{my5b_crawl_and_conquer}",
+         ui_endpoint="/challenges/my5b/ui"),
 
     # ── PostgreSQL ──────────────────────────────────────────────────────────
     dict(challenge_id="pg1a", tier=6, title="PG Error",
@@ -153,7 +156,8 @@ CHALLENGES: list[dict] = [
          description="A PostgreSQL employee directory. Every response looks identical.",
          hint="pg_sleep() is the only channel available. Use it.",
          technique="Time-blind (PG)", endpoint="/challenges/pg/employees?name=Jane+Doe",
-         points=600, flag="FIRE{pg2a_postgres_sleep}"),
+         points=600, flag="FIRE{pg2a_postgres_sleep}",
+         ui_endpoint="/challenges/pg2a/ui"),
 
     dict(challenge_id="pg2b", tier=7, title="PG Union",
          description="An orders endpoint on PostgreSQL returning multiple columns. Add your own row.",
@@ -184,7 +188,8 @@ CHALLENGES: list[dict] = [
          description="A PostgreSQL session endpoint that trusts a cookie it should not.",
          hint="The injection surface is neither the URL nor the body — check the cookie jar.",
          technique="Cookie injection (PG)", endpoint="/challenges/pg/session",
-         points=1200, flag="FIRE{pg3c_postgres_cookie}"),
+         points=1200, flag="FIRE{pg3c_postgres_cookie}",
+         ui_endpoint="/challenges/pg3c/ui"),
 
     dict(challenge_id="pg4a", tier=9, title="PG Legend",
          description="A PostgreSQL vault report. No filters, no restrictions — just you and the query planner.",
@@ -209,7 +214,8 @@ CHALLENGES: list[dict] = [
          description="A file ownership lookup on SQLite. There is no SLEEP — but computation has a cost.",
          hint="randomblob(N) grows expensive as N grows. Time that expense.",
          technique="Time-blind (SQLite)", endpoint="/challenges/sq/files?owner=admin",
-         points=600, flag="FIRE{sq2a_sqlite_time_blind}"),
+         points=600, flag="FIRE{sq2a_sqlite_time_blind}",
+         ui_endpoint="/challenges/sq2a/ui"),
 
     dict(challenge_id="sq2b", tier=11, title="Lite Union",
          description="A SQLite user lookup. The engine is relaxed about column types in UNION.",
@@ -253,13 +259,15 @@ CHALLENGES: list[dict] = [
          description="An analytics summary that groups by department. The aggregation hides a secret.",
          hint="A HAVING clause can reference columns not in the SELECT list — and inject into them.",
          technique="HAVING / GROUP BY", endpoint="/challenges/my2/groups?dept=engineering",
-         points=250, flag="FIRE{my2e_having_group_by}"),
+         points=250, flag="FIRE{my2e_having_group_by}",
+         ui_endpoint="/challenges/my2e/ui"),
 
     dict(challenge_id="my3f", tier=3, title="Schema Walker",
          description="A product lookup. A shadow table exists that the app never shows you.",
          hint="information_schema.tables lists every table. UNION it into a visible column.",
          technique="information_schema enum", endpoint="/challenges/my3/products?id=1",
-         points=500, flag="FIRE{my3f_schema_walker}"),
+         points=500, flag="FIRE{my3f_schema_walker}",
+         ui_endpoint="/challenges/my3f/ui"),
 
     dict(challenge_id="my4g", tier=4, title="No Space No Problem",
          description="A lookup with a space-stripping WAF. Spaces are overrated anyway.",
@@ -302,13 +310,15 @@ CHALLENGES: list[dict] = [
          description="A PostgreSQL department summary. The HAVING clause speaks freely.",
          hint="HAVING MIN(id)=1 OR 1=1-- will short-circuit the aggregate check.",
          technique="HAVING / GROUP BY (PG)", endpoint="/challenges/pg/groups?dept=engineering",
-         points=600, flag="FIRE{pg2d_pg_having_group_by}"),
+         points=600, flag="FIRE{pg2d_pg_having_group_by}",
+         ui_endpoint="/challenges/pg2d/ui"),
 
     dict(challenge_id="pg2e", tier=7, title="Catalog Diver",
          description="A PostgreSQL orders endpoint. A hidden table exists in the schema.",
          hint="information_schema.tables works on PostgreSQL too. UNION it in.",
          technique="information_schema enum (PG)", endpoint="/challenges/pg/orders?id=1",
-         points=600, flag="FIRE{pg2e_pg_schema_walker}"),
+         points=600, flag="FIRE{pg2e_pg_schema_walker}",
+         ui_endpoint="/challenges/pg2e/ui"),
 
     dict(challenge_id="pg2f", tier=7, title="PG Echo Chamber",
          description="A PostgreSQL profile update that stores your display name. The name is used elsewhere.",
@@ -327,7 +337,8 @@ CHALLENGES: list[dict] = [
          description="A PostgreSQL request logger. The entry is written and immediately read back.",
          hint="The injection surface is an HTTP header. The ?ua= fallback is scanner-accessible.",
          technique="Header injection (PG)", endpoint="/challenges/pg/agent",
-         points=1200, flag="FIRE{pg3e_pg_header_injection}"),
+         points=1200, flag="FIRE{pg3e_pg_header_injection}",
+         ui_endpoint="/challenges/pg3e/ui"),
 
     dict(challenge_id="pg4b", tier=9, title="Pipe Dream",
          description="A PostgreSQL vault query built with || string concatenation.",
@@ -352,7 +363,8 @@ CHALLENGES: list[dict] = [
          description="A SQLite item lookup. A hidden table is not listed in any API response.",
          hint="sqlite_master (or sqlite_schema) stores every table's CREATE statement.",
          technique="sqlite_master enumeration", endpoint="/challenges/sq/item/1",
-         points=600, flag="FIRE{sq2g_sqlite_master_enum}"),
+         points=600, flag="FIRE{sq2g_sqlite_master_enum}",
+         ui_endpoint="/challenges/sq2g/ui"),
 
     dict(challenge_id="sq2h", tier=11, title="Lite Echo",
          description="A SQLite profile page that saves a bio. The bio is returned on a different page.",
@@ -413,6 +425,15 @@ def get_scoreboard() -> list[dict]:
             ORDER BY total DESC, solved DESC
         """).fetchall()
     return [{"player": r[0], "total": r[1], "solved": r[2]} for r in rows]
+
+
+def get_player_solved(player: str) -> list[str]:
+    with _score_conn() as cx:
+        rows = cx.execute(
+            "SELECT challenge_id FROM solved WHERE player = ? ORDER BY solved_at",
+            (player,),
+        ).fetchall()
+    return [r[0] for r in rows]
 
 
 def award_points(player: str, challenge_id: str, points: int) -> bool:

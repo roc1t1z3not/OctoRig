@@ -8,9 +8,10 @@
   :root {
     --bg:#0d1117; --surface:#161b22; --border:#30363d;
     --text:#e6edf3; --muted:#8b949e; --accent:#f78166;
+    --solved-border:#238636; --solved-bg:#1a4a2e;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;padding-bottom:56px}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;padding-bottom:64px}
   a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
   nav{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:24px}
   nav .brand{font-size:1.2rem;font-weight:700;color:var(--accent);letter-spacing:.04em}
@@ -22,21 +23,30 @@
   .tier-heading{display:flex;align-items:center;gap:12px;margin-bottom:16px}
   .tier-badge{padding:4px 12px;border-radius:12px;font-size:.75rem;font-weight:700;color:#fff}
   .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:8px}
+
+  /* Card */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:8px;transition:border-color .2s}
+  .card.solved{border-color:var(--solved-border)}
+  .card-title-row{display:flex;align-items:center;gap:8px}
   .card-title{font-size:1rem;font-weight:600}
+  .card-solved-badge{font-size:.65rem;font-weight:700;color:#56d364;background:var(--solved-bg);border:1px solid var(--solved-border);padding:2px 6px;border-radius:10px;margin-left:auto;white-space:nowrap}
   .card-desc{font-size:.85rem;color:var(--muted);flex:1}
   .card-meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
   .card-technique{font-size:.75rem;background:#21262d;padding:3px 8px;border-radius:4px;color:var(--muted)}
   .card-points{font-size:.9rem;font-weight:700;color:var(--accent)}
   .card-endpoint{font-size:.72rem;color:var(--muted);word-break:break-all}
+  .card-ui-btn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;flex-shrink:0;background:#21262d;border:1px solid var(--border);border-radius:4px;font-size:.8rem;line-height:1;text-decoration:none;color:var(--accent)}
+  .card-ui-btn:hover{background:#2d333b;text-decoration:none}
+
+  /* Hint */
   details.hint{margin-top:6px;font-size:.8rem}
   details.hint summary{cursor:pointer;color:var(--muted);font-size:.75rem;user-select:none;list-style:none;display:flex;align-items:center;gap:6px}
   details.hint summary::-webkit-details-marker{display:none}
   details.hint summary::before{content:'▶';font-size:.6rem;transition:transform .15s;display:inline-block}
   details.hint[open] summary::before{transform:rotate(90deg)}
   details.hint .hint-body{margin-top:6px;padding:8px 10px;background:#1c2128;border-left:2px solid var(--border);border-radius:0 4px 4px 0;color:var(--muted);font-style:italic;line-height:1.5}
-  .card-ui-link{display:inline-block;margin-top:8px;font-size:.75rem;background:#21262d;border:1px solid var(--border);color:var(--accent);padding:3px 10px;border-radius:4px}
-  .card-ui-link:hover{background:#2d333b;text-decoration:none}
+
+  /* Backend accordion */
   details.backend{margin-bottom:32px}
   details.backend>summary{cursor:pointer;list-style:none;user-select:none;display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:20px}
   details.backend>summary::-webkit-details-marker{display:none}
@@ -44,24 +54,37 @@
   details.backend[open]>summary .backend-arrow{transform:rotate(90deg)}
   details.backend>summary .backend-title{font-size:1.1rem;font-weight:700}
   details.backend>summary .backend-meta{font-size:.82rem;color:var(--muted);margin-left:auto}
+
+  /* Scoreboard */
   table{width:100%;border-collapse:collapse;font-size:.9rem}
   th,td{padding:10px 14px;border-bottom:1px solid var(--border);text-align:left}
   th{color:var(--muted);font-weight:600}
   tr:hover td{background:#1c2128}
+  tr.player-row{cursor:pointer}
   .rank{font-weight:700;color:var(--muted)}
   .rank.gold{color:#ffd700} .rank.silver{color:#c0c0c0} .rank.bronze{color:#cd7f32}
-  .score-bar{position:fixed;bottom:0;left:0;right:0;height:48px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:24px;font-size:.85rem;z-index:100}
-  .score-bar .player-label{color:var(--muted)}
-  .score-bar .player-score{font-weight:700;color:var(--accent);font-size:1rem}
-  .score-bar .solved-count{color:var(--muted)}
-  .score-bar form{display:flex;gap:8px;margin-left:auto}
-  .score-bar input{background:#21262d;border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:4px;font-size:.82rem;width:140px}
-  .score-bar button{background:var(--accent);color:#0d1117;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:.82rem;font-weight:700}
-  #flag-result{font-size:.82rem;padding:4px 8px;border-radius:4px;display:none}
+  .solved-list{display:none;padding:8px 14px 12px;background:#1c2128}
+  .solved-list.open{display:block}
+  .solved-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .solved-chip{font-size:.72rem;padding:2px 8px;border-radius:10px;background:var(--solved-bg);color:#56d364;border:1px solid var(--solved-border)}
+
+  /* Score bar */
+  .score-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;font-size:.85rem;z-index:100;min-height:48px;flex-wrap:wrap}
+  .score-bar .player-label{color:var(--muted);white-space:nowrap}
+  .score-bar .player-score{font-weight:700;color:var(--accent);font-size:1rem;white-space:nowrap}
+  .score-bar .solved-count{color:var(--muted);white-space:nowrap}
+  .score-bar .flag-group{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;padding:4px 0}
+  .score-bar input{background:#21262d;border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:4px;font-size:.82rem}
+  .score-bar input.inp-player{width:110px}
+  .score-bar input.inp-chal{width:90px}
+  .score-bar input.inp-flag{width:160px}
+  .score-bar button{background:var(--accent);color:#0d1117;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:.82rem;font-weight:700;white-space:nowrap}
+  #flag-result{font-size:.82rem;padding:4px 8px;border-radius:4px;display:none;white-space:nowrap}
   #flag-result.ok{background:#1a4a2e;color:#56d364}
   #flag-result.fail{background:#4a1a1a;color:#f85149}
-  /* UI card pages */
-  .ui-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:32px;max-width:480px;margin:0 auto}
+
+  /* UI challenge pages */
+  .ui-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:32px;max-width:520px;margin:0 auto}
   .ui-card h2{font-size:1.2rem;margin-bottom:4px}
   .ui-card .subtitle{color:var(--muted);font-size:.85rem;margin-bottom:24px}
   .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
@@ -69,8 +92,15 @@
   .field input,.field textarea{background:#21262d;border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:4px;font-size:.9rem;font-family:inherit}
   .field textarea{resize:vertical;min-height:80px}
   .btn{background:var(--accent);color:#0d1117;border:none;padding:8px 20px;border-radius:4px;cursor:pointer;font-size:.9rem;font-weight:700;width:100%}
-  .response-box{margin-top:20px;background:#21262d;border:1px solid var(--border);border-radius:4px;padding:12px;font-size:.82rem;font-family:monospace;white-space:pre-wrap;word-break:break-all;color:var(--text);display:none}
+  .response-box{margin-top:16px;background:#21262d;border:1px solid var(--border);border-radius:4px;padding:12px;font-size:.82rem;font-family:monospace;white-space:pre-wrap;word-break:break-all;color:var(--text);display:none;max-height:300px;overflow-y:auto}
+  .response-box.visible{display:block}
   .back-link{display:block;margin-top:16px;font-size:.82rem;text-align:center;color:var(--muted)}
+
+  @media(max-width:600px){
+    .score-bar{flex-direction:column;align-items:flex-start;padding:8px 16px;min-height:unset}
+    .score-bar .flag-group{margin-left:0;width:100%}
+    .score-bar input.inp-flag{flex:1;min-width:0}
+  }
 </style>
 </head>
 <body>
@@ -87,10 +117,10 @@
   <span class="player-label">Player:</span>
   <span class="player-score" id="sb-score">&#x2014;</span>
   <span class="solved-count" id="sb-solved"></span>
-  <form id="flag-form" onsubmit="return submitFlag(event)">
-    <input id="player-input" placeholder="your name" maxlength="32">
-    <input id="chal-input"   placeholder="challenge id" maxlength="8">
-    <input id="flag-input"   placeholder="FIRE{...}" maxlength="128">
+  <form id="flag-form" class="flag-group" onsubmit="return submitFlag(event)">
+    <input id="player-input" class="inp-player" placeholder="your name" maxlength="32">
+    <input id="chal-input"   class="inp-chal"   placeholder="challenge id" maxlength="8">
+    <input id="flag-input"   class="inp-flag"   placeholder="FIRE{...}" maxlength="128">
     <button type="submit">Submit</button>
   </form>
   <span id="flag-result"></span>
@@ -101,18 +131,65 @@ const PLAYER_KEY = 'fr_player';
 let currentPlayer = localStorage.getItem(PLAYER_KEY) || '';
 document.getElementById('player-input').value = currentPlayer;
 
+// Auto-fill challenge ID from data attribute set by UI pages
+const chalIdMeta = document.querySelector('[data-challenge-id]');
+if (chalIdMeta) {
+  document.getElementById('chal-input').value = chalIdMeta.dataset.challengeId;
+}
+
+// ── Inline fetch helper (used by cookie/path-param UI pages) ─────────────
+async function fetchEndpoint(url, boxId) {
+  const box = document.getElementById(boxId);
+  if (!box) return;
+  box.classList.add('visible');
+  box.textContent = 'Loading…';
+  try {
+    const r = await fetch(url);
+    const text = await r.text();
+    try { box.textContent = JSON.stringify(JSON.parse(text), null, 2); }
+    catch(_) { box.textContent = text; }
+  } catch(e) { box.textContent = 'Error: ' + e.message; }
+}
+
+// ── Solved state ──────────────────────────────────────────────────────────
+let solvedSet = new Set();
+
+async function loadSolvedAndMark() {
+  if (!currentPlayer) return;
+  try {
+    const r = await fetch('/api/player/' + encodeURIComponent(currentPlayer) + '/solved');
+    if (!r.ok) return;
+    const data = await r.json();
+    solvedSet = new Set(data.solved_ids || []);
+    document.querySelectorAll('.card[data-cid]').forEach(card => {
+      const cid = card.dataset.cid;
+      if (solvedSet.has(cid)) {
+        card.classList.add('solved');
+        const badge = card.querySelector('.card-solved-badge');
+        if (badge) badge.style.display = 'inline-block';
+      } else {
+        card.classList.remove('solved');
+        const badge = card.querySelector('.card-solved-badge');
+        if (badge) badge.style.display = 'none';
+      }
+    });
+  } catch(_) {}
+}
+
 async function loadScore() {
   if (!currentPlayer) return;
-  const r = await fetch('/api/scoreboard');
-  const board = await r.json();
-  const me = board.find(x => x.player === currentPlayer);
-  if (me) {
-    document.getElementById('sb-score').textContent = me.total + ' pts';
-    document.getElementById('sb-solved').textContent = me.solved + ' solved';
-  } else {
-    document.getElementById('sb-score').textContent = '0 pts';
-    document.getElementById('sb-solved').textContent = '0 solved';
-  }
+  try {
+    const r = await fetch('/api/scoreboard');
+    const board = await r.json();
+    const me = board.find(x => x.player === currentPlayer);
+    if (me) {
+      document.getElementById('sb-score').textContent = me.total + ' pts';
+      document.getElementById('sb-solved').textContent = me.solved + ' solved';
+    } else {
+      document.getElementById('sb-score').textContent = '0 pts';
+      document.getElementById('sb-solved').textContent = '0 solved';
+    }
+  } catch(_) {}
 }
 
 async function submitFlag(ev) {
@@ -138,6 +215,7 @@ async function submitFlag(ev) {
       : '\u2713 Already solved';
     document.getElementById('flag-input').value = '';
     loadScore();
+    loadSolvedAndMark();
   } else {
     el.className = 'fail';
     el.textContent = '\u2717 ' + (data.message || 'Incorrect flag');
@@ -145,8 +223,73 @@ async function submitFlag(ev) {
   return false;
 }
 
+// ── Scoreboard drill-down ─────────────────────────────────────────────────
+function togglePlayerRow(playerName, detailRowId) {
+  const el = document.getElementById(detailRowId);
+  if (!el) return;
+  const isOpen = el.classList.contains('open');
+  // close all others
+  document.querySelectorAll('.solved-list.open').forEach(x => x.classList.remove('open'));
+  if (isOpen) return;
+  el.classList.add('open');
+  if (el.dataset.loaded) return;
+  el.dataset.loaded = '1';
+  fetch('/api/player/' + encodeURIComponent(playerName) + '/solved')
+    .then(r => r.json())
+    .then(data => {
+      const chips = (data.solved_ids || []).map(id =>
+        `<span class="solved-chip">${id}</span>`
+      ).join('');
+      el.querySelector('.solved-chips').innerHTML = chips || '<span style="color:var(--muted);font-size:.8rem">none yet</span>';
+    })
+    .catch(() => {});
+}
+
+// ── UI page inline fetch ──────────────────────────────────────────────────
+// Called by UI pages that opt in with data-fetch-form
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('form[data-fetch]').forEach(form => {
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const box = document.getElementById(form.dataset.fetch);
+      if (!box) return;
+      box.classList.add('visible');
+      box.textContent = 'Loading…';
+      try {
+        const method = (form.method || 'GET').toUpperCase();
+        let url = form.action || window.location.href;
+        let opts = {method};
+        if (method === 'GET') {
+          const params = new URLSearchParams(new FormData(form)).toString();
+          if (params) url += (url.includes('?') ? '&' : '?') + params;
+        } else {
+          opts.body = new FormData(form);
+        }
+        const r = await fetch(url, opts);
+        const text = await r.text();
+        try {
+          box.textContent = JSON.stringify(JSON.parse(text), null, 2);
+        } catch(_) {
+          box.textContent = text;
+        }
+      } catch(e) {
+        box.textContent = 'Error: ' + e.message;
+      }
+    });
+  });
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────
+document.getElementById('player-input').addEventListener('change', () => {
+  currentPlayer = document.getElementById('player-input').value.trim();
+  localStorage.setItem(PLAYER_KEY, currentPlayer);
+  loadScore();
+  loadSolvedAndMark();
+});
+
 loadScore();
-setInterval(loadScore, 15000);
+loadSolvedAndMark();
+setInterval(() => { loadScore(); loadSolvedAndMark(); }, 15000);
 </script>
 </body>
 </html>
