@@ -38,6 +38,7 @@ LABS=(
   "6|VulnAD|vulnad.sh|Vulnerable Active Directory - Samba4 AD with AD attack paths"
   "7|BreachSQL Fire Range|breachsql.sh|Tiered SQL injection challenges (T1-T5) for SQLi practice"
   "8|StingXSS Fire Range|stingxss.sh|Tiered XSS challenges (T1-T8) for XSS injection practice"
+  "9|VaultGate IDOR Range|vaultgate.sh|IDOR challenges for benchmarking"
 )
 
 # ---------------- dependency checks ------------------------------------------
