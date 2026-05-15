@@ -132,18 +132,20 @@ all_action() {
   if [[ "$action" == "stop" ]]; then
     local stopped=()
     for entry in "${LABS[@]}"; do
-      IFS='|' read -r id name lscript _desc <<< "$entry"
-      # Extract all container name values from the lab script
-      local cnames had_container=false
-      cnames=$(grep -oP '(?<==")(octorig-[^"]+)(?=")' "${LABS_DIR}/${lscript}" | sort -u)
+      IFS='|' read -r _id name lscript _desc <<< "$entry"
+      [[ -f "${LABS_DIR}/${lscript}" ]] || continue
+      # Check if any of this lab's containers are actually running (not just exited).
+      local cnames was_running=false
+      cnames=$(grep -oP '(?<==")(octorig-[^"]+)(?=")' "${LABS_DIR}/${lscript}" 2>/dev/null | sort -u)
       while IFS= read -r cname; do
-        if [[ -n "$cname" ]] && docker inspect "$cname" &>/dev/null; then
-          had_container=true
+        [[ -z "$cname" ]] && continue
+        if docker ps --filter "name=^${cname}$" --format "{{.Names}}" 2>/dev/null | grep -q "^${cname}$"; then
+          was_running=true
           break
         fi
       done <<< "$cnames"
       bash "${LABS_DIR}/${lscript}" stop &>/dev/null
-      [[ "$had_container" == true ]] && stopped+=("$name")
+      [[ "$was_running" == true ]] && stopped+=("$name")
     done
     if [[ ${#stopped[@]} -eq 0 ]]; then
       info "No labs were running."
