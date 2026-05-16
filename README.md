@@ -39,7 +39,7 @@ Or non-interactively:
 ## Available Labs
 
 | ID | Name | Description | Port(s) |
-|----|------|-------------|---------|
+| -- | ---- | ----------- | ------- |
 | 1 | **Juice Shop** | OWASP Top 10 + 82 challenges | `3000` |
 | 2 | **DVWA** | Classic PHP/MySQL vulnerable app | `8080` |
 | 3 | **Metasploitable2** | Linux VM with intentionally vulnerable services | `8081`, `2222`, `445`… |
@@ -48,6 +48,7 @@ Or non-interactively:
 | 6 | **VulnAD** | Vulnerable Active Directory via Samba4 | `389`, `88`, `4445` |
 | 7 | **BreachSQL Firerange** | Tiered SQL injection challenges | `17476` |
 | 8 | **StingXSS Firerange** | Tiered XSS challenges | `17477` |
+| 9 | **VaultGate** | Tiered IDOR challenges | `17478` |
 
 ---
 
@@ -66,5 +67,3 @@ OctoRig is intended for use in **isolated lab environments only**.
 
 - Run on a dedicated machine or VM — never expose lab containers to a public network
 - All labs contain intentionally vulnerable software — treat accordingly
-
----
