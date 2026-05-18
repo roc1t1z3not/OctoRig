@@ -73,6 +73,14 @@ def init_store_db() -> None:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 cookie_val TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS gql_comments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                body TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS ws_messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                content TEXT NOT NULL
+            );
         """)
         # seed a default profile
         try:

@@ -154,10 +154,14 @@ _TIER_NAMES = {
     6: "WAF Bypass",
     7: "CSP Bypass",
     8: "Template Injection",
+    9: "GraphQL XSS",
+    10: "WebSocket XSS",
+    11: "DOM Advanced",
 }
 _TIER_COLORS = {
-    1: "#4caf50", 2: "#2196f3", 3: "#ff9800", 4: "#f44336",
-    5: "#9c27b0", 6: "#00bcd4", 7: "#e91e63", 8: "#ff5722",
+    1: "#4caf50", 2: "#2196f3", 3: "#ff9800",  4: "#f44336",
+    5: "#9c27b0", 6: "#00bcd4", 7: "#e91e63",  8: "#ff5722",
+    9: "#009688", 10: "#3f51b5", 11: "#795548",
 }
 
 
@@ -182,13 +186,16 @@ def _build_index_html(by_tier: dict, total: int, max_pts: int) -> str:
     ]
 
     _TIER_GROUPS = [
-        ("Reflected XSS",     [1, 2],    True),
-        ("Stored XSS",        [3],       False),
-        ("DOM XSS",           [4],       False),
-        ("Blind XSS",         [5],       False),
-        ("WAF Bypass",        [6],       False),
-        ("CSP Bypass",        [7],       False),
-        ("Template Injection",[8],       False),
+        ("Reflected XSS",     [1, 2],     True),
+        ("Stored XSS",        [3],        False),
+        ("DOM XSS",           [4],        False),
+        ("Blind XSS",         [5],        False),
+        ("WAF Bypass",        [6],        False),
+        ("CSP Bypass",        [7],        False),
+        ("Template Injection",[8],        False),
+        ("GraphQL XSS",       [9],        False),
+        ("WebSocket XSS",     [10],       False),
+        ("DOM Advanced",      [11],       False),
     ]
 
     for group_name, tiers, open_default in _TIER_GROUPS:

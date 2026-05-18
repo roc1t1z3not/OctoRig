@@ -17,6 +17,9 @@ from core.challenges.blind import bp as blind_bp
 from core.challenges.waf import bp as waf_bp
 from core.challenges.csp import bp as csp_bp
 from core.challenges.template import bp as template_bp
+from core.challenges.graphql import bp as graphql_bp
+from core.challenges.websocket import bp as websocket_bp, ws1a_ws, ws1b_ws, ws1c_ws
+from core.challenges.dom_advanced import bp as dom_advanced_bp
 
 
 def create_app() -> Flask:
@@ -25,8 +28,16 @@ def create_app() -> Flask:
 
     # Register blueprints
     for bp in (api_bp, reflected_bp, stored_bp, dom_bp,
-               blind_bp, waf_bp, csp_bp, template_bp):
+               blind_bp, waf_bp, csp_bp, template_bp,
+               graphql_bp, websocket_bp, dom_advanced_bp):
         app.register_blueprint(bp)
+
+    # Register WebSocket routes (flask-sock)
+    from flask_sock import Sock
+    sock = Sock(app)
+    sock.route("/challenges/ws/ws1a/ws")(ws1a_ws)
+    sock.route("/challenges/ws/ws1b/ws")(ws1b_ws)
+    sock.route("/challenges/ws/ws1c/ws")(ws1c_ws)
 
     # Init DBs
     with app.app_context():
@@ -42,8 +53,29 @@ def create_app() -> Flask:
 # ---------------------------------------------------------------------------
 
 def _admin_bot(app: Flask) -> None:
-    """Simulate an admin visiting stored and blind XSS pages."""
-    import requests
+    """Simulate an admin visiting stored and blind XSS pages.
+
+    Uses headless Chromium so injected JavaScript actually executes —
+    payloads that call /api/catch will fire and award points.
+    """
+    import subprocess
+    import shutil
+
+    _chromium = shutil.which("chromium") or shutil.which("chromium-browser") or shutil.which("google-chrome")
+    _CHROME_FLAGS = [
+        "--headless=new", "--no-sandbox", "--disable-gpu",
+        "--disable-dev-shm-usage", "--dump-dom",
+    ]
+
+    def _visit(url: str) -> None:
+        if _chromium:
+            try:
+                subprocess.run(
+                    [_chromium, *_CHROME_FLAGS, url],
+                    timeout=10, capture_output=True,
+                )
+            except Exception:
+                pass
 
     BLIND_PAGES = [
         "http://127.0.0.1:5000/challenges/blind/b1a/admin",
@@ -59,6 +91,10 @@ def _admin_bot(app: Flask) -> None:
         "http://127.0.0.1:5000/challenges/stored/s1d/profile/admin",
         "http://127.0.0.1:5000/challenges/stored/s1e/board",
         "http://127.0.0.1:5000/challenges/stored/s1f/board",
+        # Tier 9 — GraphQL stored
+        "http://127.0.0.1:5000/challenges/graphql/g1b/board",
+        # Tier 10 — WebSocket stored
+        "http://127.0.0.1:5000/challenges/ws/ws1c/board",
     ]
 
     # Wait for app to be ready
@@ -67,12 +103,7 @@ def _admin_bot(app: Flask) -> None:
     while True:
         with app.app_context():
             for url in BLIND_PAGES + STORED_PAGES:
-                try:
-                    requests.get(url, timeout=5,
-                                 headers={"X-Admin-Bot": "1",
-                                          "User-Agent": "StingXSS-AdminBot/1.0"})
-                except Exception:
-                    pass
+                _visit(url)
         time.sleep(30)
 
 

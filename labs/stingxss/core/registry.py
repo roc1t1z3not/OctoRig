@@ -320,6 +320,79 @@ CHALLENGES: list[dict] = [
          technique="SSTI — render_template_string → XSS", points=3000,
          flag="STING{t1d_render_template_string_xss}",
          endpoint="/challenges/template/t1d"),
+
+    # ── Tier 9 — GraphQL XSS ─────────────────────────────────────────────────
+    dict(challenge_id="g1a", tier=9, title="also Scout",
+         description="A GraphQL search API with introspection enabled. Discover the schema, find the injectable string field, and exploit the reflected value rendered via innerHTML.",
+         hint="Introspect the endpoint first. The query type has one string-typed field whose return value lands directly in innerHTML.",
+         technique="GraphQL — reflected string field → innerHTML", points=1500,
+         flag="STING{g1a_graphql_reflected}",
+         endpoint="/challenges/graphql/g1a"),
+
+    dict(challenge_id="g1b", tier=9, title="Mutation Station",
+         description="A comment board backed by a GraphQL API. The mutation stores your input; the admin bot reads the board every 30 seconds.",
+         hint="Use the createComment mutation to inject a stored payload. The board renders comment bodies without sanitisation.",
+         technique="GraphQL — stored mutation → board → admin bot", points=1500,
+         flag="STING{g1b_graphql_stored}",
+         endpoint="/challenges/graphql/g1b"),
+
+    dict(challenge_id="g1c", tier=9, title="Error Echo",
+         description="A debug field that always fails validation and echoes your message verbatim inside the GraphQL errors array. The client renders errors[0].message via innerHTML.",
+         hint="The debug field returns an error, not data. The error message contains your msg argument unchanged.",
+         technique="GraphQL — error message reflection → innerHTML", points=1500,
+         flag="STING{g1c_graphql_error_echo}",
+         endpoint="/challenges/graphql/g1c"),
+
+    # ── Tier 10 — WebSocket XSS ───────────────────────────────────────────────
+    dict(challenge_id="ws1a", tier=10, title="Echo Chamber",
+         description="A WebSocket chat server that echoes every message back verbatim. The client renders the echoed data via innerHTML with no sanitisation.",
+         hint="Connect to the WebSocket endpoint visible in the page source. The server echoes your message; the client writes event.data to innerHTML.",
+         technique="WebSocket — raw echo → innerHTML", points=1750,
+         flag="STING{ws1a_websocket_echo}",
+         endpoint="/challenges/ws/ws1a"),
+
+    dict(challenge_id="ws1b", tier=10, title="JSON Wire",
+         description="A WebSocket protocol that wraps messages in a JSON envelope. The server echoes the frame; the client parses it and renders msg.content via innerHTML.",
+         hint="Send a raw string — the server wraps it as {type:'chat',content:'...'}. The client renders .content via innerHTML.",
+         technique="WebSocket — JSON envelope → innerHTML", points=1750,
+         flag="STING{ws1b_websocket_json}",
+         endpoint="/challenges/ws/ws1b"),
+
+    dict(challenge_id="ws1c", tier=10, title="Broadcast Booth",
+         description="WebSocket messages are persisted and broadcast to every client on connect. The admin bot reads the board every 30 seconds.",
+         hint="Send your payload via WebSocket — it is stored and rendered on the board without sanitisation. Wait for the admin to visit.",
+         technique="WebSocket — stored broadcast → board → admin bot", points=1750,
+         flag="STING{ws1c_websocket_stored}",
+         endpoint="/challenges/ws/ws1c"),
+
+    # ── Tier 11 — DOM Advanced ────────────────────────────────────────────────
+    dict(challenge_id="d2a", tier=11, title="Prototype Pollution Gadget",
+         description="A widget deep-merges URL hash JSON into a config object. A downstream gadget reads a property from a plain {} — with no own property — falling back to a polluted Object.prototype.",
+         hint="Pollute Object.prototype.template via {\"__proto__\":{\"template\":\"PAYLOAD\"}} in the hash. The gadget reads ({}).template into innerHTML.",
+         technique="DOM — prototype pollution gadget → innerHTML", points=1250,
+         flag="STING{d2a_prototype_pollution}",
+         endpoint="/challenges/dom/d2a"),
+
+    dict(challenge_id="d2b", tier=11, title="Redirect Jacking",
+         description="A post-login redirect reads the next= parameter and assigns it directly to window.location.href with no scheme validation.",
+         hint="Any URI scheme is accepted. What happens when next= is a javascript: URI?",
+         technique="DOM — open redirect → javascript: URI → XSS", points=1000,
+         flag="STING{d2b_open_redirect_xss}",
+         endpoint="/challenges/dom/d2b"),
+
+    dict(challenge_id="d2c", tier=11, title="Outer Replacement",
+         description="A widget builder reads the widget= parameter and assigns it to element.outerHTML, replacing the entire node with the parsed HTML.",
+         hint="outerHTML replaces the element itself. All HTML — including event handlers — in the new markup is parsed and live.",
+         technique="DOM — outerHTML sink", points=1000,
+         flag="STING{d2c_outerhtml_sink}",
+         endpoint="/challenges/dom/d2c"),
+
+    dict(challenge_id="d2d", tier=11, title="Adjacent Injection",
+         description="A notification widget appends the append= parameter directly via insertAdjacentHTML('beforeend', ...) with no sanitisation.",
+         hint="insertAdjacentHTML is an innerHTML-equivalent sink that is often missed by WAF rules and linters. Treat it exactly like innerHTML.",
+         technique="DOM — insertAdjacentHTML sink", points=1000,
+         flag="STING{d2d_insertadjacenthtml}",
+         endpoint="/challenges/dom/d2d"),
 ]
 
 
