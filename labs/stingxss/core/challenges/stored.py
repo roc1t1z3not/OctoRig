@@ -188,10 +188,8 @@ def s1d_form():
 
 @bp.post("/challenges/stored/s1d")
 def s1d_post():
-    username = request.form.get("username", "")
+    username = request.form.get("username", "") or "guest"
     bio = request.form.get("bio", "")
-    if not username:
-        return redirect("/challenges/stored/s1d")
     existing = store_get_where("profiles", "username=?", (username,))
     if existing:
         from core.db.storedb import store_update
