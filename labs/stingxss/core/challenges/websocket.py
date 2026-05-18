@@ -212,9 +212,9 @@ def ws1c_board():
 
 def ws1c_ws(ws) -> None:
     """Send stored history to new client, then persist and echo new messages."""
-    # Replay history
+    # Replay last 10 stored messages to new client
     try:
-        for row in store_get("ws_messages"):
+        for row in store_get("ws_messages")[-10:]:
             ws.send(row["content"])
     except Exception:
         pass
