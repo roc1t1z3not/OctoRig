@@ -39,6 +39,7 @@ LABS=(
   "7|BreachSQL Fire Range|breachsql.sh|Tiered SQL injection challenges (T1-T5) for SQLi practice"
   "8|StingXSS Fire Range|stingxss.sh|Tiered XSS challenges (T1-T8) for XSS injection practice"
   "9|VaultGate IDOR Range|vaultgate.sh|IDOR challenges for benchmarking"
+  "10|VaultRip Range|vaultriprange.sh|SSH credential-rich target for VaultRip passive and remote harvesting"
 )
 
 # ---------------- dependency checks ------------------------------------------

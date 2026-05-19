@@ -49,6 +49,7 @@ Or non-interactively:
 | 7 | **BreachSQL Firerange** | Tiered SQL injection challenges | `17476` |
 | 8 | **StingXSS Firerange** | Tiered XSS challenges | `17477` |
 | 9 | **VaultGate** | Tiered IDOR challenges | `17478` |
+| 10 | **VaultRip Range** | SSH credential-rich target for VaultRip passive and remote harvesting | `2222` |
 
 ---
 
