@@ -40,21 +40,22 @@ Or non-interactively:
 
 | ID | Name | Description | Port(s) |
 | -- | ---- | ----------- | ------- |
-| 1 | **Juice Shop** | OWASP Top 10 + 82 challenges | `3000` |
-| 2 | **DVWA** | Classic PHP/MySQL vulnerable app | `8080` |
-| 3 | **Metasploitable2** | Linux VM with intentionally vulnerable services | `8081`, `2222`, `445`… |
-| 4 | **WebGoat** | Lesson-based Java security training | `8888` |
-| 5 | **HTB Style** | CTFd scoreboard + Struts2 CVE-2017-5638 | `8000`, `8090` |
-| 6 | **VulnAD** | Vulnerable Active Directory via Samba4 | `389`, `88`, `4445` |
-| 7 | **BreachSQL Firerange** | Tiered SQL injection challenges | `17476` |
-| 8 | **StingXSS Firerange** | Tiered XSS challenges | `17477` |
-| 9 | **VaultGate** | Tiered IDOR challenges | `17478` |
-| 10 | **VaultRip Range** | SSH credential-rich target for passive and remote harvesting | `2222` |
-| 11 | **REWIND** | Retro video and games store — SQLi, XSS and IDOR | `8082` |
-| 12 | **HumanBank** | Vulnerable online banking app — SQLi, IDOR, XSS, auth flaws, file upload, business logic | `8083` |
-| 13 | **MediHuman** | Vulnerable healthcare patient portal — SQLi, IDOR, XSS, file upload, SSH/FTP weak creds | `8084`, `2224`, `2121` |
-| 14 | **NetPulse** | Vulnerable 90s ISP portal — SSRF, SSTI, command injection, open redirect, SQLi, IDOR, XSS | `8085` |
-| 15 | **TradeFloor** | Vulnerable stock trading portal — XXE, CSRF, mass assignment, SQLi, IDOR, stored XSS | `8086` |
+| 1 | [**Rewind**](labs/rewindrange/README.md) | Retro video and games store — SQLi, XSS and IDOR | `8082` |
+| 2 | [**TradeFloor**](labs/tradefloor/README.md) | Vulnerable trading portal — XXE, CSRF, mass assignment, SQLi, IDOR, stored XSS | `8086` |
+| 3 | [**GoldenAce**](labs/goldenace/README.md) | Vulnerable online casino — SQLi, IDOR, stored XSS, CSRF, business logic, JWT alg:none | `8087` |
+| 4 | [**HumanBank**](labs/humanbank/README.md) | Vulnerable online banking app — SQLi, IDOR, XSS, auth flaws, file upload, business logic | `8083` |
+| 5 | [**MediHuman**](labs/medihuman/README.md) | Vulnerable healthcare patient portal — SQLi, IDOR, XSS, file upload, SSH/FTP weak creds | `8084`, `2224`, `2121` |
+| 6 | [**NetPulse**](labs/netpulse/README.md) | Vulnerable 90s ISP portal — SSRF, SSTI, command injection, open redirect, SQLi, IDOR, XSS | `8085` |
+| 7 | [**BreachSQL**](labs/firerange/README.md) | Tiered SQL injection challenges (T1-T5) for SQLi practice | `17476` |
+| 8 | [**StingXSS**](labs/stingxss/README.md) | Tiered XSS challenges (T1-T8) for XSS injection practice | `17477` |
+| 9 | [**VaultGate**](labs/vaultgate/README.md) | IDOR challenges for benchmarking | `17478` |
+| 10 | [**VaultRip**](labs/vaultriprange/README.md) | SSH credential-rich target for VaultRip passive and remote harvesting | `2222` |
+| 11 | **Juice Shop** | OWASP Juice Shop — OWASP Top 10 web vulnerabilities | `3000` |
+| 12 | **DVWA** | Damn Vulnerable Web App — PHP/MySQL classic | `8080` |
+| 13 | **Metasploitable2** | Linux VM with intentionally vulnerable services | `8081`, `2222`, `21`, `445`, … |
+| 14 | **WebGoat** | OWASP WebGoat — lesson-based Java security training | `8888`, `9191` |
+| 15 | **HTB Style** | HackTheBox-style CTFd platform + vulnerable challenge | `8001`, `8090` |
+| 16 | **VulnAD** | Vulnerable Active Directory — Samba4 AD with AD attack paths | `88`, `389`, `4445` |
 
 ---
 
