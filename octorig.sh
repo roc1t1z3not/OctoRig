@@ -27,6 +27,28 @@ info()  { echo -e "  ${GRAY}[*]${RESET} $*"; }
 warn()  { echo -e "  ${YELLOW}[!]${RESET} $*"; }
 header(){ echo -e "\n  ${GREEN}${BOLD}$*${RESET}"; }
 
+# ---------------- self-update ------------------------------------------------
+update_self() {
+  if ! command -v git &>/dev/null; then
+    return
+  fi
+  if [[ ! -d "${SCRIPT_DIR}/.git" ]]; then
+    return
+  fi
+  if ! git -C "${SCRIPT_DIR}" diff --quiet || \
+     ! git -C "${SCRIPT_DIR}" diff --cached --quiet || \
+     [[ -n "$(git -C "${SCRIPT_DIR}" ls-files --others --exclude-standard)" ]]; then
+    info "Skipping self-update: local changes detected."
+    return
+  fi
+  info "Checking for updates..."
+  if git -C "${SCRIPT_DIR}" pull --ff-only --quiet 2>/dev/null; then
+    good "Up to date."
+  else
+    warn "Self-update failed (non-fast-forward or remote issue). Continuing."
+  fi
+}
+
 # ---------------- lab registry -----------------------------------------------
 # Format: "ID|NAME|SCRIPT|DESCRIPTION"
 LABS=(
@@ -226,6 +248,7 @@ interactive_menu() {
 }
 
 # ---------------- main --------------------------------------------------------
+update_self
 banner
 
 case "${1:-menu}" in
