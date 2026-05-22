@@ -4,7 +4,10 @@
 <div class="container" style="max-width:700px;">
   <div class="page-header"><h1>ORDER #{{ order.id }}</h1></div>
   <div class="detail-panel">
-    <div class="detail-row"><span class="lbl">Trader</span><span>{{ owner.username }} ({{ owner.full_name }})</span></div>
+    <div class="detail-row">
+      <span class="lbl">Trader</span>
+      <span><a href="{{ url_for('user_profile', user_id=owner.id) }}">{{ owner.username }}</a> ({{ owner.full_name }})</span>
+    </div>
     <div class="detail-row"><span class="lbl">Symbol</span><span style="color:var(--green);">{{ order.symbol }}</span></div>
     <div class="detail-row">
       <span class="lbl">Action</span>

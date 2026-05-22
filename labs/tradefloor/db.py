@@ -82,6 +82,14 @@ CREATE TABLE IF NOT EXISTS reset_tokens (
     used       INTEGER DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS price_history (
+    id          INTEGER PRIMARY KEY,
+    symbol      TEXT NOT NULL,
+    price       REAL NOT NULL,
+    recorded_at TEXT NOT NULL,
+    UNIQUE(symbol, recorded_at)
+);
+
 INSERT OR IGNORE INTO users VALUES
   (1,'admin','commonhuman-lab','admin@tradefloor.local','TradeFloor Admin',1,'','','',50000.0),
   (2,'alice.p','abc1234','alice@example.com','Alice Porter',0,'Day trader since 1996.','','12 Wall St, New York NY',48320.50),
@@ -212,6 +220,8 @@ def close_db(_):
 
 
 def init_db():
+    import random
+    from datetime import datetime, timedelta, timezone
     os.makedirs('/data', exist_ok=True)
     conn = sqlite3.connect(DATABASE)
     conn.executescript(SCHEMA)
@@ -219,5 +229,21 @@ def init_db():
         conn.execute("ALTER TABLE orders ADD COLUMN memo TEXT DEFAULT ''")
     except sqlite3.OperationalError:
         pass
+    # Seed 60 price-history points (one per 10 s, going back 10 minutes) for each symbol
+    stocks = conn.execute("SELECT symbol, price FROM market_data").fetchall()
+    now = datetime.now(timezone.utc)
+    for symbol, base_price in stocks:
+        price = base_price
+        for i in range(60, 0, -1):
+            ts = (now - timedelta(seconds=i * 10)).strftime('%Y-%m-%dT%H:%M:%S')
+            if symbol == 'CMNH':
+                delta = round(price * random.uniform(-0.005, 0.005), 2)
+            else:
+                delta = round(price * random.uniform(-0.015, 0.015), 2)
+            price = round(max(0.50, price + delta), 2)
+            conn.execute(
+                "INSERT OR IGNORE INTO price_history (symbol, price, recorded_at) VALUES (?, ?, ?)",
+                (symbol, price, ts)
+            )
     conn.commit()
     conn.close()

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Profile — {{ profile.username }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:800px;">
+
+  <p style="margin-bottom:1.5rem;"><a href="{{ url_for('orders') }}">&larr; Back</a></p>
+
+  <div class="page-header">
+    <h1>{{ profile.full_name or profile.username }}</h1>
+  </div>
+
+  {% if note %}
+  <!-- VULN: reflected XSS — note param echoed with | safe -->
+  <div class="alert alert-error" style="margin-bottom:1rem;">{{ note | safe }}</div>
+  {% endif %}
+
+  <div class="detail-panel" style="margin-bottom:1.5rem;">
+    <div class="section-title" style="margin-bottom:0.75rem;">ACCOUNT DETAILS</div>
+    <div class="detail-row"><span class="lbl">Username</span><span>{{ profile.username }}</span></div>
+    <div class="detail-row"><span class="lbl">Full Name</span><span>{{ profile.full_name }}</span></div>
+    <div class="detail-row"><span class="lbl">Email</span><span>{{ profile.email }}</span></div>
+    <div class="detail-row"><span class="lbl">Phone</span><span>{{ profile.phone or '—' }}</span></div>
+    <div class="detail-row"><span class="lbl">Address</span><span>{{ profile.address or '—' }}</span></div>
+    <div class="detail-row">
+      <span class="lbl">Role</span>
+      <span>{% if profile.is_admin %}<span class="badge badge-amber">ADMIN</span>{% else %}<span class="badge badge-green">USER</span>{% endif %}</span>
+    </div>
+    <div class="detail-row">
+      <span class="lbl">Cash Balance</span>
+      <span style="color:var(--green);font-weight:600;">${{ "%.2f"|format(profile.balance) }}</span>
+    </div>
+    {% if profile.bio %}
+    <div class="detail-row" style="align-items:flex-start;">
+      <span class="lbl">Bio</span>
+      <span style="color:var(--muted);">{{ profile.bio }}</span>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if holdings %}
+  <div class="section-title mt3">HOLDINGS</div>
+  <table class="data-table" style="margin-top:0.75rem;margin-bottom:1.5rem;">
+    <thead>
+      <tr><th>SYMBOL</th><th>SHARES</th><th>MKT PRICE</th><th>VALUE</th></tr>
+    </thead>
+    <tbody>
+      {% for h in holdings %}
+      <tr>
+        <td style="color:var(--green);font-weight:600;">{{ h.symbol }}</td>
+        <td>{{ h.quantity }}</td>
+        <td>${{ "%.2f"|format(h.price) }}</td>
+        <td style="color:var(--amber);">${{ "%.2f"|format(h.price * h.quantity) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  {% if orders %}
+  <div class="section-title">RECENT ORDERS</div>
+  <table class="data-table" style="margin-top:0.75rem;">
+    <thead>
+      <tr><th>ID</th><th>SYMBOL</th><th>ACTION</th><th>QTY</th><th>PRICE</th><th>STATUS</th><th>DATE</th></tr>
+    </thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td><a href="{{ url_for('order_detail', order_id=o.id) }}">#{{ o.id }}</a></td>
+        <td style="color:var(--green);">{{ o.symbol }}</td>
+        <td>{% if o.action == 'buy' %}<span class="badge badge-green">BUY</span>{% else %}<span class="badge badge-red">SELL</span>{% endif %}</td>
+        <td>{{ o.quantity }}</td>
+        <td>${{ "%.2f"|format(o.price) }}</td>
+        <td>
+          {% if o.status == 'open' %}<span class="badge badge-amber">OPEN</span>
+          {% elif o.status == 'filled' %}<span class="badge badge-green">FILLED</span>
+          {% else %}<span class="badge badge-red">{{ o.status | upper }}</span>{% endif %}
+        </td>
+        <td style="color:var(--muted);">{{ o.created_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+</div>
+{% endblock %}

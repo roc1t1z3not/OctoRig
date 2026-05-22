@@ -1,6 +1,22 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import request, render_template, session, redirect, url_for
 from db import get_db
+
+
+def _apply_market_impact(db, symbol, action, quantity, exec_price):
+    total     = quantity * exec_price
+    pct       = min(0.05, total / 2_000_000)
+    if action == 'buy':
+        new_price = round(max(0.50, exec_price * (1 + pct)), 2)
+    else:
+        new_price = round(max(0.50, exec_price * (1 - pct)), 2)
+    delta = round(new_price - exec_price, 2)
+    db.execute("UPDATE market_data SET price = ?, change = ? WHERE symbol = ?",
+               (new_price, delta, symbol))
+    db.execute(
+        "INSERT OR IGNORE INTO price_history (symbol, price, recorded_at) VALUES (?, ?, ?)",
+        (symbol, new_price, datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S'))
+    )
 
 
 def _require_login():
@@ -85,8 +101,9 @@ def init(app):
                                 "INSERT INTO orders (user_id, symbol, action, quantity, order_type, "
                                 "price, status, created_at, memo) VALUES (?, ?, ?, ?, ?, ?, 'filled', ?, ?)",
                                 (uid, symbol.upper(), action, quantity, order_type,
-                                 exec_price, datetime.utcnow().strftime('%Y-%m-%d'), memo)
+                                 exec_price, datetime.now(timezone.utc).strftime('%Y-%m-%d'), memo)
                             )
+                            _apply_market_impact(db, symbol.upper(), 'buy', quantity, exec_price)
                             db.commit()
                             user       = db.execute("SELECT * FROM users WHERE id = ?", (uid,)).fetchone()
                             symbol_pre = symbol.upper()
@@ -102,7 +119,7 @@ def init(app):
                             "INSERT INTO orders (user_id, symbol, action, quantity, order_type, "
                             "price, status, created_at, memo) VALUES (?, ?, ?, ?, ?, ?, 'open', ?, ?)",
                             (uid, symbol.upper(), action, quantity, order_type,
-                             price, datetime.utcnow().strftime('%Y-%m-%d'), memo)
+                             price, datetime.now(timezone.utc).strftime('%Y-%m-%d'), memo)
                         )
                         db.commit()
                         message = f'Limit BUY placed: {quantity} x {symbol.upper()} @ ${price:.2f}'
@@ -138,8 +155,9 @@ def init(app):
                                 "INSERT INTO orders (user_id, symbol, action, quantity, order_type, "
                                 "price, status, created_at, memo) VALUES (?, ?, ?, ?, ?, ?, 'filled', ?, ?)",
                                 (uid, symbol.upper(), action, quantity, order_type,
-                                 exec_price, datetime.utcnow().strftime('%Y-%m-%d'), memo)
+                                 exec_price, datetime.now(timezone.utc).strftime('%Y-%m-%d'), memo)
                             )
+                            _apply_market_impact(db, symbol.upper(), 'sell', quantity, exec_price)
                             db.commit()
                             user       = db.execute("SELECT * FROM users WHERE id = ?", (uid,)).fetchone()
                             symbol_pre = symbol.upper()
@@ -155,7 +173,7 @@ def init(app):
                             "INSERT INTO orders (user_id, symbol, action, quantity, order_type, "
                             "price, status, created_at, memo) VALUES (?, ?, ?, ?, ?, ?, 'open', ?, ?)",
                             (uid, symbol.upper(), action, quantity, order_type,
-                             price, datetime.utcnow().strftime('%Y-%m-%d'), memo)
+                             price, datetime.now(timezone.utc).strftime('%Y-%m-%d'), memo)
                         )
                         db.commit()
                         message = f'Limit SELL placed: {quantity} x {symbol.upper()} @ ${price:.2f}'
@@ -170,27 +188,160 @@ def init(app):
         redir = _require_login()
         if redir:
             return redir
-        stocks = get_db().execute("SELECT * FROM market_data ORDER BY symbol").fetchall()
-        return render_template('market.html', stocks=stocks)
+        db = get_db()
+        q  = request.args.get('q', '').strip()
+        if q:
+            # VULN: SQLi — q injected directly; VULN: reflected XSS — q echoed with | safe in template
+            try:
+                stocks = db.execute(
+                    f"SELECT * FROM market_data WHERE symbol LIKE '%{q}%' "
+                    f"OR name LIKE '%{q}%' ORDER BY symbol"
+                ).fetchall()
+            except Exception:
+                stocks = []
+        else:
+            stocks = db.execute("SELECT * FROM market_data ORDER BY symbol").fetchall()
+        return render_template('market.html', stocks=stocks, q=q)
 
-    @app.route('/market/<symbol>')
+    @app.route('/market/<symbol>', methods=['GET', 'POST'])
     def market_detail(symbol):
         redir = _require_login()
         if redir:
             return redir
-        symbol = symbol.upper()
-        db     = get_db()
-        uid    = session['user_id']
-        stock  = db.execute("SELECT * FROM market_data WHERE symbol = ?", (symbol,)).fetchone()
+        symbol  = symbol.upper()
+        db      = get_db()
+        uid     = session['user_id']
+        stock   = db.execute("SELECT * FROM market_data WHERE symbol = ?", (symbol,)).fetchone()
         if not stock:
             return redirect(url_for('market'))
+
+        message = None
+        error   = None
+
+        if request.method == 'POST':
+            action     = request.form.get('action', 'buy').strip()
+            order_type = request.form.get('order_type', 'market').strip()
+            memo       = request.form.get('memo', '')
+            try:
+                quantity = int(request.form.get('quantity', 0) or 0)
+                price    = float(request.form.get('price', 0) or 0)
+            except ValueError:
+                error = 'Invalid quantity or price.'
+                quantity, price = 0, 0
+
+            if not error:
+                user       = db.execute("SELECT * FROM users WHERE id = ?", (uid,)).fetchone()
+                exec_price = stock['price'] if order_type == 'market' else price
+                total      = exec_price * quantity
+
+                if quantity <= 0:
+                    error = 'Quantity must be at least 1.'
+                elif action == 'buy':
+                    if order_type == 'market':
+                        if user['balance'] < total:
+                            error = f'Insufficient funds. Need ${total:.2f}, have ${user["balance"]:.2f}'
+                        else:
+                            db.execute("UPDATE users SET balance = balance - ? WHERE id = ?", (total, uid))
+                            ex = db.execute(
+                                "SELECT * FROM portfolio_holdings WHERE user_id = ? AND symbol = ?",
+                                (uid, symbol)
+                            ).fetchone()
+                            if ex:
+                                new_qty = ex['quantity'] + quantity
+                                new_avg = ((ex['avg_price'] * ex['quantity']) + total) / new_qty
+                                db.execute(
+                                    "UPDATE portfolio_holdings SET quantity = ?, avg_price = ? "
+                                    "WHERE user_id = ? AND symbol = ?",
+                                    (new_qty, new_avg, uid, symbol)
+                                )
+                            else:
+                                db.execute(
+                                    "INSERT INTO portfolio_holdings (user_id, symbol, quantity, avg_price) "
+                                    "VALUES (?, ?, ?, ?)", (uid, symbol, quantity, exec_price)
+                                )
+                            db.execute(
+                                "INSERT INTO orders (user_id, symbol, action, quantity, order_type, "
+                                "price, status, created_at, memo) VALUES (?, ?, ?, ?, ?, ?, 'filled', ?, ?)",
+                                (uid, symbol, action, quantity, order_type, exec_price,
+                                 datetime.now(timezone.utc).strftime('%Y-%m-%d'), memo)
+                            )
+                            _apply_market_impact(db, symbol, 'buy', quantity, exec_price)
+                            db.commit()
+                            message = f'Bought {quantity} × {symbol} @ ${exec_price:.2f} — cost ${total:.2f}'
+                    else:
+                        db.execute(
+                            "INSERT INTO orders (user_id, symbol, action, quantity, order_type, "
+                            "price, status, created_at, memo) VALUES (?, ?, ?, ?, ?, ?, 'open', ?, ?)",
+                            (uid, symbol, action, quantity, order_type, price,
+                             datetime.now(timezone.utc).strftime('%Y-%m-%d'), memo)
+                        )
+                        db.commit()
+                        message = f'Limit BUY placed: {quantity} × {symbol} @ ${price:.2f}'
+
+                elif action == 'sell':
+                    ex = db.execute(
+                        "SELECT * FROM portfolio_holdings WHERE user_id = ? AND symbol = ?",
+                        (uid, symbol)
+                    ).fetchone()
+                    if order_type == 'market':
+                        held = ex['quantity'] if ex else 0
+                        if held < quantity:
+                            error = f'You hold {held} × {symbol} — cannot sell {quantity}.'
+                        else:
+                            proceeds = exec_price * quantity
+                            db.execute("UPDATE users SET balance = balance + ? WHERE id = ?", (proceeds, uid))
+                            new_qty = held - quantity
+                            if new_qty == 0:
+                                db.execute(
+                                    "DELETE FROM portfolio_holdings WHERE user_id = ? AND symbol = ?",
+                                    (uid, symbol)
+                                )
+                            else:
+                                db.execute(
+                                    "UPDATE portfolio_holdings SET quantity = ? "
+                                    "WHERE user_id = ? AND symbol = ?", (new_qty, uid, symbol)
+                                )
+                            db.execute(
+                                "INSERT INTO orders (user_id, symbol, action, quantity, order_type, "
+                                "price, status, created_at, memo) VALUES (?, ?, ?, ?, ?, ?, 'filled', ?, ?)",
+                                (uid, symbol, action, quantity, order_type, exec_price,
+                                 datetime.now(timezone.utc).strftime('%Y-%m-%d'), memo)
+                            )
+                            _apply_market_impact(db, symbol, 'sell', quantity, exec_price)
+                            db.commit()
+                            message = f'Sold {quantity} × {symbol} @ ${exec_price:.2f} — proceeds ${proceeds:.2f}'
+                    else:
+                        db.execute(
+                            "INSERT INTO orders (user_id, symbol, action, quantity, order_type, "
+                            "price, status, created_at, memo) VALUES (?, ?, ?, ?, ?, ?, 'open', ?, ?)",
+                            (uid, symbol, action, quantity, order_type, price,
+                             datetime.now(timezone.utc).strftime('%Y-%m-%d'), memo)
+                        )
+                        db.commit()
+                        message = f'Limit SELL placed: {quantity} × {symbol} @ ${price:.2f}'
+
+            # Re-fetch stock so price shown after trade is current
+            stock = db.execute("SELECT * FROM market_data WHERE symbol = ?", (symbol,)).fetchone()
+
+        user     = db.execute("SELECT * FROM users WHERE id = ?", (uid,)).fetchone()
+        holding  = db.execute(
+            "SELECT h.*, m.price FROM portfolio_holdings h "
+            "JOIN market_data m ON h.symbol = m.symbol WHERE h.user_id = ? AND h.symbol = ?",
+            (uid, symbol)
+        ).fetchone()
         filings  = db.execute(
             "SELECT * FROM filings WHERE symbol = ? ORDER BY filed_date DESC", (symbol,)
         ).fetchall()
         wl_entry = db.execute(
             "SELECT id FROM watchlist WHERE user_id = ? AND symbol = ?", (uid, symbol)
         ).fetchone()
-        return render_template('stock_detail.html', stock=stock, filings=filings, wl_entry=wl_entry)
+        hi_lo    = db.execute(
+            "SELECT MAX(price) AS hi, MIN(price) AS lo FROM price_history WHERE symbol = ?",
+            (symbol,)
+        ).fetchone()
+        return render_template('stock_detail.html', stock=stock, filings=filings,
+                               wl_entry=wl_entry, user=user, holding=holding,
+                               message=message, error=error, hi_lo=hi_lo)
 
     # VULN: CSRF — cancel endpoint is state-changing with no CSRF token
     # VULN: IDOR — no ownership check on order_id

@@ -2,9 +2,11 @@ import base64
 import hashlib
 import hmac
 import json
+import sqlite3 as _sl
+import time
 from functools import wraps
-from flask import request, jsonify, session
-from db import get_db
+from flask import request, jsonify, session, Response
+from db import get_db, DATABASE
 
 JWT_SECRET = 'tradefloor'
 
@@ -67,6 +69,48 @@ def init(app):
             "SELECT symbol, name, price, change FROM market_data ORDER BY symbol"
         ).fetchall()
         return jsonify([dict(r) for r in rows])
+
+    @app.route('/api/prices/<symbol>/history')
+    def api_price_history(symbol):
+        rows = get_db().execute(
+            "SELECT price, recorded_at FROM price_history "
+            "WHERE symbol = ? ORDER BY id DESC LIMIT 60",
+            (symbol.upper(),)
+        ).fetchall()
+        return jsonify([dict(r) for r in reversed(rows)])
+
+    @app.route('/api/prices/<symbol>/stream')
+    def api_price_stream(symbol):
+        symbol = symbol.upper()
+        def generate():
+            conn    = _sl.connect(DATABASE)
+            conn.row_factory = _sl.Row
+            last_id = 0
+            row = conn.execute(
+                "SELECT id, price, recorded_at FROM price_history "
+                "WHERE symbol = ? ORDER BY id DESC LIMIT 1", (symbol,)
+            ).fetchone()
+            if row:
+                last_id = row['id']
+                yield f"data: {json.dumps({'price': row['price'], 'at': row['recorded_at']})}\n\n"
+            try:
+                while True:
+                    time.sleep(2)
+                    row = conn.execute(
+                        "SELECT id, price, recorded_at FROM price_history "
+                        "WHERE symbol = ? AND id > ? ORDER BY id ASC LIMIT 1",
+                        (symbol, last_id)
+                    ).fetchone()
+                    if row:
+                        last_id = row['id']
+                        payload = {'price': row['price'], 'at': row['recorded_at']}
+                        yield f"data: {json.dumps(payload)}\n\n"
+            except GeneratorExit:
+                pass
+            finally:
+                conn.close()
+        return Response(generate(), mimetype='text/event-stream',
+                        headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
 
     # VULN: SQLi — f-string on username/password
     @app.route('/api/token', methods=['POST'])

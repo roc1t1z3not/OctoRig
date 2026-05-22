@@ -7,6 +7,19 @@
     <p>{{ stocks|length }} listed securities &mdash; click a row for details</p>
   </div>
 
+  <form method="get" style="margin-bottom:1.25rem;display:flex;gap:0.5rem;">
+    <!-- VULN: reflected XSS — q echoed with | safe -->
+    <input type="text" name="q" placeholder="Search symbol or company…"
+           value="{{ q | safe }}" style="flex:1;">
+    <button class="btn" type="submit">SEARCH</button>
+    {% if q %}<a href="{{ url_for('market') }}" class="btn">CLEAR</a>{% endif %}
+  </form>
+  {% if q %}
+  <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem;">
+    Results for: <strong>{{ q | safe }}</strong>
+  </p>
+  {% endif %}
+
   <table class="data-table" id="market-table">
     <thead>
       <tr>

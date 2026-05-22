@@ -11,14 +11,16 @@ import routes.filings, routes.alerts, routes.admin, routes.api
 
 
 def _price_tick():
+    from datetime import datetime, timezone
     while True:
         time.sleep(10)
         try:
             conn = _sqlite3.connect(DATABASE)
             rows = conn.execute("SELECT symbol, price FROM market_data").fetchall()
+            now  = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
             for symbol, price in rows:
                 if symbol == 'CMNH':
-                    pct = random.uniform(0.005, 0.025)   # CMNH only ever goes up
+                    pct = random.uniform(0.005, 0.025)
                 else:
                     pct = random.uniform(-0.03, 0.03)
                 delta     = round(price * pct, 2)
@@ -27,6 +29,18 @@ def _price_tick():
                     "UPDATE market_data SET price = ?, change = ? WHERE symbol = ?",
                     (new_price, delta, symbol)
                 )
+                conn.execute(
+                    "INSERT OR IGNORE INTO price_history (symbol, price, recorded_at) VALUES (?, ?, ?)",
+                    (symbol, new_price, now)
+                )
+            # Keep at most 720 rows per symbol (~2 hours at 10 s intervals)
+            conn.execute("""
+                DELETE FROM price_history WHERE id IN (
+                    SELECT id FROM price_history ph
+                    WHERE (SELECT COUNT(*) FROM price_history
+                           WHERE symbol = ph.symbol AND id >= ph.id) > 720
+                )
+            """)
             conn.commit()
             conn.close()
         except Exception:

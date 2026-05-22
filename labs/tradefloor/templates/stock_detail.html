@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 {% block title %}{{ stock.symbol }}{% endblock %}
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
 <div class="container">
 
-  <p style="margin-bottom:1.5rem;">
-    <a href="{{ url_for('market') }}">&larr; Back to Market</a>
-  </p>
+  <p style="margin-bottom:1.5rem;"><a href="{{ url_for('market') }}">&larr; Back to Market</a></p>
 
   <div class="page-header">
     <h1>
-      {{ stock.symbol }}
+      <span id="live-symbol">{{ stock.symbol }}</span>
       <span style="color:var(--muted);font-size:1rem;font-weight:400;margin-left:0.5rem;">{{ stock.name }}</span>
     </h1>
   </div>
@@ -17,13 +17,21 @@
   <div class="stat-grid">
     <div class="stat-box">
       <div class="stat-label">LAST PRICE</div>
-      <div class="stat-value">${{ "%.2f"|format(stock.price) }}</div>
+      <div class="stat-value" id="live-price">${{ "%.2f"|format(stock.price) }}</div>
     </div>
     <div class="stat-box">
       <div class="stat-label">CHANGE</div>
-      <div class="stat-value {% if stock.change > 0 %}price-up{% elif stock.change < 0 %}price-down{% endif %}">
+      <div class="stat-value {% if stock.change > 0 %}price-up{% elif stock.change < 0 %}price-down{% endif %}" id="live-change">
         {% if stock.change > 0 %}+{% endif %}{{ "%.2f"|format(stock.change) }}
       </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">SESSION HIGH</div>
+      <div class="stat-value" style="color:var(--green);">${{ "%.2f"|format(hi_lo.hi) if hi_lo and hi_lo.hi else '—' }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">SESSION LOW</div>
+      <div class="stat-value" style="color:var(--red, #ef4444);">${{ "%.2f"|format(hi_lo.lo) if hi_lo and hi_lo.lo else '—' }}</div>
     </div>
     <div class="stat-box">
       <div class="stat-label">SECTOR</div>
@@ -31,8 +39,66 @@
     </div>
   </div>
 
-  <div style="display:flex;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap;">
-    <a href="{{ url_for('trade') }}" class="btn">TRADE {{ stock.symbol }}</a>
+  <!-- Price history chart -->
+  <div class="detail-panel" style="margin-top:1.5rem;padding:1.25rem;">
+    <div class="section-title" style="margin-bottom:1rem;">PRICE HISTORY <span style="color:var(--muted);font-weight:400;font-size:0.75rem;">· live</span></div>
+    <div style="height:110px;position:relative;">
+      <canvas id="price-chart"></canvas>
+    </div>
+  </div>
+
+  <!-- Inline trade form -->
+  <div class="detail-panel" style="margin-top:1.5rem;">
+    <div class="section-title" style="margin-bottom:0.75rem;">QUICK TRADE — {{ stock.symbol }}</div>
+
+    {% if message %}<div class="alert alert-success" style="margin-bottom:1rem;">{{ message }}</div>{% endif %}
+    {% if error   %}<div class="alert alert-error"   style="margin-bottom:1rem;">{{ error | safe }}</div>{% endif %}
+
+    {% if holding %}
+    <div style="display:flex;gap:1.5rem;margin-bottom:1rem;padding:0.75rem;background:var(--surface2);border-radius:6px;font-size:0.875rem;">
+      <span>Holding: <strong style="color:var(--green);">{{ holding.quantity }} shares</strong></span>
+      <span>Avg cost: <strong>${{ "%.2f"|format(holding.avg_price) }}</strong></span>
+      <span>Value: <strong style="color:var(--amber);">${{ "%.2f"|format(holding.price * holding.quantity) }}</strong></span>
+    </div>
+    {% endif %}
+
+    <form method="post">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:0.75rem;align-items:end;">
+        <div class="form-group" style="margin:0;">
+          <label>ACTION</label>
+          <select name="action" id="qt-action">
+            <option value="buy">BUY</option>
+            <option value="sell">SELL</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label>QUANTITY</label>
+          <input type="number" name="quantity" min="1" value="1">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label>TYPE</label>
+          <select name="order_type" id="qt-type">
+            <option value="market">MARKET</option>
+            <option value="limit">LIMIT</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;" id="qt-limit-group">
+          <label>LIMIT PRICE</label>
+          <input type="number" name="price" step="0.01" value="{{ "%.2f"|format(stock.price) }}">
+        </div>
+        <div style="padding-bottom:0;">
+          <button class="btn" type="submit" style="width:100%;">SUBMIT</button>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:0.75rem;">
+        <label>NOTE <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+        <input type="text" name="memo" placeholder="e.g. earnings play…">
+      </div>
+    </form>
+  </div>
+
+  <!-- Watchlist -->
+  <div style="margin-top:1rem;">
     {% if wl_entry %}
     <form method="post" action="{{ url_for('watchlist_remove') }}" style="display:inline;">
       <input type="hidden" name="watchlist_id" value="{{ wl_entry.id }}">
@@ -51,7 +117,7 @@
   {% for f in filings %}
   <div class="detail-panel" style="margin-bottom:1rem;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:0.6rem;">
-      <strong style="color:var(--text);">{{ f.title }}</strong>
+      <strong>{{ f.title }}</strong>
       <span style="color:var(--muted);font-size:0.8rem;white-space:nowrap;">{{ f.filed_date }}</span>
     </div>
     <p style="color:var(--muted);line-height:1.6;">{{ f.body }}</p>
@@ -62,4 +128,93 @@
   {% endif %}
 
 </div>
+
+<script>
+// ── Limit price toggle ────────────────────────────────────────────────────
+(function() {
+  var typeEl  = document.getElementById('qt-type');
+  var limitEl = document.getElementById('qt-limit-group');
+  function toggle() { limitEl.style.display = typeEl.value === 'limit' ? '' : 'none'; }
+  typeEl.addEventListener('change', toggle);
+  toggle();
+})();
+
+// ── Chart setup ───────────────────────────────────────────────────────────
+var ctx = document.getElementById('price-chart').getContext('2d');
+var chart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: [],
+    datasets: [{
+      data: [],
+      borderColor: '#3b82f6',
+      backgroundColor: 'rgba(59,130,246,0.08)',
+      borderWidth: 2,
+      pointRadius: 0,
+      tension: 0.3,
+      fill: true
+    }]
+  },
+  options: {
+    maintainAspectRatio: false,
+    animation: { duration: 400 },
+    plugins: { legend: { display: false } },
+    scales: {
+      x: {
+        ticks: {
+          color: '#64748b',
+          maxTicksLimit: 8,
+          maxRotation: 0
+        },
+        grid: { color: '#1f2d45' }
+      },
+      y: {
+        ticks: { color: '#64748b', callback: function(v) { return '$' + v.toFixed(2); } },
+        grid: { color: '#1f2d45' }
+      }
+    }
+  }
+});
+
+function addPoint(price, at) {
+  var label = at.substring(11, 19); // HH:MM:SS
+  var ds    = chart.data.datasets[0];
+  chart.data.labels.push(label);
+  ds.data.push(price);
+  if (chart.data.labels.length > 60) {
+    chart.data.labels.shift();
+    ds.data.shift();
+  }
+  chart.update('none'); // skip animation for real-time smoothness
+}
+
+// Load history then open SSE stream
+fetch('/api/prices/{{ stock.symbol }}/history')
+  .then(function(r) { return r.json(); })
+  .then(function(pts) {
+    pts.forEach(function(p) { addPoint(p.price, p.recorded_at); });
+    chart.update();
+
+    var es = new EventSource('/api/prices/{{ stock.symbol }}/stream');
+    es.onmessage = function(e) {
+      var d = JSON.parse(e.data);
+      if (!d.price) return;
+      addPoint(d.price, d.at);
+
+      // Update live stat boxes
+      var priceEl  = document.getElementById('live-price');
+      var changeEl = document.getElementById('live-change');
+      var prev     = parseFloat(priceEl.textContent.replace('$',''));
+      var diff     = d.price - prev;
+
+      priceEl.textContent = '$' + d.price.toFixed(2);
+      priceEl.style.transition = 'color 0.3s';
+      priceEl.style.color = diff >= 0 ? 'var(--up)' : 'var(--down)';
+      setTimeout(function() { priceEl.style.color = ''; }, 1200);
+
+      changeEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(2);
+      changeEl.className   = 'stat-value ' + (diff >= 0 ? 'price-up' : 'price-down');
+    };
+  });
+</script>
 {% endblock %}
