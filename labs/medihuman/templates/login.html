@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign In — MediHuman</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">MEDI<span>HUMAN</span></div>
+    <p class="auth-tagline">Patient Portal — Sign In</p>
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <form method="post">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" autofocus required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" required>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:0.25rem;">Sign In</button>
+    </form>
+    <div style="margin-top:1.25rem;font-size:0.8rem;text-align:center;color:var(--muted);">
+      <a href="{{ url_for('reset_request') }}">Forgot password?</a>
+      &nbsp;&middot;&nbsp;
+      <a href="{{ url_for('register') }}">Create account</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

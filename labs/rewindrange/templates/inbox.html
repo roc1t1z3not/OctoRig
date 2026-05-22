@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Inbox{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>INBOX</h1>
+  </div>
+
+  <div style="display:flex;gap:0.8rem;margin-bottom:1.5rem;">
+    <a href="{{ url_for('inbox_compose') }}" class="btn btn-sm btn-pink">+ Compose</a>
+  </div>
+
+  <div class="section-title">RECEIVED ({{ received|length }})</div>
+  {% if received %}
+  <div style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:2rem;">
+    {% for m in received %}
+    <a href="{{ url_for('inbox_message', msg_id=m.id) }}" style="display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);border-left:3px solid {{ 'var(--cyan)' if not m.read else 'var(--border)' }};padding:0.7rem 1rem;border-radius:0 3px 3px 0;text-decoration:none;color:var(--text);">
+      <span>
+        <span style="color:var(--cyan);font-size:0.78rem;">{{ m.from_username }}</span>
+        &nbsp;&mdash;&nbsp;
+        <span style="font-size:0.88rem;{{ 'font-weight:bold;' if not m.read }}">{{ m.subject }}</span>
+      </span>
+      <span style="font-size:0.72rem;color:var(--muted);">{{ m.sent_at }}</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty" style="margin-bottom:2rem;">No messages received.</p>
+  {% endif %}
+
+  <div class="section-title">SENT ({{ sent|length }})</div>
+  {% if sent %}
+  <div style="display:flex;flex-direction:column;gap:0.4rem;">
+    {% for m in sent %}
+    <a href="{{ url_for('inbox_message', msg_id=m.id) }}" style="display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);padding:0.7rem 1rem;border-radius:3px;text-decoration:none;color:var(--text);">
+      <span>
+        <span style="color:var(--muted);font-size:0.78rem;">to {{ m.to_username }}</span>
+        &nbsp;&mdash;&nbsp;
+        <span style="font-size:0.88rem;">{{ m.subject }}</span>
+      </span>
+      <span style="font-size:0.72rem;color:var(--muted);">{{ m.sent_at }}</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty">No messages sent.</p>
+  {% endif %}
+</div>
+{% endblock %}

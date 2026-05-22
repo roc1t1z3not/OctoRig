@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Prescription #{{ rx.id }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:640px;">
+  <div style="margin-bottom:1rem;"><a href="{{ url_for('patients') }}" style="color:var(--muted);font-size:0.82rem;">&larr; Patients</a></div>
+  <div class="page-header">
+    <h1>Prescription #{{ rx.id }}</h1>
+    <p>{{ rx.patient_name }} &mdash; {{ rx.prescribed_date }}</p>
+  </div>
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="section-title">PRESCRIPTION DETAILS</div>
+    <dl class="info-list" style="margin-top:0.5rem;">
+      <dt>Drug</dt><dd style="font-weight:600;">{{ rx.drug }}</dd>
+      <dt>Dosage</dt><dd>{{ rx.dosage }}</dd>
+      <dt>Instructions</dt><dd>{{ rx.instructions }}</dd>
+      <dt>Prescribed By</dt><dd>{{ rx.doctor_name }}</dd>
+      <dt>Date</dt><dd>{{ rx.prescribed_date }}</dd>
+    </dl>
+  </div>
+  {% if rx.notes %}
+  <div class="card">
+    <div class="section-title">NOTES</div>
+    <div style="font-size:0.88rem;line-height:1.7;margin-top:0.25rem;">{{ rx.notes | safe }}</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

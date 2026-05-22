@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Admin — Feedback{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>ADMIN &mdash; FEEDBACK</h1>
+    <p>{{ items|length }} message{{ 's' if items|length != 1 }} received</p>
+  </div>
+
+  {% if items %}
+  {% for fb in items %}
+  <div class="review-card" style="margin-bottom:0.8rem;">
+    <div class="review-meta">
+      <span style="color:var(--cyan);">{{ fb.name }}</span>
+      &bull; {{ fb.email }}
+      &bull; {{ fb.submitted_at }}
+    </div>
+    <p>{{ fb.message | safe }}</p>
+  </div>
+  {% endfor %}
+  {% else %}
+  <p class="empty">No feedback yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

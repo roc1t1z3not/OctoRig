@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}HumanBank{% endblock %} — Digital Banking</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="{{ url_for('index') }}">HUMAN<span>BANK</span></a>
+  {% set u = current_user() %}
+  {% if u %}
+  <a href="{{ url_for('dashboard') }}">Dashboard</a>
+  <a href="{{ url_for('accounts') }}">Accounts</a>
+  <a href="{{ url_for('transfer') }}">Transfer</a>
+  <a href="{{ url_for('search') }}">Search</a>
+  <a href="{{ url_for('tickets') }}">Support</a>
+  <a href="{{ url_for('docs') }}">Documents</a>
+  {% endif %}
+  <div class="nav-right">
+    {% if u %}
+      <a href="{{ url_for('profile') }}">{{ (u.full_name if u.full_name else u.username) | safe }}</a>
+      {% if u.is_admin %}<a href="{{ url_for('admin_tickets') }}" style="color:var(--gold);">Admin</a>{% endif %}
+      <a href="{{ url_for('logout') }}" class="btn btn-sm">Sign out</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Sign in</a>
+      <a href="{{ url_for('register') }}" class="btn btn-sm btn-primary">Open Account</a>
+    {% endif %}
+  </div>
+</nav>
+
+{% block content %}{% endblock %}
+
+<footer>
+  <p>HumanBank Digital Banking</p>
+  <p style="margin-top:0.3rem;">Made By <a href="https://github.com/CommonHuman-Lab" target="_blank">CommonHuman</a></p>
+</footer>
+</body>
+</html>

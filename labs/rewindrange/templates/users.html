@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Members{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>MEMBERS</h1>
+    <p>{{ members|length }} registered member{{ 's' if members|length != 1 }}</p>
+  </div>
+
+  <form method="get" action="{{ url_for('users') }}" class="search-bar" style="max-width:500px;margin-bottom:1.5rem;">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search by username or email…">
+    <button type="submit" class="btn btn-sm">Search</button>
+    {% if q %}<a href="{{ url_for('users') }}" class="btn btn-sm">Clear</a>{% endif %}
+  </form>
+
+  {% if members %}
+  <div style="display:flex;flex-direction:column;gap:0.5rem;">
+    {% for m in members %}
+    <div style="background:var(--surface);border:1px solid var(--border);padding:1rem 1.2rem;border-radius:3px;display:flex;gap:1.5rem;align-items:flex-start;">
+      <div style="min-width:130px;">
+        <a href="{{ url_for('account', user_id=m.id) }}" style="color:var(--cyan);font-size:0.9rem;">{{ m.username }}</a>
+        <div style="font-size:0.72rem;color:var(--muted);">{{ m.email }}</div>
+        {% if m.first_name or m.last_name %}
+        <div style="font-size:0.75rem;color:var(--muted);">{{ m.first_name }} {{ m.last_name }}</div>
+        {% endif %}
+      </div>
+      {% if m.bio %}
+      <div style="font-size:0.82rem;color:var(--muted);line-height:1.6;">{{ m.bio | safe }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty">No members found{% if q %} for "{{ q }}"{% endif %}.</p>
+  {% endif %}
+</div>
+{% endblock %}

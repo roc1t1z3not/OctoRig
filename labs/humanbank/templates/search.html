@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Search{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>TRANSACTION SEARCH</h1>
+  </div>
+  <form method="get" class="filter-bar" style="max-width:600px;">
+    <div class="form-group" style="flex:1;">
+      <label>Search memos and counterparties</label>
+      <input type="text" name="q" value="{{ q }}" placeholder="Payroll, Netflix, HB-0003…" autofocus>
+    </div>
+    <div style="align-self:flex-end;">
+      <button type="submit" class="btn btn-primary btn-sm">Search</button>
+    </div>
+  </form>
+
+  {% if q %}
+  <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem;">
+    Results for: <strong style="color:var(--text);">{{ q | safe }}</strong>
+  </p>
+  {% if results %}
+  <div class="panel" style="padding:0;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Account</th>
+          <th>Type</th>
+          <th>Counterparty</th>
+          <th>Memo</th>
+          <th style="text-align:right;">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in results %}
+        <tr>
+          <td class="muted mono" style="font-size:0.78rem;">{{ t.txn_date }}</td>
+          <td class="mono" style="font-size:0.78rem;">{{ t.account_number }}</td>
+          <td><span class="badge-{{ t.type }}">{{ t.type | upper }}</span></td>
+          <td style="font-size:0.82rem;">{{ t.counterparty }}</td>
+          <td style="font-size:0.82rem;">{{ t.memo | safe }}</td>
+          <td class="{{ 'amount-credit' if t.type == 'credit' else 'amount-debit' }}" style="text-align:right;font-family:monospace;">
+            {{ '+' if t.type == 'credit' else '-' }}${{ "%.2f" | format(t.amount) }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No transactions found for "{{ q }}".</p>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

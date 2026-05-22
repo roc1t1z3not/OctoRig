@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Edit Thread{% endblock %}
+{% block content %}
+<div class="container" style="max-width:700px;">
+  <div class="page-header">
+    <h1>EDIT THREAD</h1>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);padding:1.5rem;border-radius:3px;">
+    <form method="post" action="{{ url_for('board_edit', thread_id=thread.id) }}">
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" name="title" value="{{ thread.title }}" required>
+      </div>
+      <div class="form-group">
+        <label>Body</label>
+        <textarea name="body" rows="8" style="resize:vertical;" required>{{ thread.body }}</textarea>
+      </div>
+      <div style="display:flex;gap:0.8rem;">
+        <button type="submit" class="btn btn-pink">Save Changes</button>
+        <a href="{{ url_for('board_thread', thread_id=thread.id) }}" class="btn">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

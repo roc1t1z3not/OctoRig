@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Order #{{ order.id }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>ORDER #{{ order.id }}</h1>
+    <p>{{ order.order_date }}</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
+    <div>
+      <div class="section-title">ITEMS</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>TITLE</th><th>TYPE</th><th>PRICE</th></tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
+            <td><a href="{{ url_for('product', product_id=item.product_id) }}">{{ item.title }}</a></td>
+            <td>
+              {% if item.type == 'vhs' %}
+                <span class="badge badge-pink">VHS</span>
+              {% else %}
+                <span class="badge badge-green">{{ item.platform }}</span>
+              {% endif %}
+            </td>
+            <td>${{ "%.2f"|format(item.price) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p style="text-align:right;margin-top:0.5rem;font-weight:bold;color:var(--pink);">
+        Total: ${{ "%.2f"|format(order.total) }}
+      </p>
+    </div>
+
+    <div style="background:var(--surface);border:1px solid var(--border);padding:1.2rem;border-radius:3px;align-self:start;">
+      <div class="section-title">ORDER DETAILS</div>
+      <table style="font-size:0.8rem;width:100%;">
+        <tr>
+          <td style="color:var(--muted);padding:0.28rem 0;">Status</td>
+          <td>
+            {% if order.status == 'delivered' %}   <span class="badge badge-green">{{ order.status }}</span>
+            {% elif order.status == 'shipped' %}   <span class="badge badge-cyan">{{ order.status }}</span>
+            {% elif order.status == 'pending' %}   <span class="badge badge-yellow">{{ order.status }}</span>
+            {% else %}                             <span class="badge badge-pink">{{ order.status }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        <tr><td style="color:var(--muted);padding:0.28rem 0;">Customer</td><td>{{ owner.username }}</td></tr>
+        <tr><td style="color:var(--muted);padding:0.28rem 0;">Email</td>   <td>{{ owner.email }}</td></tr>
+        <tr><td style="color:var(--muted);padding:0.28rem 0;">Ship to</td> <td>{{ order.shipping_address }}</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <a href="{{ url_for('orders') }}" class="btn btn-sm">Back to Orders</a>
+</div>
+{% endblock %}

@@ -50,6 +50,9 @@ Or non-interactively:
 | 8 | **StingXSS Firerange** | Tiered XSS challenges | `17477` |
 | 9 | **VaultGate** | Tiered IDOR challenges | `17478` |
 | 10 | **VaultRip Range** | SSH credential-rich target for passive and remote harvesting | `2222` |
+| 11 | **REWIND** | Retro video and games store — SQLi, XSS and IDOR | `8082` |
+| 12 | **HumanBank** | Vulnerable online banking app — SQLi, IDOR, XSS, auth flaws, file upload, business logic | `8083` |
+| 13 | **MediHuman** | Vulnerable healthcare patient portal — SQLi, IDOR, XSS, file upload, SSH/FTP weak creds | `8084`, `2224`, `2121` |
 
 ---
 

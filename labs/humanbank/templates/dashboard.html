@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+{% set u = current_user() %}
+<div class="container">
+  <div class="page-header">
+    <h1>DASHBOARD</h1>
+    <p>Welcome back, {{ u.full_name or u.username }}</p>
+  </div>
+
+  {% if accounts %}
+  <div class="section-title">YOUR ACCOUNTS</div>
+  <div class="account-grid" style="margin-bottom:2rem;">
+    {% for a in accounts %}
+    <a href="{{ url_for('account_detail', account_id=a.id) }}" style="text-decoration:none;">
+      <div class="account-card" style="cursor:pointer;transition:border-color 0.15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div class="acc-type">{{ a.account_type | upper }} ACCOUNT</div>
+        <div class="acc-bal">${{ "%.2f" | format(a.balance) }}</div>
+        <div class="acc-num mono">{{ a.account_number }}</div>
+        <div class="acc-owner" style="margin-top:0.3rem;">{{ u.full_name or u.username }}</div>
+      </div>
+    </a>
+    {% endfor %}
+    <a href="{{ url_for('transfer') }}" style="text-decoration:none;">
+      <div class="account-card" style="border-style:dashed;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:130px;transition:border-color 0.15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <span style="color:var(--muted);font-size:0.85rem;">+ New Transfer</span>
+      </div>
+    </a>
+  </div>
+  {% else %}
+  <div class="alert alert-info">No accounts yet. <a href="{{ url_for('transfer') }}">Make a transfer</a> once accounts are set up.</div>
+  {% endif %}
+
+  <div class="section-title">RECENT TRANSACTIONS</div>
+  {% if recent %}
+  <div class="panel" style="padding:0;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Account</th>
+          <th>Counterparty</th>
+          <th>Memo</th>
+          <th style="text-align:right;">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in recent %}
+        <tr>
+          <td class="muted mono" style="font-size:0.78rem;">{{ t.txn_date }}</td>
+          <td><span class="mono" style="font-size:0.78rem;">{{ t.account_number }}</span></td>
+          <td style="font-size:0.82rem;">{{ t.counterparty }}</td>
+          <td style="font-size:0.82rem;">{{ t.memo | safe }}</td>
+          <td style="text-align:right;" class="{{ 'amount-credit' if t.type == 'credit' else 'amount-debit' }}">
+            {{ '+' if t.type == 'credit' else '-' }}${{ "%.2f" | format(t.amount) }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No transactions yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

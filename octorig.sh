@@ -40,6 +40,9 @@ LABS=(
   "8|StingXSS Fire Range|stingxss.sh|Tiered XSS challenges (T1-T8) for XSS injection practice"
   "9|VaultGate IDOR Range|vaultgate.sh|IDOR challenges for benchmarking"
   "10|VaultRip Range|vaultriprange.sh|SSH credential-rich target for VaultRip passive and remote harvesting"
+  "11|REWIND|rewindrange.sh|Retro video and games store — SQLi, XSS and IDOR"
+  "12|HumanBank|humanbank.sh|Vulnerable online banking app — SQLi, IDOR, XSS, auth flaws, file upload, business logic"
+  "13|MediHuman|medihuman.sh|Vulnerable healthcare patient portal — SQLi, IDOR, XSS, file upload, SSH/FTP weak creds"
 )
 
 # ---------------- dependency checks ------------------------------------------

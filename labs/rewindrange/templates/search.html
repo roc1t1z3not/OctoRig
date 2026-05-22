@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Search{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>SEARCH</h1>
+  </div>
+
+  <form class="search-bar" method="get" action="{{ url_for('search') }}">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search titles, directors, developers, genres...">
+    <button type="submit" class="btn">Search</button>
+  </form>
+
+  {% if q %}
+  <p style="color:var(--muted);font-size:0.82rem;margin-bottom:1.2rem;">
+    Results for: <span style="color:var(--cyan);">{{ q | safe }}</span>
+  </p>
+  {% endif %}
+
+  {% if results %}
+  <div class="product-grid">
+    {% for p in results %}
+    {% set r = product_rating(p.id) %}
+    <div class="product-card">
+      {% if p.type == 'vhs' %}
+      <span class="type-badge type-vhs">VHS &bull; {{ p.year }}</span>
+      {% else %}
+      <span class="type-badge type-game">{{ p.platform }} &bull; {{ p.year }}</span>
+      {% endif %}
+      <h3><a href="{{ url_for('product', product_id=p.id) }}">{{ p.title }}</a></h3>
+      <div class="creator">{% if p.type == 'vhs' %}dir. {% endif %}{{ p.creator }}</div>
+      <div class="genre">{{ p.genre }}</div>
+      {% if r.cnt > 0 %}
+      <div class="rating">
+        <span class="stars">{{ '★' * r.avg|int }}{{ '☆' * (5 - r.avg|int) }}</span>
+        <span>{{ r.avg }}/5</span>
+      </div>
+      {% endif %}
+      <div class="price">${{ "%.2f"|format(p.price) }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% elif q %}
+  <p class="empty">No results for "{{ q | safe }}".</p>
+  {% endif %}
+</div>
+{% endblock %}

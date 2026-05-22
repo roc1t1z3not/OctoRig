@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}New Message{% endblock %}
+{% block content %}
+<div class="container" style="max-width:620px;">
+  <div style="margin-bottom:1rem;"><a href="{{ url_for('inbox') }}" style="color:var(--muted);font-size:0.82rem;">&larr; Messages</a></div>
+  <div class="page-header">
+    <h1>New Message</h1>
+  </div>
+  <div class="card">
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <form method="post">
+      <div class="form-group">
+        <label>To (username)</label>
+        <input type="text" name="to_username" list="user-list" value="{{ to_user }}" required autofocus>
+        <datalist id="user-list">
+          {% for u in users %}
+          <option value="{{ u.username }}">{{ u.full_name }} ({{ u.role }})</option>
+          {% endfor %}
+        </datalist>
+      </div>
+      <div class="form-group">
+        <label>Subject</label>
+        <input type="text" name="subject" required>
+      </div>
+      <div class="form-group">
+        <label>Message</label>
+        <textarea name="body" rows="6" style="resize:vertical;" required></textarea>
+      </div>
+      <div style="display:flex;gap:0.75rem;">
+        <button type="submit" class="btn btn-primary">Send Message</button>
+        <a href="{{ url_for('inbox') }}" class="btn">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

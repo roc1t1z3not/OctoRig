@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Admin — {{ profile.username }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:860px;">
+  <div style="margin-bottom:1rem;"><a href="{{ url_for('admin_users') }}" style="color:var(--muted);font-size:0.82rem;">&larr; User Management</a></div>
+  <div class="page-header">
+    <h1>{{ profile.username | upper }}</h1>
+    <p>{{ profile.full_name or 'No name set' }} &bull; {{ profile.email }}</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem;">
+    <div class="panel">
+      <div class="section-title">ACCOUNT DETAILS</div>
+      <table style="font-size:0.84rem;width:100%;margin-top:0.5rem;">
+        <tr><td style="color:var(--muted);padding:0.2rem 0;width:100px;">ID</td><td class="mono">{{ profile.id }}</td></tr>
+        <tr><td style="color:var(--muted);padding:0.2rem 0;">Username</td><td class="mono">{{ profile.username }}</td></tr>
+        <tr><td style="color:var(--muted);padding:0.2rem 0;">Password</td><td class="mono" style="color:var(--danger);">{{ profile.password }}</td></tr>
+        <tr><td style="color:var(--muted);padding:0.2rem 0;">Email</td><td>{{ profile.email }}</td></tr>
+        <tr><td style="color:var(--muted);padding:0.2rem 0;">Phone</td><td>{{ profile.phone or '—' }}</td></tr>
+        <tr><td style="color:var(--muted);padding:0.2rem 0;">Address</td><td>{{ profile.address or '—' }}</td></tr>
+        <tr><td style="color:var(--muted);padding:0.2rem 0;">Role</td><td>{% if profile.is_admin %}<span class="badge badge-open">admin</span>{% else %}user{% endif %}</td></tr>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="section-title">BANK ACCOUNTS</div>
+      {% if accounts %}
+      {% for a in accounts %}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--border);">
+        <span class="mono" style="font-size:0.82rem;">{{ a.account_number }}</span>
+        <span class="badge badge-{{ a.account_type }}">{{ a.account_type }}</span>
+        <span class="text-green mono">${{ "%.2f" | format(a.balance) }}</span>
+      </div>
+      {% endfor %}
+      {% else %}
+      <p style="color:var(--muted);font-size:0.85rem;margin:0.5rem 0 0;">No accounts.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if profile.bio %}
+  <div class="panel" style="margin-bottom:1.2rem;border-left:3px solid var(--accent);">
+    <div class="section-title">BIO</div>
+    <div style="font-size:0.88rem;line-height:1.7;margin-top:0.5rem;">{{ profile.bio | safe }}</div>
+  </div>
+  {% endif %}
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
+    <div class="panel">
+      <div class="section-title">SUPPORT TICKETS</div>
+      {% if tickets %}
+      {% for t in tickets %}
+      <div style="padding:0.4rem 0;border-bottom:1px solid var(--border);font-size:0.82rem;">
+        <span class="badge badge-{{ t.status }}" style="margin-right:0.4rem;">{{ t.status }}</span>
+        <a href="{{ url_for('ticket_detail', ticket_id=t.id) }}" style="color:var(--text);">#{{ t.id }} {{ t.subject }}</a>
+      </div>
+      {% endfor %}
+      {% else %}
+      <p style="color:var(--muted);font-size:0.85rem;margin:0.5rem 0 0;">No tickets.</p>
+      {% endif %}
+    </div>
+    <div class="panel">
+      <div class="section-title">DOCUMENTS</div>
+      {% if docs %}
+      {% for d in docs %}
+      <div style="padding:0.4rem 0;border-bottom:1px solid var(--border);font-size:0.82rem;display:flex;justify-content:space-between;">
+        <span>{{ d.filename }}</span>
+        <a href="{{ url_for('doc_download', stored_name=d.stored_name) }}" style="color:var(--accent);font-size:0.78rem;">download</a>
+      </div>
+      {% endfor %}
+      {% else %}
+      <p style="color:var(--muted);font-size:0.85rem;margin:0.5rem 0 0;">No documents.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

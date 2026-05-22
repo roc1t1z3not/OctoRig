@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}MediHuman{% endblock %} — MediHuman Patient Portal</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% set u = current_user() %}
+{% if u %}
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a href="{{ url_for('dashboard') }}" class="logo">MEDI<span>HUMAN</span></a>
+    <div class="nav-links">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('patients') }}">Patients</a>
+      <a href="{{ url_for('appointments') }}">Appointments</a>
+      <a href="{{ url_for('inbox') }}">Messages</a>
+      <a href="{{ url_for('docs') }}">Documents</a>
+      {% if u.is_admin %}<a href="{{ url_for('admin_panel') }}" style="color:var(--danger);">Admin</a>{% endif %}
+    </div>
+    <div class="nav-right">
+      <a href="{{ url_for('profile') }}">{{ u.full_name or u.username }}</a>
+      <a href="{{ url_for('logout') }}" class="btn-nav btn">Sign out</a>
+    </div>
+  </div>
+</nav>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+<footer class="footer">
+  <p>MediHuman Patient Portal &mdash; For training use only &mdash;
+     Made by <a href="https://github.com/CommonHuman-Lab" target="_blank">CommonHuman</a></p>
+</footer>
+</body>
+</html>

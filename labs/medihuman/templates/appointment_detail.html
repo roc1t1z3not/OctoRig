@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Appointment #{{ appt.id }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:720px;">
+  <div style="margin-bottom:1rem;"><a href="{{ url_for('appointments') }}" style="color:var(--muted);font-size:0.82rem;">&larr; Appointments</a></div>
+  <div class="page-header">
+    <h1>Appointment #{{ appt.id }}</h1>
+    <p><span class="badge badge-{{ appt.status }}">{{ appt.status }}</span> &mdash; {{ appt.appt_date }}</p>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:1.25rem;">
+    <div class="card">
+      <div class="section-title">DETAILS</div>
+      <dl class="info-list">
+        <dt>Patient</dt><dd>{{ appt.patient_name }}</dd>
+        <dt>Doctor</dt><dd>{{ appt.doctor_name }}</dd>
+        <dt>Date</dt><dd>{{ appt.appt_date }}</dd>
+        <dt>Reason</dt><dd>{{ appt.reason }}</dd>
+        <dt>Status</dt><dd><span class="badge badge-{{ appt.status }}">{{ appt.status }}</span></dd>
+      </dl>
+    </div>
+    <div class="card">
+      <div class="section-title">CLINICAL NOTES</div>
+      {% if appt.notes %}
+      <div style="font-size:0.88rem;line-height:1.7;margin-top:0.25rem;">{{ appt.notes | safe }}</div>
+      {% else %}
+      <p style="color:var(--muted);font-size:0.85rem;">No notes yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">ADD / UPDATE NOTES</div>
+    <form method="post" action="{{ url_for('appointment_add_notes', appt_id=appt.id) }}" style="margin-top:0.5rem;">
+      <div class="form-group">
+        <textarea name="notes" rows="4" style="resize:vertical;" placeholder="Clinical notes…">{{ appt.notes or '' }}</textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Save Notes</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

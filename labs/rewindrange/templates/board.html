@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Community Board{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>COMMUNITY BOARD</h1>
+    <p>{{ threads|length }} thread{{ 's' if threads|length != 1 }}</p>
+  </div>
+
+  <div style="display:flex;gap:1rem;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;">
+    <form method="get" action="{{ url_for('board') }}" class="search-bar" style="flex:1;min-width:200px;margin:0;">
+      <input type="text" name="q" value="{{ q }}" placeholder="Search threads…">
+      <button type="submit" class="btn btn-sm">Search</button>
+      {% if q %}<a href="{{ url_for('board') }}" class="btn btn-sm">Clear</a>{% endif %}
+    </form>
+    {% if session.user_id %}
+    <a href="{{ url_for('board_new') }}" class="btn btn-sm btn-pink">+ New Thread</a>
+    {% endif %}
+  </div>
+
+  {% if threads %}
+  <div style="display:flex;flex-direction:column;gap:0.6rem;">
+    {% for t in threads %}
+    <div class="board-card">
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.35rem;">
+        <span style="color:var(--cyan);">{{ t.username }}</span>
+        &bull; {{ t.posted_at }}
+      </div>
+      <a href="{{ url_for('board_thread', thread_id=t.id) }}" class="board-card-link" style="color:var(--text);font-size:0.95rem;font-weight:bold;text-decoration:none;">{{ t.title }}</a>
+      <p style="color:var(--muted);font-size:0.8rem;margin-top:0.3rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ t.body[:120] }}{% if t.body|length > 120 %}…{% endif %}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty">No threads found{% if q %} for "{{ q }}"{% endif %}.</p>
+  {% endif %}
+</div>
+{% endblock %}

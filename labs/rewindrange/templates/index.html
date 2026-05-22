@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}REWIND{% endblock %}
+
+{% macro product_card(p) %}
+{% set r = product_rating(p.id) %}
+<div class="product-card">
+  {% if p.type == 'vhs' %}
+  <span class="type-badge type-vhs">VHS &bull; {{ p.year }}</span>
+  {% else %}
+  <span class="type-badge type-game">{{ p.platform }} &bull; {{ p.year }}</span>
+  {% endif %}
+  <h3><a href="{{ url_for('product', product_id=p.id) }}">{{ p.title }}</a></h3>
+  <div class="creator">{% if p.type == 'vhs' %}dir. {% endif %}{{ p.creator }}</div>
+  <div class="genre">{{ p.genre }}</div>
+  {% if r.cnt > 0 %}
+  <div class="rating">
+    <span class="stars">{{ '★' * r.avg|int }}{{ '☆' * (5 - r.avg|int) }}</span>
+    <span>{{ r.avg }}/5</span>
+  </div>
+  {% endif %}
+  <div class="price">${{ "%.2f"|format(p.price) }}</div>
+  <div class="cond">{{ p.condition }}</div>
+</div>
+{% endmacro %}
+
+{% block content %}
+<div class="container">
+  <div class="hero">
+    <h1>REWIND</h1>
+    <p class="tagline">Pre-recorded video cassettes &amp; retro games &mdash; rare titles, fair prices</p>
+    <a href="{{ url_for('browse') }}" class="btn">Browse Catalog</a>
+    <a href="{{ url_for('search') }}" class="btn btn-pink" style="margin-left:0.5rem;">Search</a>
+  </div>
+
+  <div class="section-title">FEATURED VHS</div>
+  <div class="product-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:2.5rem;">
+    {% for p in featured_vhs %}{{ product_card(p) }}{% endfor %}
+  </div>
+
+  <div class="section-title">FEATURED GAMES</div>
+  <div class="product-grid" style="grid-template-columns:repeat(5,1fr);">
+    {% for p in featured_games %}{{ product_card(p) }}{% endfor %}
+  </div>
+</div>
+{% endblock %}

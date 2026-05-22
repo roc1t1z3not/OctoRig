@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Admin Panel{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>Admin Panel</h1>
+    <p>{{ users|length }} users &mdash; {{ patients|length }} patient records</p>
+  </div>
+
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="section-title">ALL USERS</div>
+    <table class="data-table" style="margin-top:0.5rem;">
+      <thead>
+        <tr><th>ID</th><th>Username</th><th>Full Name</th><th>Email</th><th>Role</th><th>Password</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td class="mono text-muted" style="font-size:0.78rem;">{{ u.id }}</td>
+          <td class="mono" style="font-size:0.85rem;">{{ u.username }}</td>
+          <td style="font-size:0.85rem;">{{ u.full_name or '—' }}</td>
+          <td style="font-size:0.82rem;color:var(--muted);">{{ u.email or '—' }}</td>
+          <td><span class="badge badge-{{ u.role }}">{{ u.role }}</span></td>
+          <td class="mono" style="font-size:0.78rem;color:var(--danger);">{{ u.password }}</td>
+          <td><a href="{{ url_for('admin_staff_detail', user_id=u.id) }}" style="font-size:0.78rem;color:var(--accent);">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="section-title">PATIENT RECORDS</div>
+    <table class="data-table" style="margin-top:0.5rem;">
+      <thead>
+        <tr><th>ID</th><th>Name</th><th>SSN</th><th>Insurance</th><th>Blood Type</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for p in patients %}
+        <tr>
+          <td class="mono text-muted" style="font-size:0.78rem;">{{ p.id }}</td>
+          <td style="font-weight:500;font-size:0.88rem;">{{ p.full_name }}</td>
+          <td class="mono" style="font-size:0.78rem;color:var(--danger);">{{ p.ssn }}</td>
+          <td class="mono" style="font-size:0.78rem;">{{ p.insurance_id }}</td>
+          <td><span class="badge badge-patient">{{ p.blood_type }}</span></td>
+          <td><a href="{{ url_for('patient_detail', patient_id=p.id) }}" style="font-size:0.78rem;color:var(--accent);">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

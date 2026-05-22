@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Messages{% endblock %}
+{% block content %}
+<div class="container">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+    <div class="page-header" style="margin-bottom:0;">
+      <h1>Messages</h1>
+      <p>Internal communications</p>
+    </div>
+    <a href="{{ url_for('message_new') }}" class="btn btn-primary">+ New Message</a>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="section-title" style="margin-bottom:0.75rem;">INBOX</div>
+      {% if received %}
+      {% for m in received %}
+      <a href="{{ url_for('message_view', msg_id=m.id) }}" style="text-decoration:none;display:block;">
+        <div class="card" style="margin-bottom:0.5rem;cursor:pointer;transition:box-shadow 0.15s;border-left:3px solid {{ 'var(--accent)' if not m.read else 'var(--border)' }};" onmouseover="this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.boxShadow='var(--shadow)'">
+          <div style="display:flex;justify-content:space-between;margin-bottom:0.2rem;">
+            <span style="font-size:0.82rem;font-weight:{{ '700' if not m.read else '500' }};">{{ m.from_name or m.from_user }}</span>
+            <span style="font-size:0.72rem;color:var(--muted);">{{ m.sent_at }}</span>
+          </div>
+          <div style="font-size:0.85rem;{% if not m.read %}font-weight:600;{% endif %}">{{ m.subject }}</div>
+        </div>
+      </a>
+      {% endfor %}
+      {% else %}
+      <p class="empty" style="padding:1.5rem 0;">No messages received.</p>
+      {% endif %}
+    </div>
+    <div>
+      <div class="section-title" style="margin-bottom:0.75rem;">SENT</div>
+      {% if sent %}
+      {% for m in sent %}
+      <a href="{{ url_for('message_view', msg_id=m.id) }}" style="text-decoration:none;display:block;">
+        <div class="card" style="margin-bottom:0.5rem;cursor:pointer;transition:box-shadow 0.15s;" onmouseover="this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.boxShadow='var(--shadow)'">
+          <div style="display:flex;justify-content:space-between;margin-bottom:0.2rem;">
+            <span style="font-size:0.82rem;">To: {{ m.to_name or m.to_user }}</span>
+            <span style="font-size:0.72rem;color:var(--muted);">{{ m.sent_at }}</span>
+          </div>
+          <div style="font-size:0.85rem;color:var(--muted);">{{ m.subject }}</div>
+        </div>
+      </a>
+      {% endfor %}
+      {% else %}
+      <p class="empty" style="padding:1.5rem 0;">No sent messages.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

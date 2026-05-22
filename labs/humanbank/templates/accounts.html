@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Accounts{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>ALL ACCOUNTS</h1>
+    <p>{{ accounts|length }} account{{ 's' if accounts|length != 1 }}</p>
+  </div>
+  {% if accounts %}
+  <div class="panel" style="padding:0;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Account Number</th>
+          <th>Type</th>
+          <th>Account Holder</th>
+          <th style="text-align:right;">Balance</th>
+          <th>Opened</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in accounts %}
+        <tr>
+          <td class="muted" style="font-size:0.78rem;">{{ a.id }}</td>
+          <td class="mono">{{ a.account_number }}</td>
+          <td><span class="badge badge-{{ a.account_type }}">{{ a.account_type }}</span></td>
+          <td>{{ a.full_name or a.username }}</td>
+          <td style="text-align:right;" class="text-green mono">${{ "%.2f" | format(a.balance) }}</td>
+          <td class="muted" style="font-size:0.78rem;">{{ a.opened_date }}</td>
+          <td><a href="{{ url_for('account_detail', account_id=a.id) }}" class="btn btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No accounts found.</p>
+  {% endif %}
+</div>
+{% endblock %}

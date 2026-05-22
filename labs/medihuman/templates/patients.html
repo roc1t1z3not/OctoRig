@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Patients{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>Patients</h1>
+    <p>{{ patients|length }} record{{ 's' if patients|length != 1 }}</p>
+  </div>
+
+  <form method="get" class="filter-bar" style="max-width:560px;">
+    <div class="form-group" style="flex:1;">
+      <label>Search name, SSN, or insurance ID</label>
+      <input type="text" name="q" value="{{ q }}" placeholder="Walker, 123-45-6789, INS-00441…" autofocus>
+    </div>
+    <button type="submit" class="btn btn-primary btn-sm" style="align-self:flex-end;">Search</button>
+    {% if q %}<a href="{{ url_for('patients') }}" class="btn btn-sm" style="align-self:flex-end;">Clear</a>{% endif %}
+  </form>
+
+  {% if q %}
+  <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem;">
+    Results for: <strong style="color:var(--text);">{{ q | safe }}</strong>
+  </p>
+  {% endif %}
+
+  {% if patients %}
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>DOB</th>
+          <th>Blood Type</th>
+          <th>Insurance</th>
+          <th>Assigned Doctor</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in patients %}
+        <tr>
+          <td class="mono text-muted" style="font-size:0.78rem;">{{ p.id }}</td>
+          <td style="font-weight:500;">{{ p.full_name }}</td>
+          <td class="text-muted" style="font-size:0.82rem;">{{ p.dob or '—' }}</td>
+          <td><span class="badge badge-patient">{{ p.blood_type or '—' }}</span></td>
+          <td class="mono" style="font-size:0.78rem;color:var(--muted);">{{ p.insurance_id or '—' }}</td>
+          <td style="font-size:0.82rem;">{{ p.assigned_doctor_id or '—' }}</td>
+          <td><a href="{{ url_for('patient_detail', patient_id=p.id) }}" class="btn btn-sm btn-primary">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No patients found{% if q %} for "{{ q }}"{% endif %}.</p>
+  {% endif %}
+</div>
+{% endblock %}

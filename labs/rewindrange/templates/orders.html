@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}My Orders{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>MY ORDERS</h1>
+  </div>
+
+  {% if orders %}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ORDER #</th>
+        <th>DATE</th>
+        <th>STATUS</th>
+        <th>TOTAL</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td>#{{ o.id }}</td>
+        <td>{{ o.order_date }}</td>
+        <td>
+          {% if o.status == 'delivered' %}   <span class="badge badge-green">{{ o.status }}</span>
+          {% elif o.status == 'shipped' %}   <span class="badge badge-cyan">{{ o.status }}</span>
+          {% elif o.status == 'pending' %}   <span class="badge badge-yellow">{{ o.status }}</span>
+          {% else %}                         <span class="badge badge-pink">{{ o.status }}</span>
+          {% endif %}
+        </td>
+        <td>${{ "%.2f"|format(o.total) }}</td>
+        <td><a href="{{ url_for('order', order_id=o.id) }}" class="btn btn-sm">View</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No orders yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

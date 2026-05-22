@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>Good morning, {{ u.full_name.split()[0] if u.full_name else u.username }}</h1>
+    <p>{{ u.role | capitalize }} &mdash; MediHuman Patient Portal</p>
+  </div>
+
+  <div class="stats-grid">
+    <a href="{{ url_for('patients') }}" class="stat-card stat-card-link">
+      <div class="stat-value">{{ stats.patients }}</div>
+      <div class="stat-label">Total Patients</div>
+    </a>
+    <a href="{{ url_for('appointments') }}" class="stat-card stat-card-link">
+      <div class="stat-value">{{ stats.appointments }}</div>
+      <div class="stat-label">Upcoming Appointments</div>
+    </a>
+    <a href="{{ url_for('inbox') }}" class="stat-card stat-card-link">
+      <div class="stat-value" style="color:{{ 'var(--danger)' if stats.messages > 0 else 'var(--accent)' }};">{{ stats.messages }}</div>
+      <div class="stat-label">Unread Messages</div>
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="section-title">RECENT APPOINTMENTS</div>
+    {% if recent_appts %}
+    <table class="data-table" style="margin-top:0.5rem;">
+      <thead>
+        <tr><th>Patient</th><th>Reason</th><th>Date</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for a in recent_appts %}
+        <tr>
+          <td style="font-weight:500;font-size:0.88rem;">{{ a.patient_name }}</td>
+          <td style="font-size:0.85rem;color:var(--muted);">{{ a.reason }}</td>
+          <td class="mono text-muted" style="font-size:0.78rem;">{{ a.appt_date }}</td>
+          <td><span class="badge badge-{{ a.status }}">{{ a.status }}</span></td>
+          <td><a href="{{ url_for('appointment_detail', appt_id=a.id) }}" class="btn btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="color:var(--muted);font-size:0.85rem;padding:0.5rem 0;">No recent appointments.</p>
+    {% endif %}
+    <div style="margin-top:0.75rem;">
+      <a href="{{ url_for('appointments') }}" class="btn btn-sm">All Appointments</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

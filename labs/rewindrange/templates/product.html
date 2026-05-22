@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.title }}{% endblock %}
+{% block content %}
+<div class="container">
+  <p style="font-size:0.78rem;color:var(--muted);margin-bottom:1.2rem;">
+    <a href="{{ url_for('browse') }}">Catalog</a> &rsaquo;
+    {% if product.type == 'vhs' %}
+    <a href="{{ url_for('browse', type='vhs') }}">VHS</a>
+    {% else %}
+    <a href="{{ url_for('browse', type='game') }}">Games</a>
+    {% endif %}
+    &rsaquo; {{ product.title }}
+  </p>
+
+  <div class="product-detail">
+    <div class="detail-meta">
+      {% if product.type == 'vhs' %}
+      <div class="detail-type type-vhs">VHS TAPE</div>
+      {% else %}
+      <div class="detail-type type-game">{{ product.platform }}</div>
+      {% endif %}
+      <h2 class="detail-title">{{ product.title }}</h2>
+      <p class="detail-creator">{% if product.type == 'vhs' %}dir. {% endif %}{{ product.creator }}</p>
+      <p class="detail-price">${{ "%.2f"|format(product.price) }}</p>
+      <p class="detail-desc">{{ product.description }}</p>
+      <div class="detail-row"><span class="lbl">Genre</span>     <span>{{ product.genre }}</span></div>
+      <div class="detail-row"><span class="lbl">Year</span>      <span>{{ product.year }}</span></div>
+      <div class="detail-row"><span class="lbl">Condition</span> <span style="color:var(--cyan);">{{ product.condition }}</span></div>
+      <div class="detail-row"><span class="lbl">In stock</span>  <span>{{ product.stock }}</span></div>
+      {% set r = product_rating(product.id) %}
+      {% if r.cnt > 0 %}
+      <div class="detail-row">
+        <span class="lbl">Rating</span>
+        <span>
+          <span class="stars">{{ '★' * r.avg|int }}{{ '☆' * (5 - r.avg|int) }}</span>
+          <span style="color:var(--muted);font-size:0.78rem;">{{ r.avg }}/5 ({{ r.cnt }})</span>
+        </span>
+      </div>
+      {% endif %}
+
+      {% set u = current_user() %}
+      {% if u %}
+      <form method="post" action="{{ url_for('cart_add') }}" style="margin-top:1.2rem;">
+        <input type="hidden" name="product_id" value="{{ product.id }}">
+        <input type="hidden" name="price" value="{{ product.price }}">
+        <button type="submit" class="btn btn-pink" style="width:100%;">Add to Cart</button>
+      </form>
+      {% else %}
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:1rem;">
+        <a href="{{ url_for('login') }}">Sign in</a> to purchase.
+      </p>
+      {% endif %}
+    </div>
+
+    <div>
+      <div class="section-title">CUSTOMER REVIEWS</div>
+      {% if reviews %}
+        {% for r in reviews %}
+        <div class="review-card">
+          <div class="review-meta">
+            <span style="color:var(--cyan);">{{ r.username }}</span>
+            &bull; {{ r.review_date }}
+            &bull; <span class="stars">{{ '★' * r.rating }}{{ '☆' * (5 - r.rating) }}</span>
+            <span style="color:var(--muted);">{{ r.rating }}/5</span>
+          </div>
+          <p>{{ r.text | safe }}</p>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="empty">No reviews yet.</p>
+      {% endif %}
+
+      <div class="section-title" style="margin-top:2rem;">WRITE A REVIEW</div>
+      {% set u = current_user() %}
+      {% if u %}
+      <form method="post" action="{{ url_for('submit_review', product_id=product.id) }}" style="max-width:500px;">
+        <div class="form-group">
+          <label>Rating</label>
+          <select name="rating">
+            <option value="5">5 &mdash; Excellent</option>
+            <option value="4">4 &mdash; Good</option>
+            <option value="3" selected>3 &mdash; Average</option>
+            <option value="2">2 &mdash; Poor</option>
+            <option value="1">1 &mdash; Terrible</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Review</label>
+          <textarea name="text" rows="4" placeholder="Share your thoughts..."></textarea>
+        </div>
+        <button type="submit" class="btn">Submit Review</button>
+      </form>
+      {% else %}
+      <p style="color:var(--muted);font-size:0.82rem;">
+        <a href="{{ url_for('login') }}">Sign in</a> to write a review.
+      </p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

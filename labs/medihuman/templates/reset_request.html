@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reset Password — MediHuman</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">MEDI<span>HUMAN</span></div>
+    <p class="auth-tagline">Reset your password</p>
+    {% if token_info %}
+    <div class="alert alert-info">
+      Reset link generated. Token: <span class="mono" style="font-size:0.78rem;word-break:break-all;">{{ token_info }}</span><br>
+      <a href="{{ url_for('reset_confirm', token=token_info) }}" style="font-size:0.8rem;">Use reset link &rarr;</a>
+    </div>
+    {% endif %}
+    <form method="post">
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" name="email" required autofocus>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Send Reset Link</button>
+    </form>
+    <p style="margin-top:1rem;font-size:0.8rem;text-align:center;color:var(--muted);">
+      <a href="{{ url_for('login') }}">&larr; Back to sign in</a>
+    </p>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block title %}{{ patient.full_name }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div style="margin-bottom:1rem;"><a href="{{ url_for('patients') }}" style="color:var(--muted);font-size:0.82rem;">&larr; Patients</a></div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;">
+    <div class="page-header" style="margin-bottom:0;">
+      <h1>{{ patient.full_name }}</h1>
+      <p><span class="badge badge-{{ patient.role }}">{{ patient.role }}</span> &mdash; {{ patient.username }}</p>
+    </div>
+    <a href="{{ url_for('patient_edit', patient_id=patient.id) }}" class="btn btn-sm">Edit Record</a>
+  </div>
+
+  {% if patient.bio %}
+  <div class="alert alert-info" style="margin-bottom:1.5rem;">{{ patient.bio | safe }}</div>
+  {% endif %}
+
+  <div class="grid-2" style="margin-bottom:1.5rem;">
+    <div class="card">
+      <div class="section-title">DEMOGRAPHICS</div>
+      <dl class="info-list">
+        <dt>Date of Birth</dt><dd>{{ patient.dob or '—' }}</dd>
+        <dt>Blood Type</dt><dd>{{ patient.blood_type or '—' }}</dd>
+        <dt>SSN</dt><dd class="mono">{{ patient.ssn or '—' }}</dd>
+        <dt>Insurance ID</dt><dd class="mono">{{ patient.insurance_id or '—' }}</dd>
+        <dt>Allergies</dt><dd style="color:var(--danger);">{{ patient.allergies or 'None known' }}</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <div class="section-title">CONTACT</div>
+      <dl class="info-list">
+        <dt>Email</dt><dd>{{ patient.email or '—' }}</dd>
+        <dt>Assigned Doctor ID</dt><dd class="mono">{{ patient.assigned_doctor_id or '—' }}</dd>
+      </dl>
+    </div>
+  </div>
+
+  <!-- Appointments -->
+  <div class="card" style="margin-bottom:1.25rem;">
+    <div class="section-title">APPOINTMENTS</div>
+    {% if appts %}
+    <table class="data-table" style="margin-top:0.5rem;">
+      <thead><tr><th>Date</th><th>Reason</th><th>Doctor</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for a in appts %}
+        <tr>
+          <td class="text-muted mono" style="font-size:0.78rem;">{{ a.appt_date }}</td>
+          <td style="font-size:0.85rem;">{{ a.reason }}</td>
+          <td style="font-size:0.82rem;">{{ a.doctor_name }}</td>
+          <td><span class="badge badge-{{ a.status }}">{{ a.status }}</span></td>
+          <td><a href="{{ url_for('appointment_detail', appt_id=a.id) }}" class="btn btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p style="color:var(--muted);font-size:0.85rem;">No appointments.</p>{% endif %}
+  </div>
+
+  <!-- Prescriptions -->
+  <div class="card" style="margin-bottom:1.25rem;">
+    <div class="section-title">PRESCRIPTIONS</div>
+    {% if rxs %}
+    <table class="data-table" style="margin-top:0.5rem;">
+      <thead><tr><th>Drug</th><th>Dosage</th><th>Instructions</th><th>Date</th><th></th></tr></thead>
+      <tbody>
+        {% for r in rxs %}
+        <tr>
+          <td style="font-weight:500;font-size:0.85rem;">{{ r.drug }}</td>
+          <td style="font-size:0.82rem;">{{ r.dosage }}</td>
+          <td style="font-size:0.82rem;color:var(--muted);">{{ r.instructions }}</td>
+          <td class="text-muted mono" style="font-size:0.78rem;">{{ r.prescribed_date }}</td>
+          <td><a href="{{ url_for('prescription_detail', rx_id=r.id) }}" class="btn btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p style="color:var(--muted);font-size:0.85rem;">No prescriptions.</p>{% endif %}
+  </div>
+
+  <!-- Lab Results -->
+  <div class="card" style="margin-bottom:1.25rem;">
+    <div class="section-title">LAB RESULTS</div>
+    {% if labs %}
+    <table class="data-table" style="margin-top:0.5rem;">
+      <thead><tr><th>Test</th><th>Result</th><th>Date</th><th></th></tr></thead>
+      <tbody>
+        {% for l in labs %}
+        <tr>
+          <td style="font-weight:500;font-size:0.85rem;">{{ l.test_type }}</td>
+          <td style="font-size:0.82rem;">{{ l.result }}</td>
+          <td class="text-muted mono" style="font-size:0.78rem;">{{ l.result_date }}</td>
+          <td><a href="{{ url_for('lab_detail', lab_id=l.id) }}" class="btn btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p style="color:var(--muted);font-size:0.85rem;">No lab results.</p>{% endif %}
+  </div>
+
+  <!-- Documents -->
+  <div class="card">
+    <div class="section-title">DOCUMENTS</div>
+    {% if docs %}
+    <table class="data-table" style="margin-top:0.5rem;">
+      <thead><tr><th>Filename</th><th>Type</th><th>Stored As</th><th>Uploaded</th><th></th></tr></thead>
+      <tbody>
+        {% for d in docs %}
+        <tr>
+          <td style="font-size:0.85rem;">{{ d.filename }}</td>
+          <td><span class="badge badge-{{ d.doc_type }}">{{ d.doc_type }}</span></td>
+          <td class="mono text-muted" style="font-size:0.78rem;">{{ d.stored_name }}</td>
+          <td class="text-muted" style="font-size:0.78rem;">{{ d.uploaded_at }}</td>
+          <td><a href="{{ url_for('doc_download', stored_name=d.stored_name) }}" class="btn btn-sm">Download</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p style="color:var(--muted);font-size:0.85rem;">No documents.</p>{% endif %}
+  </div>
+</div>
+{% endblock %}

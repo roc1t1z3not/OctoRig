@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>New Password — MediHuman</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">MEDI<span>HUMAN</span></div>
+    <p class="auth-tagline">Set a new password</p>
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <form method="post">
+      <div class="form-group">
+        <label>New Password</label>
+        <input type="password" name="password" required autofocus>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Update Password</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

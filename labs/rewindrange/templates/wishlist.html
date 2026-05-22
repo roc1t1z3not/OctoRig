@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Wishlist — {{ profile.username }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>WISHLIST</h1>
+    <p>{{ profile.first_name or profile.username }}'s saved items</p>
+  </div>
+
+  {% if items %}
+  <div class="product-grid">
+    {% for p in items %}
+    {% set r = product_rating(p.id) %}
+    <div class="product-card">
+      {% if p.type == 'vhs' %}
+      <span class="type-badge type-vhs">VHS &bull; {{ p.year }}</span>
+      {% else %}
+      <span class="type-badge type-game">{{ p.platform }} &bull; {{ p.year }}</span>
+      {% endif %}
+      <h3><a href="{{ url_for('product', product_id=p.id) }}">{{ p.title }}</a></h3>
+      <div class="creator">{% if p.type == 'vhs' %}dir. {% endif %}{{ p.creator }}</div>
+      <div class="genre">{{ p.genre }}</div>
+      {% if r.cnt > 0 %}
+      <div class="rating">
+        <span class="stars">{{ '★' * r.avg|int }}{{ '☆' * (5 - r.avg|int) }}</span>
+        <span>{{ r.avg }}/5</span>
+      </div>
+      {% endif %}
+      <div class="price">${{ "%.2f"|format(p.price) }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty">This wishlist is empty.</p>
+  {% endif %}
+</div>
+{% endblock %}

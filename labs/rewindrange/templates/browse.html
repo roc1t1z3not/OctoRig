@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Browse{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>CATALOG</h1>
+    <p>{{ products|length }} item{{ 's' if products|length != 1 }} available</p>
+  </div>
+
+  <div class="pill-row">
+    <a href="{{ url_for('browse') }}" class="pill {% if not type_ and not platform and not genre and not year %}active{% endif %}">All</a>
+    <a href="{{ url_for('browse', type='vhs') }}"  class="pill vhs-pill  {% if type_ == 'vhs' %}active{% endif %}">VHS Tapes</a>
+    <a href="{{ url_for('browse', type='game') }}" class="pill game-pill {% if type_ == 'game' %}active{% endif %}">Games</a>
+  </div>
+
+  {% if platforms %}
+  <div class="pill-row">
+    <span style="font-size:0.72rem;color:var(--muted);align-self:center;margin-right:0.4rem;">Platform:</span>
+    {% for pl in platforms %}
+    <a href="{{ url_for('browse', platform=pl.platform) }}"
+       class="pill game-pill {% if platform == pl.platform %}active{% endif %}">{{ pl.platform }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="pill-row">
+    <span style="font-size:0.72rem;color:var(--muted);align-self:center;margin-right:0.4rem;">Genre:</span>
+    {% for g in genres %}
+    <a href="{{ url_for('browse', genre=g.genre) }}"
+       class="pill {% if genre == g.genre %}active{% endif %}">{{ g.genre }}</a>
+    {% endfor %}
+  </div>
+
+  <form class="search-bar" method="get" action="{{ url_for('browse') }}" style="max-width:300px;margin-bottom:1.5rem;">
+    <input type="number" name="year" value="{{ year }}" placeholder="Filter by year (e.g. 1984)">
+    <button type="submit" class="btn btn-sm">Go</button>
+  </form>
+
+  {% if products %}
+  <div class="product-grid">
+    {% for p in products %}
+    {% set r = product_rating(p.id) %}
+    <div class="product-card">
+      {% if p.type == 'vhs' %}
+      <span class="type-badge type-vhs">VHS &bull; {{ p.year }}</span>
+      {% else %}
+      <span class="type-badge type-game">{{ p.platform }} &bull; {{ p.year }}</span>
+      {% endif %}
+      <h3><a href="{{ url_for('product', product_id=p.id) }}">{{ p.title }}</a></h3>
+      <div class="creator">{% if p.type == 'vhs' %}dir. {% endif %}{{ p.creator }}</div>
+      <div class="genre">{{ p.genre }}</div>
+      {% if r.cnt > 0 %}
+      <div class="rating">
+        <span class="stars">{{ '★' * r.avg|int }}{{ '☆' * (5 - r.avg|int) }}</span>
+        <span>{{ r.avg }}/5</span>
+      </div>
+      {% endif %}
+      <div class="price">${{ "%.2f"|format(p.price) }}</div>
+      <div class="cond">{{ p.condition }} &bull; {{ p.stock }} in stock</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty">No items match the current filter.</p>
+  {% endif %}
+</div>
+{% endblock %}

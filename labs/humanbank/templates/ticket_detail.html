@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Ticket #{{ ticket.id }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:780px;">
+  <div style="margin-bottom:1rem;"><a href="{{ url_for('tickets') }}" style="color:var(--muted);font-size:0.82rem;">&larr; Support Tickets</a></div>
+  <div class="page-header">
+    <h1>TICKET #{{ ticket.id }}</h1>
+    <p>
+      <span class="badge badge-{{ ticket.status }}">{{ ticket.status }}</span>
+      &bull; {{ ticket.created_at }}
+      &bull; {{ ticket.full_name or ticket.username }}
+    </p>
+  </div>
+
+  <div class="panel" style="margin-bottom:1.2rem;">
+    <div style="font-weight:600;margin-bottom:0.5rem;">{{ ticket.subject }}</div>
+    <div style="font-size:0.88rem;line-height:1.7;color:var(--text);">{{ ticket.body | safe }}</div>
+  </div>
+
+  {% if replies %}
+  <div style="margin-bottom:1.2rem;">
+    <div class="section-title" style="margin-bottom:0.75rem;">REPLIES</div>
+    {% for r in replies %}
+    <div class="panel" style="margin-bottom:0.75rem;border-left:3px solid {{ 'var(--accent)' if r.is_admin else 'var(--border)' }};">
+      <div class="ticket-meta" style="margin-bottom:0.4rem;">
+        {% if r.is_admin %}<span style="color:var(--accent);font-weight:700;">SUPPORT</span>{% else %}<span class="mono">{{ r.username }}</span>{% endif %}
+        &bull; {{ r.created_at }}
+      </div>
+      <div style="font-size:0.88rem;line-height:1.7;">{{ r.body | safe }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if ticket.status != 'closed' %}
+  <div class="panel">
+    <div class="section-title" style="margin-bottom:0.75rem;">ADD REPLY</div>
+    <form method="post" action="{{ url_for('ticket_reply', ticket_id=ticket.id) }}">
+      <div class="form-group">
+        <textarea name="body" rows="4" style="resize:vertical;" placeholder="Your reply…" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Send Reply</button>
+    </form>
+  </div>
+  {% else %}
+  <p class="empty">This ticket is closed.</p>
+  {% endif %}
+</div>
+{% endblock %}

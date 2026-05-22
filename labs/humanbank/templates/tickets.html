@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Support{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>SUPPORT TICKETS</h1>
+    <p>{{ tickets|length }} ticket{{ 's' if tickets|length != 1 }}</p>
+  </div>
+  <div style="margin-bottom:1.2rem;">
+    <a href="{{ url_for('ticket_new') }}" class="btn btn-primary">+ New Ticket</a>
+  </div>
+  {% if tickets %}
+  {% for t in tickets %}
+  <a href="{{ url_for('ticket_detail', ticket_id=t.id) }}" style="text-decoration:none;display:block;">
+    <div class="ticket-card" style="cursor:pointer;transition:border-color 0.15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--accent)'">
+      <div class="ticket-meta">
+        #{{ t.id }} &bull; {{ t.created_at }}
+        &bull; <span class="badge badge-{{ t.status }}">{{ t.status }}</span>
+      </div>
+      <div style="font-size:0.9rem;color:var(--text);font-weight:600;">{{ t.subject }}</div>
+      <div style="font-size:0.82rem;color:var(--muted);margin-top:0.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+        {{ t.body[:100] }}{% if t.body|length > 100 %}…{% endif %}
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+  {% else %}
+  <p class="empty">No tickets yet. <a href="{{ url_for('ticket_new') }}">Open one</a> if you need help.</p>
+  {% endif %}
+</div>
+{% endblock %}

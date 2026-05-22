@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Account — {{ profile.username }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>ACCOUNT</h1>
+    <p>{{ profile.first_name | safe }} {{ profile.last_name | safe }}</p>
+  </div>
+
+  {% if profile.bio %}
+  <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--cyan);padding:0.9rem 1.2rem;border-radius:0 3px 3px 0;margin-bottom:1.2rem;max-width:900px;font-size:0.85rem;line-height:1.7;">{{ profile.bio | safe }}</div>
+  {% endif %}
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:2rem;max-width:900px;">
+    <div style="background:var(--surface);border:1px solid var(--border);padding:1.2rem;border-radius:3px;">
+      <div class="section-title">PROFILE</div>
+      <table style="width:100%;font-size:0.82rem;">
+        <tr><td style="color:var(--muted);padding:0.28rem 0;">Username</td>  <td>{{ profile.username }}</td></tr>
+        <tr><td style="color:var(--muted);padding:0.28rem 0;">Email</td>     <td>{{ profile.email }}</td></tr>
+        <tr><td style="color:var(--muted);padding:0.28rem 0;">Phone</td>     <td>{{ profile.phone or '—' }}</td></tr>
+      </table>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);padding:1.2rem;border-radius:3px;">
+      <div class="section-title">SHIPPING</div>
+      <p style="font-size:0.82rem;color:var(--muted);">{{ profile.address or 'No address on file.' }}</p>
+    </div>
+    <div style="background:#09090f;border:1px solid var(--border);padding:1.2rem;border-radius:3px;text-align:center;">
+      <div style="font-size:0.68rem;color:var(--muted);letter-spacing:0.12em;margin-bottom:0.5rem;">MEMBERSHIP CARD</div>
+      <div style="font-size:0.88rem;color:var(--text);margin-bottom:0.3rem;">{{ profile.username }}</div>
+      <div style="font-size:2rem;color:var(--green);font-weight:bold;">${{ "%.2f"|format(profile.balance) }}</div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-top:0.3rem;">available balance</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;max-width:900px;">
+    <div style="background:var(--surface);border:1px solid var(--border);padding:1.5rem;border-radius:3px;">
+      <div class="section-title">EDIT PROFILE</div>
+      <form method="post" action="{{ url_for('account_update', user_id=profile.id) }}">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" name="first_name" value="{{ profile.first_name }}">
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" name="last_name" value="{{ profile.last_name }}">
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="text" name="phone" value="{{ profile.phone }}">
+        </div>
+        <div class="form-group">
+          <label>Shipping Address</label>
+          <input type="text" name="address" value="{{ profile.address }}">
+        </div>
+        <div class="form-group">
+          <label>Bio</label>
+          <textarea name="bio" rows="3" style="resize:vertical;">{{ profile.bio }}</textarea>
+        </div>
+        <button type="submit" class="btn">Save Changes</button>
+      </form>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0.6rem;align-self:start;margin-top:1.8rem;">
+      <a href="{{ url_for('orders') }}" class="btn">View Orders</a>
+      <a href="{{ url_for('wishlist', user_id=profile.id) }}" class="btn">View Wishlist</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

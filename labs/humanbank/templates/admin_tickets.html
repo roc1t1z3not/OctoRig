@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Admin — Tickets{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>SUPPORT QUEUE</h1>
+    <p>{{ tickets|length }} ticket{{ 's' if tickets|length != 1 }}</p>
+  </div>
+
+  {% if tickets %}
+  {% for t in tickets %}
+  <div class="panel" style="margin-bottom:1.2rem;">
+    <div class="ticket-meta">
+      #{{ t.id }} &bull; {{ t.created_at }}
+      &bull; <span class="mono">{{ t.full_name or t.username }}</span>
+      &bull; <span class="badge badge-{{ t.status }}">{{ t.status }}</span>
+    </div>
+    <div style="font-weight:600;margin:0.4rem 0 0.6rem;">{{ t.subject }}</div>
+    <div style="font-size:0.85rem;line-height:1.7;padding:0.75rem;background:var(--bg);border-radius:4px;border:1px solid var(--border);">
+      {{ t.body | safe }}
+    </div>
+
+    {% if replies[t.id] is defined %}
+    <div style="margin-top:0.75rem;font-size:0.82rem;color:var(--muted);border-top:1px solid var(--border);padding-top:0.75rem;">
+      Last reply from <span class="mono">{{ replies[t.id].username }}</span>: {{ replies[t.id].body | safe }}
+    </div>
+    {% endif %}
+
+    {% if t.status != 'closed' %}
+    <form method="post" action="{{ url_for('admin_ticket_reply', ticket_id=t.id) }}" style="margin-top:0.75rem;display:flex;gap:0.5rem;">
+      <input type="text" name="body" placeholder="Reply and close ticket…" required style="flex:1;padding:0.45rem 0.7rem;font-size:0.85rem;">
+      <button type="submit" class="btn btn-primary btn-sm">Reply &amp; Close</button>
+    </form>
+    {% endif %}
+  </div>
+  {% endfor %}
+  {% else %}
+  <p class="empty">No tickets in the queue.</p>
+  {% endif %}
+</div>
+{% endblock %}

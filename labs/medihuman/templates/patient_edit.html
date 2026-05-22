@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Edit — {{ patient.full_name }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:640px;">
+  <div style="margin-bottom:1rem;"><a href="{{ url_for('patient_detail', patient_id=patient.id) }}" style="color:var(--muted);font-size:0.82rem;">&larr; {{ patient.full_name }}</a></div>
+  <div class="page-header">
+    <h1>Edit Patient Record</h1>
+    <p>{{ patient.full_name }}</p>
+  </div>
+  <div class="card">
+    <form method="post">
+      <div class="form-group">
+        <label>Allergies</label>
+        <input type="text" name="allergies" value="{{ patient.allergies or '' }}">
+      </div>
+      <div class="form-group">
+        <label>Clinical Notes / Bio <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">(supports HTML)</span></label>
+        <textarea name="bio" rows="5" style="resize:vertical;">{{ patient.bio or '' }}</textarea>
+      </div>
+      <div style="display:flex;gap:0.75rem;">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{{ url_for('patient_detail', patient_id=patient.id) }}" class="btn">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

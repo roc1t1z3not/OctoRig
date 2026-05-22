@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}{{ thread.title }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div style="margin-bottom:1rem;">
+    <a href="{{ url_for('board') }}" style="font-size:0.78rem;color:var(--muted);">&larr; Back to Board</a>
+  </div>
+
+  <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--pink);padding:1.4rem 1.5rem;border-radius:0 3px 3px 0;margin-bottom:1.5rem;">
+    <h2 style="color:var(--pink);margin-bottom:0.5rem;font-size:1.2rem;">{{ thread.title }}</h2>
+    <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.8rem;">
+      <a href="{{ url_for('account', user_id=thread.user_id) }}" style="color:var(--cyan);">{{ thread.username }}</a>
+      &bull; {{ thread.posted_at }}
+    </div>
+    <div style="font-size:0.88rem;line-height:1.7;">{{ thread.body | safe }}</div>
+    {% set u = current_user() %}
+    {% if u and (u.id == thread.user_id or u.is_admin) %}
+    <div style="margin-top:1rem;display:flex;gap:0.6rem;">
+      <a href="{{ url_for('board_edit', thread_id=thread.id) }}" class="btn btn-sm">Edit</a>
+      <form method="post" action="{{ url_for('board_delete', thread_id=thread.id) }}" style="display:inline;" onsubmit="return confirm('Delete this thread?');">
+        <button type="submit" class="btn btn-sm" style="border-color:var(--danger);color:var(--danger);">Delete</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if replies %}
+  <div class="section-title">{{ replies|length }} REPL{{ 'Y' if replies|length == 1 else 'IES' }}</div>
+  <div style="display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1.5rem;">
+    {% for r in replies %}
+    <div class="review-card">
+      <div class="review-meta">
+        <a href="{{ url_for('account', user_id=r.user_id) }}" style="color:var(--cyan);">{{ r.username }}</a>
+        &bull; {{ r.posted_at }}
+        {% set u = current_user() %}
+        {% if u and (u.id == r.user_id or u.is_admin) %}
+        &bull; <a href="{{ url_for('reply_edit', reply_id=r.id) }}" style="color:var(--muted);">edit</a>
+        &middot; <form method="post" action="{{ url_for('reply_delete', reply_id=r.id) }}" style="display:inline;" onsubmit="return confirm('Delete?');"><button type="submit" style="background:none;border:none;color:var(--danger);font-family:inherit;font-size:inherit;cursor:pointer;padding:0;">delete</button></form>
+        {% endif %}
+      </div>
+      <div style="font-size:0.86rem;line-height:1.7;margin-top:0.35rem;">{{ r.body | safe }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if session.user_id %}
+  <div style="background:var(--surface);border:1px solid var(--border);padding:1.2rem;border-radius:3px;">
+    <div class="section-title">POST A REPLY</div>
+    <form method="post" action="{{ url_for('board_reply', thread_id=thread.id) }}">
+      <div class="form-group">
+        <textarea name="body" rows="4" placeholder="Write your reply…" style="resize:vertical;"></textarea>
+      </div>
+      <button type="submit" class="btn">Post Reply</button>
+    </form>
+  </div>
+  {% else %}
+  <p style="color:var(--muted);font-size:0.84rem;"><a href="{{ url_for('login') }}">Sign in</a> to reply.</p>
+  {% endif %}
+</div>
+{% endblock %}

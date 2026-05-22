@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}REWIND{% endblock %} — Retro Video &amp; Games</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="{{ url_for('index') }}">RE<span>WIND</span></a>
+  <a href="{{ url_for('browse') }}">Browse</a>
+  <a href="{{ url_for('browse', type='vhs') }}">VHS</a>
+  <a href="{{ url_for('browse', type='game') }}">Games</a>
+  <a href="{{ url_for('search') }}">Search</a>
+  <a href="{{ url_for('board') }}">Board</a>
+  <a href="{{ url_for('feedback') }}">Contact</a>
+  <div class="nav-right">
+    {% set u = current_user() %}
+    {% if u %}
+      {% set cc = cart_count() %}
+      <a href="{{ url_for('cart') }}" class="{{ 'nav-cart-active' if cc > 0 else '' }}">Cart{% if cc > 0 %} ({{ cc }}){% endif %}</a>
+      <a href="{{ url_for('orders') }}">Orders</a>
+      <a href="{{ url_for('inbox') }}">Inbox</a>
+      <a href="{{ url_for('users') }}">Members</a>
+      <a href="{{ url_for('wishlist', user_id=u.id) }}">Wishlist</a>
+      <a href="{{ url_for('account', user_id=u.id) }}">{{ (u.first_name if u.first_name else u.username) | safe }}</a>
+      {% if u.is_admin %}<a href="{{ url_for('admin_orders') }}">Admin</a>{% endif %}
+      <a href="{{ url_for('logout') }}" class="btn btn-sm btn-pink">Sign out</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Sign in</a>
+      <a href="{{ url_for('register') }}" class="btn btn-sm">Register</a>
+    {% endif %}
+  </div>
+</nav>
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer>
+  <p>REWIND &mdash; Retro Video &amp; Games &nbsp;|&nbsp; Be Kind, Rewind</p>
+  <p>Made By <a href="https://github.com/CommonHuman-Lab" target="_blank">CommonHuman</a></p>
+</footer>
+</body>
+</html>

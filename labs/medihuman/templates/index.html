@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediHuman — Patient Portal</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="auth-wrapper" style="background: linear-gradient(135deg,#e0f2fe 0%,#f1f5f9 100%);">
+  <div style="text-align:center;max-width:520px;width:100%;margin:0 auto;">
+    <div class="auth-logo" style="font-size:2rem;margin-bottom:0.5rem;">MEDI<span>HUMAN</span></div>
+    <p style="color:var(--muted);margin-bottom:2.5rem;font-size:0.9rem;">Secure Patient &amp; Clinical Portal</p>
+    <div class="auth-card" style="text-align:left;">
+      <h2 style="font-size:1.1rem;margin-bottom:0.25rem;">Welcome back</h2>
+      <p style="color:var(--muted);font-size:0.82rem;margin-bottom:1.5rem;">Sign in to access your health records</p>
+      <a href="{{ url_for('login') }}" class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:0.75rem;">Sign In</a>
+      <a href="{{ url_for('register') }}" class="btn" style="width:100%;justify-content:center;">Create Account</a>
+    </div>
+    <p style="margin-top:1.5rem;font-size:0.75rem;color:var(--muted);">
+      MediHuman &mdash; Made by <a href="https://github.com/CommonHuman-Lab" target="_blank">CommonHuman</a>
+    </p>
+  </div>
+</div>
+</body>
+</html>

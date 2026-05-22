@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}{{ account.account_number }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div style="margin-bottom:1rem;"><a href="{{ url_for('accounts') }}" style="color:var(--muted);font-size:0.82rem;">&larr; All Accounts</a></div>
+
+  <div style="display:grid;grid-template-columns:1fr 2fr;gap:1.5rem;margin-bottom:2rem;">
+    <div class="account-card">
+      <div class="acc-type">{{ account.account_type | upper }} ACCOUNT</div>
+      <div class="acc-bal">${{ "%.2f" | format(account.balance) }}</div>
+      <div class="acc-num mono" style="margin-top:0.8rem;">{{ account.account_number }}</div>
+      <div style="margin-top:0.5rem;font-size:0.78rem;color:var(--muted);">Opened {{ account.opened_date }}</div>
+    </div>
+    <div class="panel">
+      <div class="section-title">ACCOUNT HOLDER</div>
+      <table style="font-size:0.85rem;width:100%;">
+        <tr><td style="color:var(--muted);padding:0.25rem 0;width:110px;">Name</td><td>{{ account.full_name }}</td></tr>
+        <tr><td style="color:var(--muted);padding:0.25rem 0;">Username</td><td class="mono">{{ account.username }}</td></tr>
+        <tr><td style="color:var(--muted);padding:0.25rem 0;">Email</td><td>{{ account.email }}</td></tr>
+        <tr><td style="color:var(--muted);padding:0.25rem 0;">Account ID</td><td class="mono">{{ account.id }}</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <a href="{{ url_for('transactions', account_id=account.id) }}" class="btn btn-primary">View Transactions</a>
+  <a href="{{ url_for('transfer') }}" class="btn" style="margin-left:0.6rem;">Make Transfer</a>
+</div>
+{% endblock %}

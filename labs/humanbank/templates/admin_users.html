@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Admin — Users{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>USER MANAGEMENT</h1>
+    <p>{{ users|length }} registered user{{ 's' if users|length != 1 }}</p>
+  </div>
+  <div class="panel" style="padding:0;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Full Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Accounts</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td class="muted mono" style="font-size:0.78rem;">{{ u.id }}</td>
+          <td class="mono">{{ u.username }}</td>
+          <td style="font-size:0.85rem;">{{ u.full_name or '—' }}</td>
+          <td style="font-size:0.82rem;color:var(--muted);">{{ u.email }}</td>
+          <td>{% if u.is_admin %}<span class="badge badge-open">admin</span>{% else %}<span style="color:var(--muted);font-size:0.78rem;">user</span>{% endif %}</td>
+          <td class="mono" style="font-size:0.82rem;text-align:center;">{{ u.account_count }}</td>
+          <td><a href="{{ url_for('admin_user_detail', user_id=u.id) }}" style="font-size:0.78rem;color:var(--accent);">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

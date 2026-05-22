@@ -1,0 +1,33 @@
+from flask import request, render_template, redirect, url_for, abort
+from db import get_db
+from helpers import current_user
+
+VALID_STATUSES = ('pending', 'processing', 'shipped', 'delivered', 'cancelled')
+
+
+def init(app):
+
+    @app.route('/admin/orders')
+    def admin_orders():
+        u = current_user()
+        if not u or not u['is_admin']:
+            abort(403)
+        orders = get_db().execute(
+            "SELECT o.*, u.username FROM orders o "
+            "JOIN users u ON o.user_id = u.id "
+            "ORDER BY o.order_date DESC"
+        ).fetchall()
+        return render_template('admin_orders.html', orders=orders,
+                               valid_statuses=VALID_STATUSES)
+
+    @app.route('/admin/orders/<int:order_id>/status', methods=['POST'])
+    def admin_order_status(order_id):
+        u = current_user()
+        if not u or not u['is_admin']:
+            abort(403)
+        status = request.form.get('status', '').strip()
+        if status in VALID_STATUSES:
+            db = get_db()
+            db.execute("UPDATE orders SET status = ? WHERE id = ?", (status, order_id))
+            db.commit()
+        return redirect(url_for('admin_orders'))

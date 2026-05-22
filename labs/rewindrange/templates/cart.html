@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Cart{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>YOUR CART</h1>
+    <p>{{ cart|length }} item{{ 's' if cart|length != 1 }}</p>
+  </div>
+
+  {% if cart %}
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:2rem;">
+    <div>
+      <table class="data-table">
+        <thead>
+          <tr><th>ITEM</th><th>TYPE</th><th>PRICE</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for item in cart %}
+          <tr>
+            <td>{{ item.title }}</td>
+            <td>
+              {% if item.type == 'vhs' %}
+                <span class="badge badge-pink">VHS</span>
+              {% else %}
+                <span class="badge badge-green">GAME</span>
+              {% endif %}
+            </td>
+            <td style="color:var(--pink);">${{ "%.2f"|format(item.price) }}</td>
+            <td>
+              <form method="post" action="{{ url_for('cart_remove') }}" style="display:inline;">
+                <input type="hidden" name="index" value="{{ loop.index0 }}">
+                <button type="submit" class="btn btn-sm btn-pink">Remove</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div style="margin-top:1.2rem;display:flex;gap:0.5rem;justify-content:flex-end;">
+        <form method="post" action="{{ url_for('cart_clear') }}">
+          <button type="submit" class="btn btn-sm">Clear Cart</button>
+        </form>
+      </div>
+    </div>
+
+    <div>
+      <div style="background:var(--surface);border:1px solid var(--border);padding:1.5rem;border-radius:3px;">
+        <div class="section-title">MEMBERSHIP DISCOUNT</div>
+
+        {% if coupon %}
+        <div class="alert alert-success" style="margin-bottom:1rem;">
+          {{ coupon.code }} &mdash; {{ coupon.discount_pct }}% off
+          <form method="post" action="{{ url_for('cart_coupon') }}" style="display:inline;margin-left:0.5rem;">
+            <input type="hidden" name="code" value="">
+            <button type="submit" class="btn btn-sm" style="font-size:0.65rem;padding:0.1rem 0.4rem;">Remove</button>
+          </form>
+        </div>
+        {% endif %}
+
+        {% if coupon_error %}
+        <div class="alert alert-error" style="margin-bottom:1rem;">{{ coupon_error }}</div>
+        {% endif %}
+
+        <form method="post" action="{{ url_for('cart_coupon') }}" style="display:flex;gap:0.5rem;margin-bottom:1.5rem;">
+          <input type="text" name="code" placeholder="Discount code" style="flex:1;background:#09090f;border:1px solid var(--border);color:var(--text);padding:0.4rem 0.6rem;font-family:inherit;font-size:0.82rem;border-radius:2px;">
+          <button type="submit" class="btn btn-sm">Apply</button>
+        </form>
+
+        <div class="section-title">ORDER SUMMARY</div>
+        <div style="font-size:0.85rem;">
+          <div style="display:flex;justify-content:space-between;padding:0.3rem 0;border-bottom:1px solid var(--border);">
+            <span style="color:var(--muted);">Subtotal</span>
+            <span>${{ "%.2f"|format(subtotal) }}</span>
+          </div>
+          {% if discount > 0 %}
+          <div style="display:flex;justify-content:space-between;padding:0.3rem 0;border-bottom:1px solid var(--border);">
+            <span style="color:var(--green);">Discount ({{ discount }}%)</span>
+            <span style="color:var(--green);">-${{ "%.2f"|format(subtotal - total) }}</span>
+          </div>
+          {% endif %}
+          <div style="display:flex;justify-content:space-between;padding:0.6rem 0;font-weight:bold;">
+            <span>Total</span>
+            <span style="color:var(--pink);font-size:1.1rem;">${{ "%.2f"|format(total) }}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:0.3rem 0;font-size:0.78rem;">
+            <span style="color:var(--muted);">Card balance</span>
+            <span style="color:var(--green);">${{ "%.2f"|format(u.balance) }}</span>
+          </div>
+        </div>
+
+        <a href="{{ url_for('checkout') }}" class="btn btn-pink" style="width:100%;display:block;text-align:center;margin-top:1.2rem;">
+          Proceed to Checkout
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <p class="empty">Your cart is empty. <a href="{{ url_for('browse') }}">Browse the catalog</a></p>
+  {% endif %}
+</div>
+{% endblock %}

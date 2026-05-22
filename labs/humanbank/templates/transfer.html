@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Transfer Funds{% endblock %}
+{% block content %}
+<div class="container" style="max-width:640px;">
+  <div class="page-header">
+    <h1>TRANSFER FUNDS</h1>
+    <p>Move money between accounts</p>
+  </div>
+  <div class="panel">
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <form method="post">
+      <div class="form-group">
+        <label>From Account</label>
+        <select name="from_account_id" required>
+          <option value="">— Select source account —</option>
+          {% for a in accounts %}
+          <option value="{{ a.id }}">{{ a.account_number }} — {{ a.full_name or a.username }} — ${{ "%.2f" | format(a.balance) }} ({{ a.account_type }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>To Account Number</label>
+        <input type="text" name="to_account_number" placeholder="HB-0001" class="mono" required>
+      </div>
+      <div class="form-group">
+        <label>Amount ($)</label>
+        <input type="number" name="amount" step="0.01" placeholder="0.00" required>
+      </div>
+      <div class="form-group">
+        <label>Memo <span style="color:var(--muted);font-weight:normal;">(optional)</span></label>
+        <input type="text" name="memo" placeholder="Payment for…">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;padding:0.65rem;">Transfer</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

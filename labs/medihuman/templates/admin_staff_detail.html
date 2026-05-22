@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Staff — {{ profile.username }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:800px;">
+  <div style="margin-bottom:1rem;"><a href="{{ url_for('admin_panel') }}" style="color:var(--muted);font-size:0.82rem;">&larr; Admin Panel</a></div>
+  <div class="page-header">
+    <h1>{{ profile.full_name or profile.username }}</h1>
+    <p><span class="badge badge-{{ profile.role }}">{{ profile.role }}</span> &mdash; {{ profile.username }}</p>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:1.25rem;">
+    <div class="card">
+      <div class="section-title">ACCOUNT DETAILS</div>
+      <dl class="info-list" style="margin-top:0.5rem;">
+        <dt>ID</dt><dd class="mono">{{ profile.id }}</dd>
+        <dt>Username</dt><dd class="mono">{{ profile.username }}</dd>
+        <dt>Password</dt><dd class="mono" style="color:var(--danger);">{{ profile.password }}</dd>
+        <dt>Email</dt><dd>{{ profile.email or '—' }}</dd>
+        <dt>Role</dt><dd><span class="badge badge-{{ profile.role }}">{{ profile.role }}</span></dd>
+      </dl>
+    </div>
+    {% if patient %}
+    <div class="card">
+      <div class="section-title">PATIENT RECORD</div>
+      <dl class="info-list" style="margin-top:0.5rem;">
+        <dt>DOB</dt><dd>{{ patient.dob or '—' }}</dd>
+        <dt>Blood Type</dt><dd>{{ patient.blood_type or '—' }}</dd>
+        <dt>SSN</dt><dd class="mono" style="color:var(--danger);">{{ patient.ssn or '—' }}</dd>
+        <dt>Insurance</dt><dd class="mono">{{ patient.insurance_id or '—' }}</dd>
+        <dt>Allergies</dt><dd style="color:var(--danger);">{{ patient.allergies or 'None' }}</dd>
+      </dl>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if profile.bio %}
+  <div class="card" style="margin-bottom:1.25rem;border-left:3px solid var(--accent);">
+    <div class="section-title">BIO / NOTES</div>
+    <div style="font-size:0.88rem;line-height:1.7;margin-top:0.5rem;">{{ profile.bio | safe }}</div>
+  </div>
+  {% endif %}
+
+  {% if docs %}
+  <div class="card">
+    <div class="section-title">DOCUMENTS</div>
+    {% for d in docs %}
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--border);font-size:0.82rem;">
+      <span>{{ d.filename }}</span>
+      <a href="{{ url_for('doc_download', stored_name=d.stored_name) }}" class="btn btn-sm">Download</a>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

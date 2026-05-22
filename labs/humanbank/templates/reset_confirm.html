@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Set New Password{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:center;padding:4rem 1rem;">
+  <div style="width:100%;max-width:420px;">
+    <div class="panel">
+      <h2 style="color:var(--accent);font-size:1.05rem;margin-bottom:1rem;">Set New Password</h2>
+      {% if error %}
+      <div class="alert alert-danger">{{ error }}</div>
+      {% else %}
+      <form method="post">
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" name="password" required autofocus>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Update Password</button>
+      </form>
+      {% endif %}
+      <p style="margin-top:1rem;font-size:0.82rem;color:var(--muted);text-align:center;">
+        <a href="{{ url_for('login') }}">&larr; Back to sign in</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
