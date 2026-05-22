@@ -13,7 +13,9 @@
 
 ---
 
-OctoRig spins up and tears down intentionally vulnerable Docker environments for penetration testing practice, security research, and tool testing — with a single command.
+OctoRig spins up intentionally vulnerable Docker labs for penetration testing practice, security research, red team training, and security tool development — all with a single command.
+
+Each lab is designed to feel closer to a real-world target instead of a sterile CTF box. Expect vulnerable business logic, chained exploits, hidden attack paths, weak infrastructure, and easter eggs.
 
 ---
 
