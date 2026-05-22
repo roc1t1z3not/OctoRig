@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="container" style="max-width:700px;">
+  {% if not target %}
+  <div class="alert alert-error">{{ error }}</div>
+  {% else %}
+  <div class="page-header">
+    <!-- VULN: stored XSS — display_name rendered with | safe -->
+    <h1>{{ (target.display_name if target.display_name else target.username) | safe }}</h1>
+    <p>User #{{ target.id }}</p>
+  </div>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  {% if success %}<div class="alert alert-success">{{ success }}</div>{% endif %}
+
+  <div class="detail-panel">
+    <div class="detail-row"><span class="lbl">Username</span><span>{{ target.username }}</span></div>
+    <div class="detail-row"><span class="lbl">Email</span><span>{{ target.email }}</span></div>
+    <div class="detail-row">
+      <span class="lbl">Balance</span>
+      <span style="color:var(--gold);font-weight:600;">${{ "%.2f"|format(target.balance) }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="lbl">Status</span>
+      <span>
+        {% if target.is_vip %}<span class="badge badge-gold">VIP</span>{% else %}<span class="badge badge-muted">Standard</span>{% endif %}
+        {% if target.is_admin %}<span class="badge badge-blue" style="margin-left:0.3rem;">Admin</span>{% endif %}
+      </span>
+    </div>
+    <div class="detail-row"><span class="lbl">Member Since</span><span>{{ target.created_at }}</span></div>
+  </div>
+
+  <!-- VULN: IDOR — form action targets /profile/<user_id> with no ownership check -->
+  <!-- VULN: mass assignment — is_admin and is_vip fields editable via POST -->
+  <div class="section-title">Edit Profile</div>
+  <form method="post" action="{{ url_for('profile', user_id=target.id) }}">
+    <div class="form-group">
+      <label>Display Name</label>
+      <!-- VULN: stored XSS — display_name stored raw -->
+      <input type="text" name="display_name" value="{{ target.display_name }}">
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" name="email" value="{{ target.email }}">
+    </div>
+    <button class="btn btn-primary">Save Changes</button>
+    <a href="{{ url_for('transactions', user_id=target.id) }}" class="btn" style="margin-left:0.5rem;">Transaction History</a>
+    <a href="{{ url_for('transfer') }}" class="btn" style="margin-left:0.5rem;">Transfer Chips</a>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Welcome{% endblock %}
+{% block content %}
+<div class="hero">
+  <h1>Golden<span>Ace</span> Casino</h1>
+  <p class="tagline">The house always wins. Unless it doesn't.</p>
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+    <a href="{{ url_for('register') }}" class="btn btn-primary">Create Account — $1,000 Free Chips</a>
+    <a href="{{ url_for('login') }}" class="btn">Log In</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="section-title">Our Games</div>
+  <div class="game-grid">
+    <div class="game-card" style="cursor:default;">
+      <div class="game-icon">🎰</div>
+      <div class="game-name">Slots</div>
+      <div class="game-desc">Match 3 for jackpots up to 50× your bet</div>
+    </div>
+    <div class="game-card" style="cursor:default;">
+      <div class="game-icon">🃏</div>
+      <div class="game-name">Blackjack</div>
+      <div class="game-desc">Beat the dealer. Hit, stand, double or split.</div>
+    </div>
+    <div class="game-card" style="cursor:default;">
+      <div class="game-icon">🎡</div>
+      <div class="game-name">Roulette</div>
+      <div class="game-desc">European wheel — straight bets pay 35:1</div>
+    </div>
+    <div class="game-card" style="cursor:default;">
+      <div class="game-icon">🎲</div>
+      <div class="game-name">Dice</div>
+      <div class="game-desc">Hi-Lo — predict above or below 7. Double up.</div>
+    </div>
+  </div>
+
+  <div class="section-title mt3">Why GoldenAce?</div>
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="stat-label">Starting Chips</div>
+      <div class="stat-value" style="font-size:1.4rem;color:var(--gold);">$1,000</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Games Available</div>
+      <div class="stat-value">4</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Live Players</div>
+      <div class="stat-value" style="color:var(--win);">Active</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Max Payout</div>
+      <div class="stat-value" style="font-size:1.4rem;color:var(--gold);">50×</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

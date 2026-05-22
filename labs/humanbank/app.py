@@ -48,7 +48,7 @@ def commonhuman_easter_egg():
    /|   |\\
   (_)   (_)</pre>
 <h2>&#x1F419; You found it.</h2>
-<p>HumanBank &mdash; Lab 12</p>
+<p>HumanBank &mdash; Lab</p>
 <p>Part of the <strong>CommonHuman-Lab</strong> community.</p>
 <p style="margin-top:1.5rem;color:#9b8b6b;">Thank you for using these tools. If they have been useful for your training or teaching, a follow and a star on GitHub help more people find the project &mdash; and they mean a lot.</p>
 <p style="margin-top:1rem;">

@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Lobby{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>Casino Lobby</h1>
+    <!-- VULN: stored XSS — display_name rendered with | safe -->
+    <p>Welcome back, {{ (user.display_name if user.display_name else user.username) | safe }}</p>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="stat-label">Your Balance</div>
+      <div class="stat-value" style="color:var(--gold);">${{ "%.2f"|format(user.balance) }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">VIP Status</div>
+      <div class="stat-value" style="font-size:1.2rem;">
+        {% if user.is_vip %}<span class="badge badge-gold">VIP</span>{% else %}<span class="badge badge-muted">Standard</span>{% endif %}
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Promo Codes</div>
+      <div class="stat-value" style="font-size:1.2rem;">
+        <a href="{{ url_for('promo') }}" style="font-size:0.9rem;">Redeem Code</a>
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Suite Access</div>
+      <div class="stat-value" style="font-size:1rem;">
+        <a href="{{ url_for('suite', user_id=user.id) }}" style="font-size:0.85rem;">High Roller Suite</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Games</div>
+  <div class="game-grid">
+    <a href="{{ url_for('slots') }}" class="game-card">
+      <div class="game-icon">🎰</div>
+      <div class="game-name">Slots</div>
+      <div class="game-desc">Up to 50× payout on jackpot</div>
+    </a>
+    <a href="{{ url_for('blackjack') }}" class="game-card">
+      <div class="game-icon">🃏</div>
+      <div class="game-name">Blackjack</div>
+      <div class="game-desc">Hit, stand, double or split</div>
+    </a>
+    <a href="{{ url_for('roulette') }}" class="game-card">
+      <div class="game-icon">🎡</div>
+      <div class="game-name">Roulette</div>
+      <div class="game-desc">European wheel — 35:1 straight</div>
+    </a>
+    <a href="{{ url_for('dice') }}" class="game-card">
+      <div class="game-icon">🎲</div>
+      <div class="game-name">Hi-Lo Dice</div>
+      <div class="game-desc">Roll above or below 7 to double</div>
+    </a>
+  </div>
+
+  <div class="two-col mt3">
+    <div>
+      <div class="section-title">Live Activity</div>
+      <div class="detail-panel" style="padding:1rem;">
+        {% if feed %}
+        {% for entry in feed %}
+        <div class="chat-msg">
+          <span class="win-text" style="font-size:0.82rem;">{{ entry.message }}</span>
+          <span class="ts">{{ entry.created_at }}</span>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="empty">No activity yet.</p>
+        {% endif %}
+      </div>
+    </div>
+    <div>
+      <div class="section-title">Top Players</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>#</th><th>Player</th><th>Balance</th></tr>
+        </thead>
+        <tbody>
+          {% for p in board %}
+          <tr>
+            <td style="color:var(--muted);">{{ loop.index }}</td>
+            <!-- VULN: stored XSS — display_name rendered with | safe -->
+            <td>
+              <a href="{{ url_for('profile', user_id=p.id) }}">{{ (p.display_name if p.display_name else p.username) | safe }}</a>
+              {% if p.is_vip %}<span class="badge badge-gold" style="margin-left:0.3rem;">VIP</span>{% endif %}
+            </td>
+            <td style="color:var(--gold);">${{ "%.2f"|format(p.balance) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p style="margin-top:0.75rem;"><a href="{{ url_for('leaderboard') }}">Full Leaderboard →</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

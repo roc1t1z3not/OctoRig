@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}GoldenAce{% endblock %} — Online Casino</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="feed-bar">
+  <marquee id="live-feed-ticker">Live feed loading…</marquee>
+</div>
+<script>
+  function refreshFeed() {
+    fetch('/api/feed').then(function(r){return r.json();}).then(function(data){
+      var parts = data.map(function(e){
+        return '<span class="win-msg">' + e.message + '</span>';
+      });
+      document.getElementById('live-feed-ticker').innerHTML = parts.join(' &nbsp;&middot;&nbsp; ') || 'No activity yet.';
+    }).catch(function(){});
+  }
+  refreshFeed();
+  setInterval(refreshFeed, 8000);
+</script>
+<nav>
+  <a class="nav-logo" href="{{ url_for('index') }}">Golden<span>Ace</span></a>
+  {% set u = current_user() %}
+  {% if u %}
+  <a href="{{ url_for('lobby') }}">Lobby</a>
+  <a href="{{ url_for('slots') }}">Slots</a>
+  <a href="{{ url_for('blackjack') }}">Blackjack</a>
+  <a href="{{ url_for('roulette') }}">Roulette</a>
+  <a href="{{ url_for('dice') }}">Dice</a>
+  <a href="{{ url_for('chat') }}">Chat</a>
+  <a href="{{ url_for('leaderboard') }}">Leaderboard</a>
+  {% endif %}
+  <div class="nav-right">
+    {% if u %}
+      <span class="nav-balance">${{ "%.2f"|format(u.balance) }}</span>
+      <!-- VULN: stored XSS — display_name rendered with | safe -->
+      <a href="{{ url_for('profile', user_id=u.id) }}">{{ (u.display_name if u.display_name else u.username) | safe }}</a>
+      {% if u.is_admin or session.get('is_admin') %}<a href="{{ url_for('admin_index') }}" style="color:var(--gold);">Admin</a>{% endif %}
+      <a href="{{ url_for('logout') }}" class="btn btn-sm">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}" style="color:var(--muted);">Log in</a>
+      <a href="{{ url_for('register') }}" class="btn btn-sm btn-primary">Join Now</a>
+    {% endif %}
+  </div>
+</nav>
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer>
+  <p>GoldenAce Casino &mdash; Play Responsibly &mdash; &copy; 2026</p>
+  <p style="margin-top:0.3rem;">Made By <a href="https://github.com/CommonHuman-Lab" target="_blank">CommonHuman</a></p>
+</footer>
+<!--
+     ___
+    /   \     CommonHuman-Lab
+   | o_o |    Security Training Labs
+    \___/     Lab: GoldenAce
+   /|   |\    github.com/CommonHuman-Lab
+  (_)   (_)
+-->
+<script>console.log('%c\u{1F419} OctoRig By CommonHuman | Lab: GoldenAce | Happy hacking!','color:#f59e0b;font-size:14px;font-weight:bold;');</script>
+</body>
+</html>

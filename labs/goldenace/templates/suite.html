@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}High Roller Suite{% endblock %}
+{% block content %}
+<div class="container" style="max-width:700px;">
+  <div class="page-header">
+    <h1>♠ High Roller Suite</h1>
+    {% if target %}
+    <!-- VULN: IDOR — any user can access any other user's suite page via /suite/<id> -->
+    <p>Accessed as: <a href="{{ url_for('profile', user_id=target.id) }}">{{ target.username }}</a></p>
+    {% endif %}
+  </div>
+
+  {% if error %}
+  <div class="alert alert-error">{{ error }}</div>
+  {% endif %}
+
+  <div class="detail-panel" style="text-align:center;padding:3rem 2rem;border-color:var(--gold);background:rgba(245,158,11,0.04);">
+    <div style="font-size:3rem;margin-bottom:1rem;">🃏</div>
+    <h2 style="color:var(--gold);font-size:1.4rem;margin-bottom:0.75rem;">The CommonHuman Experiment</h2>
+    <p style="color:var(--muted);font-size:0.95rem;line-height:1.7;max-width:480px;margin:0 auto 1.5rem;">
+      An unclassified table game. What you are about to wager cannot be unwagered.
+      Access restricted to verified VIP players.
+    </p>
+    {% if target and target.is_vip %}
+    <div class="alert alert-info" style="max-width:400px;margin:0 auto 1.5rem;">
+      <strong>VIP Access Granted.</strong> The suite is currently under maintenance. Check back soon.
+    </div>
+    {% else %}
+    <div class="alert alert-error" style="max-width:400px;margin:0 auto 1.5rem;">
+      VIP status required. Upgrade your account to gain access.
+    </div>
+    {% endif %}
+    <p style="color:var(--muted);font-size:0.75rem;margin-top:1rem;">
+      CommonHuman-Lab &mdash; Experimental. Handle with care.
+    </p>
+  </div>
+
+  <p style="margin-top:1rem;"><a href="{{ url_for('lobby') }}">← Back to Lobby</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Set New Password{% endblock %}
+{% block content %}
+<div class="form-card">
+  <h2>Set New Password</h2>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  {% if not error %}
+  <form method="post">
+    <div class="form-group">
+      <label>New Password</label>
+      <input type="password" name="password" required>
+    </div>
+    <button class="btn btn-primary" style="width:100%;">Update Password</button>
+  </form>
+  {% endif %}
+  <p style="margin-top:1rem;text-align:center;font-size:0.85rem;color:var(--muted);">
+    <a href="{{ url_for('login') }}">Back to login</a>
+  </p>
+</div>
+{% endblock %}

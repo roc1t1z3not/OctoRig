@@ -51,7 +51,7 @@ def commonhuman_easter_egg():
    /|   |\\
   (_)   (_)</pre>
 <h2>&#x1F419; You found it.</h2>
-<p>NetPulse &mdash; Lab 14</p>
+<p>NetPulse &mdash; Lab</p>
 <p>Part of the <strong>CommonHuman-Lab</strong> community.</p>
 <p style="margin-top:1.5rem;color:#607d8b;">Thank you for using these tools. If they have been useful for your training or teaching, a follow and a star on GitHub help more people find the project &mdash; and they mean a lot.</p>
 <p style="margin-top:1rem;">

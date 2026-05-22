@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Roulette{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>🎡 Roulette</h1>
+    <p>Balance: <span style="color:var(--gold);">${{ "%.2f"|format(user.balance) }}</span> &nbsp;·&nbsp; European Wheel (0–36)</p>
+  </div>
+
+  <div class="game-panel">
+    {% if result %}
+    <div class="roulette-result {{ result.color }}">{{ result.landed }}</div>
+    <p style="text-align:center;color:var(--muted);margin-bottom:1rem;">
+      {{ result.color | capitalize }} &nbsp;·&nbsp;
+      {% if result.landed != 0 %}{{ 'odd' if result.landed % 2 == 1 else 'even' }}{% endif %}
+    </p>
+    {% if result.outcome == 'win' %}
+    <div class="alert alert-success">
+      Win! +${{ "%.2f"|format(result.payout) }} &nbsp; (bet ${{ "%.2f"|format(result.amount) }})
+    </div>
+    {% else %}
+    <div class="alert alert-error">Lost ${{ "%.2f"|format(result.amount) }}</div>
+    {% endif %}
+    <p style="color:var(--muted);font-size:0.85rem;text-align:center;margin-bottom:1.5rem;">
+      New balance: ${{ "%.2f"|format(result.new_balance) }}
+    </p>
+    {% if result.memo %}
+    <p style="color:var(--muted);font-size:0.82rem;text-align:center;margin-bottom:1rem;">
+      Memo: {{ result.memo | safe }}
+    </p>
+    {% endif %}
+    {% endif %}
+
+    <form method="post" action="{{ url_for('roulette_spin') }}">
+      <div class="form-group">
+        <label>Bet Type</label>
+        <select name="bet_type" id="bet-type" onchange="updateBetValue()">
+          <option value="color">Color (Red / Black) — 1:1</option>
+          <option value="parity">Parity (Odd / Even) — 1:1</option>
+          <option value="half">Half (Low 1-18 / High 19-36) — 1:1</option>
+          <option value="dozen">Dozen (1-12, 13-24, 25-36) — 2:1</option>
+          <option value="column">Column — 2:1</option>
+          <option value="straight">Straight (Single Number) — 35:1</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Bet Value</label>
+        <select name="bet_value" id="bet-value">
+          <option value="red">Red</option>
+          <option value="black">Black</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Amount ($)</label>
+        <!-- VULN: amount accepted without validation -->
+        <input type="number" name="amount" value="10" min="1" step="1">
+      </div>
+      <div class="form-group">
+        <label>Memo (optional)</label>
+        <!-- VULN: stored XSS — memo stored raw -->
+        <input type="text" name="memo" placeholder="Leave a note…">
+      </div>
+      <button class="btn btn-primary" style="width:100%;">Spin the Wheel</button>
+    </form>
+  </div>
+</div>
+
+<script>
+var opts = {
+  color:    [['red','Red'],['black','Black']],
+  parity:   [['odd','Odd'],['even','Even']],
+  half:     [['low','Low (1-18)'],['high','High (19-36)']],
+  dozen:    [['1','1st Dozen (1-12)'],['2','2nd Dozen (13-24)'],['3','3rd Dozen (25-36)']],
+  column:   [['1','Column 1'],['2','Column 2'],['3','Column 3']],
+  straight: Array.from({length:37},function(_,i){return [String(i), String(i)];})
+};
+function updateBetValue(){
+  var type = document.getElementById('bet-type').value;
+  var sel  = document.getElementById('bet-value');
+  sel.innerHTML = '';
+  (opts[type]||[]).forEach(function(o){
+    var opt = document.createElement('option');
+    opt.value = o[0]; opt.textContent = o[1];
+    sel.appendChild(opt);
+  });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Edit User{% endblock %}
+{% block content %}
+<div class="container" style="max-width:760px;">
+  <div class="page-header">
+    <h1>Edit User</h1>
+    {% if target %}<p>Editing: {{ target.username }} (#{{ target.id }})</p>{% endif %}
+  </div>
+
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  {% if success %}<div class="alert alert-success">{{ success }}</div>{% endif %}
+
+  {% if target %}
+  <!-- VULN: IDOR — no is_admin check on POST; any logged-in user can edit any account -->
+  <form method="post">
+    <div class="form-group">
+      <label>Display Name</label>
+      <input type="text" name="display_name" value="{{ target.display_name }}">
+    </div>
+    <div class="form-group">
+      <label>Balance ($)</label>
+      <input type="number" name="balance" value="{{ target.balance }}" step="0.01">
+    </div>
+    <div class="form-group">
+      <label>Admin</label>
+      <select name="is_admin">
+        <option value="0" {% if not target.is_admin %}selected{% endif %}>No</option>
+        <option value="1" {% if target.is_admin %}selected{% endif %}>Yes</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>VIP</label>
+      <select name="is_vip">
+        <option value="0" {% if not target.is_vip %}selected{% endif %}>No</option>
+        <option value="1" {% if target.is_vip %}selected{% endif %}>Yes</option>
+      </select>
+    </div>
+    <button class="btn btn-primary">Save</button>
+    <a href="{{ url_for('admin_index') }}" class="btn" style="margin-left:0.5rem;">Back</a>
+  </form>
+
+  {% if game_hist %}
+  <div class="section-title mt3">Recent Game History</div>
+  <table class="data-table">
+    <thead>
+      <tr><th>Game</th><th>Bet</th><th>Result</th><th>Payout</th><th>Date</th></tr>
+    </thead>
+    <tbody>
+      {% for g in game_hist %}
+      <tr>
+        <td>{{ g.game_type }}</td>
+        <td>${{ "%.2f"|format(g.bet) }}</td>
+        <td>
+          {% if g.result == 'win' %}<span class="badge badge-green">win</span>
+          {% elif g.result == 'loss' %}<span class="badge badge-red">loss</span>
+          {% else %}<span class="badge badge-muted">{{ g.result }}</span>{% endif %}
+        </td>
+        <td>${{ "%.2f"|format(g.payout) }}</td>
+        <td style="color:var(--muted);font-size:0.8rem;">{{ g.created_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

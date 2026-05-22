@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 CommonHuman-Lab
+# =============================================================================
+# Lab: GoldenAce
+# Deliberately vulnerable online casino — SQLi, IDOR, XSS, CSRF, business logic
+# Built from source in labs/goldenace/
+# =============================================================================
+
+LAB_NAME="GoldenAce"
+CONTAINER_NAME="octorig-goldenace"
+HOST_PORT=8087
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_DIR="${SCRIPT_DIR}/goldenace"
+
+source "${SCRIPT_DIR}/_common.sh"
+require_action "${1:-}"
+
+case "$1" in
+  start)
+    header "Starting..."
+    ensure_container_gone "$CONTAINER_NAME"
+
+    info "Building GoldenAce image..."
+    if docker build -q -t octorig-goldenace:latest "$APP_DIR" &>/dev/null; then
+      good "Image built"
+    else
+      bad "Image build failed — check labs/goldenace/"
+      exit 1
+    fi
+
+    docker run -d \
+      --name "$CONTAINER_NAME" \
+      -p "${HOST_PORT}:5000" \
+      --restart unless-stopped \
+      octorig-goldenace:latest
+
+    wait_for_port 127.0.0.1 "$HOST_PORT" 60
+
+    INFO_LINES=(
+      "URL|http://127.0.0.1:${HOST_PORT}"
+      "Admin|admin / commonhuman-lab"
+      "VIP|lucky_larry / sunshine1"
+      "User|jane.doe / iloveyou"
+      "Stop|./goldenace.sh stop"
+    )
+    access_card INFO_LINES
+    good "GoldenAce is up!"
+    ;;
+
+  stop)
+    header "Stopping..."
+    if docker rm -f "$CONTAINER_NAME" &>/dev/null; then
+      good "Container $CONTAINER_NAME removed."
+    else
+      warn "Container $CONTAINER_NAME was not running."
+    fi
+    ;;
+
+  status)
+    container_status "$CONTAINER_NAME"
+    ;;
+esac

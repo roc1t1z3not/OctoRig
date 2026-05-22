@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Password Reset{% endblock %}
+{% block content %}
+<div class="form-card">
+  <h2>Password Reset</h2>
+  {% if token_info %}
+  <div class="alert alert-success">
+    Reset token generated. In a real system this would be emailed.<br>
+    <span class="mono" style="font-size:0.8rem;word-break:break-all;">Token: {{ token_info }}</span>
+  </div>
+  {% endif %}
+  <form method="post">
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" name="email" required>
+    </div>
+    <button class="btn btn-primary" style="width:100%;">Request Reset</button>
+  </form>
+  <p style="margin-top:1rem;text-align:center;font-size:0.85rem;color:var(--muted);">
+    <a href="{{ url_for('login') }}">Back to login</a>
+  </p>
+</div>
+{% endblock %}

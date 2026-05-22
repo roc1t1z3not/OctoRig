@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Slots{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>🎰 Slots</h1>
+    <p>Balance: <span style="color:var(--gold);">${{ "%.2f"|format(user.balance) }}</span></p>
+  </div>
+
+  <div class="game-panel">
+    {% if result %}
+    <div class="reel-row">
+      {% for r in result.reels %}
+      <div class="reel {% if result.outcome == 'win' %}win-reel{% endif %}">{{ r }}</div>
+      {% endfor %}
+    </div>
+    <div style="text-align:center;margin-bottom:1.5rem;">
+      {% if result.outcome == 'win' %}
+      <div class="alert alert-success">
+        Win! +${{ "%.2f"|format(result.payout) }} &nbsp; (bet ${{ "%.2f"|format(result.bet) }})
+      </div>
+      {% else %}
+      <div class="alert alert-error">No match — lost ${{ "%.2f"|format(result.bet) }}</div>
+      {% endif %}
+      <p style="color:var(--muted);font-size:0.85rem;">New balance: ${{ "%.2f"|format(result.new_balance) }}</p>
+      {% if result.memo %}
+      <p style="color:var(--muted);font-size:0.82rem;">Memo: {{ result.memo | safe }}</p>
+      {% endif %}
+    </div>
+    {% else %}
+    <div class="reel-row">
+      <div class="reel">?</div>
+      <div class="reel">?</div>
+      <div class="reel">?</div>
+    </div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('slots_spin') }}">
+      <div class="form-group">
+        <label>Bet Amount ($)</label>
+        <!-- VULN: bet accepted from POST — no server-side validation -->
+        <input type="number" name="bet" value="25" min="1" step="1">
+      </div>
+      <div class="form-group">
+        <label>Memo (optional)</label>
+        <!-- VULN: stored XSS — memo stored raw -->
+        <input type="text" name="memo" placeholder="Leave a note…">
+      </div>
+      <button class="btn btn-primary" style="width:100%;">SPIN</button>
+    </form>
+
+    <div class="mt3">
+      <div class="section-title">Paytable</div>
+      <table class="data-table">
+        <thead><tr><th>Symbol</th><th>3 of a Kind</th><th>2 of a Kind</th></tr></thead>
+        <tbody>
+          <tr><td>🃏 Joker</td><td style="color:var(--gold);">50×</td><td>0.5×</td></tr>
+          <tr><td>💎 Diamond</td><td style="color:var(--gold);">20×</td><td>0.5×</td></tr>
+          <tr><td>7️⃣ Seven</td><td>10×</td><td>0.5×</td></tr>
+          <tr><td>⭐ Star</td><td>5×</td><td>0.5×</td></tr>
+          <tr><td>🔔 Bell</td><td>3×</td><td>0.5×</td></tr>
+          <tr><td>🍒 Cherry</td><td>2×</td><td>0.5×</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

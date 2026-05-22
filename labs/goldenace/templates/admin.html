@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Admin Panel{% endblock %}
+{% block content %}
+<div class="container">
+  <!-- VULN: broken access control — this page reachable by any logged-in user -->
+  <div class="page-header">
+    <h1>Admin Panel</h1>
+    <p style="color:var(--gold);">GoldenAce Casino Management</p>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="stat-label">Total Users</div>
+      <div class="stat-value">{{ stats.total_users }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Total Games Played</div>
+      <div class="stat-value">{{ stats.total_games }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Total Wagered</div>
+      <div class="stat-value" style="font-size:1.2rem;color:var(--gold);">${{ "%.0f"|format(stats.total_wagered) }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Chat Messages</div>
+      <div class="stat-value">{{ stats.total_messages }}</div>
+    </div>
+  </div>
+
+  <div class="section-title">Users</div>
+  <table class="admin-table">
+    <thead>
+      <tr><th>ID</th><th>Username</th><th>Display Name</th><th>Balance</th><th>Admin</th><th>VIP</th><th>Joined</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td style="color:var(--muted);">{{ u.id }}</td>
+        <!-- VULN: stored XSS — display_name rendered with | safe -->
+        <td><a href="{{ url_for('admin_user', user_id=u.id) }}">{{ u.username }}</a></td>
+        <td>{{ u.display_name | safe }}</td>
+        <td style="color:var(--gold);font-family:monospace;">${{ "%.2f"|format(u.balance) }}</td>
+        <td>{% if u.is_admin %}<span class="badge badge-blue">Yes</span>{% else %}—{% endif %}</td>
+        <td>{% if u.is_vip %}<span class="badge badge-gold">Yes</span>{% else %}—{% endif %}</td>
+        <td style="color:var(--muted);font-size:0.8rem;">{{ u.created_at }}</td>
+        <td>
+          <a href="{{ url_for('admin_user', user_id=u.id) }}" class="btn btn-sm">Edit</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

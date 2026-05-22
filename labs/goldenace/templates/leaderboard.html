@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Leaderboard{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>Leaderboard</h1>
+    <p>Top players by chip balance</p>
+  </div>
+
+  <!-- VULN: reflected XSS — q rendered with | safe -->
+  <form class="search-bar" method="get">
+    <input type="text" name="q" placeholder="Search player…" value="{{ q | safe }}">
+    <button class="btn">Search</button>
+  </form>
+  {% if q %}
+  <p class="text-muted" style="font-size:0.85rem;margin-bottom:1rem;">
+    Results for: <strong>{{ q | safe }}</strong>
+  </p>
+  {% endif %}
+
+  {% if rows %}
+  <table class="data-table">
+    <thead>
+      <tr><th>#</th><th>Player</th><th>Status</th><th>Balance</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for p in rows %}
+      <tr>
+        <td style="color:var(--muted);">{{ loop.index }}</td>
+        <!-- VULN: stored XSS — display_name rendered with | safe -->
+        <td><a href="{{ url_for('profile', user_id=p.id) }}">{{ (p.display_name if p.display_name else p.username) | safe }}</a></td>
+        <td>
+          {% if p.is_vip %}<span class="badge badge-gold">VIP</span>
+          {% else %}<span class="badge badge-muted">Standard</span>{% endif %}
+        </td>
+        <td style="color:var(--gold);font-family:monospace;">${{ "%.2f"|format(p.balance) }}</td>
+        <td><a href="{{ url_for('transactions', user_id=p.id) }}" style="font-size:0.8rem;color:var(--muted);">History</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No players found.</p>
+  {% endif %}
+</div>
+{% endblock %}

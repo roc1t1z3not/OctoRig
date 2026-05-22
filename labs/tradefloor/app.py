@@ -96,7 +96,7 @@ def commonhuman_easter_egg():
    /|   |\\
   (_)   (_)</pre>
 <h2>&#x1F419; You found it.</h2>
-<p>TradeFloor &mdash; Lab 15</p>
+<p>TradeFloor &mdash; Lab</p>
 <p>Part of the <strong>CommonHuman-Lab</strong> community.</p>
 <p style="margin-top:1.5rem;color:#64748b;">Thank you for using these tools. If they have been useful for your training or teaching, a follow and a star on GitHub help more people find the project &mdash; and they mean a lot.</p>
 <p style="margin-top:1rem;">

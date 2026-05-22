@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Promo Codes{% endblock %}
+{% block content %}
+<div class="form-card">
+  <h2>♦ Redeem Promo Code</h2>
+  <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1.25rem;">
+    Enter a valid promo code to receive bonus chips.
+  </p>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  {% if success %}<div class="alert alert-success">{{ success }}</div>{% endif %}
+
+  <!-- VULN: no CSRF token; code param injected into SQLi query -->
+  <form method="post" action="{{ url_for('promo') }}">
+    <div class="form-group">
+      <label>Promo Code</label>
+      <input type="text" name="code" placeholder="e.g. WELCOME100" autocomplete="off" required>
+    </div>
+    <button class="btn btn-primary" style="width:100%;">Redeem</button>
+  </form>
+
+  <p style="margin-top:1.5rem;font-size:0.8rem;color:var(--muted);">
+    Current balance: <span style="color:var(--gold);">${{ "%.2f"|format(user.balance) }}</span>
+  </p>
+</div>
+{% endblock %}

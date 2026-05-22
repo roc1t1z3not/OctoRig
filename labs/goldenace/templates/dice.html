@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Dice{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>🎲 Hi-Lo Dice</h1>
+    <p>Balance: <span style="color:var(--gold);">${{ "%.2f"|format(user.balance) }}</span> &nbsp;·&nbsp; Roll 2d6. Above 7 = High, below 7 = Low. Exact 7 = house wins.</p>
+  </div>
+
+  <div class="game-panel">
+    {% if result %}
+    <div class="dice-row">
+      <div class="die">{{ result.d1 }}</div>
+      <div class="die">{{ result.d2 }}</div>
+    </div>
+    <p style="text-align:center;font-size:1.1rem;font-weight:700;margin-bottom:1rem;">
+      Total: <span style="color:var(--gold);">{{ result.total }}</span>
+    </p>
+    {% if result.outcome == 'win' %}
+    <div class="alert alert-success">
+      Win! Rolled {{ result.total }} — {{ 'HIGH' if result.choice == 'high' else 'LOW' }}. +${{ "%.2f"|format(result.payout) }}
+    </div>
+    {% else %}
+    <div class="alert alert-error">
+      Lost ${{ "%.2f"|format(result.bet) }}. {% if result.total == 7 %}Seven — house takes it.{% else %}Wrong call.{% endif %}
+    </div>
+    {% endif %}
+    <p style="color:var(--muted);font-size:0.85rem;text-align:center;margin-bottom:1.5rem;">
+      New balance: ${{ "%.2f"|format(result.new_balance) }}
+    </p>
+    {% if result.memo %}
+    <p style="color:var(--muted);font-size:0.82rem;text-align:center;margin-bottom:1rem;">
+      Memo: {{ result.memo | safe }}
+    </p>
+    {% endif %}
+    {% else %}
+    <div class="dice-row">
+      <div class="die">?</div>
+      <div class="die">?</div>
+    </div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('dice_roll') }}">
+      <div class="form-group">
+        <label>Your Call</label>
+        <select name="choice">
+          <option value="high">High (8–12) — 2:1</option>
+          <option value="low">Low (2–6) — 2:1</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Bet Amount ($)</label>
+        <!-- VULN: bet accepted without negative validation -->
+        <input type="number" name="bet" value="10" min="1" step="1">
+      </div>
+      <div class="form-group">
+        <label>Memo (optional)</label>
+        <!-- VULN: stored XSS — memo stored raw -->
+        <input type="text" name="memo" placeholder="Leave a note…">
+      </div>
+      <button class="btn btn-primary" style="width:100%;">Roll Dice</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

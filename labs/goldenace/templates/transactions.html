@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Transactions{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    {% if owner %}
+    <!-- VULN: IDOR — viewing any user's transactions without ownership check -->
+    <h1>{{ owner.username }}'s Transactions</h1>
+    <p>User #{{ user_id }}</p>
+    {% else %}
+    <h1>Transactions</h1>
+    {% endif %}
+  </div>
+
+  <!-- VULN: reflected XSS — q rendered with | safe -->
+  <form class="search-bar" method="get">
+    <input type="text" name="q" placeholder="Search description…" value="{{ q | safe }}">
+    <button class="btn">Search</button>
+  </form>
+  {% if q %}
+  <p class="text-muted" style="font-size:0.85rem;margin-bottom:1rem;">
+    Results for: <strong>{{ q | safe }}</strong>
+  </p>
+  {% endif %}
+
+  {% if rows %}
+  <table class="data-table">
+    <thead>
+      <tr><th>ID</th><th>Type</th><th>Amount</th><th>Description</th><th>Game</th><th>Date</th></tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td style="color:var(--muted);">{{ r.id }}</td>
+        <td>
+          {% if r.type in ('win','transfer_in','promo','deposit') %}
+          <span class="badge badge-green">{{ r.type }}</span>
+          {% else %}
+          <span class="badge badge-red">{{ r.type }}</span>
+          {% endif %}
+        </td>
+        <td class="{% if r.amount >= 0 %}win-text{% else %}loss-text{% endif %}" style="font-family:monospace;">
+          {% if r.amount >= 0 %}+{% endif %}${{ "%.2f"|format(r.amount) }}
+        </td>
+        <td>{{ r.description }}</td>
+        <td style="color:var(--muted);">{{ r.game_type or '—' }}</td>
+        <td style="color:var(--muted);font-size:0.8rem;">{{ r.created_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No transactions found.</p>
+  {% endif %}
+</div>
+{% endblock %}

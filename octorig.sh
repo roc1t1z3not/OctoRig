@@ -52,21 +52,22 @@ update_self() {
 # ---------------- lab registry -----------------------------------------------
 # Format: "ID|NAME|SCRIPT|DESCRIPTION"
 LABS=(
-  "1|Juice Shop|juiceshop.sh|OWASP Juice Shop - OWASP Top 10 web vulnerabilities"
-  "2|DVWA|dvwa.sh|Damn Vulnerable Web App - PHP/MySQL classic"
-  "3|Metasploitable2|metasploitable.sh|Linux VM with intentionally vulnerable services"
-  "4|WebGoat|webgoat.sh|OWASP WebGoat - PortSwigger-style lesson-based labs"
-  "5|HTB Style|htb_style.sh|HackTheBox-style CTFd platform + vulnerable challenge"
-  "6|VulnAD|vulnad.sh|Vulnerable Active Directory - Samba4 AD with AD attack paths"
-  "7|BreachSQL Fire Range|breachsql.sh|Tiered SQL injection challenges (T1-T5) for SQLi practice"
-  "8|StingXSS Fire Range|stingxss.sh|Tiered XSS challenges (T1-T8) for XSS injection practice"
-  "9|VaultGate IDOR Range|vaultgate.sh|IDOR challenges for benchmarking"
-  "10|VaultRip Range|vaultriprange.sh|SSH credential-rich target for VaultRip passive and remote harvesting"
-  "11|REWIND|rewindrange.sh|Retro video and games store — SQLi, XSS and IDOR"
-  "12|HumanBank|humanbank.sh|Vulnerable online banking app — SQLi, IDOR, XSS, auth flaws, file upload, business logic"
-  "13|MediHuman|medihuman.sh|Vulnerable healthcare patient portal — SQLi, IDOR, XSS, file upload, SSH/FTP weak creds"
-  "14|NetPulse|netpulse.sh|Vulnerable 90s ISP portal — SSRF, SSTI, command injection, open redirect, SQLi, IDOR, XSS"
-  "15|TradeFloor|tradefloor.sh|Vulnerable trading portal — XXE, CSRF, mass assignment, SQLi, IDOR, stored XSS"
+  "1|Rewind|rewindrange.sh|Retro video and games store — SQLi, XSS and IDOR"
+  "2|TradeFloor|tradefloor.sh|Vulnerable trading portal — XXE, CSRF, mass assignment, SQLi, IDOR, stored XSS"
+  "3|GoldenAce|goldenace.sh|Vulnerable online casino — SQLi, IDOR, stored XSS, CSRF, business logic, JWT alg:none"
+  "4|HumanBank|humanbank.sh|Vulnerable online banking app — SQLi, IDOR, XSS, auth flaws, file upload, business logic"
+  "5|MediHuman|medihuman.sh|Vulnerable healthcare patient portal — SQLi, IDOR, XSS, file upload, SSH/FTP weak creds"
+  "6|NetPulse|netpulse.sh|Vulnerable 90s ISP portal — SSRF, SSTI, command injection, open redirect, SQLi, IDOR, XSS"
+  "7|BreachSQL|breachsql.sh|Tiered SQL injection challenges (T1-T5) for SQLi practice"
+  "8|StingXSS|stingxss.sh|Tiered XSS challenges (T1-T8) for XSS injection practice"
+  "9|VaultGate|vaultgate.sh|IDOR challenges for benchmarking"
+  "10|VaultRip|vaultriprange.sh|SSH credential-rich target for VaultRip passive and remote harvesting"
+  "11|Juice Shop|juiceshop.sh|OWASP Juice Shop - OWASP Top 10 web vulnerabilities"
+  "12|DVWA|dvwa.sh|Damn Vulnerable Web App - PHP/MySQL classic"
+  "13|Metasploitable2|metasploitable.sh|Linux VM with intentionally vulnerable services"
+  "14|WebGoat|webgoat.sh|OWASP WebGoat - PortSwigger-style lesson-based labs"
+  "15|HTB Style|htb_style.sh|HackTheBox-style CTFd platform + vulnerable challenge"
+  "16|VulnAD|vulnad.sh|Vulnerable Active Directory - Samba4 AD with AD attack paths"
 )
 
 # ---------------- dependency checks ------------------------------------------
@@ -151,19 +152,32 @@ status_all() {
 # ---------------- dispatch to a lab script ------------------------------------
 dispatch() {
   local action="$1"
-  local id="$2"
+  local query="$2"
 
-  local matched=""
-  for entry in "${LABS[@]}"; do
-    IFS='|' read -r lid _name lscript _desc <<< "$entry"
-    if [[ "$lid" == "$id" ]]; then
-      matched="$lscript"
-      break
-    fi
-  done
+  local matched="" matched_name=""
+
+  if [[ "$query" =~ ^[0-9]+$ ]]; then
+    for entry in "${LABS[@]}"; do
+      IFS='|' read -r lid lname lscript _desc <<< "$entry"
+      if [[ "$lid" == "$query" ]]; then
+        matched="$lscript"; matched_name="$lname"; break
+      fi
+    done
+  else
+    local qnorm
+    qnorm=$(echo "$query" | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]')
+    for entry in "${LABS[@]}"; do
+      IFS='|' read -r _lid lname lscript _desc <<< "$entry"
+      local nnorm
+      nnorm=$(echo "$lname" | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]')
+      if [[ "$nnorm" == "$qnorm"* ]]; then
+        matched="$lscript"; matched_name="$lname"; break
+      fi
+    done
+  fi
 
   if [[ -z "$matched" ]]; then
-    bad "Unknown lab ID: $id"
+    bad "Unknown lab: $query"
     echo ""
     list_labs
     exit 1
@@ -217,8 +231,8 @@ all_action() {
 interactive_menu() {
   list_labs
   echo -e "  ${BOLD}Commands:${RESET}"
-  echo -e "  ${GREEN}start <id>${RESET}   — Start a lab by ID (e.g. start 1)"
-  echo -e "  ${GREEN}stop <id>${RESET}    — Stop a lab by ID"
+  echo -e "  ${GREEN}start <id|name>${RESET}  — Start a lab by ID or name (e.g. start 3, start goldenace)"
+  echo -e "  ${GREEN}stop <id|name>${RESET}   — Stop a lab by ID or name"
   echo -e "  ${GREEN}status${RESET}       — Show running lab containers"
   echo -e "  ${GREEN}start all${RESET}    — Start all labs"
   echo -e "  ${GREEN}stop all${RESET}     — Stop all labs"
@@ -268,10 +282,10 @@ case "${1:-menu}" in
     else dispatch stop "${2:-}"; fi ;;
   help|-h|--help)
     list_labs
-    echo "Usage: $0 [menu|list|status|start <id|all>|stop <id|all>]"
+    echo "Usage: $0 [menu|list|status|start <id|name|all>|stop <id|name|all>]"
     echo "" ;;
   *)
     bad "Unknown command: ${1}"
-    echo "Usage: $0 [menu|list|status|start <id|all>|stop <id|all>]"
+    echo "Usage: $0 [menu|list|status|start <id|name|all>|stop <id|name|all>]"
     exit 1 ;;
 esac

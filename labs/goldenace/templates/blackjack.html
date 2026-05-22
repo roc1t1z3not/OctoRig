@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Blackjack{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>🃏 Blackjack</h1>
+    <p>Balance: <span style="color:var(--gold);">${{ "%.2f"|format(user.balance) }}</span></p>
+  </div>
+
+  <div class="game-panel">
+    {% if state %}
+    {% set pv = namespace(val=0) %}
+    <div class="section-title">Dealer's Hand</div>
+    <div class="card-row">
+      {% for c in state.dealer %}
+      {% if loop.index == 2 and state.status == 'playing' %}
+      <div class="playing-card face-down">🂠</div>
+      {% else %}
+      <div class="playing-card {% if '♥' in c or '♦' in c %}red{% endif %}">{{ c }}</div>
+      {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="section-title mt2">Your Hand</div>
+    <div class="card-row">
+      {% for c in state.player %}
+      <div class="playing-card {% if '♥' in c or '♦' in c %}red{% endif %}">{{ c }}</div>
+      {% endfor %}
+    </div>
+
+    {% if state.status == 'playing' %}
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1.5rem;">
+      <form method="post" action="{{ url_for('blackjack_action') }}">
+        <input type="hidden" name="action" value="hit">
+        <button class="btn btn-primary">Hit</button>
+      </form>
+      <form method="post" action="{{ url_for('blackjack_action') }}">
+        <input type="hidden" name="action" value="stand">
+        <button class="btn">Stand</button>
+      </form>
+      <form method="post" action="{{ url_for('blackjack_action') }}">
+        <input type="hidden" name="action" value="double">
+        <button class="btn">Double Down</button>
+      </form>
+      {% if state.player | length == 2 %}
+      <form method="post" action="{{ url_for('blackjack_action') }}">
+        <input type="hidden" name="action" value="split">
+        <button class="btn">Split</button>
+      </form>
+      {% endif %}
+    </div>
+
+    {% else %}
+    {% set outcome_map = {
+      'player_bust': ('loss-text', 'Bust! You went over 21.'),
+      'dealer_bust': ('win-text', 'Dealer busts! You win!'),
+      'player_win':  ('win-text', 'You win!'),
+      'dealer_win':  ('loss-text', 'Dealer wins.'),
+      'push':        ('text-muted', 'Push — bet returned.'),
+      'blackjack':   ('win-text', 'Blackjack! 2.5× payout!'),
+    } %}
+    {% set cls, msg = outcome_map.get(state.status, ('text-muted', state.status)) %}
+    <div class="alert {% if 'win' in cls %}alert-success{% elif 'loss' in cls %}alert-error{% else %}alert-info{% endif %} mt2">
+      {{ msg }}
+      {% if state.payout is defined %}
+        &nbsp; Payout: ${{ "%.2f"|format(state.payout) }}
+      {% endif %}
+    </div>
+    <form method="post" action="{{ url_for('blackjack_deal') }}" style="margin-top:1rem;">
+      <div class="form-group">
+        <label>Bet ($)</label>
+        <input type="number" name="bet" value="{{ state.bet }}" min="1" step="1" style="max-width:160px;">
+      </div>
+      <button class="btn btn-primary">Deal New Hand</button>
+    </form>
+    {% endif %}
+
+    {% else %}
+    <p class="text-muted" style="margin-bottom:1.5rem;">Place your bet and deal to begin.</p>
+    <form method="post" action="{{ url_for('blackjack_deal') }}">
+      <div class="form-group">
+        <label>Bet Amount ($)</label>
+        <!-- VULN: bet accepted without negative validation -->
+        <input type="number" name="bet" value="25" min="1" step="1">
+      </div>
+      <button class="btn btn-primary" style="width:100%;">Deal</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
