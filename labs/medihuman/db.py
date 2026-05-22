@@ -106,7 +106,7 @@ def init_db():
     # ── Seed users ────────────────────────────────────────────────────────────
     db.executescript("""
         INSERT OR IGNORE INTO users (id, username, password, email, full_name, role, is_admin) VALUES
-          (1, 'admin',         'medihuman-admin-2026', 'admin@medihuman.local',          'Admin',           'admin',   1),
+          (1, 'admin',         'commonhuman-lab',      'admin@medihuman.local',          'Admin',           'admin',   1),
           (2, 'dr.carter',     'password1',            'carter@medihuman.local',          'Dr. James Carter', 'doctor',  0),
           (3, 'dr.patel',      'letmein',              'patel@medihuman.local',           'Dr. Priya Patel',  'doctor',  0),
           (4, 'patient.john',  'sunshine1',            'john.walker@mail.example',        'John Walker',      'patient', 0),

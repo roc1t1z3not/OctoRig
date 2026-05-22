@@ -91,14 +91,14 @@ Deliberately vulnerable Flask application — 57 SQL injection challenges across
 
 ## Quick Start
 
-The Fire Range is managed by OctoRig (lab slot 7).
+The Fire Range is managed by OctoRig
 
 ```bash
 # From the OctoRig root
-./octorig.sh start 7
+./octorig.sh start BreachSQL
 
 # Stop (preserves scoreboard volume)
-./octorig.sh stop 7
+./octorig.sh stop BreachSQL
 ```
 
 The app starts on **http://127.0.0.1:17476**.
@@ -135,18 +135,6 @@ FIRE{<challenge_id>_<short_description>}
 ```
 
 Example: `FIRE{my1a_integer_error_based}`
-
-## Testing
-
-The BreachSQL scanner test suite runs all challenges end-to-end.
-
-```bash
-# From the breachsql repo root
-pytest tests/test_firerange.py -v
-
-# Skip if Fire Range is not running (CI-safe)
-pytest -m "not firerange"
-```
 
 ---
 

@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS reset_tokens (
 );
 
 INSERT OR IGNORE INTO users VALUES
-  (1,'admin','humanbank-admin-2026','admin@humanbank.local','HumanBank Admin',1,'','555-0100','HumanBank HQ'),
+  (1,'admin','commonhuman-lab','admin@humanbank.local','HumanBank Admin',1,'','555-0100','HumanBank HQ'),
   (2,'alice.wang','sunshine1','alice@example.com','Alice Wang',0,'Passionate about personal finance and travel.','+1 503 555 0201','14 Cedar Ave, Portland OR'),
   (3,'bob.harris','baseball99','bob@example.com','Bob Harris',0,'','','42 Oak Street, Seattle WA'),
   (4,'carol.lee','iloveyou','carol@example.com','Carol Lee',0,'Coffee addict. Saving for a house.','','88 Pine Road, Austin TX'),
