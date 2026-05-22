@@ -10,18 +10,29 @@
   {% if holdings %}
   <table class="data-table">
     <thead>
-      <tr><th>SYMBOL</th><th>COMPANY</th><th>QTY</th><th>AVG COST</th><th>LAST</th><th>CHANGE</th><th>VALUE</th></tr>
+      <tr><th>SYMBOL</th><th>COMPANY</th><th>QTY</th><th>AVG COST</th><th>LAST</th><th>CHANGE</th><th>VALUE</th><th>P&amp;L</th><th></th></tr>
     </thead>
     <tbody>
       {% for h in holdings %}
+      {% set value = h.price * h.quantity %}
+      {% set cost  = h.avg_price * h.quantity %}
+      {% set pnl   = value - cost %}
       <tr>
-        <td style="color:var(--green);">{{ h.symbol }}</td>
+        <td><a href="{{ url_for('market_detail', symbol=h.symbol) }}" style="color:var(--green);font-family:'SF Mono','Fira Code',monospace;font-weight:600;">{{ h.symbol }}</a></td>
         <td>{{ h.name }}</td>
         <td>{{ h.quantity }}</td>
         <td>${{ "%.2f"|format(h.avg_price) }}</td>
         <td>${{ "%.2f"|format(h.price) }}</td>
-        <td class="{% if h.change >= 0 %}price-up{% else %}price-down{% endif %}">{{ "%.2f"|format(h.change) }}</td>
-        <td style="color:var(--amber);">${{ "%.2f"|format(h.price * h.quantity) }}</td>
+        <td class="{% if h.change > 0 %}price-up{% elif h.change < 0 %}price-down{% endif %}">
+          {% if h.change > 0 %}+{% endif %}{{ "%.2f"|format(h.change) }}
+        </td>
+        <td style="color:var(--amber);">${{ "%.2f"|format(value) }}</td>
+        <td class="{% if pnl >= 0 %}price-up{% else %}price-down{% endif %}">
+          {% if pnl >= 0 %}+{% endif %}${{ "%.2f"|format(pnl) }}
+        </td>
+        <td style="text-align:right;white-space:nowrap;">
+          <a href="{{ url_for('trade') }}?symbol={{ h.symbol }}&action=sell" class="btn btn-sm btn-danger">SELL</a>
+        </td>
       </tr>
       {% endfor %}
     </tbody>

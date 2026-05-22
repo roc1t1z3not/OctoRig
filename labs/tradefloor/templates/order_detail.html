@@ -6,13 +6,39 @@
   <div class="detail-panel">
     <div class="detail-row"><span class="lbl">Trader</span><span>{{ owner.username }} ({{ owner.full_name }})</span></div>
     <div class="detail-row"><span class="lbl">Symbol</span><span style="color:var(--green);">{{ order.symbol }}</span></div>
-    <div class="detail-row"><span class="lbl">Action</span><span>{{ order.action | upper }}</span></div>
+    <div class="detail-row">
+      <span class="lbl">Action</span>
+      <span>{% if order.action == 'buy' %}<span class="badge badge-green">BUY</span>{% else %}<span class="badge badge-red">SELL</span>{% endif %}</span>
+    </div>
     <div class="detail-row"><span class="lbl">Quantity</span><span>{{ order.quantity }}</span></div>
     <div class="detail-row"><span class="lbl">Order Type</span><span>{{ order.order_type | upper }}</span></div>
     <div class="detail-row"><span class="lbl">Price</span><span style="color:var(--amber);">${{ "%.2f"|format(order.price) }}</span></div>
-    <div class="detail-row"><span class="lbl">Status</span><span>{{ order.status | upper }}</span></div>
+    <div class="detail-row"><span class="lbl">Total</span><span>${{ "%.2f"|format(order.price * order.quantity) }}</span></div>
+    <div class="detail-row">
+      <span class="lbl">Status</span>
+      <span>
+        {% if order.status == 'open' %}<span class="badge badge-amber">OPEN</span>
+        {% elif order.status == 'filled' %}<span class="badge badge-green">FILLED</span>
+        {% elif order.status == 'cancelled' %}<span class="badge badge-red">CANCELLED</span>
+        {% else %}{{ order.status }}{% endif %}
+      </span>
+    </div>
     <div class="detail-row"><span class="lbl">Date</span><span>{{ order.created_at }}</span></div>
+    {% if order.memo %}
+    <div class="detail-row" style="align-items:flex-start;">
+      <span class="lbl">Note</span>
+      <!-- VULN: stored XSS — memo rendered unsanitised -->
+      <span style="color:var(--muted);">{{ order.memo | safe }}</span>
+    </div>
+    {% endif %}
   </div>
-  <p><a href="{{ url_for('orders') }}">&larr; Back to orders</a></p>
+
+  {% if order.status == 'open' %}
+  <form method="post" action="{{ url_for('order_cancel', order_id=order.id) }}" style="margin-top:1rem;">
+    <button class="btn btn-danger" type="submit">Cancel Order</button>
+  </form>
+  {% endif %}
+
+  <p style="margin-top:1.25rem;"><a href="{{ url_for('orders') }}">&larr; Back to orders</a></p>
 </div>
 {% endblock %}

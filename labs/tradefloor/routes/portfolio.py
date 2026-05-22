@@ -53,11 +53,23 @@ def init(app):
         redir = _require_login()
         if redir:
             return redir
-        uid  = session['user_id']
-        rows = get_db().execute(
-            "SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC", (uid,)
-        ).fetchall()
-        return render_template('orders.html', orders=rows)
+        uid = session['user_id']
+        db  = get_db()
+        q   = request.args.get('q', '').strip()
+        if q:
+            # VULN: SQLi — q injected directly into query string
+            # VULN: IDOR — no user_id filter; search returns all users' orders
+            try:
+                rows = db.execute(
+                    f"SELECT * FROM orders WHERE symbol LIKE '%{q}%' ORDER BY created_at DESC"
+                ).fetchall()
+            except Exception:
+                rows = []
+        else:
+            rows = db.execute(
+                "SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC", (uid,)
+            ).fetchall()
+        return render_template('orders.html', orders=rows, q=q)
 
     # VULN: IDOR — no ownership check, any authenticated user can view any order
     @app.route('/orders/<int:order_id>')

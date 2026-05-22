@@ -1,44 +1,93 @@
 {% extends 'base.html' %}
 {% block title %}Place Order{% endblock %}
 {% block content %}
-<div class="container" style="max-width:600px;">
-  <div class="page-header"><h1>PLACE ORDER</h1></div>
+<div class="container" style="max-width:700px;">
+  <div class="page-header">
+    <h1>PLACE ORDER</h1>
+    <p>Available cash: <span style="color:var(--green);">${{ "%.2f"|format(user.balance) }}</span></p>
+  </div>
 
   {% if message %}<div class="alert alert-success">{{ message }}</div>{% endif %}
-  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  {% if error %}<div class="alert alert-error">{{ error | safe }}</div>{% endif %}
+
+  {% if holding %}
+  <div class="detail-panel" style="margin-bottom:1.5rem;">
+    <div class="section-title" style="margin-bottom:0.75rem;">CURRENT HOLDING — {{ holding.symbol }}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+      <div class="stat-box" style="padding:0.75rem;">
+        <div class="stat-label">QUANTITY</div>
+        <div class="stat-value" style="font-size:1.1rem;">{{ holding.quantity }}</div>
+      </div>
+      <div class="stat-box" style="padding:0.75rem;">
+        <div class="stat-label">AVG COST</div>
+        <div class="stat-value" style="font-size:1.1rem;">${{ "%.2f"|format(holding.avg_price) }}</div>
+      </div>
+      <div class="stat-box" style="padding:0.75rem;">
+        <div class="stat-label">LAST PRICE</div>
+        <div class="stat-value" style="font-size:1.1rem;">${{ "%.2f"|format(holding.price) }}</div>
+      </div>
+      <div class="stat-box" style="padding:0.75rem;">
+        <div class="stat-label">MARKET VALUE</div>
+        <div class="stat-value" style="font-size:1.1rem;color:var(--amber);">${{ "%.2f"|format(holding.price * holding.quantity) }}</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 
   <form method="post" class="detail-panel">
     <div class="form-group">
       <label>SYMBOL</label>
-      <select name="symbol">
+      <select name="symbol" id="symbol-select">
         {% for s in symbols %}
-        <option value="{{ s.symbol }}">{{ s.symbol }} — {{ s.name }} (${{ "%.2f"|format(s.price) }})</option>
+        <option value="{{ s.symbol }}"{% if s.symbol == symbol_pre %} selected{% endif %}>
+          {{ s.symbol }} — {{ s.name }} (${{ "%.2f"|format(s.price) }})
+        </option>
         {% endfor %}
       </select>
     </div>
-    <div class="form-group">
-      <label>ACTION</label>
-      <select name="action">
-        <option value="buy">BUY</option>
-        <option value="sell">SELL</option>
-      </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="form-group">
+        <label>ACTION</label>
+        <select name="action">
+          <option value="buy"{% if action_pre != 'sell' %} selected{% endif %}>BUY</option>
+          <option value="sell"{% if action_pre == 'sell' %} selected{% endif %}>SELL</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>ORDER TYPE</label>
+        <select name="order_type" id="order-type">
+          <option value="market">MARKET</option>
+          <option value="limit">LIMIT</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="form-group">
+        <label>QUANTITY</label>
+        <input type="number" name="quantity" min="1" value="1">
+      </div>
+      <div class="form-group" id="limit-price-group" style="display:none;">
+        <label>LIMIT PRICE</label>
+        <input type="number" name="price" step="0.01" value="0">
+      </div>
     </div>
     <div class="form-group">
-      <label>QUANTITY</label>
-      <input type="number" name="quantity" min="1" value="1">
+      <label>ORDER NOTE <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+      <input type="text" name="memo" placeholder="e.g. earnings play, stop-loss hedge…">
     </div>
-    <div class="form-group">
-      <label>ORDER TYPE</label>
-      <select name="order_type">
-        <option value="market">MARKET</option>
-        <option value="limit">LIMIT</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>LIMIT PRICE (leave 0 for market orders)</label>
-      <input type="number" name="price" step="0.01" value="0">
-    </div>
-    <button class="btn" type="submit">Submit Order</button>
+    <button class="btn" type="submit" style="width:100%;margin-top:0.5rem;">Submit Order</button>
   </form>
+
+  <p style="margin-top:1rem;text-align:right;">
+    <a href="{{ url_for('orders') }}">View order history &rarr;</a>
+  </p>
 </div>
+
+<script>
+  var ot = document.getElementById('order-type');
+  var lp = document.getElementById('limit-price-group');
+  function toggleLimit() { lp.style.display = ot.value === 'limit' ? '' : 'none'; }
+  ot.addEventListener('change', toggleLimit);
+  toggleLimit();
+</script>
 {% endblock %}

@@ -35,7 +35,8 @@ CREATE TABLE IF NOT EXISTS orders (
     order_type   TEXT NOT NULL,
     price        REAL DEFAULT 0.0,
     status       TEXT DEFAULT 'open',
-    created_at   TEXT NOT NULL
+    created_at   TEXT NOT NULL,
+    memo         TEXT DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS market_data (
@@ -82,7 +83,7 @@ CREATE TABLE IF NOT EXISTS reset_tokens (
 );
 
 INSERT OR IGNORE INTO users VALUES
-  (1,'admin','commonhuman-lab','admin@tradefloor.local','TradeFloor Admin',1,'','','',0.0),
+  (1,'admin','commonhuman-lab','admin@tradefloor.local','TradeFloor Admin',1,'','','',50000.0),
   (2,'alice.p','abc1234','alice@example.com','Alice Porter',0,'Day trader since 1996.','','12 Wall St, New York NY',48320.50),
   (3,'bob.nash','pass1234','bob@example.com','Bob Nash',0,'','','34 Market St, San Francisco CA',12750.00),
   (4,'carol.wu','tiger99','carol@example.com','Carol Wu',0,'Tech sector focused.','','88 Pine Ave, Seattle WA',31200.00),
@@ -101,7 +102,7 @@ INSERT OR IGNORE INTO market_data VALUES
   (8, 'CTRX','CentraTech Corp',      61.00,  0.00,'Technology'),
   (9, 'ARGX','Argos Exploration',     3.80,  0.15,'Energy'),
   (10,'HNTR','Hunter & Sons Ltd',    28.90, -0.60,'Retail'),
-  (11,'CMNH','CommonHuman Labs',    1337.00, 0.00,'Experimental');
+  (11,'CMNH','CommonHuman Labs',    1337.00, 42.00,'Experimental');
 
 INSERT OR IGNORE INTO portfolio_holdings VALUES
   (1, 2,'ACME', 100, 38.20),
@@ -129,35 +130,35 @@ INSERT OR IGNORE INTO portfolio_holdings VALUES
   (23,1,'GMBT', 200, 44.00);
 
 INSERT OR IGNORE INTO orders VALUES
-  (1, 2,'ACME','buy', 100,'market',38.20,'filled','1999-12-01'),
-  (2, 2,'ZTRX','buy',  20,'market',85.00,'filled','1999-12-05'),
-  (3, 2,'SLVR','buy',  75,'market',24.00,'filled','1999-12-10'),
-  (4, 2,'GMBT','buy',  50,'market',50.10,'filled','1999-12-15'),
-  (5, 2,'NOVA','sell', 50,'limit', 21.00,'open',  '2000-01-10'),
-  (6, 3,'NOVA','buy', 200,'market',20.00,'filled','1999-11-20'),
-  (7, 3,'BLKR','buy', 500,'market', 6.80,'filled','1999-11-22'),
-  (8, 3,'PCFW','buy', 100,'market',15.50,'filled','1999-12-01'),
-  (9, 3,'ACME','sell', 50,'limit', 44.00,'open',  '2000-01-12'),
-  (10,4,'ACME','buy',  75,'market',40.00,'filled','1999-10-15'),
-  (11,4,'CTRX','buy',  30,'market',58.00,'filled','1999-11-01'),
-  (12,4,'ZTRX','buy',  10,'market',80.00,'filled','1999-11-15'),
-  (13,4,'CTRX','buy',  20,'limit', 60.00,'open',  '2000-01-08'),
-  (14,5,'ARGX','buy',1000,'market', 3.50,'filled','1999-09-01'),
-  (15,5,'BLKR','buy', 200,'market', 7.00,'filled','1999-09-15'),
-  (16,5,'HNTR','buy',  50,'market',30.00,'filled','1999-10-01'),
-  (17,5,'ARGX','sell',500,'limit',  4.50,'open',  '2000-01-15'),
-  (18,6,'ZTRX','buy',  80,'market',70.00,'filled','1999-08-10'),
-  (19,6,'ACME','buy', 200,'market',35.00,'filled','1999-07-01'),
-  (20,6,'GMBT','buy', 100,'market',48.00,'filled','1999-08-20'),
-  (21,6,'CTRX','buy',  60,'market',55.00,'filled','1999-09-10'),
-  (22,7,'SLVR','buy', 150,'market',25.00,'filled','1999-10-20'),
-  (23,7,'NOVA','buy', 100,'market',19.00,'filled','1999-11-05'),
-  (24,7,'PCFW','buy',  80,'market',14.00,'filled','1999-11-18'),
-  (25,7,'SLVR','sell', 50,'limit', 24.00,'open',  '2000-01-20'),
-  (26,1,'ACME','buy', 500,'market',30.00,'filled','1999-06-01'),
-  (27,1,'ZTRX','buy', 100,'market',60.00,'filled','1999-07-15'),
-  (28,1,'GMBT','buy', 200,'market',44.00,'filled','1999-08-01'),
-  (29,1,'ZTRX','sell', 50,'limit',100.00,'open',  '2000-01-18');
+  (1, 2,'ACME','buy', 100,'market',38.20,'filled','1999-12-01',''),
+  (2, 2,'ZTRX','buy',  20,'market',85.00,'filled','1999-12-05',''),
+  (3, 2,'SLVR','buy',  75,'market',24.00,'filled','1999-12-10',''),
+  (4, 2,'GMBT','buy',  50,'market',50.10,'filled','1999-12-15',''),
+  (5, 2,'NOVA','sell', 50,'limit', 21.00,'open',  '2000-01-10',''),
+  (6, 3,'NOVA','buy', 200,'market',20.00,'filled','1999-11-20',''),
+  (7, 3,'BLKR','buy', 500,'market', 6.80,'filled','1999-11-22',''),
+  (8, 3,'PCFW','buy', 100,'market',15.50,'filled','1999-12-01',''),
+  (9, 3,'ACME','sell', 50,'limit', 44.00,'open',  '2000-01-12',''),
+  (10,4,'ACME','buy',  75,'market',40.00,'filled','1999-10-15',''),
+  (11,4,'CTRX','buy',  30,'market',58.00,'filled','1999-11-01',''),
+  (12,4,'ZTRX','buy',  10,'market',80.00,'filled','1999-11-15',''),
+  (13,4,'CTRX','buy',  20,'limit', 60.00,'open',  '2000-01-08',''),
+  (14,5,'ARGX','buy',1000,'market', 3.50,'filled','1999-09-01',''),
+  (15,5,'BLKR','buy', 200,'market', 7.00,'filled','1999-09-15',''),
+  (16,5,'HNTR','buy',  50,'market',30.00,'filled','1999-10-01',''),
+  (17,5,'ARGX','sell',500,'limit',  4.50,'open',  '2000-01-15',''),
+  (18,6,'ZTRX','buy',  80,'market',70.00,'filled','1999-08-10',''),
+  (19,6,'ACME','buy', 200,'market',35.00,'filled','1999-07-01',''),
+  (20,6,'GMBT','buy', 100,'market',48.00,'filled','1999-08-20',''),
+  (21,6,'CTRX','buy',  60,'market',55.00,'filled','1999-09-10',''),
+  (22,7,'SLVR','buy', 150,'market',25.00,'filled','1999-10-20',''),
+  (23,7,'NOVA','buy', 100,'market',19.00,'filled','1999-11-05',''),
+  (24,7,'PCFW','buy',  80,'market',14.00,'filled','1999-11-18',''),
+  (25,7,'SLVR','sell', 50,'limit', 24.00,'open',  '2000-01-20',''),
+  (26,1,'ACME','buy', 500,'market',30.00,'filled','1999-06-01',''),
+  (27,1,'ZTRX','buy', 100,'market',60.00,'filled','1999-07-15',''),
+  (28,1,'GMBT','buy', 200,'market',44.00,'filled','1999-08-01',''),
+  (29,1,'ZTRX','sell', 50,'limit',100.00,'open',  '2000-01-18','');
 
 INSERT OR IGNORE INTO watchlist VALUES
   (1,2,'BLKR'),(2,2,'PCFW'),(3,2,'CTRX'),
@@ -214,5 +215,9 @@ def init_db():
     os.makedirs('/data', exist_ok=True)
     conn = sqlite3.connect(DATABASE)
     conn.executescript(SCHEMA)
+    try:
+        conn.execute("ALTER TABLE orders ADD COLUMN memo TEXT DEFAULT ''")
+    except sqlite3.OperationalError:
+        pass
     conn.commit()
     conn.close()

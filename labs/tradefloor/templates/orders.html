@@ -7,20 +7,32 @@
     <a href="{{ url_for('trade') }}" class="btn btn-sm">New Order</a>
   </div>
 
+  <form method="get" style="margin-bottom:1.5rem;display:flex;gap:0.5rem;">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search by symbol…" style="flex:1;">
+    <button class="btn btn-sm" type="submit">Search</button>
+    {% if q %}<a href="{{ url_for('orders') }}" class="btn btn-sm">Clear</a>{% endif %}
+  </form>
+
+  {% if q %}
+  <!-- VULN: reflected XSS — q echoed unsanitised -->
+  <p style="color:var(--muted);margin-bottom:1rem;">Results for: <strong>{{ q | safe }}</strong></p>
+  {% endif %}
+
   {% if orders %}
   <table class="data-table">
     <thead>
-      <tr><th>ID</th><th>SYMBOL</th><th>ACTION</th><th>QTY</th><th>TYPE</th><th>PRICE</th><th>STATUS</th><th>DATE</th><th></th></tr>
+      <tr><th>ID</th><th>SYMBOL</th><th>ACTION</th><th>QTY</th><th>TYPE</th><th>PRICE</th><th>TOTAL</th><th>STATUS</th><th>DATE</th><th></th></tr>
     </thead>
     <tbody>
       {% for o in orders %}
       <tr>
         <td><a href="{{ url_for('order_detail', order_id=o.id) }}">#{{ o.id }}</a></td>
-        <td style="color:var(--green);">{{ o.symbol }}</td>
+        <td style="color:var(--green);font-family:'SF Mono','Fira Code',monospace;">{{ o.symbol }}</td>
         <td>{% if o.action == 'buy' %}<span class="badge badge-green">BUY</span>{% else %}<span class="badge badge-red">SELL</span>{% endif %}</td>
         <td>{{ o.quantity }}</td>
         <td>{{ o.order_type | upper }}</td>
         <td>${{ "%.2f"|format(o.price) }}</td>
+        <td style="color:var(--amber);">${{ "%.2f"|format(o.price * o.quantity) }}</td>
         <td>
           {% if o.status == 'open' %}<span class="badge badge-amber">OPEN</span>
           {% elif o.status == 'filled' %}<span class="badge badge-green">FILLED</span>
@@ -40,7 +52,7 @@
     </tbody>
   </table>
   {% else %}
-  <p class="empty">No orders yet.</p>
+  <p class="empty">No orders{% if q %} matching <em>{{ q }}</em>{% endif %}.</p>
   {% endif %}
 </div>
 {% endblock %}
