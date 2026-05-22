@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>DASHBOARD</h1>
+    <p>Welcome back, {{ user.full_name if user.full_name else user.username }}</p>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="stat-label">CASH BALANCE</div>
+      <div class="stat-value" style="font-size:1.4rem;">${{ "%.2f"|format(user.balance) }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">HOLDINGS</div>
+      <div class="stat-value">{{ holdings|length }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">ACTIVE ALERTS</div>
+      <div class="stat-value">{{ alerts|length }}</div>
+    </div>
+  </div>
+
+  <div class="section-title">PORTFOLIO SUMMARY</div>
+  {% if holdings %}
+  <table class="data-table">
+    <thead>
+      <tr><th>SYMBOL</th><th>NAME</th><th>QTY</th><th>AVG COST</th><th>LAST PRICE</th><th>CHANGE</th></tr>
+    </thead>
+    <tbody>
+      {% for h in holdings %}
+      <tr>
+        <td style="color:var(--green);">{{ h.symbol }}</td>
+        <td>{{ h.name }}</td>
+        <td>{{ h.quantity }}</td>
+        <td>${{ "%.2f"|format(h.avg_price) }}</td>
+        <td>${{ "%.2f"|format(h.price) }}</td>
+        <td class="{% if h.change >= 0 %}price-up{% else %}price-down{% endif %}">
+          {% if h.change >= 0 %}+{% endif %}{{ "%.2f"|format(h.change) }}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No holdings. <a href="{{ url_for('trade') }}">Place your first trade.</a></p>
+  {% endif %}
+
+  {% if alerts %}
+  <div class="section-title mt3">ACTIVE ALERTS</div>
+  <table class="data-table">
+    <thead><tr><th>NAME</th><th>SYMBOL</th><th>CONDITION</th><th>THRESHOLD</th></tr></thead>
+    <tbody>
+      {% for a in alerts %}
+      <tr>
+        <!-- VULN: stored XSS — alert name rendered with | safe -->
+        <td>{{ a.name | safe }}</td>
+        <td style="color:var(--green);">{{ a.symbol }}</td>
+        <td>{{ a.condition }}</td>
+        <td>${{ "%.2f"|format(a.threshold) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

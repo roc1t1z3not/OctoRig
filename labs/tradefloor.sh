@@ -2,18 +2,18 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2026 CommonHuman-Lab
 # =============================================================================
-# Lab: HumanBank
-# Deliberately vulnerable online banking app — SQLi, IDOR, XSS, auth flaws,
-# file upload, path traversal, business logic
-# Built from source in labs/humanbank/
+# Lab: TradeFloor
+# Deliberately vulnerable Y2K-era stock trading terminal — XXE, CSRF, mass
+# assignment, SQLi, IDOR, stored XSS, broken access control
+# Built from source in labs/tradefloor/
 # =============================================================================
 
-LAB_NAME="HumanBank"
-CONTAINER_NAME="octorig-humanbank"
-HOST_PORT=8083
+LAB_NAME="TradeFloor"
+CONTAINER_NAME="octorig-tradefloor"
+HOST_PORT=8086
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APP_DIR="${SCRIPT_DIR}/humanbank"
+APP_DIR="${SCRIPT_DIR}/tradefloor"
 
 source "${SCRIPT_DIR}/_common.sh"
 require_action "${1:-}"
@@ -23,11 +23,11 @@ case "$1" in
     header "Starting..."
     ensure_container_gone "$CONTAINER_NAME"
 
-    info "Building HumanBank image..."
-    if docker build -q -t octorig-humanbank:latest "$APP_DIR" &>/dev/null; then
+    info "Building TradeFloor image..."
+    if docker build -q -t octorig-tradefloor:latest "$APP_DIR" &>/dev/null; then
       good "Image built"
     else
-      bad "Image build failed — check labs/humanbank/"
+      bad "Image build failed — check labs/tradefloor/"
       exit 1
     fi
 
@@ -35,16 +35,16 @@ case "$1" in
       --name "$CONTAINER_NAME" \
       -p "${HOST_PORT}:5000" \
       --restart unless-stopped \
-      octorig-humanbank:latest
+      octorig-tradefloor:latest
 
     wait_for_port 127.0.0.1 "$HOST_PORT" 60
 
     INFO_LINES=(
       "URL|http://127.0.0.1:${HOST_PORT}"
-      "Stop|./humanbank.sh stop"
+      "Stop|./tradefloor.sh stop"
     )
     access_card INFO_LINES
-    good "HumanBank is up!"
+    good "TradeFloor is up!"
     ;;
 
   stop)

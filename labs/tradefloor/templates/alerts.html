@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Alerts{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>PRICE ALERTS</h1>
+    <a href="{{ url_for('alert_new') }}" class="btn btn-sm">New Alert</a>
+  </div>
+
+  {% if alerts %}
+  <table class="data-table">
+    <thead><tr><th>NAME</th><th>SYMBOL</th><th>CONDITION</th><th>THRESHOLD</th><th>ACTIVE</th><th></th></tr></thead>
+    <tbody>
+      {% for a in alerts %}
+      <tr>
+        <!-- VULN: stored XSS — alert name rendered with | safe -->
+        <td>{{ a.name | safe }}</td>
+        <td style="color:var(--green);">{{ a.symbol }}</td>
+        <td>{{ a.condition }}</td>
+        <td>${{ "%.2f"|format(a.threshold) }}</td>
+        <td>{% if a.active %}<span class="badge badge-green">YES</span>{% else %}<span class="badge badge-red">NO</span>{% endif %}</td>
+        <td><a href="{{ url_for('alert_edit', alert_id=a.id) }}" class="btn btn-sm">Edit</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No alerts configured.</p>
+  {% endif %}
+</div>
+{% endblock %}

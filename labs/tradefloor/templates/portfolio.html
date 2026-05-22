@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Portfolio{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>PORTFOLIO</h1>
+    <p>Cash balance: <span style="color:var(--green);">${{ "%.2f"|format(user.balance) }}</span></p>
+  </div>
+
+  {% if holdings %}
+  <table class="data-table">
+    <thead>
+      <tr><th>SYMBOL</th><th>COMPANY</th><th>QTY</th><th>AVG COST</th><th>LAST</th><th>CHANGE</th><th>VALUE</th></tr>
+    </thead>
+    <tbody>
+      {% for h in holdings %}
+      <tr>
+        <td style="color:var(--green);">{{ h.symbol }}</td>
+        <td>{{ h.name }}</td>
+        <td>{{ h.quantity }}</td>
+        <td>${{ "%.2f"|format(h.avg_price) }}</td>
+        <td>${{ "%.2f"|format(h.price) }}</td>
+        <td class="{% if h.change >= 0 %}price-up{% else %}price-down{% endif %}">{{ "%.2f"|format(h.change) }}</td>
+        <td style="color:var(--amber);">${{ "%.2f"|format(h.price * h.quantity) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No holdings. <a href="{{ url_for('trade') }}">Place a trade.</a></p>
+  {% endif %}
+</div>
+{% endblock %}

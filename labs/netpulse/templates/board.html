@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Community Board{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>COMMUNITY BOARD</h1>
+    <a href="{{ url_for('board_new') }}" class="btn btn-sm">New Thread</a>
+  </div>
+
+  <form method="get" class="search-bar">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search threads...">
+    <button class="btn" type="submit">Search</button>
+    {% if q %}<a href="{{ url_for('board') }}" class="btn btn-sm">Clear</a>{% endif %}
+  </form>
+
+  {% if q %}
+  <!-- VULN: reflected XSS — q rendered with | safe -->
+  <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem;">Results for &ldquo;{{ q | safe }}&rdquo;</p>
+  {% endif %}
+
+  {% if threads %}
+    {% for t in threads %}
+    <div class="board-card">
+      <a class="board-link" href="{{ url_for('board_thread', thread_id=t.id) }}"></a>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.2rem;">{{ t.created_at[:10] }} &mdash; {{ t.username }}</div>
+      <div style="font-size:0.9rem;color:var(--teal);">{{ t.title }}</div>
+      <div style="font-size:0.8rem;color:var(--muted);margin-top:0.2rem;">{{ t.body[:120] }}{% if t.body|length > 120 %}...{% endif %}</div>
+    </div>
+    {% endfor %}
+  {% else %}
+  <p class="empty">No threads found.</p>
+  {% endif %}
+</div>
+{% endblock %}

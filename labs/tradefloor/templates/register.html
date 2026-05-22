@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Open Account{% endblock %}
+{% block content %}
+<div class="form-card">
+  <h2>[ OPEN TRADING ACCOUNT ]</h2>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  <form method="post">
+    <div class="form-group"><label>USERNAME</label><input type="text" name="username" autofocus></div>
+    <div class="form-group"><label>PASSWORD</label><input type="password" name="password"></div>
+    <div class="form-group"><label>EMAIL</label><input type="email" name="email"></div>
+    <div class="form-group"><label>FULL NAME</label><input type="text" name="full_name"></div>
+    <button class="btn btn-primary" style="width:100%;">Open Account</button>
+  </form>
+  <p style="margin-top:1rem;font-size:0.75rem;color:var(--muted);">
+    Already a member? <a href="{{ url_for('login') }}">Login</a>
+  </p>
+</div>
+{% endblock %}

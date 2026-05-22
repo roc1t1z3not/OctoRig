@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}TradeFloor{% endblock %} — Online Trading</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="ticker-bar">
+  <marquee><span class="up">ACME 42.50 +1.20</span> &nbsp;&middot;&nbsp; <span class="down">NOVA 18.75 -0.45</span> &nbsp;&middot;&nbsp; <span class="up">BLKR 7.10 +0.05</span> &nbsp;&middot;&nbsp; <span class="up">ZTRX 93.00 +2.80</span> &nbsp;&middot;&nbsp; <span class="down">PCFW 14.20 -0.30</span> &nbsp;&middot;&nbsp; <span class="up">GMBT 55.60 +0.90</span> &nbsp;&middot;&nbsp; <span class="down">SLVR 22.40 -1.10</span> &nbsp;&middot;&nbsp; CTRX 61.00 0.00 &nbsp;&middot;&nbsp; <span class="up">ARGX 3.80 +0.15</span> &nbsp;&middot;&nbsp; <span class="down">HNTR 28.90 -0.60</span></marquee>
+</div>
+<nav>
+  <a class="nav-logo" href="{{ url_for('index') }}">Trade<span>Floor</span></a>
+  {% set u = current_user() %}
+  {% if u %}
+  <a href="{{ url_for('dashboard') }}">Dashboard</a>
+  <a href="{{ url_for('portfolio') }}">Portfolio</a>
+  <a href="{{ url_for('trade') }}">Trade</a>
+  <a href="{{ url_for('filings') }}">Filings</a>
+  <a href="{{ url_for('watchlist') }}">Watchlist</a>
+  <a href="{{ url_for('alerts') }}">Alerts</a>
+  {% endif %}
+  <div class="nav-right">
+    {% if u %}
+      <span class="nav-cash">${{ "%.2f"|format(u.balance) }}</span>
+      <a href="{{ url_for('admin_user', user_id=u.id) }}">{{ (u.full_name if u.full_name else u.username) | safe }}</a>
+      {% if u.is_admin %}<a href="{{ url_for('admin_index') }}" style="color:var(--amber);">Admin</a>{% endif %}
+      <a href="{{ url_for('logout') }}" class="btn btn-sm">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}" style="color:var(--muted);">Log in</a>
+      <a href="{{ url_for('register') }}" class="btn btn-sm btn-primary">Open Account</a>
+    {% endif %}
+  </div>
+</nav>
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer>
+  <p>TradeFloor &mdash; Online Trading Platform &mdash; &copy; 2000</p>
+  <p style="margin-top:0.3rem;">Made By <a href="https://github.com/CommonHuman-Lab" target="_blank">CommonHuman</a></p>
+</footer>
+</body>
+</html>

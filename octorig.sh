@@ -43,6 +43,8 @@ LABS=(
   "11|REWIND|rewindrange.sh|Retro video and games store — SQLi, XSS and IDOR"
   "12|HumanBank|humanbank.sh|Vulnerable online banking app — SQLi, IDOR, XSS, auth flaws, file upload, business logic"
   "13|MediHuman|medihuman.sh|Vulnerable healthcare patient portal — SQLi, IDOR, XSS, file upload, SSH/FTP weak creds"
+  "14|NetPulse|netpulse.sh|Vulnerable 90s ISP portal — SSRF, SSTI, command injection, open redirect, SQLi, IDOR, XSS"
+  "15|TradeFloor|tradefloor.sh|Vulnerable Y2K trading terminal — XXE, CSRF, mass assignment, SQLi, IDOR, stored XSS"
 )
 
 # ---------------- dependency checks ------------------------------------------

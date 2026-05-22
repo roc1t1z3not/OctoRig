@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}NetPulse — Welcome{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="hero">
+    <h1>NETPULSE</h1>
+    <p class="tagline">Your local Internet Service Provider &mdash; reliable dial-up &amp; ISDN access since 1994</p>
+    <a href="{{ url_for('login') }}" class="btn">Member Login</a>
+    &nbsp;
+    <a href="{{ url_for('register') }}" class="btn btn-amber">New Account</a>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;margin-bottom:3rem;">
+    <div class="detail-panel">
+      <div class="section-title">DIAL-UP 56K</div>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:0.8rem;">Reliable 56K V.90 dial-up access. Includes email and Usenet.</p>
+      <p style="color:var(--amber);font-size:1.3rem;font-weight:bold;">$19.99 / month</p>
+      <p style="color:var(--muted);font-size:0.75rem;margin-top:0.3rem;">500 MB data &bull; Unlimited local dial access</p>
+    </div>
+    <div class="detail-panel">
+      <div class="section-title">ISDN 64K</div>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:0.8rem;">Faster digital connection with a dedicated ISDN line.</p>
+      <p style="color:var(--amber);font-size:1.3rem;font-weight:bold;">$29.99 / month</p>
+      <p style="color:var(--muted);font-size:0.75rem;margin-top:0.3rem;">1 GB data &bull; Static IP available</p>
+    </div>
+    <div class="detail-panel">
+      <div class="section-title">ISDN 128K</div>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:0.8rem;">Maximum speed for power users and small businesses.</p>
+      <p style="color:var(--amber);font-size:1.3rem;font-weight:bold;">$49.99 / month</p>
+      <p style="color:var(--muted);font-size:0.75rem;margin-top:0.3rem;">2 GB data &bull; Static IP included</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

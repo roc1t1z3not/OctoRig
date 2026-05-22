@@ -46,9 +46,8 @@ case "$1" in
 
     INFO_LINES=(
       "URL|http://127.0.0.1:${HOST_PORT}"
-      "Admin|admin / medihuman-admin-2026"
       "SSH|ssh sysadmin@127.0.0.1 -p ${SSH_PORT}  (pw: medihuman123)"
-      "FTP|ftp 127.0.0.1 ${FTP_PORT}  (anonymous login)"
+      "FTP|ftp 127.0.0.1 ${FTP_PORT}"
       "Stop|./medihuman.sh stop"
     )
     access_card INFO_LINES

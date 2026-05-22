@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Link Checker{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>LINK CHECKER</h1>
+    <p>Verify that a URL is reachable from the NetPulse network.</p>
+  </div>
+
+  <div style="max-width:640px;">
+    <form method="post" class="detail-panel">
+      <div class="form-group">
+        <label>URL TO CHECK</label>
+        <input type="text" name="url" value="{{ url }}" placeholder="http://www.example.com/" autofocus>
+      </div>
+      <button class="btn" type="submit">Check Link</button>
+    </form>
+
+    {% if error %}
+    <div class="alert alert-error mt2">Error: {{ error }}</div>
+    {% endif %}
+
+    {% if result %}
+    <div class="section-title mt3">RESULT</div>
+    <div class="detail-panel">
+      <div class="detail-row"><span class="lbl">HTTP STATUS</span><span style="color:var(--teal);">{{ result.status }}</span></div>
+      <div class="detail-row"><span class="lbl">RESPONSE SIZE</span><span>{{ result.size }} bytes</span></div>
+    </div>
+    <div class="section-title mt2">RESPONSE PREVIEW (first 2048 bytes)</div>
+    <div class="terminal-box">{{ result.preview }}</div>
+    {% endif %}
+  </div>
+
+  <p class="mt3"><a href="{{ url_for('tools_dnslookup') }}">&rarr; DNS Lookup Tool</a></p>
+</div>
+{% endblock %}

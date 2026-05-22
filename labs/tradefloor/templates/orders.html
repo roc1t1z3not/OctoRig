@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Orders{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>ORDER HISTORY</h1>
+    <a href="{{ url_for('trade') }}" class="btn btn-sm">New Order</a>
+  </div>
+
+  {% if orders %}
+  <table class="data-table">
+    <thead>
+      <tr><th>ID</th><th>SYMBOL</th><th>ACTION</th><th>QTY</th><th>TYPE</th><th>PRICE</th><th>STATUS</th><th>DATE</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td><a href="{{ url_for('order_detail', order_id=o.id) }}">#{{ o.id }}</a></td>
+        <td style="color:var(--green);">{{ o.symbol }}</td>
+        <td>{% if o.action == 'buy' %}<span class="badge badge-green">BUY</span>{% else %}<span class="badge badge-red">SELL</span>{% endif %}</td>
+        <td>{{ o.quantity }}</td>
+        <td>{{ o.order_type | upper }}</td>
+        <td>${{ "%.2f"|format(o.price) }}</td>
+        <td>
+          {% if o.status == 'open' %}<span class="badge badge-amber">OPEN</span>
+          {% elif o.status == 'filled' %}<span class="badge badge-green">FILLED</span>
+          {% elif o.status == 'cancelled' %}<span class="badge badge-red">CANCELLED</span>
+          {% else %}{{ o.status }}{% endif %}
+        </td>
+        <td>{{ o.created_at }}</td>
+        <td>
+          {% if o.status == 'open' %}
+          <form method="post" action="{{ url_for('order_cancel', order_id=o.id) }}" style="display:inline;">
+            <button class="btn btn-sm btn-danger" type="submit">Cancel</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No orders yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

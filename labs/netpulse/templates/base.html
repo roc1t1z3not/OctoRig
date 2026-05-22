@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}NetPulse{% endblock %} — Internet Services</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="marquee-bar">
+  <marquee>*** NetPulse Internet Services *** Dial-Up 56K from $19.99/mo *** ISDN 128K now available in all zones *** Usenet access included with all plans *** New: Web hosting add-on $4.99/mo *** Support hotline: 1-800-NET-PULSE ***</marquee>
+</div>
+<nav>
+  <a class="nav-logo" href="{{ url_for('index') }}">NET<span>PULSE</span></a>
+  {% set u = current_user() %}
+  {% if u %}
+  <a href="{{ url_for('dashboard') }}">Dashboard</a>
+  <a href="{{ url_for('billing') }}">Billing</a>
+  <a href="{{ url_for('tools_linkcheck') }}">Tools</a>
+  <a href="{{ url_for('tickets') }}">Support</a>
+  <a href="{{ url_for('board') }}">Board</a>
+  {% endif %}
+  <div class="nav-right">
+    {% if u %}
+      <span class="status-dot"></span>
+      <a href="{{ url_for('account', user_id=u.id) }}">{{ (u.full_name if u.full_name else u.username) | safe }}</a>
+      {% if u.is_admin %}<a href="{{ url_for('admin_index') }}" style="color:var(--amber);">Admin</a>{% endif %}
+      <a href="{{ url_for('logout') }}" class="btn btn-sm btn-amber">Disconnect</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Sign in</a>
+      <a href="{{ url_for('register') }}" class="btn btn-sm">New Account</a>
+    {% endif %}
+  </div>
+</nav>
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer>
+  <p>NetPulse Internet Services &mdash; Connecting You Since 1994</p>
+  <p style="margin-top:0.3rem;">Made By <a href="https://github.com/CommonHuman-Lab" target="_blank">CommonHuman</a></p>
+</footer>
+</body>
+</html>

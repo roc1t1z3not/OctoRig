@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Order #{{ order.id }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:700px;">
+  <div class="page-header"><h1>ORDER #{{ order.id }}</h1></div>
+  <div class="detail-panel">
+    <div class="detail-row"><span class="lbl">Trader</span><span>{{ owner.username }} ({{ owner.full_name }})</span></div>
+    <div class="detail-row"><span class="lbl">Symbol</span><span style="color:var(--green);">{{ order.symbol }}</span></div>
+    <div class="detail-row"><span class="lbl">Action</span><span>{{ order.action | upper }}</span></div>
+    <div class="detail-row"><span class="lbl">Quantity</span><span>{{ order.quantity }}</span></div>
+    <div class="detail-row"><span class="lbl">Order Type</span><span>{{ order.order_type | upper }}</span></div>
+    <div class="detail-row"><span class="lbl">Price</span><span style="color:var(--amber);">${{ "%.2f"|format(order.price) }}</span></div>
+    <div class="detail-row"><span class="lbl">Status</span><span>{{ order.status | upper }}</span></div>
+    <div class="detail-row"><span class="lbl">Date</span><span>{{ order.created_at }}</span></div>
+  </div>
+  <p><a href="{{ url_for('orders') }}">&larr; Back to orders</a></p>
+</div>
+{% endblock %}

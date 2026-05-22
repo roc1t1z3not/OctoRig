@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Edit Alert{% endblock %}
+{% block content %}
+<div class="container" style="max-width:560px;">
+  <div class="page-header"><h1>EDIT ALERT #{{ alert.id }}</h1></div>
+  <form method="post" class="detail-panel">
+    <div class="form-group"><label>ALERT NAME</label><input type="text" name="name" value="{{ alert.name }}"></div>
+    <div class="form-group">
+      <label>SYMBOL</label>
+      <select name="symbol">
+        {% for s in symbols %}
+        <option value="{{ s.symbol }}" {% if s.symbol == alert.symbol %}selected{% endif %}>{{ s.symbol }} — {{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>CONDITION</label>
+      <select name="condition">
+        <option value="above" {% if alert.condition == 'above' %}selected{% endif %}>PRICE ABOVE</option>
+        <option value="below" {% if alert.condition == 'below' %}selected{% endif %}>PRICE BELOW</option>
+      </select>
+    </div>
+    <div class="form-group"><label>THRESHOLD ($)</label><input type="number" name="threshold" step="0.01" value="{{ alert.threshold }}"></div>
+    <div class="form-group">
+      <label>ACTIVE</label>
+      <input type="checkbox" name="active" {% if alert.active %}checked{% endif %}> Enabled
+    </div>
+    <button class="btn" type="submit">Save Changes</button>
+    &nbsp;<a href="{{ url_for('alerts') }}" class="btn btn-sm btn-amber">Cancel</a>
+  </form>
+</div>
+{% endblock %}

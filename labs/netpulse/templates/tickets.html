@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Support Tickets{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>SUPPORT TICKETS</h1>
+    <a href="{{ url_for('ticket_new') }}" class="btn btn-sm">New Ticket</a>
+  </div>
+
+  {% if tickets %}
+  <table class="data-table">
+    <thead>
+      <tr><th>ID</th><th>SUBJECT</th><th>SUBMITTED</th><th>STATUS</th></tr>
+    </thead>
+    <tbody>
+      {% for t in tickets %}
+      <tr>
+        <td><a href="{{ url_for('ticket_detail', ticket_id=t.id) }}">#{{ t.id }}</a></td>
+        <td><a href="{{ url_for('ticket_detail', ticket_id=t.id) }}">{{ t.subject }}</a></td>
+        <td>{{ t.created_at[:10] }}</td>
+        <td>
+          {% if t.status == 'open' %}<span class="badge badge-amber">OPEN</span>
+          {% else %}<span class="badge badge-teal">CLOSED</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No support tickets.</p>
+  {% endif %}
+</div>
+{% endblock %}

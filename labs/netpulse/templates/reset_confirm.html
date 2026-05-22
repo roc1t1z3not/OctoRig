@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Set New Password{% endblock %}
+{% block content %}
+<div class="form-card">
+  <h2>[ SET NEW PASSWORD ]</h2>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  {% if not error %}
+  <form method="post">
+    <div class="form-group">
+      <label>NEW PASSWORD</label>
+      <input type="password" name="password" autofocus>
+    </div>
+    <button class="btn" style="width:100%;">Set Password</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

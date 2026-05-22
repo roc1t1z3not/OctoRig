@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Filings{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header"><h1>COMPANY FILINGS</h1></div>
+
+  <form method="get" class="search-bar">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search filings...">
+    <select name="sector">
+      <option value="">All sectors</option>
+      {% for s in sectors %}
+      <option value="{{ s.sector }}" {% if s.sector == sector %}selected{% endif %}>{{ s.sector }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn" type="submit">Search</button>
+    {% if q or sector %}<a href="{{ url_for('filings') }}" class="btn btn-sm">Clear</a>{% endif %}
+  </form>
+
+  {% if q %}
+  <!-- VULN: reflected XSS — q rendered with | safe -->
+  <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem;">Results for &ldquo;{{ q | safe }}&rdquo;</p>
+  {% endif %}
+
+  {% if filings %}
+  <table class="data-table">
+    <thead><tr><th>DATE</th><th>SYMBOL</th><th>SECTOR</th><th>TITLE</th></tr></thead>
+    <tbody>
+      {% for f in filings %}
+      <tr>
+        <td>{{ f.filed_date }}</td>
+        <td style="color:var(--green);">{{ f.symbol }}</td>
+        <td>{{ f.sector }}</td>
+        <td><a href="{{ url_for('filing_detail', filing_id=f.id) }}">{{ f.title }}</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No filings found.</p>
+  {% endif %}
+</div>
+{% endblock %}

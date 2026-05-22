@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Edit Template — {{ tmpl.name }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:800px;">
+  <div class="page-header">
+    <h1>EDIT TEMPLATE — {{ tmpl.name }}</h1>
+    <p>Use Jinja2 variables: <code style="color:var(--teal);">{{ '{{ user.full_name }}' }}</code>, <code style="color:var(--teal);">{{ '{{ user.username }}' }}</code>, <code style="color:var(--teal);">{{ '{{ user.plan }}' }}</code>, <code style="color:var(--teal);">{{ '{{ invoice.amount }}' }}</code></p>
+  </div>
+
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+
+  <form method="post" class="detail-panel">
+    <div class="form-group">
+      <label>NAME</label>
+      <input type="text" name="name" value="{{ tmpl.name }}">
+    </div>
+    <div class="form-group">
+      <label>SUBJECT</label>
+      <input type="text" name="subject" value="{{ tmpl.subject }}">
+    </div>
+    <div class="form-group">
+      <label>BODY (Jinja2 template)</label>
+      <textarea name="body" rows="10">{{ tmpl.body }}</textarea>
+    </div>
+    <div class="form-group">
+      <label>DESCRIPTION</label>
+      <input type="text" name="description" value="{{ tmpl.description }}">
+    </div>
+    <button class="btn" type="submit" name="action" value="save">Save Template</button>
+    &nbsp;
+    <button class="btn btn-amber" type="submit" name="action" value="preview">Preview</button>
+    &nbsp;
+    <a href="{{ url_for('admin_templates') }}" class="btn btn-sm">Cancel</a>
+  </form>
+
+  {% if preview is not none %}
+  <div class="section-title mt3">PREVIEW OUTPUT</div>
+  <div class="terminal-box">{{ preview }}</div>
+  {% endif %}
+</div>
+{% endblock %}

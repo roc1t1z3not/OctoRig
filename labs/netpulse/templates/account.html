@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Account — {{ profile.username }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>ACCOUNT — {{ profile.username }}</h1>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+    <div>
+      <div class="section-title">PROFILE DETAILS</div>
+      <div class="detail-panel">
+        <div class="detail-row"><span class="lbl">Full Name</span><span>{{ profile.full_name }}</span></div>
+        <div class="detail-row"><span class="lbl">Email</span><span>{{ profile.email }}</span></div>
+        <div class="detail-row"><span class="lbl">Phone</span><span>{{ profile.phone or '—' }}</span></div>
+        <div class="detail-row"><span class="lbl">Address</span><span>{{ profile.address or '—' }}</span></div>
+        <div class="detail-row"><span class="lbl">Plan</span><span>{{ profile.plan }}</span></div>
+      </div>
+      {% if profile.bio %}
+      <div class="section-title mt2">BIO</div>
+      <!-- VULN: stored XSS — bio rendered unsanitised -->
+      <div class="detail-panel" style="font-size:0.85rem;color:var(--muted);">{{ profile.bio | safe }}</div>
+      {% endif %}
+    </div>
+
+    <div>
+      <div class="section-title">EDIT PROFILE</div>
+      <form method="post" action="{{ url_for('account_update', user_id=profile.id) }}" class="detail-panel">
+        <div class="form-group">
+          <label>FULL NAME</label>
+          <input type="text" name="full_name" value="{{ profile.full_name }}">
+        </div>
+        <div class="form-group">
+          <label>EMAIL</label>
+          <input type="email" name="email" value="{{ profile.email }}">
+        </div>
+        <div class="form-group">
+          <label>PHONE</label>
+          <input type="text" name="phone" value="{{ profile.phone }}">
+        </div>
+        <div class="form-group">
+          <label>ADDRESS</label>
+          <input type="text" name="address" value="{{ profile.address }}">
+        </div>
+        <div class="form-group">
+          <label>BIO</label>
+          <textarea name="bio" rows="3">{{ profile.bio }}</textarea>
+        </div>
+        <button class="btn" type="submit">Save Changes</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

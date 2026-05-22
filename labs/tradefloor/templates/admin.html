@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header"><h1>ADMIN PANEL</h1></div>
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="stat-label">TOTAL TRADERS</div>
+      <div class="stat-value">{{ user_count }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">OPEN ORDERS</div>
+      <div class="stat-value">{{ open_orders }}</div>
+    </div>
+  </div>
+  <div class="section-title">ADMIN TOOLS</div>
+  <p><a href="{{ url_for('admin_users') }}">&rarr; Manage Traders</a></p>
+
+  <div class="section-title mt3">CORPORATE ACTION</div>
+  <form method="post" action="{{ url_for('admin_corporate_action') }}" class="detail-panel" style="max-width:500px;">
+    <div class="form-group"><label>ACTION TYPE</label>
+      <select name="action_type"><option value="price_update">Price Update</option></select>
+    </div>
+    <div class="form-group"><label>SYMBOL</label><input type="text" name="symbol" placeholder="ACME"></div>
+    <div class="form-group"><label>VALUE</label><input type="number" name="value" step="0.01"></div>
+    <button class="btn" type="submit">Execute</button>
+  </form>
+</div>
+{% endblock %}

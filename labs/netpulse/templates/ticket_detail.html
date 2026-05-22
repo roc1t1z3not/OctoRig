@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Ticket #{{ ticket.id }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:760px;">
+  <div class="page-header">
+    <h1>TICKET #{{ ticket.id }} &mdash; {{ ticket.subject }}</h1>
+    <p>Submitted {{ ticket.created_at[:10] }} &bull;
+      {% if ticket.status == 'open' %}<span class="badge badge-amber">OPEN</span>
+      {% else %}<span class="badge badge-teal">CLOSED</span>{% endif %}
+    </p>
+  </div>
+
+  <!-- VULN: stored XSS — ticket body rendered with | safe in admin view (admin_template_edit handles preview SSTI; here body shown safely to user but | safe in admin path) -->
+  <div class="reply-card" style="border-left-color:var(--teal);">
+    <div class="reply-meta">{{ ticket.created_at[:10] }} &mdash; you</div>
+    <div style="font-size:0.88rem;">{{ ticket.body }}</div>
+  </div>
+
+  {% for r in replies %}
+  <div class="reply-card {% if r.is_admin %}{% endif %}" style="{% if r.is_admin %}border-left-color:var(--amber);{% endif %}">
+    <div class="reply-meta">
+      {{ r.created_at[:10] }} &mdash;
+      {% if r.is_admin %}<span style="color:var(--amber);">NetPulse Support</span>{% else %}{{ r.username }}{% endif %}
+    </div>
+    <!-- VULN: stored XSS — replies rendered with | safe -->
+    <div style="font-size:0.88rem;">{{ r.body | safe }}</div>
+  </div>
+  {% endfor %}
+
+  <form method="post" action="{{ url_for('ticket_reply', ticket_id=ticket.id) }}" class="detail-panel mt3">
+    <div class="form-group">
+      <label>ADD REPLY</label>
+      <textarea name="body" rows="4"></textarea>
+    </div>
+    <button class="btn" type="submit">Send Reply</button>
+  </form>
+
+  <p class="mt2"><a href="{{ url_for('tickets') }}">&larr; Back to tickets</a></p>
+</div>
+{% endblock %}

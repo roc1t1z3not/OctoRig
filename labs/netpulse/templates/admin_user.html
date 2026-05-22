@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Admin — {{ profile.username }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>MEMBER — {{ profile.username }}</h1>
+  </div>
+  <div class="detail-panel">
+    <div class="detail-row"><span class="lbl">ID</span><span>{{ profile.id }}</span></div>
+    <div class="detail-row"><span class="lbl">Full Name</span><span>{{ profile.full_name }}</span></div>
+    <div class="detail-row"><span class="lbl">Email</span><span>{{ profile.email }}</span></div>
+    <div class="detail-row"><span class="lbl">Plan</span><span>{{ profile.plan }}</span></div>
+    <div class="detail-row"><span class="lbl">Data Used</span><span>{{ profile.data_used_mb }} / {{ profile.data_limit_mb }} MB</span></div>
+    <div class="detail-row"><span class="lbl">Admin</span><span>{{ 'Yes' if profile.is_admin else 'No' }}</span></div>
+  </div>
+
+  <div class="section-title mt2">SUPPORT TICKETS</div>
+  {% if tickets %}
+  <table class="data-table">
+    <thead><tr><th>ID</th><th>SUBJECT</th><th>STATUS</th></tr></thead>
+    <tbody>
+      {% for t in tickets %}
+      <tr>
+        <td>#{{ t.id }}</td>
+        <!-- VULN: stored XSS — ticket body rendered with | safe in admin view -->
+        <td>{{ t.subject | safe }}</td>
+        <td>{{ t.status }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No tickets.</p>
+  {% endif %}
+
+  <div class="section-title mt2">INVOICES</div>
+  {% if invoices %}
+  <table class="data-table">
+    <thead><tr><th>INVOICE</th><th>DESCRIPTION</th><th>AMOUNT</th><th>STATUS</th></tr></thead>
+    <tbody>
+      {% for inv in invoices %}
+      <tr>
+        <td>{{ inv.invoice_number }}</td>
+        <td>{{ inv.description }}</td>
+        <td>${{ "%.2f" | format(inv.amount) }}</td>
+        <td>{% if inv.paid %}PAID{% else %}UNPAID{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No invoices.</p>
+  {% endif %}
+
+  <p class="mt2"><a href="{{ url_for('admin_users') }}">&larr; Back to members</a></p>
+</div>
+{% endblock %}

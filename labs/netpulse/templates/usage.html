@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Usage{% endblock %}
+{% block content %}
+<div class="container" style="max-width:700px;">
+  <div class="page-header">
+    <h1>DATA USAGE</h1>
+  </div>
+  {% set pct = (user.data_used_mb / user.data_limit_mb * 100) | int %}
+  <div class="detail-panel">
+    <div class="detail-row"><span class="lbl">Plan</span><span>{{ user.plan }}</span></div>
+    <div class="detail-row"><span class="lbl">Data Limit</span><span>{{ user.data_limit_mb }} MB</span></div>
+    <div class="detail-row"><span class="lbl">Data Used</span><span>{{ user.data_used_mb }} MB</span></div>
+    <div class="detail-row"><span class="lbl">Remaining</span><span>{{ user.data_limit_mb - user.data_used_mb }} MB</span></div>
+  </div>
+  <div class="mt2">
+    <div class="usage-bar-outer" style="height:18px;">
+      <div class="usage-bar-inner {% if pct >= 90 %}crit{% elif pct >= 70 %}warn{% endif %}" style="width:{{ pct }}%;"></div>
+    </div>
+    <p style="font-size:0.75rem;color:var(--muted);margin-top:0.4rem;">{{ pct }}% of monthly allowance used</p>
+  </div>
+</div>
+{% endblock %}

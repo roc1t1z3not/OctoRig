@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}New Account{% endblock %}
+{% block content %}
+<div class="form-card">
+  <h2>[ NEW ACCOUNT ]</h2>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  <form method="post">
+    <div class="form-group">
+      <label>USERNAME</label>
+      <input type="text" name="username" autofocus>
+    </div>
+    <div class="form-group">
+      <label>PASSWORD</label>
+      <input type="password" name="password">
+    </div>
+    <div class="form-group">
+      <label>EMAIL</label>
+      <input type="email" name="email">
+    </div>
+    <div class="form-group">
+      <label>FULL NAME</label>
+      <input type="text" name="full_name">
+    </div>
+    <button class="btn" style="width:100%;">Create Account</button>
+  </form>
+  <p style="margin-top:1rem;font-size:0.75rem;color:var(--muted);">
+    Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
+  </p>
+</div>
+{% endblock %}

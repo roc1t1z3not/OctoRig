@@ -53,6 +53,8 @@ Or non-interactively:
 | 11 | **REWIND** | Retro video and games store — SQLi, XSS and IDOR | `8082` |
 | 12 | **HumanBank** | Vulnerable online banking app — SQLi, IDOR, XSS, auth flaws, file upload, business logic | `8083` |
 | 13 | **MediHuman** | Vulnerable healthcare patient portal — SQLi, IDOR, XSS, file upload, SSH/FTP weak creds | `8084`, `2224`, `2121` |
+| 14 | **NetPulse** | Vulnerable 90s ISP portal — SSRF, SSTI, command injection, open redirect, SQLi, IDOR, XSS | `8085` |
+| 15 | **TradeFloor** | Vulnerable stock trading portal — XXE, CSRF, mass assignment, SQLi, IDOR, stored XSS | `8086` |
 
 ---
 

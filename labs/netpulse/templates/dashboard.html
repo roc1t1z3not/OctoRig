@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>DASHBOARD</h1>
+    <p>Welcome back, {{ user.full_name if user.full_name else user.username }} &mdash; <span class="status-dot"></span> connected</p>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="stat-label">CURRENT PLAN</div>
+      <div class="stat-value" style="font-size:1.1rem;margin-top:0.4rem;">{{ user.plan }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">DATA USED THIS MONTH</div>
+      <div class="stat-value">{{ user.data_used_mb }} <span style="font-size:0.9rem;color:var(--muted);">/ {{ user.data_limit_mb }} MB</span></div>
+      {% set pct = (user.data_used_mb / user.data_limit_mb * 100) | int %}
+      <div class="usage-bar-outer">
+        <div class="usage-bar-inner {% if pct >= 90 %}crit{% elif pct >= 70 %}warn{% endif %}" style="width:{{ pct }}%;"></div>
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">ACCOUNT ID</div>
+      <div class="stat-value" style="font-size:1rem;margin-top:0.4rem;">#{{ user.id }}</div>
+    </div>
+  </div>
+
+  <div class="section-title">RECENT INVOICES</div>
+  {% if invoices %}
+  <table class="data-table">
+    <thead>
+      <tr><th>INVOICE</th><th>DESCRIPTION</th><th>AMOUNT</th><th>DUE</th><th>STATUS</th></tr>
+    </thead>
+    <tbody>
+      {% for inv in invoices %}
+      <tr>
+        <td><a href="{{ url_for('invoice_detail', invoice_id=inv.id) }}">{{ inv.invoice_number }}</a></td>
+        <td>{{ inv.description }}</td>
+        <td style="color:var(--amber);">${{ "%.2f" | format(inv.amount) }}</td>
+        <td>{{ inv.due_date }}</td>
+        <td>{% if inv.paid %}<span class="badge badge-green">PAID</span>{% else %}<span class="badge badge-red">UNPAID</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="mt2"><a href="{{ url_for('billing') }}">View all invoices &rarr;</a></p>
+  {% else %}
+  <p class="empty">No invoices found.</p>
+  {% endif %}
+</div>
+{% endblock %}

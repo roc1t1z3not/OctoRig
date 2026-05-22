@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Import Watchlist{% endblock %}
+{% block content %}
+<div class="container" style="max-width:600px;">
+  <div class="page-header"><h1>IMPORT WATCHLIST</h1></div>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  {% if added %}
+  <div class="alert alert-success">Added {{ added|length }} symbol(s): {{ added | join(', ') }}</div>
+  {% endif %}
+  <p><a href="{{ url_for('watchlist') }}">&larr; Back to watchlist</a></p>
+</div>
+{% endblock %}

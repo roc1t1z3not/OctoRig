@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Watchlist{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>WATCHLIST</h1>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+    <div>
+      {% if items %}
+      <table class="data-table">
+        <thead><tr><th>SYMBOL</th><th>NAME</th><th>PRICE</th><th>CHANGE</th><th></th></tr></thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
+            <td style="color:var(--green);">{{ item.symbol }}</td>
+            <td>{{ item.name or '—' }}</td>
+            <td>{% if item.price %}${{ "%.2f"|format(item.price) }}{% else %}—{% endif %}</td>
+            <td class="{% if item.change and item.change >= 0 %}price-up{% elif item.change %}price-down{% endif %}">
+              {% if item.change %}{{ "%.2f"|format(item.change) }}{% else %}—{% endif %}
+            </td>
+            <td>
+              <form method="post" action="{{ url_for('watchlist_remove') }}" style="display:inline;">
+                <input type="hidden" name="watchlist_id" value="{{ item.id }}">
+                <button class="btn btn-sm btn-danger" type="submit">Remove</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="empty">No symbols on watchlist.</p>
+      {% endif %}
+
+      <form method="post" action="{{ url_for('watchlist_add') }}" class="detail-panel mt3">
+        <div class="form-group">
+          <label>ADD SYMBOL</label>
+          <input type="text" name="symbol" placeholder="e.g. ACME">
+        </div>
+        <button class="btn btn-sm" type="submit">Add</button>
+      </form>
+    </div>
+
+    <div>
+      <div class="section-title">IMPORT FROM XML</div>
+      <form method="post" action="{{ url_for('watchlist_import') }}" enctype="multipart/form-data" class="detail-panel">
+        <p style="font-size:0.8rem;color:var(--muted);margin-bottom:1rem;">Upload an XML watchlist file. Format:<br>
+          <code style="color:var(--green);">&lt;watchlist&gt;&lt;symbol&gt;ACME&lt;/symbol&gt;...&lt;/watchlist&gt;</code>
+        </p>
+        <div class="form-group">
+          <label>XML FILE</label>
+          <input type="file" name="xmlfile" accept=".xml">
+        </div>
+        <button class="btn" type="submit">Import</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

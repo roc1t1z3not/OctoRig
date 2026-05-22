@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Billing{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>BILLING</h1>
+    <p>Your invoice history.</p>
+  </div>
+
+  <form method="get" class="search-bar" style="margin-bottom:1rem;">
+    <input type="text" name="month" value="{{ month }}" placeholder="Filter by month (e.g. 1998-05)">
+    <input type="text" name="plan" value="{{ plan }}" placeholder="Filter by plan">
+    <button class="btn" type="submit">Filter</button>
+    {% if month or plan %}<a href="{{ url_for('billing') }}" class="btn btn-sm">Clear</a>{% endif %}
+  </form>
+
+  {% if invoices %}
+  <table class="data-table">
+    <thead>
+      <tr><th>INVOICE</th><th>DESCRIPTION</th><th>ISSUED</th><th>DUE</th><th>AMOUNT</th><th>STATUS</th></tr>
+    </thead>
+    <tbody>
+      {% for inv in invoices %}
+      <tr>
+        <td><a href="{{ url_for('invoice_detail', invoice_id=inv.id) }}">{{ inv.invoice_number }}</a></td>
+        <td>{{ inv.description }}</td>
+        <td>{{ inv.issued_date }}</td>
+        <td>{{ inv.due_date }}</td>
+        <td style="color:var(--amber);">${{ "%.2f" | format(inv.amount) }}</td>
+        <td>{% if inv.paid %}<span class="badge badge-green">PAID</span>{% else %}<span class="badge badge-red">UNPAID</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No invoices found.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Invoice {{ invoice.invoice_number }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:700px;">
+  <div class="page-header">
+    <h1>INVOICE {{ invoice.invoice_number }}</h1>
+  </div>
+
+  <div class="detail-panel">
+    <div class="detail-row"><span class="lbl">Customer</span><span>{{ owner.full_name }} ({{ owner.username }})</span></div>
+    <div class="detail-row"><span class="lbl">Address</span><span>{{ owner.address or '—' }}</span></div>
+    <div class="detail-row"><span class="lbl">Description</span><span>{{ invoice.description }}</span></div>
+    <div class="detail-row"><span class="lbl">Issued</span><span>{{ invoice.issued_date }}</span></div>
+    <div class="detail-row"><span class="lbl">Due Date</span><span>{{ invoice.due_date }}</span></div>
+    <div class="detail-row"><span class="lbl">Amount</span><span style="color:var(--amber);font-size:1.1rem;">${{ "%.2f" | format(invoice.amount) }}</span></div>
+    <div class="detail-row"><span class="lbl">Status</span><span>{% if invoice.paid %}<span class="badge badge-green">PAID</span>{% else %}<span class="badge badge-red">UNPAID</span>{% endif %}</span></div>
+  </div>
+
+  <p><a href="{{ url_for('billing') }}">&larr; Back to billing</a></p>
+</div>
+{% endblock %}

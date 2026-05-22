@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}TradeFloor — Welcome{% endblock %}
+{% block content %}
+<div class="y2k-banner">*** Y2K COMPLIANCE VERIFIED *** All systems tested and certified year-2000 ready ***</div>
+<div class="container">
+  <div class="hero">
+    <h1>TRADEFLOOR</h1>
+    <p class="tagline">Self-service retail trading &mdash; stocks, market data, and portfolio management online</p>
+    <a href="{{ url_for('login') }}" class="btn">Log in</a>
+    &nbsp;
+    <a href="{{ url_for('register') }}" class="btn btn-primary">Open Account</a>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.2rem;">
+    <div class="detail-panel">
+      <div class="section-title">MARKET ORDERS</div>
+      <p style="color:var(--muted);font-size:0.85rem;">Execute market orders at current prices instantly.</p>
+    </div>
+    <div class="detail-panel">
+      <div class="section-title">LIMIT ORDERS</div>
+      <p style="color:var(--muted);font-size:0.85rem;">Set your target price and let the system execute automatically.</p>
+    </div>
+    <div class="detail-panel">
+      <div class="section-title">PORTFOLIO TRACKING</div>
+      <p style="color:var(--muted);font-size:0.85rem;">Monitor your holdings, P&amp;L, and order history in real time.</p>
+    </div>
+    <div class="detail-panel">
+      <div class="section-title">PRICE ALERTS</div>
+      <p style="color:var(--muted);font-size:0.85rem;">Get notified when stocks cross your target thresholds.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Trader — {{ profile.username }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>TRADER — {{ profile.username }}</h1>
+  </div>
+  <div class="detail-panel">
+    <div class="detail-row"><span class="lbl">ID</span><span>{{ profile.id }}</span></div>
+    <div class="detail-row"><span class="lbl">Full Name</span><span>{{ profile.full_name }}</span></div>
+    <div class="detail-row"><span class="lbl">Email</span><span>{{ profile.email }}</span></div>
+    <div class="detail-row"><span class="lbl">Balance</span><span style="color:var(--amber);">${{ "%.2f"|format(profile.balance) }}</span></div>
+    <div class="detail-row"><span class="lbl">Admin</span><span>{{ 'Yes' if profile.is_admin else 'No' }}</span></div>
+  </div>
+
+  <div class="section-title mt2">HOLDINGS</div>
+  {% if holdings %}
+  <table class="data-table">
+    <thead><tr><th>SYMBOL</th><th>NAME</th><th>QTY</th><th>AVG COST</th><th>LAST</th></tr></thead>
+    <tbody>
+      {% for h in holdings %}
+      <tr>
+        <td style="color:var(--green);">{{ h.symbol }}</td>
+        <td>{{ h.name }}</td>
+        <td>{{ h.quantity }}</td>
+        <td>${{ "%.2f"|format(h.avg_price) }}</td>
+        <td>${{ "%.2f"|format(h.price) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No holdings.</p>
+  {% endif %}
+
+  <div class="section-title mt2">ORDER HISTORY</div>
+  {% if orders %}
+  <table class="data-table">
+    <thead><tr><th>ID</th><th>SYMBOL</th><th>ACTION</th><th>QTY</th><th>PRICE</th><th>STATUS</th><th>DATE</th></tr></thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td>#{{ o.id }}</td>
+        <td style="color:var(--green);">{{ o.symbol }}</td>
+        <td>{{ o.action | upper }}</td>
+        <td>{{ o.quantity }}</td>
+        <td>${{ "%.2f"|format(o.price) }}</td>
+        <td>{{ o.status }}</td>
+        <td>{{ o.created_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No orders.</p>
+  {% endif %}
+
+  <p class="mt2"><a href="{{ url_for('admin_users') }}">&larr; Back to traders</a></p>
+</div>
+{% endblock %}
