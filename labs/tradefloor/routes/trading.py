@@ -47,6 +47,33 @@ def init(app):
 
         return render_template('trade.html', symbols=symbols, message=message, error=error)
 
+    @app.route('/market')
+    def market():
+        redir = _require_login()
+        if redir:
+            return redir
+        stocks = get_db().execute("SELECT * FROM market_data ORDER BY symbol").fetchall()
+        return render_template('market.html', stocks=stocks)
+
+    @app.route('/market/<symbol>')
+    def market_detail(symbol):
+        redir = _require_login()
+        if redir:
+            return redir
+        symbol = symbol.upper()
+        db     = get_db()
+        uid    = session['user_id']
+        stock  = db.execute("SELECT * FROM market_data WHERE symbol = ?", (symbol,)).fetchone()
+        if not stock:
+            return redirect(url_for('market'))
+        filings  = db.execute(
+            "SELECT * FROM filings WHERE symbol = ? ORDER BY filed_date DESC", (symbol,)
+        ).fetchall()
+        wl_entry = db.execute(
+            "SELECT id FROM watchlist WHERE user_id = ? AND symbol = ?", (uid, symbol)
+        ).fetchone()
+        return render_template('stock_detail.html', stock=stock, filings=filings, wl_entry=wl_entry)
+
     # VULN: CSRF — cancel endpoint is state-changing with no CSRF token
     # VULN: IDOR — no ownership check on order_id
     @app.route('/orders/<int:order_id>/cancel', methods=['POST'])

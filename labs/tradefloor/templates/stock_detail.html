@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}{{ stock.symbol }}{% endblock %}
+{% block content %}
+<div class="container">
+
+  <p style="margin-bottom:1.5rem;">
+    <a href="{{ url_for('market') }}">&larr; Back to Market</a>
+  </p>
+
+  <div class="page-header">
+    <h1>
+      {{ stock.symbol }}
+      <span style="color:var(--muted);font-size:1rem;font-weight:400;margin-left:0.5rem;">{{ stock.name }}</span>
+    </h1>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="stat-label">LAST PRICE</div>
+      <div class="stat-value">${{ "%.2f"|format(stock.price) }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">CHANGE</div>
+      <div class="stat-value {% if stock.change > 0 %}price-up{% elif stock.change < 0 %}price-down{% endif %}">
+        {% if stock.change > 0 %}+{% endif %}{{ "%.2f"|format(stock.change) }}
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">SECTOR</div>
+      <div class="stat-value" style="font-size:1rem;">{{ stock.sector }}</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap;">
+    <a href="{{ url_for('trade') }}" class="btn">TRADE {{ stock.symbol }}</a>
+    {% if wl_entry %}
+    <form method="post" action="{{ url_for('watchlist_remove') }}" style="display:inline;">
+      <input type="hidden" name="watchlist_id" value="{{ wl_entry.id }}">
+      <button class="btn" type="submit">REMOVE FROM WATCHLIST</button>
+    </form>
+    {% else %}
+    <form method="post" action="{{ url_for('watchlist_add') }}" style="display:inline;">
+      <input type="hidden" name="symbol" value="{{ stock.symbol }}">
+      <button class="btn btn-primary" type="submit">+ ADD TO WATCHLIST</button>
+    </form>
+    {% endif %}
+  </div>
+
+  {% if filings %}
+  <div class="section-title mt3">FILINGS</div>
+  {% for f in filings %}
+  <div class="detail-panel" style="margin-bottom:1rem;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:0.6rem;">
+      <strong style="color:var(--text);">{{ f.title }}</strong>
+      <span style="color:var(--muted);font-size:0.8rem;white-space:nowrap;">{{ f.filed_date }}</span>
+    </div>
+    <p style="color:var(--muted);line-height:1.6;">{{ f.body }}</p>
+  </div>
+  {% endfor %}
+  {% else %}
+  <p class="empty" style="margin-top:2rem;">No filings on record for {{ stock.symbol }}.</p>
+  {% endif %}
+
+</div>
+{% endblock %}

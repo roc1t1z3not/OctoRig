@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Market{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>MARKET</h1>
+    <p>{{ stocks|length }} listed securities &mdash; click a row for details</p>
+  </div>
+
+  <table class="data-table" id="market-table">
+    <thead>
+      <tr>
+        <th>SYMBOL</th>
+        <th>COMPANY</th>
+        <th>LAST PRICE</th>
+        <th>CHANGE</th>
+        <th>SECTOR</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in stocks %}
+      <tr class="clickable-row" data-href="{{ url_for('market_detail', symbol=s.symbol) }}">
+        <td style="color:var(--green);font-weight:600;font-family:'SF Mono','Fira Code',monospace;">{{ s.symbol }}</td>
+        <td>{{ s.name }}</td>
+        <td>${{ "%.2f"|format(s.price) }}</td>
+        <td class="{% if s.change > 0 %}price-up{% elif s.change < 0 %}price-down{% endif %}">
+          {% if s.change > 0 %}+{% endif %}{{ "%.2f"|format(s.change) }}
+        </td>
+        <td style="color:var(--muted);font-size:0.85rem;">{{ s.sector }}</td>
+        <td style="text-align:right;">
+          <a href="{{ url_for('market_detail', symbol=s.symbol) }}" class="btn btn-sm">VIEW &rarr;</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .clickable-row { cursor: pointer; }
+  .clickable-row:hover td { background: var(--surface2); }
+</style>
+<script>
+  document.querySelectorAll('.clickable-row').forEach(function(row) {
+    row.addEventListener('click', function(e) {
+      if (!e.target.closest('a, button, form')) {
+        window.location.href = this.dataset.href;
+      }
+    });
+  });
+</script>
+{% endblock %}

@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="ticker-bar">
-  <marquee><span class="up">ACME 42.50 +1.20</span> &nbsp;&middot;&nbsp; <span class="down">NOVA 18.75 -0.45</span> &nbsp;&middot;&nbsp; <span class="up">BLKR 7.10 +0.05</span> &nbsp;&middot;&nbsp; <span class="up">ZTRX 93.00 +2.80</span> &nbsp;&middot;&nbsp; <span class="down">PCFW 14.20 -0.30</span> &nbsp;&middot;&nbsp; <span class="up">GMBT 55.60 +0.90</span> &nbsp;&middot;&nbsp; <span class="down">SLVR 22.40 -1.10</span> &nbsp;&middot;&nbsp; CTRX 61.00 0.00 &nbsp;&middot;&nbsp; <span class="up">ARGX 3.80 +0.15</span> &nbsp;&middot;&nbsp; <span class="down">HNTR 28.90 -0.60</span></marquee>
+  <marquee><span class="up">ACME 42.50 +1.20</span> &nbsp;&middot;&nbsp; <span class="down">NOVA 18.75 -0.45</span> &nbsp;&middot;&nbsp; <span class="up">BLKR 7.10 +0.05</span> &nbsp;&middot;&nbsp; <span class="up">ZTRX 93.00 +2.80</span> &nbsp;&middot;&nbsp; <span class="down">PCFW 14.20 -0.30</span> &nbsp;&middot;&nbsp; <span class="up">GMBT 55.60 +0.90</span> &nbsp;&middot;&nbsp; <span class="down">SLVR 22.40 -1.10</span> &nbsp;&middot;&nbsp; CTRX 61.00 0.00 &nbsp;&middot;&nbsp; <span class="up">ARGX 3.80 +0.15</span> &nbsp;&middot;&nbsp; <span class="down">HNTR 28.90 -0.60</span> &nbsp;&middot;&nbsp; CMNH 1337.00 0.00</marquee>
 </div>
 <nav>
   <a class="nav-logo" href="{{ url_for('index') }}">Trade<span>Floor</span></a>
@@ -16,6 +16,7 @@
   {% if u %}
   <a href="{{ url_for('dashboard') }}">Dashboard</a>
   <a href="{{ url_for('portfolio') }}">Portfolio</a>
+  <a href="{{ url_for('market') }}">Market</a>
   <a href="{{ url_for('trade') }}">Trade</a>
   <a href="{{ url_for('filings') }}">Filings</a>
   <a href="{{ url_for('watchlist') }}">Watchlist</a>
