@@ -100,7 +100,8 @@ INSERT OR IGNORE INTO market_data VALUES
   (7, 'SLVR','Silverstream Media',   22.40, -1.10,'Media'),
   (8, 'CTRX','CentraTech Corp',      61.00,  0.00,'Technology'),
   (9, 'ARGX','Argos Exploration',     3.80,  0.15,'Energy'),
-  (10,'HNTR','Hunter & Sons Ltd',    28.90, -0.60,'Retail');
+  (10,'HNTR','Hunter & Sons Ltd',    28.90, -0.60,'Retail'),
+  (11,'CMNH','CommonHuman Labs',    1337.00, 0.00,'Experimental');
 
 INSERT OR IGNORE INTO portfolio_holdings VALUES
   (1, 2,'ACME', 100, 38.20),
@@ -165,7 +166,7 @@ INSERT OR IGNORE INTO watchlist VALUES
   (9,5,'GMBT'),(10,5,'ZTRX'),(11,5,'CTRX'),
   (12,6,'NOVA'),(13,6,'PCFW'),
   (14,7,'ACME'),(15,7,'BLKR'),(16,7,'ZTRX'),
-  (17,1,'CTRX'),(18,1,'HNTR'),(19,1,'SLVR');
+  (17,1,'CTRX'),(18,1,'HNTR'),(19,1,'SLVR'),(20,1,'CMNH');
 
 INSERT OR IGNORE INTO filings VALUES
   (1,'ACME','Q4 1999 Earnings Report','Acme Corporation reported record Q4 earnings of $2.1 per share, beating analyst estimates by 12%. Revenue grew 34% year-over-year driven by strong demand for our enterprise software products. The board has authorised a $50M share buyback programme.','Technology','2000-01-15'),
@@ -173,7 +174,8 @@ INSERT OR IGNORE INTO filings VALUES
   (3,'BLKR','Acquisition of SolarDyne Assets','Blackrock Industries has completed the acquisition of SolarDyne asset portfolio for $14.8M. The assets include three operational wind generation sites and a 15-year power purchase agreement with Pacific Grid.','Energy','2000-01-20'),
   (4,'ZTRX','Prospectus Supplement — Secondary Offering','ZetaTronix Ltd is offering 2,000,000 shares of common stock at $90.00 per share. Proceeds will fund expansion into Asian markets and accelerate development of our next-generation processor architecture.','Technology','2000-01-22'),
   (5,'GMBT','Regulatory Filing — Form 10-K','Gambit Financial annual report for fiscal year 1999. Net income $88.4M, total assets $4.2B. Full report available upon request from the Investor Relations department.','Finance','2000-01-25'),
-  (6,'ACME','Patent Grant — Distributed Processing Architecture','The US Patent and Trademark Office has granted Acme Corporation patent number 6,140,892 covering our proprietary distributed processing architecture. This patent strengthens our IP portfolio and provides competitive protection for our core product lines.','Technology','2000-01-28');
+  (6,'ACME','Patent Grant — Distributed Processing Architecture','The US Patent and Trademark Office has granted Acme Corporation patent number 6,140,892 covering our proprietary distributed processing architecture. This patent strengthens our IP portfolio and provides competitive protection for our core product lines.','Technology','2000-01-28'),
+  (7,'CMNH','Initial Public Offering — CommonHuman Labs','CommonHuman Labs is not a company. CommonHuman Labs is a question. We are filing this document in accordance with applicable regulations, but we offer no further guidance on what we do, what we make, or what we are. Sector: Experimental. Handle with care.','Experimental','2026-05-22');
 
 INSERT OR IGNORE INTO alerts VALUES
   (1, 2,'ACME above $45',    'ACME','above',45.00,1,'2000-01-05'),

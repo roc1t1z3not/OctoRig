@@ -170,7 +170,11 @@ INSERT OR IGNORE INTO products VALUES
   (24,'game','Pitfall!','Activision','Platformer / Adventure',1982,8.99,5,
    'Swing on vines, leap over scorpions and crocodiles across 255 jungle screens.','Good','Atari 2600'),
   (25,'game','Doom','id Software','First-Person Shooter',1993,9.99,4,
-   'The grandfather of the FPS genre. Rip and tear through demon-infested Mars base UAC.','Good','PC');
+   'The grandfather of the FPS genre. Rip and tear through demon-infested Mars base UAC.','Good','PC'),
+  (26,'game','CommonHuman-Lab','CommonHuman','Experimental',2026,999.99,1,
+   'A mysterious product that defies categorisation. Handle with care.','Mint','PC'),
+  (27,'vhs','The CommonHuman Experiment','CommonHuman','Experimental / Documentary',2026,149.99,1,
+   'An unclassified production. What you are about to see cannot be unseen.','Mint',NULL);
 
 INSERT OR IGNORE INTO orders VALUES
   (1,2,'2026-04-28','delivered',22.98,'42 Oak Street, Portland OR'),
