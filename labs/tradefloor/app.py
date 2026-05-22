@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, Response, render_template_string
 from db import init_db, close_db
 from helpers import current_user
 import routes.auth, routes.portfolio, routes.trading, routes.watchlist
@@ -17,6 +17,48 @@ routes.filings.init(app)
 routes.alerts.init(app)
 routes.admin.init(app)
 routes.api.init(app)
+
+@app.route('/robots.txt')
+def robots_txt():
+    return Response(
+        "User-agent: *\n"
+        "Disallow: /trading-engine\n"
+        "Disallow: /settlement\n"
+        "Disallow: /compliance-logs\n"
+        "Disallow: /commonhuman\n\n"
+        "# TradeFloor — CommonHuman-Lab\n"
+        "# Deliberately vulnerable — do not use real credentials.\n",
+        mimetype='text/plain'
+    )
+
+@app.route('/commonhuman')
+def commonhuman_easter_egg():
+    return render_template_string('''<!DOCTYPE html><html lang="en">
+<head><meta charset="UTF-8"><title>CommonHuman-Lab</title>
+<style>
+  body{background:#0b0f1a;color:#3b82f6;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+  .egg{text-align:center;max-width:520px;padding:2rem;border:1px solid #1f2d45;border-radius:12px;background:#111827}
+  pre{font-family:monospace;color:#3b82f6;line-height:1.5;margin:1.5rem 0}
+  h2{font-size:1.4rem;margin-bottom:1rem;color:#e2e8f0}
+  p{color:#64748b;margin:.5rem 0}
+  a{color:#3b82f6}
+</style></head>
+<body><div class="egg">
+<pre>     ___
+    /   \\
+   | o_o |
+    \\___/
+   /|   |\\
+  (_)   (_)</pre>
+<h2>&#x1F419; You found it.</h2>
+<p>TradeFloor &mdash; Lab 15</p>
+<p>Part of the <strong>CommonHuman-Lab</strong> community.</p>
+<p style="margin-top:1.5rem;color:#64748b;">Thank you for using these tools. If they have been useful for your training or teaching, a follow and a star on GitHub help more people find the project &mdash; and they mean a lot.</p>
+<p style="margin-top:1rem;">
+  <a href="https://github.com/CommonHuman-Lab" target="_blank">&#11088; Star &amp; Follow on GitHub</a>
+</p>
+<p style="margin-top:1.5rem"><a href="/">&#8592; Back to TradeFloor</a></p>
+</div></body></html>''')
 
 if __name__ == '__main__':
     init_db()
