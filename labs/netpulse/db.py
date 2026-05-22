@@ -160,7 +160,8 @@ INSERT OR IGNORE INTO board_threads VALUES
   (9, 2,'Netscape vs Internet Explorer — which?',  'I know this is controversial but I genuinely want to hear opinions. I have been on Netscape 4 since it came out but IE 4 seems faster lately. What are people using?','1998-05-18'),
   (10,6,'Setting up a personal mail server',       'I am running sendmail on Linux and want to host my own email. I have a static IP from NetPulse. Anyone done this? Main questions are: do I need my own domain, and how do I handle spam filtering?','1998-05-19'),
   (11,5,'Modem init string for better speeds',     'My 56K modem rarely connects above 44K. I read that tweaking the modem initialisation string in dial-up networking can improve things. Has anyone found a good init string for the Sportster 56K?','1998-05-20'),
-  (12,4,'Running a web server on ISDN — tips?',    'I have Apache 1.3 running on my Windows 98 machine with the ISDN line. It works but goes down whenever I reboot. Anyone using a more stable setup for a personal site that gets light traffic?','1998-05-21');
+  (12,4,'Running a web server on ISDN — tips?',    'I have Apache 1.3 running on my Windows 98 machine with the ISDN line. It works but goes down whenever I reboot. Anyone using a more stable setup for a personal site that gets light traffic?','1998-05-21'),
+  (13,1,'Does anyone know who is on this network?','There is a user in our access logs that does not match any account in our system. Username shows as "commonhuman". Connection timestamps are irregular. If you see anything unusual on your end, do not interact with it. Handle with care.','1998-05-22');
 
 INSERT OR IGNORE INTO board_replies VALUES
   (1, 1,4,'EFnet is huge but yes, very laggy. I switched to DALnet for smaller channels and it is much more stable. Try ##programming on there.','1998-05-02'),
@@ -192,7 +193,8 @@ INSERT OR IGNORE INTO board_replies VALUES
 INSERT OR IGNORE INTO notification_templates VALUES
   (1,'welcome','Welcome to NetPulse!','Dear {{ user.full_name }},\n\nWelcome to NetPulse Internet Services. Your account is now active.\n\nUsername: {{ user.username }}\nPlan: {{ user.plan }}\n\nPlease keep your password safe. If you need help, contact our helpdesk.\n\nNetPulse Support Team','Sent when a new account is created'),
   (2,'invoice','Your NetPulse invoice is ready','Dear {{ user.full_name }},\n\nYour invoice for {{ invoice.description }} is now available.\n\nAmount Due: ${{ invoice.amount }}\nDue Date: {{ invoice.due_date }}\n\nPlease contact us if you have any questions.\n\nNetPulse Billing Department','Sent when a new invoice is issued'),
-  (3,'suspend','Account suspension notice','Dear {{ user.full_name }},\n\nYour NetPulse account has been temporarily suspended due to non-payment.\n\nTo restore service, please settle your outstanding balance.\n\nNetPulse Accounts','Sent when an account is suspended for non-payment');
+  (3,'suspend','Account suspension notice','Dear {{ user.full_name }},\n\nYour NetPulse account has been temporarily suspended due to non-payment.\n\nTo restore service, please settle your outstanding balance.\n\nNetPulse Accounts','Sent when an account is suspended for non-payment'),
+  (4,'commonhuman-alert','CommonHuman Alert','This message was generated automatically.\n\nIf you are reading this, you were not supposed to.\n\nHandle with care.\n\nCommonHuman Labs\nCategorisation not possible.','Internal use only. Do not modify.');
 """
 
 

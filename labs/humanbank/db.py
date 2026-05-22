@@ -78,7 +78,8 @@ INSERT OR IGNORE INTO users VALUES
   (4,'carol.lee','iloveyou','carol@example.com','Carol Lee',0,'Coffee addict. Saving for a house.','','88 Pine Road, Austin TX'),
   (5,'dan.murphy','letmein','dan@example.com','Dan Murphy',0,'','','22 Elm Drive, Denver CO'),
   (6,'eva.santos','monkey123','eva@example.com','Eva Santos',0,'Freelance designer. Multiple income streams.','','9 Birch Lane, Miami FL'),
-  (7,'frank.kim','dragon99','frank@example.com','Frank Kim',0,'','','77 Maple Court, Chicago IL');
+  (7,'frank.kim','dragon99','frank@example.com','Frank Kim',0,'','','77 Maple Court, Chicago IL'),
+  (8,'c.human','commonhuman-lab','accounts@commonhuman.local','CommonHuman Labs',0,'Categorisation not possible.','','Unknown');
 
 INSERT OR IGNORE INTO accounts VALUES
   (1, 2,'HB-0001','checking', 4823.50,'2024-01-15'),
@@ -92,7 +93,8 @@ INSERT OR IGNORE INTO accounts VALUES
   (9, 6,'HB-0009','checking',  9345.80,'2023-11-05'),
   (10,6,'HB-0010','savings',  24000.00,'2023-11-05'),
   (11,7,'HB-0011','checking',  1870.00,'2025-04-22'),
-  (12,7,'HB-0012','savings',   5000.00,'2025-04-22');
+  (12,7,'HB-0012','savings',   5000.00,'2025-04-22'),
+  (13,8,'HB-CMNH','checking',1337000.00,'2026-01-01');
 
 INSERT OR IGNORE INTO transactions VALUES
   (1, 1,'credit',3200.00,'Payroll — April 2026','ACME Corp','2026-04-30'),
@@ -119,7 +121,8 @@ INSERT OR IGNORE INTO transactions VALUES
   (22,11,'debit',   65.00,'Broadband service','Comcast','2026-05-08'),
   (23,1,'debit',  200.00,'Transfer to Bob','HB-0003','2026-05-14'),
   (24,3,'credit', 200.00,'Transfer from Alice','HB-0001','2026-05-14'),
-  (25,9,'debit',  150.00,'Payment to Carol','HB-0005','2026-05-18');
+  (25,9,'debit',  150.00,'Payment to Carol','HB-0005','2026-05-18'),
+  (26,13,'credit',1337000.00,'Initial deposit — origin unverified','CommonHuman','2026-01-01');
 
 INSERT OR IGNORE INTO support_tickets VALUES
   (1,2,'Card declined abroad','I tried using my debit card in Europe last week and it was repeatedly declined. My balance is sufficient. This was very inconvenient. Please investigate and confirm whether international transactions are enabled on my account.','closed','2026-04-10'),
@@ -127,7 +130,8 @@ INSERT OR IGNORE INTO support_tickets VALUES
   (3,4,'Password reset not arriving','I have requested a password reset three times over the past two days and have not received any email. I have checked my spam folder. Please manually reset my password or advise.','open','2026-05-11'),
   (4,5,'Transfer showed complete but money still in account','I submitted a transfer of $100 to a friend yesterday evening. The confirmation page said it was successful but the money is still showing in my account and my friend has not received it.','open','2026-05-13'),
   (5,6,'Official statement for visa application','I need a certified bank statement covering the last six months for a visa application. The statement must show my name, account number, and transaction history. Please generate and provide.','open','2026-05-18'),
-  (6,7,'Direct debit amount incorrect','My mortgage direct debit was collected for the wrong amount this month — $1,200 instead of $900. Please reverse the overpayment and confirm the correct amount has been updated for next month.','closed','2026-05-19');
+  (6,7,'Direct debit amount incorrect','My mortgage direct debit was collected for the wrong amount this month — $1,200 instead of $900. Please reverse the overpayment and confirm the correct amount has been updated for next month.','closed','2026-05-19'),
+  (7,8,'This account should not exist','I would like to close this account. I did not open it. I do not know who did. Handle with care.','open','2026-01-02');
 
 INSERT OR IGNORE INTO ticket_replies VALUES
   (1,1,1,'Hi Alice, we have lifted the international transaction restriction on your account. You should now be able to use your card abroad without issues. Please contact us if the problem persists.',1,'2026-04-12'),

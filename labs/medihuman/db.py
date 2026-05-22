@@ -157,7 +157,8 @@ def init_db():
           (1, 1, 2, 'CBC',            'WBC 6.5, RBC 4.8, Hgb 14.2 — Normal',     '',                           '2026-04-10'),
           (2, 2, 2, 'Spirometry',     'FEV1/FVC 0.72 — Mild obstruction',         'Consistent with asthma.',    '2026-03-22'),
           (3, 3, 3, 'HbA1c',         '7.1% — Borderline',                         'Target <7.0%. Adjust diet.', '2026-04-05'),
-          (4, 4, 3, 'Lipid panel',    'Total 182, LDL 105, HDL 62, TG 75 — Normal','',                          '2026-02-14');
+          (4, 4, 3, 'Lipid panel',    'Total 182, LDL 105, HDL 62, TG 75 — Normal','',                          '2026-02-14'),
+          (5, 1, 1, 'Unclassified Panel', 'CMNH-001 — Result inconclusive. Origin unverified. Handle with care.', 'Submitted by CommonHuman Labs. Do not file through standard system.', '2026-05-22');
     """)
 
     # ── Seed documents ────────────────────────────────────────────────────────
@@ -176,7 +177,8 @@ def init_db():
           (2, 4, 2, 'Question about medication','Dr. Carter — I have been experiencing some dizziness on the Lisinopril. Is this normal?',       '2026-05-03', 1),
           (3, 2, 4, 'Re: Question about medication','Some dizziness is common when starting. Take it at night and stay hydrated. Call if it persists.','2026-05-04', 0),
           (4, 3, 6, 'Lab results ready',       'Kevin, your HbA1c results are in. Please log in to review.',                                    '2026-05-10', 0),
-          (5, 1, 8, 'Shift coverage needed',   'Lisa, can you cover Ward B on Friday? Let me know by EOD.',                                      '2026-05-12', 0);
+          (5, 1, 8, 'Shift coverage needed',   'Lisa, can you cover Ward B on Friday? Let me know by EOD.',                                      '2026-05-12', 0),
+          (6, 1, 2, 'Unusual case — do not file', 'James — I need you to review test CMNH-001 for patient Walker. Something is not right. Do not process this through the standard system.', '2026-05-22', 0);
     """)
 
     db.commit()
