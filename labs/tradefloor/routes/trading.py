@@ -88,7 +88,14 @@ def init(app):
                                  exec_price, datetime.utcnow().strftime('%Y-%m-%d'), memo)
                             )
                             db.commit()
-                            user    = db.execute("SELECT * FROM users WHERE id = ?", (uid,)).fetchone()
+                            user       = db.execute("SELECT * FROM users WHERE id = ?", (uid,)).fetchone()
+                            symbol_pre = symbol.upper()
+                            holding    = db.execute(
+                                "SELECT h.*, m.price, m.name FROM portfolio_holdings h "
+                                "JOIN market_data m ON h.symbol = m.symbol "
+                                "WHERE h.user_id = ? AND h.symbol = ?",
+                                (uid, symbol.upper())
+                            ).fetchone()
                             message = f'Bought {quantity} x {symbol.upper()} @ ${exec_price:.2f} — cost ${total:.2f}'
                     else:
                         db.execute(
@@ -134,7 +141,14 @@ def init(app):
                                  exec_price, datetime.utcnow().strftime('%Y-%m-%d'), memo)
                             )
                             db.commit()
-                            user    = db.execute("SELECT * FROM users WHERE id = ?", (uid,)).fetchone()
+                            user       = db.execute("SELECT * FROM users WHERE id = ?", (uid,)).fetchone()
+                            symbol_pre = symbol.upper()
+                            holding    = db.execute(
+                                "SELECT h.*, m.price, m.name FROM portfolio_holdings h "
+                                "JOIN market_data m ON h.symbol = m.symbol "
+                                "WHERE h.user_id = ? AND h.symbol = ?",
+                                (uid, symbol.upper())
+                            ).fetchone()
                             message = f'Sold {quantity} x {symbol.upper()} @ ${exec_price:.2f} — proceeds ${proceeds:.2f}'
                     else:
                         db.execute(

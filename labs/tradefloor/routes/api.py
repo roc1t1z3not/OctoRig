@@ -61,6 +61,13 @@ def require_jwt(f):
 
 def init(app):
 
+    @app.route('/api/prices')
+    def api_prices():
+        rows = get_db().execute(
+            "SELECT symbol, name, price, change FROM market_data ORDER BY symbol"
+        ).fetchall()
+        return jsonify([dict(r) for r in rows])
+
     # VULN: SQLi — f-string on username/password
     @app.route('/api/token', methods=['POST'])
     def api_token():

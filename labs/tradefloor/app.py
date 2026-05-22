@@ -1,8 +1,39 @@
+import random
+import sqlite3 as _sqlite3
+import threading
+import time
+
 from flask import Flask, Response, render_template_string
-from db import init_db, close_db
+from db import init_db, close_db, DATABASE
 from helpers import current_user
 import routes.auth, routes.portfolio, routes.trading, routes.watchlist
 import routes.filings, routes.alerts, routes.admin, routes.api
+
+
+def _price_tick():
+    while True:
+        time.sleep(10)
+        try:
+            conn = _sqlite3.connect(DATABASE)
+            rows = conn.execute("SELECT symbol, price FROM market_data").fetchall()
+            for symbol, price in rows:
+                if symbol == 'CMNH':
+                    pct = random.uniform(0.005, 0.025)   # CMNH only ever goes up
+                else:
+                    pct = random.uniform(-0.03, 0.03)
+                delta     = round(price * pct, 2)
+                new_price = round(max(0.50, price + delta), 2)
+                conn.execute(
+                    "UPDATE market_data SET price = ?, change = ? WHERE symbol = ?",
+                    (new_price, delta, symbol)
+                )
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+
+
+threading.Thread(target=_price_tick, daemon=True).start()
 
 app = Flask(__name__)
 app.secret_key = 'tradefloor-y2k-xV6pNw2'

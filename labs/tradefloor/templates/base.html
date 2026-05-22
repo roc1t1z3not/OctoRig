@@ -8,8 +8,23 @@
 </head>
 <body>
 <div class="ticker-bar">
-  <marquee><span class="up">ACME 42.50 +1.20</span> &nbsp;&middot;&nbsp; <span class="down">NOVA 18.75 -0.45</span> &nbsp;&middot;&nbsp; <span class="up">BLKR 7.10 +0.05</span> &nbsp;&middot;&nbsp; <span class="up">ZTRX 93.00 +2.80</span> &nbsp;&middot;&nbsp; <span class="down">PCFW 14.20 -0.30</span> &nbsp;&middot;&nbsp; <span class="up">GMBT 55.60 +0.90</span> &nbsp;&middot;&nbsp; <span class="down">SLVR 22.40 -1.10</span> &nbsp;&middot;&nbsp; CTRX 61.00 0.00 &nbsp;&middot;&nbsp; <span class="up">ARGX 3.80 +0.15</span> &nbsp;&middot;&nbsp; <span class="down">HNTR 28.90 -0.60</span> &nbsp;&middot;&nbsp; CMNH 1337.00 0.00</marquee>
+  <marquee id="live-ticker">Loading market data…</marquee>
 </div>
+<script>
+  function refreshTicker() {
+    fetch('/api/prices').then(function(r) { return r.json(); }).then(function(data) {
+      var parts = data.map(function(s) {
+        var cls  = s.change > 0 ? 'up' : (s.change < 0 ? 'down' : '');
+        var sign = s.change > 0 ? '+' : '';
+        var tag  = cls ? '<span class="' + cls + '">' : '<span>';
+        return tag + s.symbol + ' ' + s.price.toFixed(2) + ' ' + sign + s.change.toFixed(2) + '</span>';
+      });
+      document.getElementById('live-ticker').innerHTML = parts.join(' &nbsp;&middot;&nbsp; ');
+    }).catch(function() {});
+  }
+  refreshTicker();
+  setInterval(refreshTicker, 10000);
+</script>
 <nav>
   <a class="nav-logo" href="{{ url_for('index') }}">Trade<span>Floor</span></a>
   {% set u = current_user() %}
