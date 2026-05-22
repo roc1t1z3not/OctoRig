@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-AGPLv3-green.svg)](../../LICENSE)
 [![Backend](https://img.shields.io/badge/Backend-SQLite-blue.svg)](.)
-[![OctoRig](https://img.shields.io/badge/OctoRig-Lab%204-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
+[![OctoRig](https://img.shields.io/badge/OctoRig-Lab-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
 
 A deliberately vulnerable online banking application packed with real-world auth flaws, broken access control, and injection vulnerabilities. Manage accounts, wire transfers, and support tickets — or own them all.
 

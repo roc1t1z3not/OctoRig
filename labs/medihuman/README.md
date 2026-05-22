@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/License-AGPLv3-green.svg)](../../LICENSE)
 [![Backend](https://img.shields.io/badge/Backend-SQLite-blue.svg)](.)
 [![Ports](https://img.shields.io/badge/Services-HTTP%20%7C%20SSH%20%7C%20FTP-orange.svg)](.)
-[![OctoRig](https://img.shields.io/badge/OctoRig-Lab%205-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
+[![OctoRig](https://img.shields.io/badge/OctoRig-Lab-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
 
 A deliberately vulnerable healthcare patient portal exposing medical records, prescriptions, lab results, and appointment data. It also runs SSH and FTP — because hospitals really do have more than one attack surface.
 

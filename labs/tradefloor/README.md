@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-AGPLv3-green.svg)](../../LICENSE)
 [![Backend](https://img.shields.io/badge/Backend-SQLite-blue.svg)](.)
-[![OctoRig](https://img.shields.io/badge/OctoRig-Lab%202-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
+[![OctoRig](https://img.shields.io/badge/OctoRig-Lab-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
 
 It's 1999. The dot-com bubble hasn't burst yet, and TradeFloor hasn't heard of CSRF tokens, parameterised queries, or output encoding. A deliberately vulnerable Y2K-era stock trading terminal where live ticking prices share a page with stored XSS, cross-site request forgery, and SQL injection.
 

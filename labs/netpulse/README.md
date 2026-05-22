@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-AGPLv3-green.svg)](../../LICENSE)
 [![Backend](https://img.shields.io/badge/Backend-SQLite-blue.svg)](.)
-[![OctoRig](https://img.shields.io/badge/OctoRig-Lab%206-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
+[![OctoRig](https://img.shields.io/badge/OctoRig-Lab-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
 
 Welcome to 1998. NetPulse is a deliberately vulnerable dial-up ISP customer portal packed with server-side injection, a network diagnostic toolbox that doesn't sanitise its inputs, and a syslog nobody was supposed to read.
 

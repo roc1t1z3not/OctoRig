@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/License-AGPLv3-green.svg)](../../LICENSE)
 [![Backend](https://img.shields.io/badge/Backend-MySQL%20%7C%20PostgreSQL%20%7C%20SQLite-blue.svg)](.)
 [![Challenges](https://img.shields.io/badge/Challenges-57-orange.svg)](.)
-[![OctoRig](https://img.shields.io/badge/OctoRig-Lab%207-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
+[![OctoRig](https://img.shields.io/badge/OctoRig-Lab-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
 
 Deliberately vulnerable Flask application — 57 SQL injection challenges across MySQL, PostgreSQL, and SQLite. The primary test target for the [BreachSQL](https://github.com/CommonHuman-Lab/breachsql) scanner. Also usable as a standalone CTF lab.
 

@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-AGPLv3-green.svg)](../../LICENSE)
 [![Backend](https://img.shields.io/badge/Backend-SQLite-blue.svg)](.)
-[![OctoRig](https://img.shields.io/badge/OctoRig-Lab%203-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
+[![OctoRig](https://img.shields.io/badge/OctoRig-Lab-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
 
 The house always wins — unless you know where the vulnerabilities are. GoldenAce is a deliberately vulnerable online casino with live slots, blackjack, roulette, and dice alongside a broken promo system, a chat room with no XSS filter, and an admin panel that forgets to check who's asking.
 

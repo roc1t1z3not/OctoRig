@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/License-AGPLv3-green.svg)](../../LICENSE)
 [![Backend](https://img.shields.io/badge/Backend-SQLite-blue.svg)](.)
 [![Challenges](https://img.shields.io/badge/Challenges-54-orange.svg)](.)
-[![OctoRig](https://img.shields.io/badge/OctoRig-Lab%208-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
+[![OctoRig](https://img.shields.io/badge/OctoRig-Lab-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
 
 Dedicated XSS training range — 54 challenges across 11 tiers, from raw reflected injection through blind XSS, WAF and CSP bypass, GraphQL, WebSocket, and DOM prototype pollution. An automated admin bot visits stored and blind XSS pages every 30 seconds, so your payloads actually need to fire. **57,800 total points.**
 

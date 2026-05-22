@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/License-AGPLv3-green.svg)](../../LICENSE)
 [![Backend](https://img.shields.io/badge/Backend-SQLite-blue.svg)](.)
 [![Challenges](https://img.shields.io/badge/Challenges-26-orange.svg)](.)
-[![OctoRig](https://img.shields.io/badge/OctoRig-Lab%209-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
+[![OctoRig](https://img.shields.io/badge/OctoRig-Lab-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
 
 Dedicated IDOR training range — 26 challenges across 8 categories: horizontal IDOR via path, POST body, and query params; obfuscated references (UUID, base64, hex, MD5); vertical privilege escalation; HTTP method bypass; parameter pollution; mass assignment; and JWT tampering. **18,400 total points.**
 

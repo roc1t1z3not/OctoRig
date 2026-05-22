@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-AGPLv3-green.svg)](../../LICENSE)
 [![Backend](https://img.shields.io/badge/Backend-SQLite-blue.svg)](.)
-[![OctoRig](https://img.shields.io/badge/OctoRig-Lab%201-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
+[![OctoRig](https://img.shields.io/badge/OctoRig-Lab-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
 
 Be kind, rewind — then exploit. Rewind Range is a deliberately vulnerable retro VHS and video-game store brimming with 80s and 90s nostalgia, SQL injection across every filter, broken object-level access on private messages, and reflected script execution hiding in plain sight.
 

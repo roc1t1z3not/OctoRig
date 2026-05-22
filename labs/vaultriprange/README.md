@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-AGPLv3-green.svg)](../../LICENSE)
 [![Protocol](https://img.shields.io/badge/Protocol-SSH-blue.svg)](.)
-[![OctoRig](https://img.shields.io/badge/OctoRig-Lab%2010-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
+[![OctoRig](https://img.shields.io/badge/OctoRig-Lab-purple.svg)](https://github.com/CommonHuman-Lab/OctoRig)
 
 A deliberately credential-rich SSH target built to exercise every harvesting module in [VaultRip](https://github.com/CommonHuman-Lab/vaultrip). Two user accounts hold credentials in every format VaultRip recognises — SSH keys, AWS profiles, kubeconfig bearer tokens, Docker auth, git credentials, pgpass, netrc, my.cnf, shell history, and `.env` files. A background process holds secrets in environment variables so the memory scanner fires too.
 
