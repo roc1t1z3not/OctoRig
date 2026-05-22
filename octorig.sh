@@ -46,14 +46,38 @@ LABS=(
 )
 
 # ---------------- dependency checks ------------------------------------------
-check_docker() {
-  if ! command -v docker &>/dev/null; then
-    bad "Docker is not installed. Install it from https://docs.docker.com/get-docker/"
+install_docker() {
+  warn "Docker not found — attempting to install..."
+  if [[ $EUID -ne 0 ]]; then
+    bad "Root privileges required to install Docker. Re-run with sudo."
     exit 1
   fi
-  if ! docker info &>/dev/null 2>&1; then
-    bad "Docker daemon is not running. Start it and try again."
+  apt-get update -qq
+  apt-get install -y -qq docker.io
+  systemctl enable --now docker
+  if ! command -v docker &>/dev/null; then
+    bad "Docker installation failed. Install it manually: apt install docker.io"
     exit 1
+  fi
+  good "Docker installed successfully"
+}
+
+check_docker() {
+  if ! command -v docker &>/dev/null; then
+    install_docker
+  fi
+  if ! docker info &>/dev/null 2>&1; then
+    info "Docker daemon is not running — attempting to start it..."
+    if [[ $EUID -ne 0 ]]; then
+      sudo systemctl start docker 2>/dev/null || { bad "Failed to start Docker daemon. Try: sudo systemctl start docker"; exit 1; }
+    else
+      systemctl start docker 2>/dev/null || { bad "Failed to start Docker daemon. Try: systemctl start docker"; exit 1; }
+    fi
+    sleep 2
+    if ! docker info &>/dev/null 2>&1; then
+      bad "Docker daemon still not running after start attempt."
+      exit 1
+    fi
   fi
   good "Docker is running"
 }
