@@ -3,19 +3,31 @@
 </p>
 
 <h1 align="center">OctoRig</h1>
-<p align="center"><em>Bash-based Docker lab launcher for offensive security practice</em></p>
+<p align="center"><em>Spin up realistic vulnerable environments for pentesting, security research, and offensive security training — with a single command.</em></p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Shell-Bash-green.svg" />
   <img src="https://img.shields.io/badge/Runtime-Docker-blue.svg" />
-  <img src="https://img.shields.io/badge/Use-Security%20Labs-red.svg" />
+  <img src="https://img.shields.io/badge/focus-offensive--security-darkred.svg" />
 </p>
 
 ---
 
-OctoRig spins up intentionally vulnerable Docker labs for penetration testing practice, security research, red team training, and security tool development — all with a single command.
+OctoRig is a modular vulnerable lab platform that spins up realistic Docker-based targets for penetration testing practice, security research, red team training, and security tool validation — all with a single command.
 
-Each lab is designed to feel closer to a real-world target instead of a sterile CTF box. Expect vulnerable business logic, chained exploits, hidden attack paths, weak infrastructure, and easter eggs.
+Unlike traditional CTF-style machines, OctoRig labs are designed to feel closer to real-world applications and infrastructure. Each environment contains layered vulnerabilities, insecure business logic, hidden attack paths, weak operational security, and realistic application flows for deeper testing and exploration.
+
+## Features
+
+- One-command lab deployment
+- Fully isolated Docker environments
+- Realistic vulnerable applications
+- Multiple vulnerability classes per lab
+- Designed for DAST and offensive tooling
+- Beginner to advanced attack paths
+- Hidden easter eggs and chained exploits
+- Fast teardown and reset workflows
+- Ideal for workshops, demos, and practice environments
 
 ---
 
@@ -42,12 +54,12 @@ Or non-interactively:
 
 | ID | Name | Description | Port(s) |
 | -- | ---- | ----------- | ------- |
-| 1 | [**Rewind**](labs/rewindrange/README.md) | Retro video and games store — SQLi, XSS and IDOR | `8082` |
-| 2 | [**TradeFloor**](labs/tradefloor/README.md) | Vulnerable trading portal — XXE, CSRF, mass assignment, SQLi, IDOR, stored XSS | `8086` |
-| 3 | [**GoldenAce**](labs/goldenace/README.md) | Vulnerable online casino — SQLi, IDOR, stored XSS, CSRF, business logic, JWT alg:none | `8087` |
-| 4 | [**HumanBank**](labs/humanbank/README.md) | Vulnerable online banking app — SQLi, IDOR, XSS, auth flaws, file upload, business logic | `8083` |
-| 5 | [**MediHuman**](labs/medihuman/README.md) | Vulnerable healthcare patient portal — SQLi, IDOR, XSS, file upload, SSH/FTP weak creds | `8084`, `2224`, `2121` |
-| 6 | [**NetPulse**](labs/netpulse/README.md) | Vulnerable 90s ISP portal — SSRF, SSTI, command injection, open redirect, SQLi, IDOR, XSS | `8085` |
+| 1 | [**Rewind**](labs/rewindrange/README.md) | Retro gaming and media storefront featuring SQL injection, XSS, IDOR, and insecure legacy functionality | `8082` |
+| 2 | [**TradeFloor**](labs/tradefloor/README.md) | Vulnerable trading platform with XXE, CSRF, mass assignment, SQLi, IDOR, and stored XSS | `8086` |
+| 3 | [**GoldenAce**](labs/goldenace/README.md) | Online casino environment containing SQLi, JWT flaws, IDOR, stored XSS, CSRF, and business logic vulnerabilities | `8087` |
+| 4 | [**HumanBank**](labs/humanbank/README.md) | Vulnerable online banking application with authentication flaws, SQLi, XSS, insecure uploads, and business logic abuse | `8083` |
+| 5 | [**MediHuman**](labs/medihuman/README.md) | Healthcare patient portal exposing SQLi, IDOR, XSS, insecure file handling, and weak SSH/FTP configurations | `8084`, `2224`, `2121` |
+| 6 | [**NetPulse**](labs/netpulse/README.md) | 90s-inspired ISP management portal vulnerable to SSRF, SSTI, command injection, open redirects, SQLi, IDOR, and XSS | `8085` |
 | 7 | [**BreachSQL**](labs/firerange/README.md) | Tiered SQL injection challenges (T1-T5) for SQLi practice | `17476` |
 | 8 | [**StingXSS**](labs/stingxss/README.md) | Tiered XSS challenges (T1-T8) for XSS injection practice | `17477` |
 | 9 | [**VaultGate**](labs/vaultgate/README.md) | IDOR challenges for benchmarking | `17478` |
@@ -69,6 +81,12 @@ Or non-interactively:
 - Internet access on first run (image pulls)
 
 ---
+
+## Philosophy
+
+OctoRig focuses on realistic offensive security training rather than artificial puzzle-based challenges.
+
+The goal is to provide reproducible vulnerable environments that resemble modern applications, internal tooling, and operational mistakes commonly encountered during real assessments.
 
 ## Legal & Ethical Use
 
