@@ -110,7 +110,7 @@ INSERT OR IGNORE INTO market_data VALUES
   (8, 'CTRX','CentraTech Corp',      61.00,  0.00,'Technology'),
   (9, 'ARGX','Argos Exploration',     3.80,  0.15,'Energy'),
   (10,'HNTR','Hunter & Sons Ltd',    28.90, -0.60,'Retail'),
-  (11,'CMNH','CommonHuman Labs',    1337.00, 42.00,'Experimental');
+  (11,'CMNH','CommonHuman Labs',    1337.00, 5.00,'Experimental');
 
 INSERT OR IGNORE INTO portfolio_holdings VALUES
   (1, 2,'ACME', 100, 38.20),
