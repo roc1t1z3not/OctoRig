@@ -221,7 +221,8 @@ INSERT OR IGNORE INTO wishlists VALUES
   (9,5,1),(10,5,8),(11,5,21),
   (12,6,3),(13,6,20),(14,6,22),
   (15,7,12),(16,7,19),(17,7,21),
-  (18,8,3),(19,8,14),(20,8,22);
+  (18,8,3),(19,8,14),(20,8,22),
+  (21,2,26),(22,3,27),(23,5,26),(24,8,27);
 
 INSERT OR IGNORE INTO reviews VALUES
   (1,1,2,5,'Absolute classic. The practical effects still hold up after all these years.','2026-04-29'),
@@ -256,7 +257,13 @@ INSERT OR IGNORE INTO reviews VALUES
   (30,21,8,5,'The campaign still holds up. Facility bathroom. Enough said.','2026-05-13'),
   (31,22,5,5,'Ocarina of Time is the greatest game ever made. Perfect cart.','2026-05-14'),
   (32,22,6,5,'Nothing has come close in 25 years. The Kokiri Forest music still hits.','2026-05-15'),
-  (33,25,8,4,'The IDDQD codes work fine. Brilliant rip-and-tear purchase.','2026-05-21');
+  (33,25,8,4,'The IDDQD codes work fine. Brilliant rip-and-tear purchase.','2026-05-21'),
+  (34,26,1,5,'There are no words. Whatever this is — it runs. Handle with care indeed.','2026-05-20'),
+  (35,26,4,5,'I have never seen anything like it. The executable defies description. Five stars is not enough.','2026-05-21'),
+  (36,26,7,5,'Experimental does not even begin to cover it. Mint condition. It will change how you think about software.','2026-05-22'),
+  (37,27,1,5,'Do not watch this alone. The print quality is flawless and the content is... something else entirely.','2026-05-20'),
+  (38,27,3,5,'I do not know what I watched but I cannot stop thinking about it. Mint condition. Worth every penny.','2026-05-21'),
+  (39,27,6,5,'Classified for a reason. The tape quality is immaculate. This one stays in the vault.','2026-05-22');
 
 INSERT OR IGNORE INTO board_threads VALUES
   (1,2,'Best retro game to start collecting?','Just joined the store and looking for advice on where to start. I have a SNES and an NES. Any recommendations for must-haves?','2026-05-01'),
