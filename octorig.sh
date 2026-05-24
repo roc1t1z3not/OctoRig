@@ -70,6 +70,9 @@ LABS=(
   "16|VulnAD|vulnad.sh|Vulnerable Active Directory - Samba4 AD with AD attack paths"
 )
 
+# IDs of real-world scenario labs (for "start world")
+WORLD_LAB_IDS=(1 2 3 4 5 6)
+
 # ---------------- dependency checks ------------------------------------------
 install_docker() {
   warn "Docker not found — attempting to install..."
@@ -227,6 +230,58 @@ all_action() {
   fi
 }
 
+# ---------------- start real-world labs in parallel ---------------------------
+start_world() {
+  header "Starting all real-world labs in parallel..."
+  echo ""
+
+  local tmpdir
+  tmpdir=$(mktemp -d)
+  local pids=() names=() lids=()
+
+  for entry in "${LABS[@]}"; do
+    IFS='|' read -r lid lname lscript _desc <<< "$entry"
+    local is_world=false
+    for wid in "${WORLD_LAB_IDS[@]}"; do
+      [[ "$lid" == "$wid" ]] && is_world=true && break
+    done
+    [[ "$is_world" == false ]] && continue
+    [[ ! -f "${LABS_DIR}/${lscript}" ]] && continue
+
+    info "Queuing: $lname"
+    bash "${LABS_DIR}/${lscript}" start > "${tmpdir}/${lid}.log" 2>&1 &
+    pids+=($!)
+    names+=("$lname")
+    lids+=("$lid")
+  done
+
+  echo ""
+  info "${#pids[@]} labs launching in parallel — waiting for them to come up..."
+  echo ""
+
+  local all_ok=true
+  local i
+  for i in "${!pids[@]}"; do
+    local pid="${pids[$i]}" name="${names[$i]}" lid="${lids[$i]}"
+    if wait "$pid"; then
+      good "$name is up"
+    else
+      bad "$name failed to start"
+      all_ok=false
+    fi
+    cat "${tmpdir}/${lid}.log"
+    echo ""
+  done
+
+  rm -rf "$tmpdir"
+
+  if [[ "$all_ok" == true ]]; then
+    good "All real-world labs are running."
+  else
+    warn "Some labs failed to start — check output above."
+  fi
+}
+
 # ---------------- interactive menu --------------------------------------------
 interactive_menu() {
   list_labs
@@ -235,6 +290,7 @@ interactive_menu() {
   echo -e "  ${GREEN}stop <id|name>${RESET}   — Stop a lab by ID or name"
   echo -e "  ${GREEN}status${RESET}       — Show running lab containers"
   echo -e "  ${GREEN}start all${RESET}    — Start all labs"
+  echo -e "  ${GREEN}start world${RESET}  — Start all real-world scenario labs in parallel"
   echo -e "  ${GREEN}stop all${RESET}     — Stop all labs"
   echo -e "  ${GREEN}list${RESET}         — List available labs"
   echo -e "  ${GREEN}quit${RESET}         — Exit"
@@ -246,7 +302,8 @@ interactive_menu() {
     case "$cmd" in
       start)
         check_docker
-        if [[ "${arg1:-}" == "all" ]]; then all_action start
+        if   [[ "${arg1:-}" == "all"   ]]; then all_action start
+        elif [[ "${arg1:-}" == "world" ]]; then start_world
         else dispatch start "${arg1:-}"; fi ;;
       stop)
         if [[ "${arg1:-}" == "all" ]]; then all_action stop
@@ -275,17 +332,18 @@ case "${1:-menu}" in
     status_all ;;
   start)
     check_docker
-    if [[ "${2:-}" == "all" ]]; then all_action start
+    if   [[ "${2:-}" == "all"   ]]; then all_action start
+    elif [[ "${2:-}" == "world" ]]; then start_world
     else dispatch start "${2:-}"; fi ;;
   stop)
     if [[ "${2:-}" == "all" ]]; then all_action stop
     else dispatch stop "${2:-}"; fi ;;
   help|-h|--help)
     list_labs
-    echo "Usage: $0 [menu|list|status|start <id|name|all>|stop <id|name|all>]"
+    echo "Usage: $0 [menu|list|status|start <id|name|all|world>|stop <id|name|all>]"
     echo "" ;;
   *)
     bad "Unknown command: ${1}"
-    echo "Usage: $0 [menu|list|status|start <id|name|all>|stop <id|name|all>]"
+    echo "Usage: $0 [menu|list|status|start <id|name|all|world>|stop <id|name|all>]"
     exit 1 ;;
 esac
