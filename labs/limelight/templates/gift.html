@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Gift Cards{% endblock %}
+{% block content %}
+<div class="form-card">
+  <h2>Redeem a Gift Card</h2>
+  <p class="mt1" style="color:var(--muted);font-size:0.875rem;margin-bottom:1.25rem;">Enter your gift card code to add credit to your account.</p>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  {% if success %}<div class="alert alert-success">{{ success }}</div>{% endif %}
+  <!-- VULN: SQLi — code field injected into raw query; CSRF — no token -->
+  <form method="post">
+    <div class="form-group">
+      <label>Gift Card Code</label>
+      <input type="text" name="code" placeholder="e.g. WELCOME20" autocomplete="off" required>
+    </div>
+    <button class="btn btn-primary" style="width:100%">Redeem</button>
+  </form>
+</div>
+{% endblock %}

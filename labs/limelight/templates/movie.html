@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}{{ m.title }}{% endblock %}
+{% block content %}
+<div class="container">
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  {% if success %}<div class="alert alert-success">{{ success }}</div>{% endif %}
+
+  <div class="movie-detail">
+    <div class="movie-detail-poster">{{ m.title[0] }}</div>
+    <div class="movie-detail-body">
+      <h1>{{ m.title }}</h1>
+      <p class="movie-meta mt1">
+        <span class="badge badge-red">{{ m.genre }}</span>
+        <span class="badge badge-muted">{{ m.rating }}</span>
+        {% if m.duration_min %}<span class="badge badge-muted">{{ m.duration_min }} min</span>{% endif %}
+      </p>
+      <p class="mt2" style="color:var(--muted);font-size:0.875rem;">Directed by {{ m.director }}</p>
+      <p class="mt2">{{ m.description }}</p>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <p class="section-title">Showtimes</p>
+  {% if showings %}
+  <div class="showtime-list">
+    {% for s in showings %}
+    <div class="showtime-row">
+      <div>
+        <span class="showtime-time">{{ s.show_time[11:16] }}</span>
+        <span class="showtime-date" style="color:var(--muted);font-size:0.8rem;margin-left:0.5rem;">{{ s.show_time[:10] }}</span>
+        <span class="badge badge-muted" style="margin-left:0.75rem;">{{ s.hall }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <span style="color:var(--muted);font-size:0.875rem;">from £{{ "%.2f"|format(s.price) }}</span>
+        {% if current_user() %}
+        <a href="{{ url_for('book', showing_id=s.id) }}" class="btn btn-primary btn-sm">Book</a>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="btn btn-sm">Sign in to book</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty">No upcoming screenings.</p>
+  {% endif %}
+
+  <div class="section-divider"></div>
+
+  <p class="section-title">Reviews</p>
+  <div class="reviews-list">
+    {% for r in reviews %}
+    <div class="review-item">
+      <div class="review-header">
+        <!-- VULN: stored XSS — display_name rendered with | safe -->
+        <span class="review-author">{{ (r.display_name if r.display_name else r.username) | safe }}</span>
+        <span class="review-stars">{% for i in range(r.rating) %}★{% endfor %}{% for i in range(5 - r.rating) %}☆{% endfor %}</span>
+        <span class="review-date" style="color:var(--muted);font-size:0.78rem;">{{ r.created_at[:10] }}</span>
+      </div>
+      <!-- VULN: stored XSS — review text rendered with | safe -->
+      <p class="review-text">{{ r.text | safe }}</p>
+    </div>
+    {% else %}
+    <p class="empty">No reviews yet. Be the first!</p>
+    {% endfor %}
+  </div>
+
+  {% if current_user() %}
+  <div class="form-card" style="margin-top:1.5rem;max-width:600px;">
+    <h2 style="font-size:1rem;">Write a Review</h2>
+    <form method="post" action="{{ url_for('review', movie_id=m.id) }}">
+      <div class="form-group">
+        <label>Rating</label>
+        <select name="rating">
+          <option value="5">★★★★★</option>
+          <option value="4">★★★★☆</option>
+          <option value="3" selected>★★★☆☆</option>
+          <option value="2">★★☆☆☆</option>
+          <option value="1">★☆☆☆☆</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Your review</label>
+        <textarea name="text" rows="4" placeholder="What did you think?"></textarea>
+      </div>
+      <button class="btn btn-primary">Post Review</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -58,20 +58,21 @@ LABS=(
   "4|HumanBank|humanbank.sh|Vulnerable online banking app — SQLi, IDOR, XSS, auth flaws, file upload, business logic"
   "5|MediHuman|medihuman.sh|Vulnerable healthcare patient portal — SQLi, IDOR, XSS, file upload, SSH/FTP weak creds"
   "6|NetPulse|netpulse.sh|Vulnerable 90s ISP portal — SSRF, SSTI, command injection, open redirect, SQLi, IDOR, XSS"
-  "7|BreachSQL|breachsql.sh|Tiered SQL injection challenges (T1-T5) for SQLi practice"
-  "8|StingXSS|stingxss.sh|Tiered XSS challenges (T1-T8) for XSS injection practice"
-  "9|VaultGate|vaultgate.sh|IDOR challenges for benchmarking"
-  "10|VaultRip|vaultriprange.sh|SSH credential-rich target for VaultRip passive and remote harvesting"
-  "11|Juice Shop|juiceshop.sh|OWASP Juice Shop - OWASP Top 10 web vulnerabilities"
-  "12|DVWA|dvwa.sh|Damn Vulnerable Web App - PHP/MySQL classic"
-  "13|Metasploitable2|metasploitable.sh|Linux VM with intentionally vulnerable services"
-  "14|WebGoat|webgoat.sh|OWASP WebGoat - PortSwigger-style lesson-based labs"
-  "15|HTB Style|htb_style.sh|HackTheBox-style CTFd platform + vulnerable challenge"
-  "16|VulnAD|vulnad.sh|Vulnerable Active Directory - Samba4 AD with AD attack paths"
+  "7|Limelight|limelight.sh|Vulnerable cinema booking app — SQLi, XSS, IDOR, CSRF, SSTI, business logic, mass assignment"
+  "8|BreachSQL|breachsql.sh|Tiered SQL injection challenges (T1-T5) for SQLi practice"
+  "9|StingXSS|stingxss.sh|Tiered XSS challenges (T1-T8) for XSS injection practice"
+  "10|VaultGate|vaultgate.sh|IDOR challenges for benchmarking"
+  "11|VaultRip|vaultriprange.sh|SSH credential-rich target for VaultRip passive and remote harvesting"
+  "12|Juice Shop|juiceshop.sh|OWASP Juice Shop - OWASP Top 10 web vulnerabilities"
+  "13|DVWA|dvwa.sh|Damn Vulnerable Web App - PHP/MySQL classic"
+  "14|Metasploitable2|metasploitable.sh|Linux VM with intentionally vulnerable services"
+  "15|WebGoat|webgoat.sh|OWASP WebGoat - PortSwigger-style lesson-based labs"
+  "16|HTB Style|htb_style.sh|HackTheBox-style CTFd platform + vulnerable challenge"
+  "17|VulnAD|vulnad.sh|Vulnerable Active Directory - Samba4 AD with AD attack paths"
 )
 
 # IDs of real-world scenario labs (for "start world")
-WORLD_LAB_IDS=(1 2 3 4 5 6)
+WORLD_LAB_IDS=(1 2 3 4 5 6 7)
 
 # ---------------- dependency checks ------------------------------------------
 install_docker() {
@@ -286,14 +287,16 @@ start_world() {
 interactive_menu() {
   list_labs
   echo -e "  ${BOLD}Commands:${RESET}"
-  echo -e "  ${GREEN}start <id|name>${RESET}  — Start a lab by ID or name (e.g. start 3, start goldenace)"
-  echo -e "  ${GREEN}stop <id|name>${RESET}   — Stop a lab by ID or name"
-  echo -e "  ${GREEN}status${RESET}       — Show running lab containers"
-  echo -e "  ${GREEN}start all${RESET}    — Start all labs"
-  echo -e "  ${GREEN}start world${RESET}  — Start all real-world scenario labs in parallel"
-  echo -e "  ${GREEN}stop all${RESET}     — Stop all labs"
-  echo -e "  ${GREEN}list${RESET}         — List available labs"
-  echo -e "  ${GREEN}quit${RESET}         — Exit"
+  echo -e "  ${GREEN}start <id|name>${RESET}    — Start a lab by ID or name (e.g. start 3, start goldenace)"
+  echo -e "  ${GREEN}stop <id|name>${RESET}     — Stop a lab by ID or name"
+  echo -e "  ${GREEN}restart <id|name>${RESET}  — Restart a lab by ID or name"
+  echo -e "  ${GREEN}status${RESET}         — Show running lab containers"
+  echo -e "  ${GREEN}start all${RESET}      — Start all labs"
+  echo -e "  ${GREEN}start world${RESET}    — Start all real-world scenario labs in parallel"
+  echo -e "  ${GREEN}stop all${RESET}       — Stop all labs"
+  echo -e "  ${GREEN}restart all${RESET}    — Restart all labs"
+  echo -e "  ${GREEN}list${RESET}           — List available labs"
+  echo -e "  ${GREEN}quit${RESET}           — Exit"
   echo ""
 
   while true; do
@@ -308,6 +311,10 @@ interactive_menu() {
       stop)
         if [[ "${arg1:-}" == "all" ]]; then all_action stop
         else dispatch stop "${arg1:-}"; fi ;;
+      restart)
+        check_docker
+        if [[ "${arg1:-}" == "all" ]]; then all_action stop; all_action start
+        else dispatch stop "${arg1:-}"; dispatch start "${arg1:-}"; fi ;;
       status) status_all ;;
       list)   list_labs ;;
       quit|exit|q) info "Bye!"; exit 0 ;;
@@ -338,12 +345,16 @@ case "${1:-menu}" in
   stop)
     if [[ "${2:-}" == "all" ]]; then all_action stop
     else dispatch stop "${2:-}"; fi ;;
+  restart)
+    check_docker
+    if [[ "${2:-}" == "all" ]]; then all_action stop; all_action start
+    else dispatch stop "${2:-}"; dispatch start "${2:-}"; fi ;;
   help|-h|--help)
     list_labs
-    echo "Usage: $0 [menu|list|status|start <id|name|all|world>|stop <id|name|all>]"
+    echo "Usage: $0 [menu|list|status|start <id|name|all|world>|stop <id|name|all>|restart <id|name|all>]"
     echo "" ;;
   *)
     bad "Unknown command: ${1}"
-    echo "Usage: $0 [menu|list|status|start <id|name|all|world>|stop <id|name|all>]"
+    echo "Usage: $0 [menu|list|status|start <id|name|all|world>|stop <id|name|all>|restart <id|name|all>]"
     exit 1 ;;
 esac

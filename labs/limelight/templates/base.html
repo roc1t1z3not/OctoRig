@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Limelight{% endblock %} — Cinema</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<!--
+     ___
+    /   \     CommonHuman-Lab
+   | o_o |    Security Training Labs
+    \___/     Lab: Limelight
+   /|   |\    github.com/CommonHuman-Lab
+  (_)   (_)
+-->
+<body>
+<nav>
+  <a class="nav-logo" href="{{ url_for('index') }}">Lime<span>light</span></a>
+  {% set u = current_user() %}
+  {% if u %}
+  <a href="{{ url_for('movies') }}">Films</a>
+  <a href="{{ url_for('my_bookings') }}">My Bookings</a>
+  <a href="{{ url_for('gift') }}">Gift Cards</a>
+  {% endif %}
+  <div class="nav-right">
+    {% if u %}
+      {% if u.balance > 0 %}
+      <span class="nav-balance">£{{ "%.2f"|format(u.balance) }}</span>
+      {% endif %}
+      <!-- VULN: stored XSS — display_name rendered with | safe -->
+      <a href="{{ url_for('profile', user_id=u.id) }}">{{ (u.display_name if u.display_name else u.username) | safe }}</a>
+      {% if u.is_admin or session.get('is_admin') %}<a href="{{ url_for('admin_index') }}" style="color:var(--accent);">Admin</a>{% endif %}
+      <a href="{{ url_for('logout') }}" class="btn btn-sm">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}" style="color:var(--muted);">Sign In</a>
+      <a href="{{ url_for('register') }}" class="btn btn-sm btn-primary">Join</a>
+    {% endif %}
+  </div>
+</nav>
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer>
+  <p>Limelight Cinema &mdash; Your seat. Your movie. &copy; 2026</p>
+  <p style="margin-top:0.3rem;">Made By <a href="https://github.com/CommonHuman-Lab" target="_blank">CommonHuman</a></p>
+</footer>
+<script>console.log('%c\u{1F419} OctoRig By CommonHuman | Lab: Limelight | Happy hacking!','color:#dc2626;font-size:14px;font-weight:bold;');</script>
+</body>
+</html>

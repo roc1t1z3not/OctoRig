@@ -60,16 +60,17 @@ Or non-interactively:
 | 4 | [**HumanBank**](labs/humanbank/README.md) | Vulnerable online banking application with authentication flaws, SQLi, XSS, insecure uploads, and business logic abuse | `8083` |
 | 5 | [**MediHuman**](labs/medihuman/README.md) | Healthcare patient portal exposing SQLi, IDOR, XSS, insecure file handling, and weak SSH/FTP configurations | `8084`, `2224`, `2121` |
 | 6 | [**NetPulse**](labs/netpulse/README.md) | 90s-inspired ISP management portal vulnerable to SSRF, SSTI, command injection, open redirects, SQLi, IDOR, and XSS | `8085` |
-| 7 | [**BreachSQL**](labs/firerange/README.md) | Tiered SQL injection challenges (T1-T5) for SQLi practice | `17476` |
-| 8 | [**StingXSS**](labs/stingxss/README.md) | Tiered XSS challenges (T1-T8) for XSS injection practice | `17477` |
-| 9 | [**VaultGate**](labs/vaultgate/README.md) | IDOR challenges for benchmarking | `17478` |
-| 10 | [**VaultRip**](labs/vaultriprange/README.md) | SSH credential-rich target for VaultRip passive and remote harvesting | `2222` |
-| 11 | **Juice Shop** | OWASP Juice Shop — OWASP Top 10 web vulnerabilities | `3000` |
-| 12 | **DVWA** | Damn Vulnerable Web App — PHP/MySQL classic | `8080` |
-| 13 | **Metasploitable2** | Linux VM with intentionally vulnerable services | `8081`, `2222`, `21`, `445`, … |
-| 14 | **WebGoat** | OWASP WebGoat — lesson-based Java security training | `8888`, `9191` |
-| 15 | **HTB Style** | HackTheBox-style CTFd platform + vulnerable challenge | `8001`, `8090` |
-| 16 | **VulnAD** | Vulnerable Active Directory — Samba4 AD with AD attack paths | `88`, `389`, `4445` |
+| 7 | [**Limelight**](labs/limelight/README.md) | Vulnerable cinema booking platform with SQLi, XSS, IDOR, SSTI, CSRF, business logic abuse, and mass assignment | `8088` |
+| 8 | [**BreachSQL**](labs/firerange/README.md) | Tiered SQL injection challenges (T1-T5) for SQLi practice | `17476` |
+| 9 | [**StingXSS**](labs/stingxss/README.md) | Tiered XSS challenges (T1-T8) for XSS injection practice | `17477` |
+| 10 | [**VaultGate**](labs/vaultgate/README.md) | IDOR challenges for benchmarking | `17478` |
+| 11 | [**VaultRip**](labs/vaultriprange/README.md) | SSH credential-rich target for VaultRip passive and remote harvesting | `2222` |
+| 12 | **Juice Shop** | OWASP Juice Shop — OWASP Top 10 web vulnerabilities | `3000` |
+| 13 | **DVWA** | Damn Vulnerable Web App — PHP/MySQL classic | `8080` |
+| 14 | **Metasploitable2** | Linux VM with intentionally vulnerable services | `8081`, `2222`, `21`, `445`, … |
+| 15 | **WebGoat** | OWASP WebGoat — lesson-based Java security training | `8888`, `9191` |
+| 16 | **HTB Style** | HackTheBox-style CTFd platform + vulnerable challenge | `8001`, `8090` |
+| 17 | **VulnAD** | Vulnerable Active Directory — Samba4 AD with AD attack paths | `88`, `389`, `4445` |
 
 ---
 

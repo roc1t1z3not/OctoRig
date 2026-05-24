@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Now Showing{% endblock %}
+{% block content %}
+<div class="hero">
+  <h1>Now <span>Showing</span></h1>
+  <p class="tagline">Book your seats online. Pick up your tickets at the door.</p>
+  <a href="{{ url_for('movies') }}" class="btn btn-primary">Browse All Films</a>
+</div>
+
+<div class="container">
+  <p class="section-title">On Now</p>
+  <div class="movie-grid">
+    {% for m in movies %}
+    <a class="movie-card" href="{{ url_for('movie', movie_id=m.id) }}">
+      <div class="movie-poster">{{ m.title[0] }}</div>
+      <div class="movie-info">
+        <p class="movie-title">{{ m.title }}</p>
+        <p class="movie-meta">
+          <span class="badge badge-red">{{ m.genre }}</span>
+          <span class="badge badge-muted">{{ m.rating }}</span>
+          {% if m.duration_min %}<span class="badge badge-muted">{{ m.duration_min }} min</span>{% endif %}
+        </p>
+        <p class="movie-desc">{{ m.description[:100] }}{% if m.description|length > 100 %}…{% endif %}</p>
+      </div>
+    </a>
+    {% else %}
+    <p class="empty">No films currently showing.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

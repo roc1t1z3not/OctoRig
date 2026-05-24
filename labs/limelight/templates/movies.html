@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Films{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>Films</h1>
+  </div>
+
+  <form class="search-bar" method="get" action="{{ url_for('movies') }}">
+    <input type="text" name="q" placeholder="Search title or genre…" value="{{ query }}">
+    <select name="genre">
+      <option value="">All genres</option>
+      {% for g in genres %}
+      <option value="{{ g.genre }}" {% if genre == g.genre %}selected{% endif %}>{{ g.genre }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn">Search</button>
+    {% if query or genre %}<a href="{{ url_for('movies') }}" class="btn">Clear</a>{% endif %}
+  </form>
+
+  {% if query %}
+  <!-- VULN: reflected XSS — query echoed with | safe, no escaping -->
+  <p class="results-label" style="color:var(--muted);font-size:0.875rem;margin-bottom:1rem;">
+    Results for: <strong>{{ query | safe }}</strong>
+  </p>
+  {% endif %}
+
+  <div class="movie-grid">
+    {% for m in movies %}
+    <a class="movie-card" href="{{ url_for('movie', movie_id=m.id) }}">
+      <div class="movie-poster">{{ m.title[0] }}</div>
+      <div class="movie-info">
+        <p class="movie-title">{{ m.title }}</p>
+        <p class="movie-meta">
+          <span class="badge badge-red">{{ m.genre }}</span>
+          <span class="badge badge-muted">{{ m.rating }}</span>
+          {% if m.duration_min %}<span class="badge badge-muted">{{ m.duration_min }} min</span>{% endif %}
+        </p>
+        <p class="movie-desc">{{ m.description[:100] }}{% if m.description|length > 100 %}…{% endif %}</p>
+      </div>
+    </a>
+    {% else %}
+    <p class="empty" style="grid-column:1/-1">No films found.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

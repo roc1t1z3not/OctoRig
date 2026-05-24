@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}Select Seats{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>Select Seats</h1>
+    <p>{{ showing.title }} &mdash; {{ showing.show_time[11:16] }}, {{ showing.show_time[:10] }} &mdash; {{ showing.hall }}</p>
+  </div>
+
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+
+  <div class="seats-layout">
+    <!-- Left: seat map -->
+    <div class="seats-left">
+      <div class="screen-label">SCREEN</div>
+      <div class="screen-bar"></div>
+
+      <div class="seat-legend">
+        <span class="seat-demo seat-free"></span> Available &nbsp;
+        <span class="seat-demo seat-taken"></span> Taken &nbsp;
+        <span class="seat-demo seat-selected"></span> Selected
+      </div>
+
+      <div class="seat-grid" id="seatGrid">
+        {% for row in rows %}
+        <div class="seat-row">
+          <span class="row-label">{{ row }}</span>
+          {% for col in range(1, 11) %}
+          {% set label = row ~ col %}
+          <button type="button"
+                  class="seat {% if label in booked %}seat-taken{% else %}seat-free{% endif %}"
+                  data-seat="{{ label }}"
+                  {% if label in booked %}disabled{% endif %}
+                  onclick="toggleSeat(this)">{{ label }}</button>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right: booking summary (sticky) -->
+    <div class="seats-right">
+      <!-- VULN: business logic — price submitted by client, not locked server-side -->
+      <form method="post" id="bookForm">
+        <input type="hidden" name="seats" id="selectedSeats">
+        <input type="hidden" name="price" value="{{ showing.price }}">
+
+        <div class="summary-card">
+          <p class="section-title" style="margin-bottom:1.25rem;">Booking Summary</p>
+
+          <div class="detail-row">
+            <span class="lbl">Film</span>
+            <span>{{ showing.title }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="lbl">Showtime</span>
+            <span>{{ showing.show_time[11:16] }}, {{ showing.show_time[:10] }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="lbl">Hall</span>
+            <span>{{ showing.hall }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="lbl">Price per seat</span>
+            <span>£{{ "%.2f"|format(showing.price) }}</span>
+          </div>
+
+          <div id="summarySeatsRow" class="detail-row" style="display:none;">
+            <span class="lbl">Seats</span>
+            <span id="summarySeats" class="mono" style="text-align:right;max-width:160px;word-break:break-all;"></span>
+          </div>
+          <div id="summaryTotalRow" class="detail-row" style="display:none;">
+            <span class="lbl">Total</span>
+            <span id="summaryTotal" style="color:var(--accent);font-weight:700;"></span>
+          </div>
+
+          <div id="emptyHint" style="padding:1.5rem 0;text-align:center;color:var(--muted);font-size:0.82rem;">
+            Select seats from the map to continue.
+          </div>
+
+          <button type="submit" id="confirmBtn" class="btn btn-primary" style="width:100%;display:none;">
+            Confirm Booking
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+var selected = [];
+var price    = {{ showing.price }};
+
+function toggleSeat(btn) {
+  var seat = btn.dataset.seat;
+  var idx  = selected.indexOf(seat);
+  if (idx === -1) {
+    selected.push(seat);
+    btn.classList.remove('seat-free');
+    btn.classList.add('seat-selected');
+  } else {
+    selected.splice(idx, 1);
+    btn.classList.remove('seat-selected');
+    btn.classList.add('seat-free');
+  }
+  updateSummary();
+}
+
+function updateSummary() {
+  var hasSeats = selected.length > 0;
+  document.getElementById('emptyHint').style.display         = hasSeats ? 'none'  : 'block';
+  document.getElementById('confirmBtn').style.display        = hasSeats ? 'block' : 'none';
+  document.getElementById('summarySeatsRow').style.display   = hasSeats ? 'flex'  : 'none';
+  document.getElementById('summaryTotalRow').style.display   = hasSeats ? 'flex'  : 'none';
+  if (hasSeats) {
+    document.getElementById('selectedSeats').value           = selected.join(',');
+    document.getElementById('summarySeats').textContent      = selected.join(', ');
+    document.getElementById('summaryTotal').textContent      = '£' + (price * selected.length).toFixed(2);
+  }
+}
+</script>
+{% endblock %}

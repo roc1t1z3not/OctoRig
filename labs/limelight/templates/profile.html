@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="container" style="max-width:560px;">
+  <div class="page-header">
+    <h1>Profile</h1>
+    <!-- VULN: stored XSS — display_name rendered with | safe -->
+    <p>{{ (target.display_name if target.display_name else target.username) | safe }}</p>
+  </div>
+
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  {% if success %}<div class="alert alert-success">{{ success }}</div>{% endif %}
+
+  <div class="form-card" style="margin:0;">
+    <h2>Edit Profile</h2>
+    <!-- VULN: IDOR — user_id from URL, no ownership check; CSRF — no token -->
+    <form method="post">
+      <div class="form-group">
+        <label>Display Name</label>
+        <input type="text" name="display_name" value="{{ target.display_name }}">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" value="{{ target.email }}">
+      </div>
+      <div class="form-group">
+        <label>New Password <span style="color:var(--muted);font-size:0.78rem;">(leave blank to keep current)</span></label>
+        <input type="password" name="password">
+      </div>
+      <!-- VULN: mass assignment — is_admin and balance hidden fields accepted by server -->
+      <input type="hidden" name="is_admin" value="{{ target.is_admin }}">
+      <input type="hidden" name="balance"  value="{{ target.balance }}">
+      <button class="btn btn-primary" style="width:100%">Save Changes</button>
+    </form>
+  </div>
+
+  <div class="detail-panel mt3">
+    <div class="detail-row">
+      <span class="lbl">User ID</span>
+      <span class="mono">{{ target.id }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="lbl">Username</span>
+      <span>{{ target.username }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="lbl">Balance</span>
+      <span>£{{ "%.2f"|format(target.balance) }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="lbl">Admin</span>
+      <span>{{ 'Yes' if target.is_admin else 'No' }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="lbl">Member since</span>
+      <span>{{ target.created_at[:10] }}</span>
+    </div>
+  </div>
+</div>
+{% endblock %}
