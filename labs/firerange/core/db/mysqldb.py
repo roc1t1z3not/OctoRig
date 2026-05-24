@@ -10,7 +10,7 @@ _connector = mysql.connector
 
 def _mysql_conn():
     return _connector.connect(
-        host=os.environ.get("MYSQL_HOST", "127.0.0.1"),
+        host=os.environ.get("MYSQL_HOST", "172.28.8.2"),
         port=int(os.environ.get("MYSQL_PORT", "3306")),
         user=os.environ.get("MYSQL_USER", "firerange"),
         password=os.environ.get("MYSQL_PASSWORD", "firerange"),

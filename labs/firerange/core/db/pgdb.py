@@ -9,7 +9,7 @@ import psycopg2.extras
 
 def _pg_conn():
     return psycopg2.connect(
-        host=os.environ.get("PG_HOST", "127.0.0.1"),
+        host=os.environ.get("PG_HOST", "172.28.8.2"),
         port=int(os.environ.get("PG_PORT", "5432")),
         user=os.environ.get("PG_USER", "firerange"),
         password=os.environ.get("PG_PASSWORD", "firerange"),
