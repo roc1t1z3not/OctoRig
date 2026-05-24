@@ -30,7 +30,7 @@ Be kind, rewind — then exploit. Rewind Range is a deliberately vulnerable retr
 ./octorig.sh stop rewind
 ```
 
-The app starts on **http://127.0.0.1:8082**.
+The app starts on **http://172.28.1.2**.
 
 ---
 

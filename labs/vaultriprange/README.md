@@ -30,7 +30,7 @@ A deliberately credential-rich SSH target built to exercise every harvesting mod
 ./octorig.sh stop vaultriprange
 ```
 
-SSH is available on **127.0.0.1:2222**.
+SSH is available on **172.28.11.2** (standard port 22).
 
 ---
 
@@ -43,8 +43,8 @@ SSH is available on **127.0.0.1:2222**.
 
 ```bash
 # Shell access
-ssh -p 2222 labuser@127.0.0.1
-ssh -p 2222 deploy@127.0.0.1
+ssh labuser@172.28.11.2
+ssh deploy@172.28.11.2
 ```
 
 ---
@@ -53,12 +53,12 @@ ssh -p 2222 deploy@127.0.0.1
 
 ```bash
 # Remote sweep — files, Kerberos, system (memory scanner skipped)
-vaultrip --remote 127.0.0.1 --ssh-port 2222 \
+vaultrip --remote 172.28.11.2 \
          --ssh-user labuser --ssh-pass 'LabUser123!' \
          --no-memory --no-browser
 
 # Deploy user only
-vaultrip --remote 127.0.0.1 --ssh-port 2222 \
+vaultrip --remote 172.28.11.2 \
          --ssh-user deploy --ssh-pass 'Deploy456!'
 
 # Local memory scan (run inside the container)

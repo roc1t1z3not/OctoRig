@@ -10,11 +10,12 @@
 
 LAB_NAME="BreachSQL Fire Range"
 NETWORK_NAME="octorig-breachsql-net"
+LAB_SUBNET="172.28.8.0/24"
+LAB_IP="172.28.8.2"
 MYSQL_CONTAINER="octorig-breachsql-db"
 PG_CONTAINER="octorig-breachsql-pg"
 APP_CONTAINER="octorig-breachsql-app"
 SCORES_VOLUME="octorig-breachsql-scores"
-HOST_PORT=17476
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FIRERANGE_DIR="${SCRIPT_DIR}/firerange"
@@ -31,10 +32,10 @@ case "$1" in
     ensure_container_gone "$MYSQL_CONTAINER"
     ensure_container_gone "$PG_CONTAINER"
 
-    # --- network ---
+    # --- network (subnet lets us assign the app container a fixed IP) ---
     if ! docker network inspect "$NETWORK_NAME" &>/dev/null; then
-      docker network create "$NETWORK_NAME" &>/dev/null
-      good "Network ${NETWORK_NAME} created"
+      docker network create --subnet="$LAB_SUBNET" "$NETWORK_NAME" &>/dev/null
+      good "Network ${NETWORK_NAME} created (${LAB_SUBNET})"
     else
       good "Network ${NETWORK_NAME} ready (cached)"
     fi
@@ -91,7 +92,7 @@ case "$1" in
     docker run -d \
       --name "$APP_CONTAINER" \
       --network "$NETWORK_NAME" \
-      -p "${HOST_PORT}:5000" \
+      --ip "$LAB_IP" \
       -v "${SCORES_VOLUME}:/data" \
       -e MYSQL_HOST="$MYSQL_CONTAINER" \
       -e MYSQL_PORT=3306 \
@@ -111,7 +112,7 @@ case "$1" in
     # --- wait for /health (MySQL-gated) ---
     info "Waiting for Fire Range to be ready (DB init can take ~30s)..."
     _i=0
-    until curl -sf "http://127.0.0.1:${HOST_PORT}/health" &>/dev/null; do
+    until curl -sf "http://${LAB_IP}/health" &>/dev/null; do
       sleep 2
       _i=$((_i+2))
       if [[ $_i -ge 120 ]]; then
@@ -122,7 +123,7 @@ case "$1" in
     good "Fire Range is healthy"
 
     INFO_LINES=(
-      "URL|http://127.0.0.1:${HOST_PORT}"
+      "URL|http://${LAB_IP}"
       "Flag submit|POST /api/submit-flag"
       "Stop|./breachsql.sh stop"
     )
@@ -141,8 +142,8 @@ case "$1" in
     done
     [[ $_stopped -eq 0 ]] && warn "No Fire Range containers were running."
 
-    # leave network + volume intact so scores persist across restarts
-    info "Network and scores volume preserved (scores persist)."
+    info "Scores volume preserved (scores persist across restarts)."
+    remove_network "$NETWORK_NAME"
     ;;
 
   status)

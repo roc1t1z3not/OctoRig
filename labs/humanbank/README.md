@@ -31,7 +31,7 @@ A deliberately vulnerable online banking application packed with real-world auth
 ./octorig.sh stop humanbank
 ```
 
-The app starts on **http://127.0.0.1:8083**.
+The app starts on **http://172.28.4.2**.
 
 ---
 

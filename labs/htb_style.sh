@@ -14,11 +14,10 @@
 LAB_NAME="HTB Style"
 CTFD_CONTAINER="octorig-ctfd"
 CHALLENGE_CONTAINER="octorig-htb-challenge"
-CTFD_PORT=8001
-CHALLENGE_PORT=8090
-
-# CTFd requires a network so it can reach its DB
-NETWORK_NAME="octorig-htb-net"
+LAB_NET="octorig-htb-net"
+LAB_SUBNET="172.28.16.0/24"
+CTFD_IP="172.28.16.2"
+CHALLENGE_IP="172.28.16.3"
 
 source "$(dirname "$0")/_common.sh"
 require_action "${1:-}"
@@ -27,11 +26,7 @@ case "$1" in
   start)
     header "Starting..."
 
-    # ---- network ----
-    if ! docker network ls --format '{{.Name}}' | grep -qx "$NETWORK_NAME"; then
-      info "Creating Docker network $NETWORK_NAME"
-      docker network create "$NETWORK_NAME" &>/dev/null
-    fi
+    ensure_network "$LAB_NET" "$LAB_SUBNET"
 
     # ---- CTFd stack (CTFd + Redis + MySQL) ----
     ensure_container_gone "octorig-ctfd-db"
@@ -41,7 +36,7 @@ case "$1" in
     info "Starting CTFd database..."
     docker run -d \
       --name octorig-ctfd-db \
-      --network "$NETWORK_NAME" \
+      --network "$LAB_NET" \
       -e MYSQL_ROOT_PASSWORD=ctfd \
       -e MYSQL_DATABASE=ctfd \
       -e MYSQL_USER=ctfd \
@@ -56,7 +51,7 @@ case "$1" in
     info "Starting CTFd Redis..."
     docker run -d \
       --name octorig-ctfd-redis \
-      --network "$NETWORK_NAME" \
+      --network "$LAB_NET" \
       --restart unless-stopped \
       redis:7-alpine &>/dev/null
 
@@ -65,8 +60,8 @@ case "$1" in
     info "Starting CTFd..."
     docker run -d \
       --name "$CTFD_CONTAINER" \
-      --network "$NETWORK_NAME" \
-      -p "${CTFD_PORT}:8000" \
+      --network "$LAB_NET" \
+      --ip "$CTFD_IP" \
       -e DATABASE_URL="mysql+pymysql://ctfd:ctfd@octorig-ctfd-db/ctfd" \
       -e REDIS_URL="redis://octorig-ctfd-redis:6379" \
       -e SECRET_KEY="octorig-htb-secret" \
@@ -83,7 +78,8 @@ case "$1" in
     else
       warn "Struts2 image unavailable — using a generic Apache httpd placeholder"
       docker_pull httpd:2.4
-      docker run -d --name "$CHALLENGE_CONTAINER" -p "${CHALLENGE_PORT}:80" \
+      docker run -d --name "$CHALLENGE_CONTAINER" \
+        --network "$LAB_NET" --ip "$CHALLENGE_IP" \
         --restart unless-stopped httpd:2.4 &>/dev/null
     fi
 
@@ -91,16 +87,17 @@ case "$1" in
     docker ps --format '{{.Names}}' | grep -qx "$CHALLENGE_CONTAINER" || \
       docker run -d \
         --name "$CHALLENGE_CONTAINER" \
-        -p "${CHALLENGE_PORT}:8080" \
+        --network "$LAB_NET" \
+        --ip "$CHALLENGE_IP" \
         --restart unless-stopped \
         vulhub/struts2:2.3.30 &>/dev/null 2>&1 || true
 
-    wait_for_port 127.0.0.1 "$CTFD_PORT" 90
+    wait_for_port "$CTFD_IP" 8000 90
 
     INFO_LINES=(
-      "CTFd (scoreboard)|http://127.0.0.1:${CTFD_PORT}"
+      "CTFd (scoreboard)|http://${CTFD_IP}:8000"
       "CTFd setup|Complete setup wizard on first visit"
-      "Challenge target|http://127.0.0.1:${CHALLENGE_PORT}"
+      "Challenge target|http://${CHALLENGE_IP}:8080"
       "Vuln|Apache Struts2 CVE-2017-5638 RCE"
       "CVSSv3|10.0 (Critical)"
       "Stop|./htb_style.sh stop"
@@ -119,7 +116,7 @@ case "$1" in
         info "$c was not running"
       fi
     done
-    docker network rm "$NETWORK_NAME" &>/dev/null && info "Network $NETWORK_NAME removed" || true
+    remove_network "$LAB_NET"
     ;;
 
   status)

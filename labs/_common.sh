@@ -118,6 +118,23 @@ wait_for_port() {
   good "Port ${port} is open"
 }
 
+# Create a Docker bridge network with a fixed subnet (idempotent).
+# Usage: ensure_network <name> <subnet>
+ensure_network() {
+  local net="$1" subnet="$2"
+  if ! docker network inspect "$net" &>/dev/null; then
+    docker network create --subnet="$subnet" "$net" &>/dev/null
+    good "Network ${net} created (${subnet})"
+  fi
+}
+
+# Remove a Docker network; silent if missing or still in use.
+# Usage: remove_network <name>
+remove_network() {
+  local net="$1"
+  docker network rm "$net" &>/dev/null || true
+}
+
 # Ensure the container name doesn't already exist (running or stopped)
 ensure_container_gone() {
   local name="$1"

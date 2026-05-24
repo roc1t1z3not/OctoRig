@@ -10,8 +10,9 @@
 
 LAB_NAME="WebGoat"
 CONTAINER_NAME="octorig-webgoat"
-HOST_PORT=8888
-WOLF_PORT=9191   # WebWolf companion app (internal: 9090)
+LAB_NET="octorig-webgoat-net"
+LAB_SUBNET="172.28.15.0/24"
+LAB_IP="172.28.15.2"
 
 source "$(dirname "$0")/_common.sh"
 require_action "${1:-}"
@@ -22,22 +23,23 @@ case "$1" in
     ensure_container_gone "$CONTAINER_NAME"
     docker_pull webgoat/webgoat:latest
 
+    ensure_network "$LAB_NET" "$LAB_SUBNET"
     docker run -d \
       --name "$CONTAINER_NAME" \
+      --network "$LAB_NET" \
+      --ip "$LAB_IP" \
       --tmpfs /tmp \
       --tmpfs /home/webgoat/.webgoat-2025.3 \
-      -p "${HOST_PORT}:8080" \
-      -p "${WOLF_PORT}:9090" \
       -e SERVER_ADDRESS=0.0.0.0 \
       -e TZ=UTC \
       --restart unless-stopped \
       webgoat/webgoat:latest &>/dev/null
 
-    wait_for_port 127.0.0.1 "$HOST_PORT" 90
+    wait_for_port "$LAB_IP" 8080 90
 
     INFO_LINES=(
-      "WebGoat URL|http://127.0.0.1:${HOST_PORT}/WebGoat"
-      "WebWolf URL|http://127.0.0.1:${WOLF_PORT}/WebWolf"
+      "WebGoat URL|http://${LAB_IP}:8080/WebGoat"
+      "WebWolf URL|http://${LAB_IP}:9090/WebWolf"
       "Register|Create account on first visit"
       "Coverage|SQLi / XSS / XXE / JWT / IDOR / SSRF"
       "Coverage 2|Path traversal / Crypto / Auth bypass"
@@ -54,6 +56,7 @@ case "$1" in
     else
       warn "Container $CONTAINER_NAME was not running."
     fi
+    remove_network "$LAB_NET"
     ;;
 
   status)

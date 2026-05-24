@@ -78,23 +78,23 @@ def _admin_bot(app: Flask) -> None:
                 pass
 
     BLIND_PAGES = [
-        "http://127.0.0.1:5000/challenges/blind/b1a/admin",
-        "http://127.0.0.1:5000/challenges/blind/b1b/admin",
-        "http://127.0.0.1:5000/challenges/blind/b1c/admin",
-        "http://127.0.0.1:5000/challenges/blind/b1d/admin",
-        "http://127.0.0.1:5000/challenges/blind/b1e/admin",
+        "http://127.0.0.1/challenges/blind/b1a/admin",
+        "http://127.0.0.1/challenges/blind/b1b/admin",
+        "http://127.0.0.1/challenges/blind/b1c/admin",
+        "http://127.0.0.1/challenges/blind/b1d/admin",
+        "http://127.0.0.1/challenges/blind/b1e/admin",
     ]
     STORED_PAGES = [
-        "http://127.0.0.1:5000/challenges/stored/s1a/board",
-        "http://127.0.0.1:5000/challenges/stored/s1b/board",
-        "http://127.0.0.1:5000/challenges/stored/s1c/reviews",
-        "http://127.0.0.1:5000/challenges/stored/s1d/profile/admin",
-        "http://127.0.0.1:5000/challenges/stored/s1e/board",
-        "http://127.0.0.1:5000/challenges/stored/s1f/board",
+        "http://127.0.0.1/challenges/stored/s1a/board",
+        "http://127.0.0.1/challenges/stored/s1b/board",
+        "http://127.0.0.1/challenges/stored/s1c/reviews",
+        "http://127.0.0.1/challenges/stored/s1d/profile/admin",
+        "http://127.0.0.1/challenges/stored/s1e/board",
+        "http://127.0.0.1/challenges/stored/s1f/board",
         # Tier 9 — GraphQL stored
-        "http://127.0.0.1:5000/challenges/graphql/g1b/board",
+        "http://127.0.0.1/challenges/graphql/g1b/board",
         # Tier 10 — WebSocket stored
-        "http://127.0.0.1:5000/challenges/ws/ws1c/board",
+        "http://127.0.0.1/challenges/ws/ws1c/board",
     ]
 
     # Wait for app to be ready
@@ -113,4 +113,4 @@ if __name__ == "__main__":
     bot_thread = threading.Thread(target=_admin_bot, args=(application,), daemon=True)
     bot_thread.start()
 
-    application.run(host="0.0.0.0", port=5000, debug=False, use_reloader=False)
+    application.run(host="0.0.0.0", port=80, debug=False, use_reloader=False)

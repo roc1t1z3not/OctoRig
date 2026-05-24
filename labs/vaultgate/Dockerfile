@@ -10,6 +10,6 @@ COPY core/ core/
 COPY templates/ templates/
 
 ENV FLASK_ENV=production
-EXPOSE 5000
+EXPOSE 80
 
 CMD ["python", "app.py"]

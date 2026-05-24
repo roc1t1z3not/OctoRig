@@ -34,7 +34,9 @@
 
 LAB_NAME="VaultRip Range"
 CONTAINER_NAME="octorig-vaultriprange"
-SSH_PORT=2222
+LAB_NET="octorig-vaultriprange-net"
+LAB_SUBNET="172.28.11.0/24"
+LAB_IP="172.28.11.2"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LAB_DIR="${SCRIPT_DIR}/vaultriprange"
@@ -57,23 +59,25 @@ case "$1" in
       exit 1
     fi
 
+    ensure_network "$LAB_NET" "$LAB_SUBNET"
     info "Starting VaultRip Range container..."
     docker run -d \
       --name "$CONTAINER_NAME" \
-      -p "${SSH_PORT}:22" \
+      --network "$LAB_NET" \
+      --ip "$LAB_IP" \
       --restart unless-stopped \
       octorig-vaultriprange:latest &>/dev/null
 
-    wait_for_port 127.0.0.1 "$SSH_PORT" 30
+    wait_for_port "$LAB_IP" 22 30
 
     INFO_LINES=(
-      "SSH host|127.0.0.1:${SSH_PORT}"
+      "SSH host|${LAB_IP}"
       "User A|labuser / LabUser123!"
       "User B|deploy  / Deploy456!"
       "Credentials|SSH key, AWS, kube, Docker, git, pgpass, .env ..."
       "Memory process|secrets in env — run vaultrip locally for memory scan"
-      "Remote test|vaultrip --remote 127.0.0.1 --ssh-port ${SSH_PORT} --ssh-user labuser --ssh-pass 'LabUser123!'"
-      "Shell access|ssh -p ${SSH_PORT} labuser@127.0.0.1"
+      "Remote test|vaultrip --remote ${LAB_IP} --ssh-user labuser --ssh-pass 'LabUser123!'"
+      "Shell access|ssh labuser@${LAB_IP}"
       "AD attacks|./vulnad.sh start  (DCSync / PTH / ticket forging)"
       "Stop|./vaultriprange.sh stop"
     )
@@ -82,16 +86,16 @@ case "$1" in
     echo ""
     info "Quick test commands:"
     info "  # Remote sweep (passive — files, kerberos, system)"
-    info "  vaultrip --remote 127.0.0.1 --ssh-port ${SSH_PORT} \\"
+    info "  vaultrip --remote ${LAB_IP} \\"
     info "           --ssh-user labuser --ssh-pass 'LabUser123!' \\"
     info "           --no-memory --no-browser"
     echo ""
     info "  # Restrict to deploy user only"
-    info "  vaultrip --remote 127.0.0.1 --ssh-port ${SSH_PORT} \\"
+    info "  vaultrip --remote ${LAB_IP} \\"
     info "           --ssh-user deploy --ssh-pass 'Deploy456!'"
     echo ""
     info "  # Shell access for local vaultrip run (memory scanner)"
-    info "  ssh -p ${SSH_PORT} labuser@127.0.0.1"
+    info "  ssh labuser@${LAB_IP}"
     echo ""
 
     good "VaultRip Range is up!"
@@ -104,6 +108,7 @@ case "$1" in
     else
       warn "Container $CONTAINER_NAME was not running."
     fi
+    remove_network "$LAB_NET"
     ;;
 
   status)

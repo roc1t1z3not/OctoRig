@@ -35,7 +35,7 @@ The popcorn smells real. The vulnerabilities are too. Limelight is a deliberatel
 ./octorig.sh stop limelight
 ```
 
-The app starts on **http://127.0.0.1:8088**.
+The app starts on **http://172.28.7.2**.
 
 ---
 

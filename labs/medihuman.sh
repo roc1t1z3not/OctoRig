@@ -10,9 +10,9 @@
 
 LAB_NAME="MediHuman"
 CONTAINER_NAME="octorig-medihuman"
-HOST_PORT=8084
-SSH_PORT=2224
-FTP_PORT=2121
+LAB_NET="octorig-medihuman-net"
+LAB_SUBNET="172.28.5.0/24"
+LAB_IP="172.28.5.2"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_DIR="${SCRIPT_DIR}/medihuman"
@@ -33,21 +33,20 @@ case "$1" in
       exit 1
     fi
 
+    ensure_network "$LAB_NET" "$LAB_SUBNET"
     docker run -d \
       --name "$CONTAINER_NAME" \
-      -p "${HOST_PORT}:5000" \
-      -p "${SSH_PORT}:22" \
-      -p "${FTP_PORT}:21" \
-      -p "30000-30009:30000-30009" \
+      --network "$LAB_NET" \
+      --ip "$LAB_IP" \
       --restart unless-stopped \
       octorig-medihuman:latest
 
-    wait_for_port 127.0.0.1 "$HOST_PORT" 90
+    wait_for_port "$LAB_IP" 80 90
 
     INFO_LINES=(
-      "URL|http://127.0.0.1:${HOST_PORT}"
-      "SSH|ssh sysadmin@127.0.0.1 -p ${SSH_PORT}  (pw: medihuman123)"
-      "FTP|ftp 127.0.0.1 ${FTP_PORT}"
+      "URL|http://${LAB_IP}"
+      "SSH|ssh sysadmin@${LAB_IP}  (pw: medihuman123)"
+      "FTP|ftp ${LAB_IP}"
       "Stop|./medihuman.sh stop"
     )
     access_card INFO_LINES
@@ -61,6 +60,7 @@ case "$1" in
     else
       warn "Container $CONTAINER_NAME was not running."
     fi
+    remove_network "$LAB_NET"
     ;;
 
   status)

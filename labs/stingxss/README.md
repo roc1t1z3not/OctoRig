@@ -137,7 +137,7 @@ Dedicated XSS training range — 54 challenges across 11 tiers, from raw reflect
 ./octorig.sh reset stingxss
 ```
 
-The app starts on **http://127.0.0.1:17477**.
+The app starts on **http://172.28.9.2**.
 
 ---
 

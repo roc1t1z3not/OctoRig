@@ -31,7 +31,7 @@ It's 1999. The dot-com bubble hasn't burst yet, and TradeFloor hasn't heard of C
 ./octorig.sh stop tradefloor
 ```
 
-The app starts on **http://127.0.0.1:8086**.
+The app starts on **http://172.28.2.2**.
 
 ---
 

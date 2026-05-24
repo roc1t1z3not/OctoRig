@@ -9,7 +9,9 @@
 
 LAB_NAME="Juice Shop"
 CONTAINER_NAME="octorig-juiceshop"
-HOST_PORT=3000
+LAB_NET="octorig-juiceshop-net"
+LAB_SUBNET="172.28.12.0/24"
+LAB_IP="172.28.12.2"
 
 source "$(dirname "$0")/_common.sh"
 require_action "${1:-}"
@@ -20,16 +22,18 @@ case "$1" in
     ensure_container_gone "$CONTAINER_NAME"
     docker_pull bkimminich/juice-shop:latest
 
+    ensure_network "$LAB_NET" "$LAB_SUBNET"
     docker run -d \
       --name "$CONTAINER_NAME" \
-      -p "${HOST_PORT}:3000" \
+      --network "$LAB_NET" \
+      --ip "$LAB_IP" \
       --restart unless-stopped \
-      bkimminich/juice-shop:latest
+      bkimminich/juice-shop:latest &>/dev/null
 
-    wait_for_port 127.0.0.1 "$HOST_PORT" 60
+    wait_for_port "$LAB_IP" 3000 60
 
     INFO_LINES=(
-      "URL|http://127.0.0.1:${HOST_PORT}"
+      "URL|http://${LAB_IP}:3000"
       "Credentials|none (register on first visit)"
       "Admin email|admin@juice-sh.op"
       "Admin pass|admin123"
@@ -47,6 +51,7 @@ case "$1" in
     else
       warn "Container $CONTAINER_NAME was not running."
     fi
+    remove_network "$LAB_NET"
     ;;
 
   status)

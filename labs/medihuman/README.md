@@ -17,8 +17,8 @@ A deliberately vulnerable healthcare patient portal exposing medical records, pr
 - Patient records are fetched by integer ID at `/patients/<id>` with no ownership check. How many records can you enumerate?
 - The staff detail endpoint at `/admin/staff/<id>` enforces a different — and weaker — check than the main `/admin` panel. Can a regular user reach it?
 - Messages at `/messages/<id>` have no ownership check. Whose messages can you read?
-- SSH is open on port 2224. The credentials are weak and reused in more than one place.
-- FTP is on port 2121. Try connecting without any credentials.
+- SSH is open on port 22. The credentials are weak and reused in more than one place.
+- FTP is on port 21. Try connecting without any credentials.
 - `/patient-records`, `/staff-only`, and `/mri-archive` are disallowed in `robots.txt`. Worth a look.
 
 ---
@@ -33,7 +33,7 @@ A deliberately vulnerable healthcare patient portal exposing medical records, pr
 ./octorig.sh stop medihuman
 ```
 
-The app starts on **http://127.0.0.1:8084**.
+The app starts on **http://172.28.5.2**.
 
 ---
 
@@ -41,9 +41,9 @@ The app starts on **http://127.0.0.1:8084**.
 
 | Service | Details |
 |---------|---------|
-| Web | http://127.0.0.1:8084 |
-| SSH | `ssh sysadmin@127.0.0.1 -p 2224` — password: `medihuman123` |
-| FTP | `ftp 127.0.0.1 2121` — anonymous login |
+| Web | http://172.28.5.2 |
+| SSH | `ssh sysadmin@172.28.5.2` — password: `medihuman123` |
+| FTP | `ftp 172.28.5.2` — anonymous login |
 
 | Account | Username | Password |
 |---------|----------|----------|

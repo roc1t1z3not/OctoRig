@@ -31,7 +31,7 @@ Welcome to 1998. NetPulse is a deliberately vulnerable dial-up ISP customer port
 ./octorig.sh stop netpulse
 ```
 
-The app starts on **http://127.0.0.1:8085**.
+The app starts on **http://172.28.6.2**.
 
 ---
 

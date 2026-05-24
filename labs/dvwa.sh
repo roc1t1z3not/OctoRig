@@ -9,7 +9,9 @@
 
 LAB_NAME="DVWA"
 CONTAINER_NAME="octorig-dvwa"
-HOST_PORT=8080
+LAB_NET="octorig-dvwa-net"
+LAB_SUBNET="172.28.13.0/24"
+LAB_IP="172.28.13.2"
 
 source "$(dirname "$0")/_common.sh"
 require_action "${1:-}"
@@ -20,19 +22,21 @@ case "$1" in
     ensure_container_gone "$CONTAINER_NAME"
     docker_pull vulnerables/web-dvwa:latest
 
+    ensure_network "$LAB_NET" "$LAB_SUBNET"
     docker run -d \
       --name "$CONTAINER_NAME" \
-      -p "${HOST_PORT}:80" \
+      --network "$LAB_NET" \
+      --ip "$LAB_IP" \
       --restart unless-stopped \
-      vulnerables/web-dvwa:latest
+      vulnerables/web-dvwa:latest &>/dev/null
 
-    wait_for_port 127.0.0.1 "$HOST_PORT" 60
+    wait_for_port "$LAB_IP" 80 60
 
     INFO_LINES=(
-      "URL|http://127.0.0.1:${HOST_PORT}"
+      "URL|http://${LAB_IP}"
       "Username|admin"
       "Password|password"
-      "Setup DB|http://127.0.0.1:${HOST_PORT}/setup.php"
+      "Setup DB|http://${LAB_IP}/setup.php"
       "Difficulty|Low / Medium / High / Impossible"
       "Stop|./dvwa.sh stop"
     )
@@ -48,6 +52,7 @@ case "$1" in
     else
       warn "Container $CONTAINER_NAME was not running."
     fi
+    remove_network "$LAB_NET"
     ;;
 
   status)

@@ -10,7 +10,7 @@ from markupsafe import escape
 
 bp = Blueprint("reflected", __name__)
 
-FLAG_BASE = "http://127.0.0.1:5000"
+FLAG_BASE = "http://127.0.0.1"
 
 # ---------------------------------------------------------------------------
 # Shared page shell — intentionally minimal, no CSP

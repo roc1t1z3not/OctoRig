@@ -34,5 +34,5 @@ RUN printf "patient_id,name,dob,ssn,insurance_id\n1,John Walker,1985-03-12,123-4
     chown ftp:ftp /srv/ftp/pub/patients_export.csv /srv/ftp/pub/system_notes.txt && \
     chmod 644 /srv/ftp/pub/patients_export.csv /srv/ftp/pub/system_notes.txt
 
-EXPOSE 5000 21 22 30000-30009
+EXPOSE 80 21 22 30000-30009
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]

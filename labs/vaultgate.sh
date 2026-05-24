@@ -10,7 +10,9 @@
 LAB_NAME="VaultGate IDOR Range"
 APP_CONTAINER="octorig-vaultgate-app"
 SCORES_VOLUME="octorig-vaultgate-scores"
-HOST_PORT=17478
+LAB_NET="octorig-vaultgate-net"
+LAB_SUBNET="172.28.10.0/24"
+LAB_IP="172.28.10.2"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_DIR="${SCRIPT_DIR}/vaultgate"
@@ -52,10 +54,12 @@ case "$1" in
       exit 1
     fi
 
+    ensure_network "$LAB_NET" "$LAB_SUBNET"
     info "Starting VaultGate app..."
     docker run -d \
       --name "$APP_CONTAINER" \
-      -p "${HOST_PORT}:5000" \
+      --network "$LAB_NET" \
+      --ip "$LAB_IP" \
       -v "${SCORES_VOLUME}:/data" \
       --restart unless-stopped \
       octorig-vaultgate:latest &>/dev/null
@@ -64,7 +68,7 @@ case "$1" in
 
     info "Waiting for VaultGate to be ready..."
     _i=0
-    until curl -sf "http://127.0.0.1:${HOST_PORT}/health" &>/dev/null; do
+    until curl -sf "http://${LAB_IP}/health" &>/dev/null; do
       sleep 2
       _i=$((_i+2))
       if [[ $_i -ge 60 ]]; then
@@ -75,7 +79,7 @@ case "$1" in
     good "VaultGate is healthy"
 
     INFO_LINES=(
-      "URL|http://127.0.0.1:${HOST_PORT}"
+      "URL|http://${LAB_IP}"
       "Tokens|GET /api/tokens"
       "Login|POST /api/login"
       "Flag submit|POST /api/submit-flag"
@@ -95,6 +99,7 @@ case "$1" in
       warn "Container $APP_CONTAINER was not running."
     fi
     info "Scores volume preserved (scores persist across restarts)."
+    remove_network "$LAB_NET"
     ;;
 
   status)

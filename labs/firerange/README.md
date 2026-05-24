@@ -101,7 +101,7 @@ The Fire Range is managed by OctoRig
 ./octorig.sh stop BreachSQL
 ```
 
-The app starts on **http://127.0.0.1:17476**.
+The app starts on **http://172.28.8.2**.
 
 ---
 

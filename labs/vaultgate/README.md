@@ -94,7 +94,7 @@ Dedicated IDOR training range — 26 challenges across 8 categories: horizontal 
 ./octorig.sh reset vaultgate
 ```
 
-The app starts on **http://127.0.0.1:17478**.
+The app starts on **http://172.28.10.2**.
 
 ---
 

@@ -35,6 +35,9 @@ DOMAIN="vulnad.local"
 DOMAIN_UPPER="VULNAD"
 ADMIN_PASS="P@ssw0rd123!"
 REALM="VULNAD.LOCAL"
+LAB_NET="octorig-vulnad-net"
+LAB_SUBNET="172.28.17.0/24"
+LAB_IP="172.28.17.2"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 VULNAD_DIR="${SCRIPT_DIR}/vulnad"
@@ -117,16 +120,14 @@ case "$1" in
 
     _build_image
 
+    ensure_network "$LAB_NET" "$LAB_SUBNET"
     info "Starting Samba4 AD DC container..."
     docker run -d \
       --name "$CONTAINER_NAME" \
+      --network "$LAB_NET" \
+      --ip "$LAB_IP" \
       --hostname "dc1.${DOMAIN}" \
       --privileged \
-      -p 88:88 \
-      -p 389:389 \
-      -p 636:636 \
-      -p 4445:445 \
-      -p 3268:3268 \
       -e DOMAIN="$DOMAIN" \
       -e DOMAIN_UPPER="$DOMAIN_UPPER" \
       -e REALM="$REALM" \
@@ -134,7 +135,7 @@ case "$1" in
       --restart unless-stopped \
       "$SAMBA_IMAGE" &>/dev/null
 
-    wait_for_port 127.0.0.1 389 120
+    wait_for_port "$LAB_IP" 389 120
 
     _populate_ad
 
@@ -143,9 +144,9 @@ case "$1" in
       "DC hostname|dc1.${DOMAIN}"
       "Admin user|Administrator"
       "Admin pass|${ADMIN_PASS}"
-      "LDAP|ldap://127.0.0.1:389"
-      "Kerberos|127.0.0.1:88"
-      "SMB|127.0.0.1:4445"
+      "LDAP|ldap://${LAB_IP}:389"
+      "Kerberos|${LAB_IP}:88"
+      "SMB|${LAB_IP}:445"
       "Attack paths|Kerb / ASREP / DCSync / BadACL"
       "Impacket|secretsdump / GetUserSPNs etc."
       "Stop|./vulnad.sh stop"
@@ -154,10 +155,10 @@ case "$1" in
 
     echo ""
     info "Quick-start attack examples:"
-    info "  GetUserSPNs.py ${DOMAIN}/Administrator:'${ADMIN_PASS}' -dc-ip 127.0.0.1 -request"
-    info "  GetNPUsers.py ${DOMAIN}/ -usersfile users.txt -dc-ip 127.0.0.1 -no-pass"
-    info "  secretsdump.py ${DOMAIN}/dcsync_user@127.0.0.1"
-    info "  bloodhound-python -u Administrator -p '${ADMIN_PASS}' -d ${DOMAIN} -ns 127.0.0.1 -c All"
+    info "  GetUserSPNs.py ${DOMAIN}/Administrator:'${ADMIN_PASS}' -dc-ip ${LAB_IP} -request"
+    info "  GetNPUsers.py ${DOMAIN}/ -usersfile users.txt -dc-ip ${LAB_IP} -no-pass"
+    info "  secretsdump.py ${DOMAIN}/dcsync_user@${LAB_IP}"
+    info "  bloodhound-python -u Administrator -p '${ADMIN_PASS}' -d ${DOMAIN} -ns ${LAB_IP} -c All"
     echo ""
 
     good "VulnAD is up!"
@@ -170,13 +171,14 @@ case "$1" in
     else
       warn "Container $CONTAINER_NAME was not running."
     fi
+    remove_network "$LAB_NET"
     ;;
 
   status)
     container_status "$CONTAINER_NAME"
     if docker ps --format '{{.Names}}' | grep -qx "$CONTAINER_NAME"; then
       info "Domain: ${DOMAIN}"
-      info "LDAP:   ldap://127.0.0.1:389"
+      info "LDAP:   ldap://${LAB_IP}:389"
     fi
     ;;
 esac

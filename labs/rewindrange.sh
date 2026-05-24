@@ -9,7 +9,9 @@
 
 LAB_NAME="Rewind Range"
 CONTAINER_NAME="octorig-rewindrange"
-HOST_PORT=8082
+LAB_NET="octorig-rewindrange-net"
+LAB_SUBNET="172.28.1.0/24"
+LAB_IP="172.28.1.2"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_DIR="${SCRIPT_DIR}/rewindrange"
@@ -30,16 +32,18 @@ case "$1" in
       exit 1
     fi
 
+    ensure_network "$LAB_NET" "$LAB_SUBNET"
     docker run -d \
       --name "$CONTAINER_NAME" \
-      -p "${HOST_PORT}:5000" \
+      --network "$LAB_NET" \
+      --ip "$LAB_IP" \
       --restart unless-stopped \
       octorig-rewindrange:latest
 
-    wait_for_port 127.0.0.1 "$HOST_PORT" 60
+    wait_for_port "$LAB_IP" 80 60
 
     INFO_LINES=(
-      "URL|http://127.0.0.1:${HOST_PORT}"
+      "URL|http://${LAB_IP}"
       "Stop|./rewindrange.sh stop"
     )
     access_card INFO_LINES
@@ -53,6 +57,7 @@ case "$1" in
     else
       warn "Container $CONTAINER_NAME was not running."
     fi
+    remove_network "$LAB_NET"
     ;;
 
   status)

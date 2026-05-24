@@ -11,21 +11,9 @@
 
 LAB_NAME="Metasploitable2"
 CONTAINER_NAME="octorig-metasploitable"
-
-# Port mappings: host_port:container_port
-declare -A PORTS=(
-  [21]=21     # FTP  (vsftpd 2.3.4 backdoor)
-  [2222]=22   # SSH  (use 2222 to avoid conflict with host SSH)
-  [23]=23     # Telnet
-  [25]=25     # SMTP
-  [8081]=80   # HTTP (use 8081 to avoid conflict)
-  [139]=139   # NetBIOS
-  [445]=445   # SMB  (Samba usermap_script)
-  [3306]=3306 # MySQL (no auth root)
-  [5432]=5432 # PostgreSQL
-  [5900]=5900 # VNC  (no auth)
-  [6667]=6667 # IRC  (UnrealIRCd backdoor)
-)
+LAB_NET="octorig-metasploitable-net"
+LAB_SUBNET="172.28.14.0/24"
+LAB_IP="172.28.14.2"
 
 source "$(dirname "$0")/_common.sh"
 require_action "${1:-}"
@@ -36,30 +24,25 @@ case "$1" in
     ensure_container_gone "$CONTAINER_NAME"
     docker_pull tleemcjr/metasploitable2:latest
 
-    # Build port flags
-    PORT_FLAGS=""
-    for h in "${!PORTS[@]}"; do
-      PORT_FLAGS="$PORT_FLAGS -p ${h}:${PORTS[$h]}"
-    done
-
-    # shellcheck disable=SC2086
+    ensure_network "$LAB_NET" "$LAB_SUBNET"
     docker run -d \
       --name "$CONTAINER_NAME" \
-      $PORT_FLAGS \
+      --network "$LAB_NET" \
+      --ip "$LAB_IP" \
       --restart unless-stopped \
       tleemcjr/metasploitable2:latest \
       sh -c "/bin/services.sh && sleep infinity" &>/dev/null
 
-    wait_for_port 127.0.0.1 8081 90
+    wait_for_port "$LAB_IP" 80 90
 
     INFO_LINES=(
-      "HTTP|http://127.0.0.1:8081"
-      "SSH|ssh msfadmin@127.0.0.1 -p 2222 -oHostKeyAlgorithms=+ssh-rsa"
+      "HTTP|http://${LAB_IP}"
+      "SSH|ssh msfadmin@${LAB_IP} -oHostKeyAlgorithms=+ssh-rsa"
       "SSH creds|msfadmin / msfadmin"
-      "FTP|ftp 127.0.0.1 21 (anonymous OK)"
-      "MySQL|mysql -h 127.0.0.1 -u root --skip-ssl"
-      "SMB|smbclient -L //127.0.0.1"
-      "VNC|vncviewer 127.0.0.1:5900  (pass: password)"
+      "FTP|ftp ${LAB_IP}  (anonymous OK)"
+      "MySQL|mysql -h ${LAB_IP} -u root --skip-ssl"
+      "SMB|smbclient -L //${LAB_IP}"
+      "VNC|vncviewer ${LAB_IP}:5900  (pass: password)"
       "Stop|./metasploitable.sh stop"
     )
     access_card INFO_LINES
@@ -74,6 +57,7 @@ case "$1" in
     else
       warn "Container $CONTAINER_NAME was not running."
     fi
+    remove_network "$LAB_NET"
     ;;
 
   status)

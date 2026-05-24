@@ -31,7 +31,7 @@ The house always wins — unless you know where the vulnerabilities are. GoldenA
 ./octorig.sh stop goldenace
 ```
 
-The app starts on **http://127.0.0.1:8087**.
+The app starts on **http://172.28.3.2**.
 
 ---
 
