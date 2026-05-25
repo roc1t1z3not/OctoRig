@@ -21,11 +21,16 @@ def init(app):
         err = _require_admin()
         if err:
             return err
-        db         = get_db()
-        user_count = db.execute("SELECT COUNT(*) AS c FROM users").fetchone()['c']
-        post_count = db.execute("SELECT COUNT(*) AS c FROM posts").fetchone()['c']
-        users      = db.execute("SELECT * FROM users ORDER BY id").fetchall()
-        return render_template('admin.html', user_count=user_count, post_count=post_count, users=users)
+        db               = get_db()
+        user_count       = db.execute("SELECT COUNT(*) AS c FROM users").fetchone()['c']
+        post_count       = db.execute("SELECT COUNT(*) AS c FROM posts WHERE status='published'").fetchone()['c']
+        communities_count= db.execute("SELECT COUNT(*) AS c FROM communities").fetchone()['c']
+        comments_count   = db.execute("SELECT COUNT(*) AS c FROM comments").fetchone()['c']
+        users            = db.execute("SELECT * FROM users ORDER BY id").fetchall()
+        return render_template('admin.html',
+            user_count=user_count, post_count=post_count,
+            communities_count=communities_count, comments_count=comments_count,
+            users=users)
 
     @app.route('/admin/users')
     def admin_users():
