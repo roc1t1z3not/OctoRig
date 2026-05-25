@@ -1,0 +1,8 @@
+SubVerse Deployment Notes
+=========================
+SSH:  sysadmin@<host>  pw: subverse2024
+DB:   /data/subverse.db
+App:  /app/
+FTP passive ports: 30010-30019
+
+NOTE: Change default SSH password before production deployment.
