@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Mod Log — sv/{{ comm['name'] }} — SubVerse{% endblock %}
+{% block content %}
+<div class="feed-layout" style="justify-content:center;">
+  <div style="max-width:800px;width:100%;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <h2>Mod Log — sv/{{ comm['name'] }}</h2>
+      <a href="{{ url_for('community_view', name=comm['name']) }}" class="btn btn-sm">&#8592; Community</a>
+    </div>
+    <div class="sidebar-widget">
+      <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+        <thead>
+          <tr style="color:var(--muted);border-bottom:1px solid var(--border);">
+            <th style="text-align:left;padding:0.5rem;">Date</th>
+            <th style="text-align:left;padding:0.5rem;">Moderator</th>
+            <th style="text-align:left;padding:0.5rem;">Action</th>
+            <th style="text-align:left;padding:0.5rem;">Target ID</th>
+            <th style="text-align:left;padding:0.5rem;">Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:0.5rem;color:var(--muted);">{{ log['created_at'][:10] }}</td>
+            <td style="padding:0.5rem;"><a href="{{ url_for('user_profile', username=log['mod_username']) }}">{{ log['mod_username'] }}</a></td>
+            <td style="padding:0.5rem;"><span class="flair">{{ log['action'] }}</span></td>
+            <td style="padding:0.5rem;color:var(--muted);">{{ log['target_id'] }}</td>
+            <td style="padding:0.5rem;">{{ log['reason'] }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" style="padding:1rem;color:var(--muted);">No moderation actions recorded.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

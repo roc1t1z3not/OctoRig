@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Search — SubVerse{% endblock %}
+{% block content %}
+<div class="feed-layout">
+  <div class="feed-main">
+    <div class="page-header">
+      <!-- VULN: reflected XSS — q rendered unsanitised -->
+      <h2>Results for: <strong>{{ q | safe }}</strong></h2>
+    </div>
+    {% if not q %}
+    <p class="muted" style="padding:1rem;">Enter a search term above.</p>
+    {% elif not posts %}
+    <p class="muted" style="padding:1rem;">No posts found matching <strong>{{ q | safe }}</strong>.</p>
+    {% else %}
+    {% for p in posts %}
+    <div class="post-card">
+      <div class="vote-col">
+        <a href="{{ url_for('post_vote', post_id=p['id']) }}?v=1" class="vote-up">&#9650;</a>
+        <span class="score">{{ p['score'] }}</span>
+        <a href="{{ url_for('post_vote', post_id=p['id']) }}?v=-1" class="vote-dn">&#9660;</a>
+      </div>
+      <div class="post-body">
+        {% if p['flair'] %}<span class="flair">{{ p['flair'] }}</span>{% endif %}
+        <a class="post-title" href="{{ url_for('post_view', post_id=p['id']) }}">{{ p['title'] }}</a>
+        <div class="post-meta">
+          <a href="{{ url_for('community_view', name=p['community_name']) }}" class="comm-link">sv/{{ p['community_name'] }}</a>
+          &bull; <a href="{{ url_for('user_profile', username=p['username']) }}">{{ p['username'] }}</a>
+          &bull; {{ p['created_at'][:10] }}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+  <div class="feed-sidebar">
+    <div class="sidebar-widget">
+      <h3>Search Tips</h3>
+      <p class="muted" style="font-size:0.85rem;">Try searching for community names, usernames, or post content.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

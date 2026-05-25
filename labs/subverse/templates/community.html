@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}sv/{{ comm['name'] }} — SubVerse{% endblock %}
+{% block content %}
+<div class="feed-layout">
+  <div class="feed-main">
+    <div class="community-header">
+      <h2>sv/{{ comm['name'] }}</h2>
+      <p class="muted">{{ comm['description'] }}</p>
+      {% if comm['announcement'] %}
+      <div class="announcement-box">
+        <strong>&#128226; Announcement</strong>
+        <div>{{ comm['announcement'] | safe }}</div>
+      </div>
+      {% endif %}
+      <div class="sort-bar" style="margin-top:0.75rem;">
+        <a href="?sort=hot" class="sort-btn {% if sort=='hot' %}active{% endif %}">&#128293; Hot</a>
+        <a href="?sort=new" class="sort-btn {% if sort=='new' %}active{% endif %}">&#10024; New</a>
+      </div>
+    </div>
+
+    {% for p in posts %}
+    <div class="post-card">
+      <div class="vote-col">
+        <a href="{{ url_for('post_vote', post_id=p['id']) }}?v=1" class="vote-up">&#9650;</a>
+        <span class="score">{{ p['score'] }}</span>
+        <a href="{{ url_for('post_vote', post_id=p['id']) }}?v=-1" class="vote-dn">&#9660;</a>
+      </div>
+      <div class="post-body">
+        {% if p['flair'] %}<span class="flair">{{ p['flair'] }}</span>{% endif %}
+        <a class="post-title" href="{{ url_for('post_view', post_id=p['id']) }}">{{ p['title'] }}</a>
+        <div class="post-meta">
+          posted by <a href="{{ url_for('user_profile', username=p['username']) }}">{{ p['username'] }}</a>
+          &bull; {{ p['created_at'][:10] }}
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <p class="muted" style="padding:2rem;">No posts yet in this community.</p>
+    {% endfor %}
+  </div>
+
+  <div class="feed-sidebar">
+    <div class="sidebar-widget">
+      <h3>sv/{{ comm['name'] }}</h3>
+      <p class="muted" style="font-size:0.85rem;">{{ comm['description'] }}</p>
+      <p style="font-size:0.85rem;margin-top:0.5rem;"><strong>{{ comm['member_count'] }}</strong> members</p>
+      {% set u = current_user() %}
+      {% if u %}
+      <form method="post" action="{{ url_for('community_join', name=comm['name']) }}" style="margin-top:0.75rem;">
+        {% if member %}
+        <button type="submit" class="btn btn-sm" style="width:100%;">Leave</button>
+        {% else %}
+        <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">Join</button>
+        {% endif %}
+      </form>
+      {% if u['role'] in ('admin', 'moderator') %}
+      <a href="{{ url_for('community_modlog', name=comm['name']) }}" class="btn btn-sm" style="display:block;text-align:center;margin-top:0.5rem;">Mod Log</a>
+      <a href="{{ url_for('admin_announce', name=comm['name']) }}" class="btn btn-sm" style="display:block;text-align:center;margin-top:0.5rem;">Set Announcement</a>
+      {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

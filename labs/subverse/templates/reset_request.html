@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Reset Password — SubVerse{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <h2>Reset Password</h2>
+    {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+    {% if info %}<div class="alert alert-info">{{ info }}</div>{% endif %}
+    <form method="post" action="{{ url_for('reset_request') }}">
+      <label>Username</label>
+      <input type="text" name="username" autofocus required>
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:0.5rem;">Get Reset Link</button>
+    </form>
+    <p class="muted" style="margin-top:1rem;text-align:center;"><a href="{{ url_for('login') }}">Back to Sign In</a></p>
+  </div>
+</div>
+{% endblock %}

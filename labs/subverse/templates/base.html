@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SubVerse{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<!--
+     ___
+    /   \     CommonHuman-Lab
+   | o_o |    Security Training Labs
+    \___/     Lab: SubVerse
+   /|   |\    github.com/CommonHuman-Lab
+  (_)   (_)
+-->
+<body>
+{% set u = current_user() %}
+<nav>
+  <div class="nav-left">
+    <a class="nav-logo" href="{{ url_for('index') }}">Sub<span>Verse</span></a>
+    <form class="nav-search" action="{{ url_for('search') }}" method="get">
+      <input type="text" name="q" placeholder="Search SubVerse..." value="{{ request.args.get('q','') }}">
+    </form>
+  </div>
+  <div class="nav-right">
+    {% if u %}
+      <a href="{{ url_for('communities_list') }}">Communities</a>
+      <a href="{{ url_for('post_new') }}" class="btn btn-sm btn-primary">+ Post</a>
+      <a href="{{ url_for('messages_inbox') }}">Messages</a>
+      <span class="karma-badge">{{ u['karma'] }} karma</span>
+      <a href="{{ url_for('user_profile', username=u['username']) }}" class="nav-username">{{ u['username'] | safe }}</a>
+      {% if u['role'] == 'admin' or u['role'] == 'moderator' %}
+        <a href="{{ url_for('admin_index') }}" class="nav-admin">Admin</a>
+      {% endif %}
+      <a href="{{ url_for('logout') }}" class="btn btn-sm">Logout</a>
+    {% else %}
+      <a href="{{ url_for('communities_list') }}">Communities</a>
+      <a href="{{ url_for('login') }}" class="muted">Sign In</a>
+      <a href="{{ url_for('register') }}" class="btn btn-sm btn-primary">Join</a>
+    {% endif %}
+  </div>
+</nav>
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer>
+  <p>SubVerse &mdash; The Front Page of Everything &copy; 2026</p>
+  <p style="margin-top:0.3rem;">Made by <a href="https://github.com/CommonHuman-Lab" target="_blank">CommonHuman</a></p>
+</footer>
+<script>console.log('%c\u{1F419} OctoRig By CommonHuman | Lab: SubVerse | Happy hacking!','color:#ff4500;font-size:14px;font-weight:bold;');</script>
+</body>
+</html>

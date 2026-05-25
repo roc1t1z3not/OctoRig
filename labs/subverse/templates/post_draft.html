@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}[DRAFT] {{ post['title'] }} — SubVerse{% endblock %}
+{% block content %}
+<div class="feed-layout">
+  <div class="feed-main">
+    <div class="post-card post-detail" style="border-color:#ff4500;">
+      <div class="post-body" style="padding:1.5rem;">
+        <div class="alert alert-info" style="margin-bottom:1rem;">
+          &#128274; This is an unpublished draft.
+        </div>
+        <h1 class="post-title-lg">{{ post['title'] }}</h1>
+        <div class="post-meta">
+          <a href="{{ url_for('community_view', name=post['community_name']) }}" class="comm-link">sv/{{ post['community_name'] }}</a>
+          &bull; draft by <a href="{{ url_for('user_profile', username=post['username']) }}">{{ post['username'] }}</a>
+          &bull; {{ post['created_at'][:10] }}
+        </div>
+        {% if post['body'] %}
+        <div class="post-text" style="margin-top:1rem;">{{ post['body'] | safe }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

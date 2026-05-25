@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}SubVerse — The Front Page of Everything{% endblock %}
+{% block content %}
+<div class="feed-layout">
+  <div class="feed-main">
+    <div class="sort-bar">
+      <a href="?sort=hot" class="sort-btn {% if sort=='hot' %}active{% endif %}">&#128293; Hot</a>
+      <a href="?sort=new" class="sort-btn {% if sort=='new' %}active{% endif %}">&#10024; New</a>
+    </div>
+    {% for p in posts %}
+    <div class="post-card">
+      <div class="vote-col">
+        <a href="{{ url_for('post_vote', post_id=p['id']) }}?v=1" class="vote-up" title="Upvote">&#9650;</a>
+        <span class="score">{{ p['score'] }}</span>
+        <a href="{{ url_for('post_vote', post_id=p['id']) }}?v=-1" class="vote-dn" title="Downvote">&#9660;</a>
+      </div>
+      <div class="post-body">
+        {% if p['flair'] %}<span class="flair">{{ p['flair'] }}</span>{% endif %}
+        <a class="post-title" href="{{ url_for('post_view', post_id=p['id']) }}">{{ p['title'] }}</a>
+        <div class="post-meta">
+          <a href="{{ url_for('community_view', name=p['community_name']) }}" class="comm-link">sv/{{ p['community_name'] }}</a>
+          &bull; posted by <a href="{{ url_for('user_profile', username=p['username']) }}">{{ p['username'] }}</a>
+          &bull; {{ p['created_at'][:10] }}
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <p class="muted" style="padding:2rem;">No posts yet. <a href="{{ url_for('post_new') }}">Create the first one!</a></p>
+    {% endfor %}
+  </div>
+
+  <div class="feed-sidebar">
+    <div class="sidebar-widget">
+      <h3>Top Communities</h3>
+      {% for c in communities %}
+      <div class="sidebar-community">
+        <a href="{{ url_for('community_view', name=c['name']) }}">sv/{{ c['name'] }}</a>
+        <span class="muted">{{ c['member_count'] }} members</span>
+      </div>
+      {% endfor %}
+      <a href="{{ url_for('communities_list') }}" class="btn btn-sm" style="margin-top:0.75rem;display:block;text-align:center;">Browse All</a>
+    </div>
+    <div class="sidebar-widget">
+      <h3>About SubVerse</h3>
+      <p class="muted" style="font-size:0.85rem;">The front page of everything. Join communities, share posts, and connect with people who care about the same things you do.</p>
+      {% set u = current_user() %}
+      {% if not u %}
+      <a href="{{ url_for('register') }}" class="btn btn-primary" style="display:block;text-align:center;margin-top:0.75rem;">Create Account</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

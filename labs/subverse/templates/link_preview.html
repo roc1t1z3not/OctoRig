@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Link Preview — SubVerse{% endblock %}
+{% block content %}
+<div class="feed-layout" style="justify-content:center;">
+  <div style="max-width:760px;width:100%;">
+    <h2 style="margin-bottom:1rem;">Link Preview</h2>
+    {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+    <div class="sidebar-widget">
+      <form method="post" action="{{ url_for('post_preview_link') }}">
+        <label>URL</label>
+        <div style="display:flex;gap:0.5rem;">
+          <input type="text" name="url" value="{{ url }}" placeholder="https://..." style="flex:1;">
+          <button type="submit" class="btn btn-primary">Preview</button>
+        </div>
+      </form>
+      {% if output %}
+      <hr style="border-color:var(--border);margin:1rem 0;">
+      <h4>Response</h4>
+      <pre class="output-pre">{{ output }}</pre>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

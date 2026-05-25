@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ post['title'] }} — SubVerse{% endblock %}
+{% block content %}
+<div class="feed-layout">
+  <div class="feed-main">
+    <div class="post-card post-detail">
+      <div class="vote-col">
+        <a href="{{ url_for('post_vote', post_id=post['id']) }}?v=1" class="vote-up">&#9650;</a>
+        <span class="score">{{ post['score'] }}</span>
+        <a href="{{ url_for('post_vote', post_id=post['id']) }}?v=-1" class="vote-dn">&#9660;</a>
+      </div>
+      <div class="post-body">
+        {% if post['flair'] %}<span class="flair">{{ post['flair'] }}</span>{% endif %}
+        <h1 class="post-title-lg">{{ post['title'] }}</h1>
+        <div class="post-meta">
+          <a href="{{ url_for('community_view', name=post['community_name']) }}" class="comm-link">sv/{{ post['community_name'] }}</a>
+          &bull; posted by <a href="{{ url_for('user_profile', username=post['username']) }}">{{ post['username'] }}</a>
+          &bull; {{ post['created_at'][:10] }}
+        </div>
+        {% if post['body'] %}
+        <!-- VULN: stored XSS — post body rendered unsanitised -->
+        <div class="post-text">{{ post['body'] | safe }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Link Preview Tool -->
+    {% set u = current_user() %}
+    {% if u %}
+    <div class="link-preview-box">
+      <h4>Link Preview</h4>
+      <form method="post" action="{{ url_for('post_preview_link') }}">
+        <div style="display:flex;gap:0.5rem;">
+          <input type="text" name="url" placeholder="Enter URL to preview..." style="flex:1;">
+          <button type="submit" class="btn btn-sm">Preview</button>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+
+    <!-- Comments -->
+    <div class="comments-section">
+      <h3 style="margin-bottom:1rem;">{{ comments|length }} Comment{{ 's' if comments|length != 1 }}</h3>
+      {% if u %}
+      <form method="post" action="{{ url_for('comment_add', post_id=post['id']) }}" class="comment-form">
+        <textarea name="body" placeholder="What are your thoughts?" rows="4"></textarea>
+        <button type="submit" class="btn btn-primary">Comment</button>
+      </form>
+      {% else %}
+      <p class="muted"><a href="{{ url_for('login') }}">Log in</a> to comment.</p>
+      {% endif %}
+
+      {% for c in comments %}
+      <div class="comment-card">
+        <div class="comment-vote">
+          <a href="{{ url_for('comment_vote', comment_id=c['id']) }}?v=1" class="vote-up">&#9650;</a>
+          <span>{{ c['score'] }}</span>
+          <a href="{{ url_for('comment_vote', comment_id=c['id']) }}?v=-1" class="vote-dn">&#9660;</a>
+        </div>
+        <div class="comment-body">
+          <div class="comment-meta">
+            <a href="{{ url_for('user_profile', username=c['username']) }}">{{ c['username'] }}</a>
+            &bull; {{ c['created_at'][:10] }}
+          </div>
+          <!-- VULN: stored XSS — comment body rendered unsanitised -->
+          <div class="comment-text">{{ c['body'] | safe }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="feed-sidebar">
+    <div class="sidebar-widget">
+      <h3>sv/{{ post['community_name'] }}</h3>
+      <a href="{{ url_for('community_view', name=post['community_name']) }}" class="btn btn-sm" style="display:block;text-align:center;margin-top:0.5rem;">View Community</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

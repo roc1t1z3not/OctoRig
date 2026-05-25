@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ msg['subject'] }} — SubVerse{% endblock %}
+{% block content %}
+<div class="feed-layout" style="justify-content:center;">
+  <div style="max-width:760px;width:100%;">
+    <div class="sidebar-widget">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <h2>{{ msg['subject'] }}</h2>
+          <p class="muted" style="font-size:0.9rem;margin-top:0.25rem;">
+            From: <a href="{{ url_for('user_profile', username=msg['sender_name']) }}">{{ msg['sender_name'] }}</a>
+            &bull; To: <a href="{{ url_for('user_profile', username=msg['recipient_name']) }}">{{ msg['recipient_name'] }}</a>
+            &bull; {{ msg['created_at'][:10] }}
+          </p>
+        </div>
+        <a href="{{ url_for('messages_inbox') }}" class="btn btn-sm">&#8592; Back</a>
+      </div>
+      <hr style="border-color:var(--border);margin:1rem 0;">
+      <div class="message-body">{{ msg['body'] }}</div>
+    </div>
+    <div style="margin-top:1rem;">
+      <a href="{{ url_for('message_new') }}?to={{ msg['sender_name'] }}" class="btn btn-sm">Reply</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

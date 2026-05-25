@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Users — Admin — SubVerse{% endblock %}
+{% block content %}
+<div class="feed-layout" style="justify-content:center;">
+  <div style="max-width:900px;width:100%;">
+    <div style="display:flex;justify-content:space-between;margin-bottom:1rem;">
+      <h2>User Management</h2>
+      <a href="{{ url_for('admin_index') }}" class="btn btn-sm">&#8592; Admin</a>
+    </div>
+    <div class="sidebar-widget">
+      <table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
+        <thead>
+          <tr style="color:var(--muted);border-bottom:1px solid var(--border);">
+            <th style="text-align:left;padding:0.4rem;">ID</th>
+            <th style="text-align:left;padding:0.4rem;">Username</th>
+            <th style="text-align:left;padding:0.4rem;">Email</th>
+            <th style="text-align:left;padding:0.4rem;">Role</th>
+            <th style="text-align:left;padding:0.4rem;">Karma</th>
+            <th style="text-align:left;padding:0.4rem;">Password Hash</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:0.4rem;color:var(--muted);">{{ u['id'] }}</td>
+            <td style="padding:0.4rem;"><a href="{{ url_for('user_profile', username=u['username']) }}">{{ u['username'] }}</a></td>
+            <td style="padding:0.4rem;color:var(--muted);">{{ u['email'] or '—' }}</td>
+            <td style="padding:0.4rem;"><span class="badge badge-{{ u['role'] }}">{{ u['role'] }}</span></td>
+            <td style="padding:0.4rem;">{{ u['karma'] }}</td>
+            <td style="padding:0.4rem;font-family:monospace;font-size:0.8rem;color:var(--muted);">{{ u['password_hash'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ target['username'] }} — SubVerse{% endblock %}
+{% block content %}
+<div class="feed-layout">
+  <div class="feed-main">
+    <div class="profile-header">
+      {% if target['avatar'] %}
+      <img src="{{ url_for('static', filename='uploads/' + target['avatar']) }}" class="avatar-lg" alt="avatar">
+      {% else %}
+      <div class="avatar-placeholder-lg">{{ target['username'][0].upper() }}</div>
+      {% endif %}
+      <div>
+        <h2>{{ target['username'] }}</h2>
+        <div class="badge badge-{{ target['role'] }}">{{ target['role'] }}</div>
+        <span class="muted" style="margin-left:0.5rem;">{{ target['karma'] }} karma</span>
+        <p style="margin-top:0.5rem;">
+          <!-- VULN: stored XSS — bio rendered unsanitised -->
+          {{ target['bio'] | safe }}
+        </p>
+      </div>
+    </div>
+
+    {% set me = current_user() %}
+    {% if me and me['id'] == target['id'] %}
+    <div style="margin-bottom:1rem;">
+      <a href="{{ url_for('profile_edit') }}" class="btn btn-sm">Edit Profile</a>
+      <a href="{{ url_for('message_new') }}?to={{ target['username'] }}" class="btn btn-sm">Send Message</a>
+    </div>
+    {% elif me %}
+    <div style="margin-bottom:1rem;">
+      <a href="{{ url_for('message_new') }}?to={{ target['username'] }}" class="btn btn-sm">Send Message</a>
+    </div>
+    {% endif %}
+
+    <h3 style="margin-bottom:0.75rem;">Recent Posts</h3>
+    {% for p in posts %}
+    <div class="post-card">
+      <div class="vote-col">
+        <span class="score">{{ p['score'] }}</span>
+      </div>
+      <div class="post-body">
+        {% if p['flair'] %}<span class="flair">{{ p['flair'] }}</span>{% endif %}
+        <a class="post-title" href="{{ url_for('post_view', post_id=p['id']) }}">{{ p['title'] }}</a>
+        <div class="post-meta">
+          <a href="{{ url_for('community_view', name=p['community_name']) }}" class="comm-link">sv/{{ p['community_name'] }}</a>
+          &bull; {{ p['created_at'][:10] }}
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <p class="muted">No posts yet.</p>
+    {% endfor %}
+  </div>
+
+  <div class="feed-sidebar">
+    <div class="sidebar-widget">
+      <h3>About {{ target['username'] }}</h3>
+      <p class="muted" style="font-size:0.85rem;">Member since {{ target['created_at'][:10] }}</p>
+      <p style="font-size:0.85rem;"><strong>{{ target['karma'] }}</strong> karma</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

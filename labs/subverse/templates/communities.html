@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Communities — SubVerse{% endblock %}
+{% block content %}
+<div class="feed-layout">
+  <div class="feed-main">
+    <div class="page-header">
+      <h2>Communities</h2>
+      <form method="get" action="{{ url_for('communities_list') }}" style="margin-top:0.75rem;">
+        <div style="display:flex;gap:0.5rem;">
+          <input type="text" name="q" placeholder="Search communities..." value="{{ q }}" style="flex:1;">
+          <button type="submit" class="btn btn-sm">Search</button>
+        </div>
+      </form>
+    </div>
+    {% for c in communities %}
+    <div class="community-card">
+      <div class="community-card-info">
+        <a href="{{ url_for('community_view', name=c['name']) }}" class="comm-title">sv/{{ c['name'] }}</a>
+        <p class="muted" style="font-size:0.9rem;margin-top:0.25rem;">{{ c['description'] }}</p>
+      </div>
+      <div class="community-card-stats">
+        <span><strong>{{ c['member_count'] }}</strong> members</span>
+        <a href="{{ url_for('community_view', name=c['name']) }}" class="btn btn-sm" style="margin-top:0.5rem;">View</a>
+      </div>
+    </div>
+    {% else %}
+    <p class="muted" style="padding:2rem;">No communities found.</p>
+    {% endfor %}
+  </div>
+  <div class="feed-sidebar">
+    <div class="sidebar-widget">
+      <h3>Explore</h3>
+      <p class="muted" style="font-size:0.85rem;">Find communities about things you care about. Explore and join.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
