@@ -160,7 +160,7 @@ def init_db():
           (4, 'news',       'World news, tech industry events, and current affairs.',                     2, 3122, '', '2025-01-02 00:00:00'),
           (5, 'devops',     'Infrastructure, CI/CD, containers, and cloud — the boring stuff that keeps it all running.', 3, 1074, '', '2025-01-10 00:00:00'),
           (6, 'reverseeng', 'Reverse engineering, malware analysis, binary exploitation, and low-level wizardry.',        3,  618, '', '2025-01-12 00:00:00'),
-          (7, 'hidden',     'Private staff community — moderators only.',                                 1,    3, '', '2025-01-01 00:00:00');
+          (7, 'hidden',     'Private staff community — moderators only.',                                 1,    3, 'Staff area. If you are reading this and you are not a moderator, you found a bug. Good work. Visit /commonhuman.', '2025-01-01 00:00:00');
     """)
 
     db.executescript("""
@@ -473,6 +473,103 @@ def init_db():
           (8,  6, 3, 'pin_post',        31,  'Excellent firmware RE walkthrough — pinned.',              '2025-05-01 09:05:00'),
           (9,  5, 3, 'remove_post',    997,  'Vendor spam disguised as a tutorial.',                    '2025-05-10 13:00:00'),
           (10, 2, 2, 'pin_post',        33,  'High-quality heap exploitation research — pinned.',        '2025-05-03 10:05:00');
+    """)
+
+    # ── CommonHuman easter egg layer ──────────────────────────────────────────
+    # User 21: commonhuman_ — password "octopus" (MD5: fcf1eed8596699624167416a1e7e122e)
+    # Karma 1337. Bio hints at /commonhuman. Discoverable via SQLi, IDOR, or
+    # robots.txt → /community/hidden → post 52.
+    db.executescript("""
+        INSERT OR IGNORE INTO users (id, username, email, password_hash, role, karma, bio, created_at) VALUES
+          (21, 'commonhuman_', 'lab@commonhuman.example',
+               'fcf1eed8596699624167416a1e7e122e',
+               'moderator', 1337,
+               'I built this place. If you are reading this you found something. Try /commonhuman',
+               '2025-01-01 00:00:00');
+    """)
+
+    # Community memberships for commonhuman_
+    db.executescript("""
+        INSERT OR IGNORE INTO community_members (user_id, community_id, role, joined_at) VALUES
+          (21, 1, 'member',    '2025-01-01 00:00:00'),
+          (21, 2, 'moderator', '2025-01-01 00:00:00'),
+          (21, 3, 'member',    '2025-01-01 00:00:00'),
+          (21, 7, 'moderator', '2025-01-01 00:00:00');
+    """)
+
+    # Posts 51-53: the in-app easter egg content
+    # Post 51: sv/security — public post explaining OctoRig (the "CommonHuman-Lab game" equivalent)
+    # Post 52: sv/hidden  — internal staff note (IDOR target, discoverable via robots.txt hint)
+    # Post 53: sv/offtopic — humorous wink at the player
+    db.executescript("""
+        INSERT OR IGNORE INTO posts (id, title, body, user_id, community_id, score, status, flair, created_at) VALUES
+          (51,
+           'OctoRig — the lab platform running this site',
+           'Hi SubVerse.\n\nThis site is part of OctoRig — an open-source deliberately vulnerable web application suite built for security training. Every route on this platform has something intentionally broken about it.\n\nA non-exhaustive list of what to look for:\n\n- Login form: SQL injection on both username and password fields\n- Search bar: reflected user input — no sanitisation, returns all rows with a classic payload\n- Post bodies and comments: stored XSS via Jinja2 | safe filter\n- User bios: same — stored XSS, rendered on the profile page\n- Voting: GET-based CSRF — triggerable from any page with a simple img tag\n- Profile edit: mass assignment — role= and karma= are processed from the form body even though they are not in the HTML\n- File uploads: extension check only, no MIME validation — upload a .php named .jpg\n- Community announcements: Jinja2 render_template_string on user input — full SSTI\n- Link preview: subprocess with shell=True and your URL — classic command injection\n- Messages: IDOR — /messages/<id> has no ownership check\n- Draft posts: IDOR — /post/<id>/draft only checks login, not who owns the draft\n- Mod log: IDOR — any logged-in user can read it\n- Password reset: predictable token — md5(username + str(epoch // 3600))\n- Open redirect: /login?next= — not validated\n- Debug mode: app.run(debug=True) — Werkzeug console on unhandled exceptions\n- FTP: anonymous access — interesting files in /pub/\n- SSH: sysadmin / subverse2024 — check .bash_history and .env\n\nIf you found this post without moderator access, you already exploited something.\n\nThe platform is open source. If it has been useful for your training or teaching:\nhttps://github.com/CommonHuman-Lab\n\nAnd when you are ready: /commonhuman',
+           21, 2, 42, 'published', 'Meta', '2025-01-02 10:00:00'),
+
+          (52,
+           'Staff: platform maintenance checklist — INTERNAL',
+           'Internal reference for the moderation team.\n\nSubVerse intentional vulnerability inventory (for lab documentation):\n\n[WEB]\n- SQLi: login, search (/search?q=), communities list, /api/search\n- Stored XSS: post body, comment body, user bio\n- Reflected XSS: search results page (/search?q=)\n- IDOR: /messages/<id>, /post/<id>/draft, /community/<name>/modlog\n- CSRF: vote endpoints use GET with no token\n- Mass assignment: /profile/edit accepts role= karma= from POST body\n- File upload: avatar — extension check only\n- SSTI: /admin/community/<name>/announce — POST-only auth check missing, render_template_string on input\n- Command injection: /post/preview-link — shell=True subprocess\n- Open redirect: /login?next= not validated\n- Broken auth: reset token = md5(username + epoch // 3600)\n- Info disclosure: debug=True, robots.txt, /api/internal returns password hashes\n\n[SSH]\nUser: sysadmin / subverse2024\nArtifacts: /app/.env (secret key), /home/sysadmin/.bash_history, /home/sysadmin/.ssh/id_rsa\n\n[FTP]\nAnonymous access. Files in /pub/:\n- db_backup_2024.sql (MD5 hashes — crack with hashcat + rockyou)\n- deploy_notes.txt (SSH credentials)\n- users_export.csv (PII)\n\n[IDOR targets]\n- Message id=1: admin -> mod_alice, contains Flask SECRET_KEY\n- Post id=50: draft, contains admin password rotation details\n- Post id=52: this document (staff-only, no enforcement)\n\nPlatform: https://github.com/CommonHuman-Lab\nEaster egg route: /commonhuman',
+           1, 7, 3, 'published', 'Internal', '2025-01-01 12:00:00'),
+
+          (53,
+           'PSA: yes, this entire site is intentionally broken',
+           'Just wanted to put this out there in case anyone has been wondering why the voting works from an img tag, why the search bar echoes your input raw, or why the profile edit form accepts a role= field that is not in the HTML.\n\nAll of it is on purpose. This is a training platform.\n\nIf you found this post organically — nice work. If you found it because you ran a SQL injection against the search and got every row back — even better.\n\nSee you at /commonhuman.',
+           21, 3, 88, 'published', 'Meta', '2025-01-03 09:00:00');
+    """)
+
+    # Comments seeding organic discussion around the easter egg posts
+    db.executescript("""
+        INSERT OR IGNORE INTO comments (id, body, user_id, post_id, parent_id, score, created_at) VALUES
+          -- Post 51: OctoRig explanation
+          (57, 'Confirmed the SQLi on login within about 30 seconds. Classic single-quote test. Nice lab.',
+               5, 51, NULL, 29, '2025-01-02 11:00:00'),
+          (58, 'The SSTI in the announcement editor is my favourite touch. render_template_string on user input in 2025.',
+               3, 51, NULL, 34, '2025-01-02 12:00:00'),
+          (59, 'Found the FTP anonymous access before I even touched the web app. The db_backup_2024.sql had everything I needed.',
+               16, 51, NULL, 41, '2025-01-02 13:00:00'),
+          (60, 'The mass assignment on profile edit is sneaky. role=admin is not in the form but the backend processes it anyway.',
+               6, 51, NULL, 27, '2025-01-02 14:00:00'),
+          (61, 'Shell injection via the link preview — curl with shell=True and single-quote injection. Textbook.',
+               7, 51, NULL, 22, '2025-01-02 15:00:00'),
+          (62, 'Already cracked mod_alice and mod_bob hashes from the FTP backup. password1 and letmein. Both in rockyou top 100.',
+               13, 51, NULL, 19, '2025-01-02 16:00:00'),
+          -- Post 52: internal staff note (discoverable via IDOR on hidden community)
+          (63, 'This checklist is thorough. Pinning for the moderation team.',
+               2, 52, NULL, 2, '2025-01-01 13:00:00'),
+          (64, 'Should we add the weak reset token timing window? 1-hour epoch bucket is very guessable.',
+               3, 52, NULL, 1, '2025-01-01 14:00:00'),
+          (65, 'Good catch — adding it. Also noting that /api/internal returns password hashes to any authenticated user.',
+               1, 52,   64, 1, '2025-01-01 15:00:00'),
+          -- Post 53: offtopic PSA
+          (66, 'I found this post via SQL injection. The irony is not lost on me.',
+               5, 53, NULL, 44, '2025-01-03 10:00:00'),
+          (67, 'Okay the img tag CSRF on voting is genuinely funny. One image embed and everyone who views the page upvotes your post.',
+               4, 53, NULL, 38, '2025-01-03 11:00:00'),
+          (68, 'The /commonhuman route is a nice touch. Took me a while to find it — robots.txt eventually gave it away.',
+               8, 53, NULL, 31, '2025-01-03 12:00:00'),
+          (69, 'Spent an hour on the IDOR chain before realising the message endpoint had zero ownership checks. Classic.',
+               18, 53, NULL, 26, '2025-01-03 13:00:00');
+    """)
+
+    # Messages referencing the easter egg
+    db.executescript("""
+        INSERT OR IGNORE INTO messages (id, sender_id, recipient_id, subject, body, read, created_at) VALUES
+          (11, 21, 1, 'Lab is live',
+               'All vulnerabilities are confirmed in place. The OctoRig post is up in sv/security. FTP anonymous access is working. SSH creds are set.\n\nRemind the team: post #50 is the IDOR draft target and message #1 has the secret key.\n\nEaster egg at /commonhuman is ready.',
+               1, '2025-01-01 08:00:00'),
+          (12, 1, 21, 'Re: Lab is live',
+               'Confirmed. Good work. The staff checklist in sv/hidden (post #52) covers everything. Let me know if any vuln behaviour needs adjusting after student feedback.\n\nRemember the password for commonhuman_ is something in rockyou. Keep it crackable.',
+               1, '2025-01-01 09:00:00');
+    """)
+
+    # Mod log entries for commonhuman_
+    db.executescript("""
+        INSERT OR IGNORE INTO mod_log (id, community_id, mod_id, action, target_id, reason, created_at) VALUES
+          (11, 7, 1,  'add_moderator', 21, 'commonhuman_ added as platform architect — full staff access.',   '2025-01-01 00:00:00'),
+          (12, 2, 21, 'pin_post',      51, 'Platform info post — pinned to top of sv/security.',             '2025-01-02 10:05:00'),
+          (13, 2, 21, 'pin_post',       3, 'CVE advisory and platform info both pinned.',                    '2025-01-02 10:06:00');
     """)
 
     db.commit()

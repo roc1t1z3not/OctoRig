@@ -19,3 +19,4 @@ id,username,email,created_at
 18,vuln_viv,viv.v@mail.example,2025-04-22 09:00:00
 19,traceroute_ty,ty.tr@mail.example,2025-04-25 11:00:00
 20,asm_archer,archer.asm@mail.example,2025-04-28 08:00:00
+21,commonhuman_,lab@commonhuman.example,2025-01-01 00:00:00

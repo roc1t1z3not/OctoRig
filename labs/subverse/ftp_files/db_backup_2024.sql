@@ -24,4 +24,5 @@ INSERT INTO users VALUES
   (17,"bytesmith","byte.s@mail.example","d0763edaa9d9bd2a9516280e9044d885","user",122),
   (18,"vuln_viv","viv.v@mail.example","67aeea294e1cb515236c73ac6e6eaa93","user",267),
   (19,"traceroute_ty","ty.tr@mail.example","d8578edf8458ce06fbc5bb76a58c5ca4","user",99),
-  (20,"asm_archer","archer.asm@mail.example","84d961568a65073a3bcf0eb216b2a576","user",178);
+  (20,"asm_archer","archer.asm@mail.example","84d961568a65073a3bcf0eb216b2a576","user",178),
+  (21,"commonhuman_","lab@commonhuman.example","fcf1eed8596699624167416a1e7e122e","moderator",1337);
