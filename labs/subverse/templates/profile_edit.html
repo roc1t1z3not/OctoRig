@@ -1,35 +1,50 @@
 {% extends "base.html" %}
 {% block title %}Edit Profile — SubVerse{% endblock %}
 {% block content %}
-<div class="feed-layout" style="justify-content:center;">
-  <div style="max-width:600px;width:100%;">
-    <h2 style="margin-bottom:1rem;">Edit Profile</h2>
+<div class="container">
+  <div style="max-width:600px;margin:0 auto;">
+    <div class="page-header">
+      <h2>Edit Profile</h2>
+    </div>
     {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
     {% if success %}<div class="alert alert-success">{{ success }}</div>{% endif %}
 
-    <div class="sidebar-widget">
-      <h3>Profile Info</h3>
-      <form method="post" action="{{ url_for('profile_edit') }}">
-        <label>Username</label>
-        <input type="text" name="username" value="{{ u['username'] }}">
-        <label>Email</label>
-        <input type="email" name="email" value="{{ u['email'] or '' }}">
-        <label>Bio</label>
-        <textarea name="bio" rows="4">{{ u['bio'] or '' }}</textarea>
-        <button type="submit" class="btn btn-primary" style="margin-top:0.5rem;">Save Changes</button>
-      </form>
+    <div class="widget">
+      <div class="widget-header">Profile Info</div>
+      <div class="widget-body">
+        <form method="post" action="{{ url_for('profile_edit') }}">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" name="username" value="{{ u['username'] }}">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" value="{{ u['email'] or '' }}">
+          </div>
+          <div class="form-group">
+            <label>Bio</label>
+            <textarea name="bio" rows="4">{{ u['bio'] or '' }}</textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+      </div>
     </div>
 
-    <div class="sidebar-widget" style="margin-top:1rem;">
-      <h3>Profile Picture</h3>
-      {% if u['avatar'] %}
-      <img src="{{ url_for('static', filename='uploads/' + u['avatar']) }}" class="avatar-lg" style="margin-bottom:0.75rem;" alt="avatar">
-      {% endif %}
-      <form method="post" action="{{ url_for('profile_avatar') }}" enctype="multipart/form-data">
-        <input type="file" name="avatar" accept=".jpg,.jpeg,.png,.gif">
-        <button type="submit" class="btn btn-sm" style="margin-top:0.5rem;">Upload Avatar</button>
-      </form>
-      <p class="muted" style="font-size:0.8rem;margin-top:0.5rem;">Accepted: jpg, jpeg, png, gif</p>
+    <div class="widget" style="margin-top:1rem;">
+      <div class="widget-header">Profile Picture</div>
+      <div class="widget-body">
+        {% if u['avatar'] %}
+        <img src="{{ url_for('static', filename='uploads/' + u['avatar']) }}" class="avatar-img" style="margin-bottom:0.875rem;" alt="avatar">
+        {% endif %}
+        <form method="post" action="{{ url_for('profile_avatar') }}" enctype="multipart/form-data">
+          <div class="form-group">
+            <label>Upload New Avatar</label>
+            <input type="file" name="avatar" accept=".jpg,.jpeg,.png,.gif">
+          </div>
+          <button type="submit" class="btn btn-sm">Upload</button>
+        </form>
+        <p style="color:var(--muted);font-size:0.78rem;margin-top:0.5rem;">Accepted: jpg, jpeg, png, gif</p>
+      </div>
     </div>
   </div>
 </div>

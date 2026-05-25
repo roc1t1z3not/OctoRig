@@ -1,28 +1,36 @@
 {% extends "base.html" %}
 {% block title %}Set Announcement — sv/{{ comm['name'] }} — SubVerse{% endblock %}
 {% block content %}
-<div class="feed-layout" style="justify-content:center;">
-  <div style="max-width:700px;width:100%;">
-    <div style="display:flex;justify-content:space-between;margin-bottom:1rem;">
-      <h2>Set Announcement — sv/{{ comm['name'] }}</h2>
+<div class="container">
+  <div style="max-width:700px;margin:0 auto;">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
+      <h2>Set Announcement &mdash; sv/{{ comm['name'] }}</h2>
       <a href="{{ url_for('community_view', name=comm['name']) }}" class="btn btn-sm">&#8592; Community</a>
     </div>
     {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
-    <div class="sidebar-widget">
-      <form method="post" action="{{ url_for('admin_announce', name=comm['name']) }}">
-        <label>Announcement Template</label>
-        <p class="muted" style="font-size:0.82rem;margin-bottom:0.5rem;">Supports Jinja2 template syntax for dynamic content.</p>
-        <textarea name="announcement" rows="8" placeholder="Enter announcement text or template...">{{ comm['announcement'] }}</textarea>
-        <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
-          <button type="submit" name="action" value="preview" class="btn btn-sm">Preview</button>
-          <button type="submit" name="action" value="save"    class="btn btn-primary btn-sm">Save</button>
+    <div class="widget">
+      <div class="widget-header">Announcement Editor</div>
+      <div class="widget-body">
+        <form method="post" action="{{ url_for('admin_announce', name=comm['name']) }}">
+          <div class="form-group">
+            <label>Template Text</label>
+            <p style="font-size:0.78rem;color:var(--muted);margin-bottom:0.5rem;">Supports Jinja2 template syntax for dynamic content.</p>
+            <textarea name="announcement" rows="8" placeholder="Enter announcement text or template...">{{ comm['announcement'] }}</textarea>
+          </div>
+          <div style="display:flex;gap:0.5rem;">
+            <button type="submit" name="action" value="preview" class="btn btn-sm">Preview</button>
+            <button type="submit" name="action" value="save" class="btn btn-primary btn-sm">Save</button>
+          </div>
+        </form>
+        {% if preview is not none %}
+        <hr class="divider">
+        <p style="font-size:0.75rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">Preview</p>
+        <div class="announcement">
+          <div class="announcement-label">&#128226; Announcement</div>
+          <div>{{ preview | safe }}</div>
         </div>
-      </form>
-      {% if preview is not none %}
-      <hr style="border-color:var(--border);margin:1rem 0;">
-      <h4>Preview</h4>
-      <div class="announcement-box">{{ preview | safe }}</div>
-      {% endif %}
+        {% endif %}
+      </div>
     </div>
   </div>
 </div>

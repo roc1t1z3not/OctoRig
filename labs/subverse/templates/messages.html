@@ -1,34 +1,44 @@
 {% extends "base.html" %}
 {% block title %}Messages — SubVerse{% endblock %}
 {% block content %}
-<div class="feed-layout" style="justify-content:center;">
-  <div style="max-width:760px;width:100%;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+<div class="container">
+  <div style="max-width:760px;margin:0 auto;">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
       <h2>Messages</h2>
       <a href="{{ url_for('message_new') }}" class="btn btn-primary btn-sm">+ Compose</a>
     </div>
 
-    <h3 style="margin-bottom:0.5rem;">Inbox</h3>
-    {% for m in inbox %}
-    <a href="{{ url_for('message_view', msg_id=m['id']) }}" class="message-row {% if not m['read'] %}unread{% endif %}">
-      <div class="msg-from">{{ m['sender_name'] }}</div>
-      <div class="msg-subject">{{ m['subject'] }}</div>
-      <div class="msg-date muted">{{ m['created_at'][:10] }}</div>
-    </a>
-    {% else %}
-    <p class="muted" style="padding:1rem;">Your inbox is empty.</p>
-    {% endfor %}
+    <p class="section-label">Inbox</p>
+    <div class="message-list">
+      {% for m in inbox %}
+      <a href="{{ url_for('message_view', msg_id=m['id']) }}" class="message-row {% if not m['read'] %}unread{% endif %}">
+        <div class="msg-from">{{ m['sender_name'] }}</div>
+        <div class="msg-subject">{{ m['subject'] }}</div>
+        <div class="msg-date">{{ m['created_at'][:10] }}</div>
+      </a>
+      {% else %}
+      <div class="empty-state" style="padding:2rem;">
+        <div class="empty-icon">&#128235;</div>
+        <p>Your inbox is empty.</p>
+      </div>
+      {% endfor %}
+    </div>
 
-    <h3 style="margin:1.5rem 0 0.5rem;">Sent</h3>
-    {% for m in sent %}
-    <a href="{{ url_for('message_view', msg_id=m['id']) }}" class="message-row">
-      <div class="msg-from muted">To: {{ m['recipient_name'] }}</div>
-      <div class="msg-subject">{{ m['subject'] }}</div>
-      <div class="msg-date muted">{{ m['created_at'][:10] }}</div>
-    </a>
-    {% else %}
-    <p class="muted" style="padding:1rem;">No sent messages.</p>
-    {% endfor %}
+    <p class="section-label" style="margin-top:1.75rem;">Sent</p>
+    <div class="message-list">
+      {% for m in sent %}
+      <a href="{{ url_for('message_view', msg_id=m['id']) }}" class="message-row">
+        <div class="msg-from" style="color:var(--muted);">To: {{ m['recipient_name'] }}</div>
+        <div class="msg-subject">{{ m['subject'] }}</div>
+        <div class="msg-date">{{ m['created_at'][:10] }}</div>
+      </a>
+      {% else %}
+      <div class="empty-state" style="padding:2rem;">
+        <div class="empty-icon">&#128228;</div>
+        <p>No sent messages.</p>
+      </div>
+      {% endfor %}
+    </div>
   </div>
 </div>
 {% endblock %}

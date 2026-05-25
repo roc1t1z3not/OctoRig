@@ -17,27 +17,30 @@
 <body>
 {% set u = current_user() %}
 <nav>
-  <div class="nav-left">
-    <a class="nav-logo" href="{{ url_for('index') }}">Sub<span>Verse</span></a>
-    <form class="nav-search" action="{{ url_for('search') }}" method="get">
+  <a class="nav-logo" href="{{ url_for('index') }}">Sub<span>Verse</span></a>
+  <div class="nav-search">
+    <form action="{{ url_for('search') }}" method="get">
       <input type="text" name="q" placeholder="Search SubVerse..." value="{{ request.args.get('q','') }}">
     </form>
   </div>
+  <div class="nav-center">
+    <a href="{{ url_for('communities_list') }}">Communities</a>
+    {% if u %}
+    <a href="{{ url_for('messages_inbox') }}">Messages</a>
+    {% endif %}
+  </div>
   <div class="nav-right">
     {% if u %}
-      <a href="{{ url_for('communities_list') }}">Communities</a>
-      <a href="{{ url_for('post_new') }}" class="btn btn-sm btn-primary">+ Post</a>
-      <a href="{{ url_for('messages_inbox') }}">Messages</a>
-      <span class="karma-badge">{{ u['karma'] }} karma</span>
+      <span class="karma-pill">{{ u['karma'] }} karma</span>
       <a href="{{ url_for('user_profile', username=u['username']) }}" class="nav-username">{{ u['username'] | safe }}</a>
       {% if u['role'] == 'admin' or u['role'] == 'moderator' %}
         <a href="{{ url_for('admin_index') }}" class="nav-admin">Admin</a>
       {% endif %}
+      <a href="{{ url_for('post_new') }}" class="btn btn-primary btn-sm">+ Post</a>
       <a href="{{ url_for('logout') }}" class="btn btn-sm">Logout</a>
     {% else %}
-      <a href="{{ url_for('communities_list') }}">Communities</a>
-      <a href="{{ url_for('login') }}" class="muted">Sign In</a>
-      <a href="{{ url_for('register') }}" class="btn btn-sm btn-primary">Join</a>
+      <a href="{{ url_for('login') }}" class="btn btn-sm">Sign In</a>
+      <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Join</a>
     {% endif %}
   </div>
 </nav>
