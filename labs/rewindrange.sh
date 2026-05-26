@@ -24,7 +24,7 @@ case "$1" in
     header "Starting..."
     ensure_container_gone "$CONTAINER_NAME"
 
-    info "Building Rewind Range image..."
+    info "Building Rewind Range image (this may take ~60s for apt packages)..."
     if docker build -q -t octorig-rewindrange:latest "$APP_DIR" &>/dev/null; then
       good "Image built"
     else
@@ -44,6 +44,8 @@ case "$1" in
 
     INFO_LINES=(
       "URL|http://${LAB_IP}"
+      "SSH|ssh staff@${LAB_IP}"
+      "FTP|ftp ${LAB_IP}"
       "Stop|./rewindrange.sh stop"
     )
     access_card INFO_LINES

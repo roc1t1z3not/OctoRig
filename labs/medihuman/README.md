@@ -17,8 +17,8 @@ A deliberately vulnerable healthcare patient portal exposing medical records, pr
 - Patient records are fetched by integer ID at `/patients/<id>` with no ownership check. How many records can you enumerate?
 - The staff detail endpoint at `/admin/staff/<id>` enforces a different — and weaker — check than the main `/admin` panel. Can a regular user reach it?
 - Messages at `/messages/<id>` have no ownership check. Whose messages can you read?
-- SSH is open on port 22. The credentials are weak and reused in more than one place.
-- FTP is on port 21. Try connecting without any credentials.
+- SSH is open on port 22. The system has more than one way in.
+- FTP is on port 21. What does the server expose?
 - `/patient-records`, `/staff-only`, and `/mri-archive` are disallowed in `robots.txt`. Worth a look.
 
 ---
@@ -42,8 +42,8 @@ The app starts on **http://172.28.5.2**.
 | Service | Details |
 |---------|---------|
 | Web | http://172.28.5.2 |
-| SSH | `ssh sysadmin@172.28.5.2` — password: `medihuman123` |
-| FTP | `ftp 172.28.5.2` — anonymous login |
+| SSH | `ssh sysadmin@172.28.5.2` |
+| FTP | `ftp 172.28.5.2` |
 
 | Account | Username | Password |
 |---------|----------|----------|

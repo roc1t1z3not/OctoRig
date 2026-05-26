@@ -36,6 +36,12 @@ The app starts on **http://172.28.1.2**.
 
 ## Access
 
+| Service | Details |
+|---------|---------|
+| Web | http://172.28.1.2 |
+| SSH | `ssh staff@172.28.1.2` |
+| FTP | `ftp 172.28.1.2` |
+
 | Account | Username | Password |
 |---------|----------|----------|
 | Admin | `admin` | `123456789` |

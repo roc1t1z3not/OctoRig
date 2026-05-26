@@ -25,7 +25,7 @@ case "$1" in
     header "Starting..."
     ensure_container_gone "$CONTAINER_NAME"
 
-    info "Building NetPulse image..."
+    info "Building NetPulse image (this may take ~60s for apt packages)..."
     if docker build -q -t octorig-netpulse:latest "$APP_DIR" &>/dev/null; then
       good "Image built"
     else
@@ -45,6 +45,8 @@ case "$1" in
 
     INFO_LINES=(
       "URL|http://${LAB_IP}"
+      "SSH|ssh netadmin@${LAB_IP}"
+      "FTP|ftp ${LAB_IP}"
       "Stop|./netpulse.sh stop"
     )
     access_card INFO_LINES

@@ -45,7 +45,7 @@ case "$1" in
 
     INFO_LINES=(
       "URL|http://${LAB_IP}"
-      "SSH|ssh sysadmin@${LAB_IP}  (pw: medihuman123)"
+      "SSH|ssh sysadmin@${LAB_IP}"
       "FTP|ftp ${LAB_IP}"
       "Stop|./medihuman.sh stop"
     )

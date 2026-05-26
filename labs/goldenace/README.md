@@ -37,6 +37,12 @@ The app starts on **http://172.28.3.2**.
 
 ## Access
 
+| Service | Details |
+|---------|---------|
+| Web | http://172.28.3.2 |
+| SSH | `ssh casinoops@172.28.3.2` |
+| FTP | `ftp 172.28.3.2` |
+
 | Account | Username | Password |
 |---------|----------|----------|
 | Admin | `admin` | `commonhuman-lab` |

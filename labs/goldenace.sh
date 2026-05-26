@@ -24,7 +24,7 @@ case "$1" in
     header "Starting..."
     ensure_container_gone "$CONTAINER_NAME"
 
-    info "Building GoldenAce image..."
+    info "Building GoldenAce image (this may take ~60s for apt packages)..."
     if docker build -q -t octorig-goldenace:latest "$APP_DIR" &>/dev/null; then
       good "Image built"
     else
@@ -47,6 +47,8 @@ case "$1" in
       "Admin|admin / commonhuman-lab"
       "VIP|lucky_larry / sunshine1"
       "User|jane.doe / iloveyou"
+      "SSH|ssh casinoops@${LAB_IP}"
+      "FTP|ftp ${LAB_IP}"
       "Stop|./goldenace.sh stop"
     )
     access_card INFO_LINES
