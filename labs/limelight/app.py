@@ -4,7 +4,7 @@ from flask import Flask, Response, render_template_string
 from db import init_db, close_db
 from helpers import current_user
 import routes.auth, routes.movies, routes.bookings
-import routes.account, routes.api, routes.admin
+import routes.account, routes.api, routes.admin, routes.expanded
 
 app = Flask(__name__)
 app.secret_key = 'limelight-xK9mPq3'
@@ -17,6 +17,7 @@ routes.bookings.init(app)
 routes.account.init(app)
 routes.api.init(app)
 routes.admin.init(app)
+routes.expanded.init(app)
 
 
 @app.route('/robots.txt')
@@ -27,6 +28,9 @@ def robots_txt():
         "Disallow: /api\n"
         "Disallow: /booking\n"
         "Disallow: /profile\n"
+        "Disallow: /projection-booth\n"
+        "Disallow: /gift-card-admin\n"
+        "Disallow: /api/v1/admin/refunds\n"
         "Disallow: /commonhuman\n\n"
         "# Limelight — CommonHuman-Lab\n"
         "# Deliberately vulnerable — do not use real credentials.\n",

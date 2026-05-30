@@ -1,7 +1,7 @@
 from flask import Flask, Response, render_template_string
 from db import init_db, close_db
 from helpers import current_user, cart_count, product_rating
-import routes.auth, routes.shop, routes.account, routes.feedback, routes.api, routes.admin, routes.board, routes.inbox
+import routes.auth, routes.shop, routes.account, routes.feedback, routes.api, routes.admin, routes.board, routes.inbox, routes.expanded
 
 app = Flask(__name__)
 app.secret_key = 'rewind-range-2026-xK9mPv3'
@@ -20,6 +20,7 @@ routes.api.init(app)
 routes.admin.init(app)
 routes.board.init(app)
 routes.inbox.init(app)
+routes.expanded.init(app)
 
 @app.route('/robots.txt')
 def robots_txt():
@@ -28,6 +29,10 @@ def robots_txt():
         "Disallow: /vhs-vault\n"
         "Disallow: /late-fees\n"
         "Disallow: /manager-office\n"
+        "Disallow: /staff-portal\n"
+        "Disallow: /inventory-manager\n"
+        "Disallow: /late-returns\n"
+        "Disallow: /api/v1/customers\n"
         "Disallow: /commonhuman\n\n"
         "# Be Kind, Rewind.\n"
         "# This app is part of the CommonHuman-Lab\n"

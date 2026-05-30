@@ -1,7 +1,7 @@
 from flask import Flask, Response, render_template_string
 from db import init_db, close_db
 from helpers import current_user
-import routes.auth, routes.banking, routes.support, routes.admin, routes.docs, routes.api
+import routes.auth, routes.banking, routes.support, routes.admin, routes.docs, routes.api, routes.expanded
 
 app = Flask(__name__)
 app.secret_key = 'humanbank-2026-xQ8nRv4'
@@ -14,6 +14,7 @@ routes.support.init(app)
 routes.admin.init(app)
 routes.docs.init(app)
 routes.api.init(app)
+routes.expanded.init(app)
 
 @app.route('/robots.txt')
 def robots_txt():
@@ -22,6 +23,7 @@ def robots_txt():
         "Disallow: /vault\n"
         "Disallow: /wire-transfers\n"
         "Disallow: /audit-log\n"
+        "Disallow: /api/v1/admin/users\n"
         "Disallow: /commonhuman\n\n"
         "# HumanBank — CommonHuman-Lab\n"
         "# Deliberately vulnerable — do not use real credentials.\n",

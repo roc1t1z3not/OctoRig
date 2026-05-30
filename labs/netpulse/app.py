@@ -2,7 +2,7 @@ from flask import Flask, Response, render_template_string
 from db import init_db, close_db
 from helpers import current_user
 import routes.auth, routes.account, routes.tools, routes.billing
-import routes.tickets, routes.board, routes.admin, routes.api
+import routes.tickets, routes.board, routes.admin, routes.api, routes.expanded
 
 app = Flask(__name__)
 app.secret_key = 'netpulse-1998-xT7kLm9'
@@ -17,6 +17,7 @@ routes.tickets.init(app)
 routes.board.init(app)
 routes.admin.init(app)
 routes.api.init(app)
+routes.expanded.init(app)
 
 @app.route('/robots.txt')
 def robots_txt():
@@ -25,6 +26,7 @@ def robots_txt():
         "Disallow: /dialup-pool\n"
         "Disallow: /billing-db\n"
         "Disallow: /syslog\n"
+        "Disallow: /api/v1/admin/config\n"
         "Disallow: /commonhuman\n\n"
         "# NetPulse Internet Services — CommonHuman-Lab\n"
         "# Deliberately vulnerable — do not use real credentials.\n",

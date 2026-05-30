@@ -7,7 +7,7 @@ from flask import Flask, Response, render_template_string
 from db import init_db, close_db, DATABASE
 from helpers import current_user
 import routes.auth, routes.portfolio, routes.trading, routes.watchlist
-import routes.filings, routes.alerts, routes.admin, routes.api
+import routes.filings, routes.alerts, routes.admin, routes.api, routes.expanded
 
 
 def _price_tick():
@@ -62,6 +62,7 @@ routes.filings.init(app)
 routes.alerts.init(app)
 routes.admin.init(app)
 routes.api.init(app)
+routes.expanded.init(app)
 
 @app.route('/robots.txt')
 def robots_txt():
@@ -70,6 +71,9 @@ def robots_txt():
         "Disallow: /trading-engine\n"
         "Disallow: /settlement\n"
         "Disallow: /compliance-logs\n"
+        "Disallow: /risk-engine\n"
+        "Disallow: /fund-manager\n"
+        "Disallow: /api/v1/accounts\n"
         "Disallow: /commonhuman\n\n"
         "# TradeFloor — CommonHuman-Lab\n"
         "# Deliberately vulnerable — do not use real credentials.\n",

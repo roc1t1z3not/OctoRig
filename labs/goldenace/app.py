@@ -8,7 +8,7 @@ from db import init_db, close_db, DATABASE
 from helpers import current_user
 import routes.auth, routes.lobby, routes.slots, routes.blackjack
 import routes.roulette, routes.dice, routes.account, routes.chat
-import routes.promo, routes.admin, routes.api
+import routes.promo, routes.admin, routes.api, routes.expanded
 
 _NPC_USERS = [
     (2, 'lucky_larry'), (3, 'high_roller'), (4, 'jane.doe'),
@@ -90,6 +90,7 @@ routes.chat.init(app)
 routes.promo.init(app)
 routes.admin.init(app)
 routes.api.init(app)
+routes.expanded.init(app)
 
 
 @app.route('/robots.txt')
@@ -99,6 +100,9 @@ def robots_txt():
         "Disallow: /admin\n"
         "Disallow: /suite\n"
         "Disallow: /api\n"
+        "Disallow: /vault-room\n"
+        "Disallow: /high-rollers\n"
+        "Disallow: /cashier-office\n"
         "Disallow: /commonhuman\n\n"
         "# GoldenAce — CommonHuman-Lab\n"
         "# Deliberately vulnerable — do not use real credentials.\n",
