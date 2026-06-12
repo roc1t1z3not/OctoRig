@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Set New Password — SubVerse{% endblock %}
+{% block content %}
+<div class="form-card">
+  <h2>Set New Password</h2>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  {% if success %}<div class="alert alert-success">{{ success }} <a href="{{ url_for('login') }}">Sign in</a></div>{% endif %}
+  {% if valid and not success %}
+  <form method="post" action="{{ url_for('reset_confirm', token=token) }}">
+    <div class="form-group">
+      <label>New Password</label>
+      <input type="password" name="password" autofocus required>
+    </div>
+    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Update Password</button>
+  </form>
+  {% endif %}
+  <p style="color:var(--muted);font-size:0.82rem;margin-top:1.25rem;text-align:center;">
+    <a href="{{ url_for('login') }}">Back to Sign In</a>
+  </p>
+</div>
+{% endblock %}

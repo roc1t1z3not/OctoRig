@@ -59,20 +59,21 @@ LABS=(
   "5|MediHuman|medihuman.sh|Vulnerable healthcare patient portal — SQLi, IDOR, XSS, file upload, SSH/FTP weak creds"
   "6|NetPulse|netpulse.sh|Vulnerable 90s ISP portal — SSRF, SSTI, command injection, open redirect, SQLi, IDOR, XSS, SSH/FTP"
   "7|Limelight|limelight.sh|Vulnerable cinema booking app — SQLi, XSS, IDOR, CSRF, SSTI, business logic, mass assignment, SSH/FTP"
-  "8|BreachSQL|breachsql.sh|Tiered SQL injection challenges (T1-T5) for SQLi practice"
-  "9|StingXSS|stingxss.sh|Tiered XSS challenges (T1-T8) for XSS injection practice"
-  "10|VaultGate|vaultgate.sh|IDOR challenges for benchmarking"
-  "11|VaultRip|vaultriprange.sh|SSH credential-rich target for VaultRip passive and remote harvesting"
-  "12|Juice Shop|juiceshop.sh|OWASP Juice Shop - OWASP Top 10 web vulnerabilities"
-  "13|DVWA|dvwa.sh|Damn Vulnerable Web App - PHP/MySQL classic"
-  "14|Metasploitable2|metasploitable.sh|Linux VM with intentionally vulnerable services"
-  "15|WebGoat|webgoat.sh|OWASP WebGoat - PortSwigger-style lesson-based labs"
-  "16|HTB Style|htb_style.sh|HackTheBox-style CTFd platform + vulnerable challenge"
-  "17|VulnAD|vulnad.sh|Vulnerable Active Directory - Samba4 AD with AD attack paths"
+  "8|SubVerse|subverse.sh|SubVerse — Reddit-like community forum — SQLi, XSS, IDOR, CSRF, SSTI, command injection, mass assignment, file upload, SSH/FTP"
+  "9|BreachSQL|breachsql.sh|Tiered SQL injection challenges (T1-T5) for SQLi practice"
+  "10|StingXSS|stingxss.sh|Tiered XSS challenges (T1-T8) for XSS injection practice"
+  "11|VaultGate|vaultgate.sh|IDOR challenges for benchmarking"
+  "12|VaultRip|vaultriprange.sh|SSH credential-rich target for VaultRip passive and remote harvesting"
+  "13|Juice Shop|juiceshop.sh|OWASP Juice Shop - OWASP Top 10 web vulnerabilities"
+  "14|DVWA|dvwa.sh|Damn Vulnerable Web App - PHP/MySQL classic"
+  "15|Metasploitable2|metasploitable.sh|Linux VM with intentionally vulnerable services"
+  "16|WebGoat|webgoat.sh|OWASP WebGoat - PortSwigger-style lesson-based labs"
+  "17|HTB Style|htb_style.sh|HackTheBox-style CTFd platform + vulnerable challenge"
+  "18|VulnAD|vulnad.sh|Vulnerable Active Directory - Samba4 AD with AD attack paths"
 )
 
 # IDs of real-world scenario labs (for "start world")
-WORLD_LAB_IDS=(1 2 3 4 5 6 7)
+WORLD_LAB_IDS=(1 2 3 4 5 6 7 8)
 
 # ---------------- dependency checks ------------------------------------------
 install_docker() {

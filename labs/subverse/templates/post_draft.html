@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}[DRAFT] {{ post['title'] }} — SubVerse{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="feed-layout">
+    <div class="feed-main">
+      <div class="draft-banner">
+        &#128274; <strong>Unpublished Draft</strong> &mdash; This post is not visible to regular users.
+      </div>
+      <div class="post-card post-detail">
+        <div class="post-body" style="padding:1.5rem;">
+          <div class="post-meta-top">
+            <a href="{{ url_for('community_view', name=post['community_name']) }}" class="comm-link">sv/{{ post['community_name'] }}</a>
+            <span class="post-author">draft by <a href="{{ url_for('user_profile', username=post['username']) }}">{{ post['username'] }}</a> &bull; {{ post['created_at'][:10] }}</span>
+          </div>
+          <h1 class="post-title-lg">{{ post['title'] }}</h1>
+          {% if post['body'] %}
+          <div class="post-text">{{ post['body'] | safe }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="feed-sidebar">
+      <div class="widget">
+        <div class="widget-header">Draft Info</div>
+        <div class="widget-body">
+          <p style="font-size:0.85rem;color:var(--muted);">This post has not been published. Only the author and admins can view drafts.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

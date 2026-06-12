@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}{{ target['username'] }} — SubVerse{% endblock %}
+{% block content %}
+{% set me = current_user() %}
+<div class="container">
+  <div class="feed-layout">
+    <div class="feed-main">
+      <div class="profile-card">
+        <div class="profile-banner"></div>
+        <div class="profile-info">
+          <div class="avatar-wrap">
+            {% if target['avatar'] %}
+            <img src="{{ url_for('static', filename='uploads/' + target['avatar']) }}" class="avatar-img" alt="avatar">
+            {% else %}
+            <div class="avatar-circle">{{ target['username'][0].upper() }}</div>
+            {% endif %}
+          </div>
+          <div class="profile-name">
+            {{ target['username'] }}
+            <span class="badge badge-{{ target['role'] }}" style="margin-left:0.5rem;">{{ target['role'] }}</span>
+          </div>
+          <!-- VULN: stored XSS — bio rendered unsanitised -->
+          <div class="profile-bio">{{ target['bio'] | safe }}</div>
+          <div class="profile-stats">
+            <div class="profile-stat">
+              <div class="val">{{ target['karma'] }}</div>
+              <div class="lbl">Karma</div>
+            </div>
+            <div class="profile-stat">
+              <div class="val">{{ posts | length }}</div>
+              <div class="lbl">Posts</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if me and me['id'] == target['id'] %}
+      <div style="display:flex;gap:0.5rem;margin-bottom:1.25rem;">
+        <a href="{{ url_for('profile_edit') }}" class="btn btn-sm">Edit Profile</a>
+        <a href="{{ url_for('message_new') }}?to={{ target['username'] }}" class="btn btn-sm">Send Message</a>
+      </div>
+      {% elif me %}
+      <div style="margin-bottom:1.25rem;">
+        <a href="{{ url_for('message_new') }}?to={{ target['username'] }}" class="btn btn-sm">Send Message</a>
+      </div>
+      {% endif %}
+
+      <p class="section-label">Recent Posts</p>
+      {% for p in posts %}
+      <div class="post-card">
+        <div class="vote-col">
+          <span class="score">{{ p['score'] }}</span>
+        </div>
+        <div class="post-body">
+          <div class="post-meta-top">
+            <a href="{{ url_for('community_view', name=p['community_name']) }}" class="comm-link">sv/{{ p['community_name'] }}</a>
+            {% if p['flair'] %}<span class="flair">{{ p['flair'] }}</span>{% endif %}
+            <span class="post-author">{{ p['created_at'][:10] }}</span>
+          </div>
+          <a class="post-title" href="{{ url_for('post_view', post_id=p['id']) }}">{{ p['title'] }}</a>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">&#128221;</div>
+        <p>No posts yet.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="feed-sidebar">
+      <div class="widget">
+        <div class="widget-header">Profile</div>
+        <div class="widget-body">
+          <div class="widget-row">
+            <span style="color:var(--muted);font-size:0.82rem;">Member since</span>
+            <span style="font-size:0.82rem;">{{ target['created_at'][:10] }}</span>
+          </div>
+          <div class="widget-row">
+            <span style="color:var(--muted);font-size:0.82rem;">Karma</span>
+            <strong>{{ target['karma'] }}</strong>
+          </div>
+          <div class="widget-row">
+            <span style="color:var(--muted);font-size:0.82rem;">Role</span>
+            <span class="badge badge-{{ target['role'] }}">{{ target['role'] }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

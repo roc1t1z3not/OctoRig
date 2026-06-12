@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}sv/{{ comm['name'] }} — SubVerse{% endblock %}
+{% block content %}
+{% set u = current_user() %}
+<div class="community-banner">
+  <div class="community-banner-art"></div>
+  <div class="community-banner-body">
+    <div class="community-name">sv/{{ comm['name'] }}</div>
+    <div class="community-desc">{{ comm['description'] }}</div>
+    <div class="community-stats">
+      <span><strong>{{ comm['member_count'] }}</strong> members</span>
+    </div>
+  </div>
+</div>
+
+{% if comm['announcement'] %}
+<div class="container" style="padding-top:0;padding-bottom:0;">
+  <div class="announcement">
+    <div class="announcement-label">&#128226; Announcement</div>
+    <div>{{ comm['announcement'] | safe }}</div>
+  </div>
+</div>
+{% endif %}
+
+<div class="container" style="padding-top:0.75rem;">
+  <div class="feed-layout">
+    <div class="feed-main">
+      <div class="sort-bar">
+        <a href="?sort=hot" class="sort-btn {% if sort=='hot' %}active{% endif %}">&#128293; Hot</a>
+        <a href="?sort=new" class="sort-btn {% if sort=='new' %}active{% endif %}">&#10024; New</a>
+        <a href="?sort=top" class="sort-btn {% if sort=='top' %}active{% endif %}">&#127942; Top</a>
+      </div>
+
+      {% for p in posts %}
+      <div class="post-card">
+        <div class="vote-col">
+          <a href="{{ url_for('post_vote', post_id=p['id']) }}?v=1" class="vote-btn">&#9650;</a>
+          <span class="score">{{ p['score'] }}</span>
+          <a href="{{ url_for('post_vote', post_id=p['id']) }}?v=-1" class="vote-btn dn">&#9660;</a>
+        </div>
+        <div class="post-body">
+          <div class="post-meta-top">
+            {% if p['flair'] %}<span class="flair">{{ p['flair'] }}</span>{% endif %}
+            <span class="post-author">posted by <a href="{{ url_for('user_profile', username=p['username']) }}">{{ p['username'] }}</a> &bull; {{ p['created_at'][:10] }}</span>
+          </div>
+          <a class="post-title" href="{{ url_for('post_view', post_id=p['id']) }}">{{ p['title'] }}</a>
+          <div class="post-actions">
+            <a href="{{ url_for('post_view', post_id=p['id']) }}" class="post-action-btn">&#128172; Comments</a>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">&#128172;</div>
+        <p>No posts yet in this community.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="feed-sidebar">
+      <div class="widget">
+        <div class="widget-header">About sv/{{ comm['name'] }}</div>
+        <div class="widget-body">
+          <p style="font-size:0.85rem;color:var(--muted);line-height:1.6;margin-bottom:0.75rem;">{{ comm['description'] }}</p>
+          <div class="widget-row">
+            <span style="color:var(--muted);font-size:0.82rem;">Members</span>
+            <strong>{{ comm['member_count'] }}</strong>
+          </div>
+          {% if u %}
+          <form method="post" action="{{ url_for('community_join', name=comm['name']) }}" style="margin-top:0.875rem;">
+            {% if member %}
+            <button type="submit" class="btn btn-sm" style="width:100%;justify-content:center;">Leave Community</button>
+            {% else %}
+            <button type="submit" class="btn btn-primary btn-sm" style="width:100%;justify-content:center;">Join Community</button>
+            {% endif %}
+          </form>
+          {% if u['role'] in ('admin', 'moderator') %}
+          <hr class="divider">
+          <p style="font-size:0.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">Mod Tools</p>
+          <a href="{{ url_for('community_modlog', name=comm['name']) }}" class="btn btn-sm" style="width:100%;justify-content:center;margin-bottom:0.4rem;">Mod Log</a>
+          <a href="{{ url_for('admin_announce', name=comm['name']) }}" class="btn btn-sm" style="width:100%;justify-content:center;">Set Announcement</a>
+          {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ msg['subject'] }} — SubVerse{% endblock %}
+{% block content %}
+<div class="container">
+  <div style="max-width:760px;margin:0 auto;">
+    <div class="widget">
+      <div class="widget-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>{{ msg['subject'] }}</span>
+        <a href="{{ url_for('messages_inbox') }}" class="btn btn-sm btn-ghost">&#8592; Back</a>
+      </div>
+      <div class="widget-body">
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem;">
+          From: <a href="{{ url_for('user_profile', username=msg['sender_name']) }}" style="color:var(--text);font-weight:600;">{{ msg['sender_name'] }}</a>
+          &rarr;
+          <a href="{{ url_for('user_profile', username=msg['recipient_name']) }}" style="color:var(--text);font-weight:600;">{{ msg['recipient_name'] }}</a>
+          <span style="float:right;">{{ msg['created_at'][:10] }}</span>
+        </p>
+        <hr class="divider">
+        <div style="font-size:0.9rem;line-height:1.75;white-space:pre-wrap;">{{ msg['body'] }}</div>
+      </div>
+    </div>
+    <div style="margin-top:1rem;">
+      <a href="{{ url_for('message_new') }}?to={{ msg['sender_name'] }}" class="btn btn-sm">&#8617; Reply</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
