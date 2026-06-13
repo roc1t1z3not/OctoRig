@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2026 CommonHuman-Lab
 from datetime import datetime
-from flask import request, render_template, session, redirect, url_for
+from flask import make_response, request, render_template, session, redirect, url_for
 from db import get_db
 from helpers import current_user
 
@@ -53,8 +53,10 @@ def init(app):
         ).fetchall()
         error   = request.args.get('error')
         success = request.args.get('success')
-        return render_template('movie.html', m=m, showings=showings, reviews=reviews,
-                               error=error, success=success)
+        resp = make_response(render_template('movie.html', m=m, showings=showings, reviews=reviews,
+                                            error=error, success=success))
+        resp.set_cookie('xss_challenge', 'FLAG{ll_xss_cookie_captured}', httponly=False)
+        return resp
 
     @app.route('/movie/<int:movie_id>/review', methods=['POST'])
     def review(movie_id):

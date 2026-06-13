@@ -1,0 +1,66 @@
+"use client";
+
+import { useState } from "react";
+import { Palette, X } from "lucide-react";
+import { clsx } from "clsx";
+import { THEMES, type ThemeId } from "@/lib/themes";
+import { useThemeStore } from "@/stores/theme.store";
+
+export function ThemeModal() {
+  const [open, setOpen] = useState(false);
+  const { theme, setTheme } = useThemeStore();
+
+  function pick(id: ThemeId) {
+    setTheme(id);
+    setOpen(false);
+  }
+
+  return (
+    <>
+      <button className="g-btn g-btn-ghost g-btn-icon" onClick={() => setOpen(true)} title="Change theme">
+        <Palette size={16} />
+      </button>
+
+      {open && (
+        <div className="g-backdrop" onClick={() => setOpen(false)}>
+          <div className="g-modal theme-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="g-modal-header">
+              <span className="font-mono text-sm">THEME</span>
+              <button className="g-btn g-btn-ghost g-btn-icon" onClick={() => setOpen(false)}>
+                <X size={16} />
+              </button>
+            </div>
+            <div className="theme-grid">
+              {THEMES.map((t) => (
+                <button
+                  key={t.id}
+                  className={clsx("theme-card", theme === t.id && "theme-card--active")}
+                  onClick={() => pick(t.id)}
+                  style={{ background: t.preview.bg, borderColor: theme === t.id ? t.preview.accent : t.preview.border }}
+                >
+                  <div className="theme-swatch" style={{ background: t.preview.accent }} />
+                  <div>
+                    <p className="text-sm font-mono" style={{ color: t.preview.text }}>{t.name}</p>
+                    <p className="text-10" style={{ color: t.preview.dim }}>{t.hint}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        .theme-modal { max-width: 480px; width: 100%; }
+        .theme-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; padding: 1rem; }
+        .theme-card {
+          display: flex; align-items: center; gap: 0.75rem;
+          padding: 0.75rem; border-radius: 0.5rem; border: 1px solid;
+          cursor: pointer; text-align: left; transition: border-color 0.15s;
+        }
+        .theme-card--active { outline: 2px solid var(--g-accent); outline-offset: 1px; }
+        .theme-swatch { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; }
+      `}</style>
+    </>
+  );
+}

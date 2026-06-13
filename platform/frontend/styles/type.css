@@ -1,0 +1,76 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* Copyright (c) 2026 CommonHuman-Lab */
+
+/* ── Font family ──────────────────────────────────────────────────────────── */
+.font-sans  { font-family: var(--font-inter, ui-sans-serif, system-ui, sans-serif); }
+.font-mono  { font-family: var(--font-mono, ui-monospace, "JetBrains Mono", monospace); }
+.font-serif { font-family: ui-serif, Georgia, serif; }
+
+/* ── Font size ────────────────────────────────────────────────────────────── */
+.text-xs   { font-size: 0.75rem;  line-height: 1rem; }
+.text-sm   { font-size: 0.875rem; line-height: 1.25rem; }
+.text-base { font-size: 1rem;     line-height: 1.5rem; }
+.text-lg   { font-size: 1.125rem; line-height: 1.75rem; }
+.text-xl   { font-size: 1.25rem;  line-height: 1.75rem; }
+.text-2xl  { font-size: 1.5rem;   line-height: 2rem; }
+.text-3xl  { font-size: 1.875rem; line-height: 2.25rem; }
+
+/* Sub-xs sizes used in this app */
+.text-9px  { font-size: 9px; }
+.text-10px { font-size: 10px; }
+.text-11px { font-size: 11px; }
+/* Short aliases */
+.text-9  { font-size: 9px; }
+.text-10 { font-size: 10px; }
+.text-11 { font-size: 11px; }
+
+/* ── Font weight ──────────────────────────────────────────────────────────── */
+.font-light    { font-weight: 300; }
+.font-normal   { font-weight: 400; }
+.font-medium   { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold     { font-weight: 700; }
+.font-extrabold { font-weight: 800; }
+.font-black    { font-weight: 900; }
+
+/* ── Letter spacing ───────────────────────────────────────────────────────── */
+.tracking-tighter  { letter-spacing: -0.05em; }
+.tracking-tight    { letter-spacing: -0.025em; }
+.tracking-normal   { letter-spacing: 0; }
+.tracking-wide     { letter-spacing: 0.025em; }
+.tracking-wider    { letter-spacing: 0.05em; }
+.tracking-widest   { letter-spacing: 0.1em; }
+.tracking-brand    { letter-spacing: 0.2em; }   /* GLOOMPROXY brand */
+.tracking-section  { letter-spacing: 0.15em; }  /* section headers */
+
+/* ── Text alignment ───────────────────────────────────────────────────────── */
+.text-left   { text-align: left; }
+.text-center { text-align: center; }
+.text-right  { text-align: right; }
+
+/* ── Text decoration ──────────────────────────────────────────────────────── */
+.underline      { text-decoration-line: underline; }
+.no-underline   { text-decoration-line: none; }
+.line-through   { text-decoration-line: line-through; }
+
+/* ── Text transform ───────────────────────────────────────────────────────── */
+.uppercase   { text-transform: uppercase; }
+.lowercase   { text-transform: lowercase; }
+.capitalize  { text-transform: capitalize; }
+.normal-case { text-transform: none; }
+
+/* ── Tabular nums ─────────────────────────────────────────────────────────── */
+.tabular-nums    { font-variant-numeric: tabular-nums; }
+.slashed-zero    { font-variant-numeric: slashed-zero; }
+.oldstyle-nums   { font-variant-numeric: oldstyle-nums; }
+
+/* ── Antialiasing ─────────────────────────────────────────────────────────── */
+.antialiased {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Vertical align ───────────────────────────────────────────────────────── */
+.align-middle { vertical-align: middle; }
+.align-top    { vertical-align: top; }
+.align-bottom { vertical-align: bottom; }

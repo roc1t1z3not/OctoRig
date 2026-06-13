@@ -1,0 +1,192 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* Copyright (c) 2026 CommonHuman-Lab */
+
+/* ── Text colors ──────────────────────────────────────────────────────────── */
+.text-primary   { color: var(--g-text); }
+.text-secondary { color: var(--g-text-secondary); }
+.text-muted     { color: var(--g-text-muted); }
+.text-dim       { color: var(--g-text-dim); }
+.text-accent    { color: var(--g-accent); }
+.text-success   { color: var(--g-success); }
+.text-warning   { color: var(--g-warning); }
+.text-danger    { color: var(--g-danger); }
+.text-info      { color: var(--g-info); }
+
+/* Palette colors (match --g-* hue tokens) */
+.text-rose    { color: var(--g-rose); }
+.text-orange  { color: var(--g-orange); }
+.text-amber   { color: var(--g-amber); }
+.text-yellow  { color: var(--g-yellow); }
+.text-emerald { color: var(--g-emerald); }
+.text-sky     { color: var(--g-sky); }
+.text-violet  { color: var(--g-violet); }
+.text-teal    { color: var(--g-teal); }
+.text-zinc    { color: var(--g-zinc); }
+
+/* Hover variants */
+.hover-text-primary:hover   { color: var(--g-text); }
+.hover-text-secondary:hover { color: var(--g-text-secondary); }
+.hover-text-muted:hover     { color: var(--g-text-muted); }
+.hover-text-accent:hover    { color: var(--g-accent); }
+.hover-text-danger:hover    { color: var(--g-danger); }
+.hover-text-success:hover   { color: var(--g-success); }
+
+/* ── Background colors ────────────────────────────────────────────────────── */
+.bg-page        { background-color: var(--g-bg); }
+.bg-chrome      { background-color: var(--g-chrome); }
+.bg-raised      { background-color: var(--g-raised); }
+.bg-elevated    { background-color: var(--g-elevated); }
+.bg-surface     { background-color: var(--g-surface); }
+.bg-overlay     { background-color: var(--g-overlay); }
+.bg-code        { background-color: var(--g-code-bg); }
+
+.bg-accent      { background-color: var(--g-accent); }
+.bg-accent-dim  { background-color: var(--g-accent-dim); }
+
+.bg-success-dim { background-color: var(--g-success-bg); }
+.bg-warning-dim { background-color: var(--g-warning-bg); }
+.bg-danger-dim  { background-color: var(--g-danger-bg); }
+.bg-info-dim    { background-color: var(--g-info-bg); }
+
+/* Hover variants */
+.hover-bg-surface:hover   { background-color: var(--g-surface-hover); }
+.hover-bg-elevated:hover  { background-color: var(--g-elevated); }
+.hover-bg-raised:hover    { background-color: var(--g-raised); }
+.hover-bg-accent-dim:hover { background-color: var(--g-accent-dim); }
+.hover-bg-danger-dim:hover { background-color: var(--g-danger-bg); }
+
+/* ── Border colors ────────────────────────────────────────────────────────── */
+/* .border already defaults to var(--g-border) in layout.css */
+.border-default { border-color: var(--g-border); }
+.border-strong  { border-color: var(--g-border-hover); }
+.border-accent  { border-color: var(--g-accent); }
+.border-accent-dim { border-color: rgba(var(--g-accent), 0.3); }
+.border-danger  { border-color: var(--g-danger); }
+.border-success { border-color: var(--g-success); }
+.border-warning { border-color: var(--g-warning); }
+
+/* ── Severity colors (finding severity) ──────────────────────────────────── */
+.sev-critical  { color: var(--g-rose); }
+.sev-high      { color: var(--g-orange); }
+.sev-medium    { color: var(--g-amber); }
+.sev-low       { color: var(--g-sky); }
+.sev-info      { color: var(--g-zinc); }
+
+.sev-critical-dot { background-color: var(--g-rose); }
+.sev-high-dot     { background-color: var(--g-orange); }
+.sev-medium-dot   { background-color: var(--g-amber); }
+.sev-low-dot      { background-color: var(--g-sky); }
+.sev-info-dot     { background-color: var(--g-zinc); }
+
+.sev-critical-badge {
+  color: var(--g-rose);
+  background-color: color-mix(in srgb, var(--g-rose) 12%, transparent);
+  border-color: color-mix(in srgb, var(--g-rose) 30%, transparent);
+}
+.sev-high-badge {
+  color: var(--g-orange);
+  background-color: color-mix(in srgb, var(--g-orange) 12%, transparent);
+  border-color: color-mix(in srgb, var(--g-orange) 30%, transparent);
+}
+.sev-medium-badge {
+  color: var(--g-amber);
+  background-color: color-mix(in srgb, var(--g-amber) 12%, transparent);
+  border-color: color-mix(in srgb, var(--g-amber) 30%, transparent);
+}
+.sev-low-badge {
+  color: var(--g-sky);
+  background-color: color-mix(in srgb, var(--g-sky) 12%, transparent);
+  border-color: color-mix(in srgb, var(--g-sky) 30%, transparent);
+}
+.sev-info-badge {
+  color: var(--g-zinc);
+  background-color: color-mix(in srgb, var(--g-zinc) 12%, transparent);
+  border-color: color-mix(in srgb, var(--g-zinc) 25%, transparent);
+}
+
+/* ── Scan/job status colors ───────────────────────────────────────────────── */
+.status-running   { color: var(--g-accent); }
+.status-finished  { color: var(--g-success); }
+.status-failed    { color: var(--g-danger); }
+.status-cancelled { color: var(--g-text-muted); }
+.status-pending   { color: var(--g-warning); }
+
+.status-running-badge {
+  color: var(--g-accent);
+  background-color: var(--g-accent-dim);
+  border-color: color-mix(in srgb, var(--g-accent) 35%, transparent);
+}
+.status-finished-badge {
+  color: var(--g-success);
+  background-color: var(--g-success-bg);
+  border-color: color-mix(in srgb, var(--g-success) 35%, transparent);
+}
+.status-failed-badge {
+  color: var(--g-danger);
+  background-color: var(--g-danger-bg);
+  border-color: color-mix(in srgb, var(--g-danger) 35%, transparent);
+}
+.status-cancelled-badge {
+  color: var(--g-text-muted);
+  background-color: var(--g-elevated);
+  border-color: var(--g-border);
+}
+.status-pending-badge {
+  color: var(--g-warning);
+  background-color: var(--g-warning-bg);
+  border-color: color-mix(in srgb, var(--g-warning) 35%, transparent);
+}
+
+/* ── HTTP method colors ───────────────────────────────────────────────────── */
+.method-get     { color: var(--g-emerald); }
+.method-post    { color: var(--g-violet); }
+.method-put     { color: var(--g-amber); }
+.method-patch   { color: var(--g-orange); }
+.method-delete  { color: var(--g-rose); }
+.method-options { color: var(--g-sky); }
+.method-head    { color: var(--g-teal); }
+.method-default { color: var(--g-zinc); }
+
+/* ── HTTP status code colors ──────────────────────────────────────────────── */
+.http-2xx { color: var(--g-success); }
+.http-3xx { color: var(--g-info); }
+.http-4xx { color: var(--g-warning); }
+.http-5xx { color: var(--g-danger); }
+.http-nil { color: var(--g-text-muted); }
+
+/* ── Backdrop effects ─────────────────────────────────────────────────────── */
+.backdrop-blur-sm  { backdrop-filter: blur(4px); }
+.backdrop-blur     { backdrop-filter: blur(8px); }
+.backdrop-blur-xl  { backdrop-filter: blur(24px); }
+
+/* ── Box shadow ───────────────────────────────────────────────────────────── */
+.shadow-sm  { box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+.shadow     { box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3); }
+.shadow-lg  { box-shadow: 0 4px 6px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2); }
+.shadow-xl  { box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+.shadow-2xl { box-shadow: 0 16px 40px rgba(0,0,0,0.5); }
+.shadow-none { box-shadow: none; }
+
+.ring-accent {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--g-accent) 40%, transparent),
+              0 0 12px color-mix(in srgb, var(--g-accent) 20%, transparent);
+}
+
+/* ── Transition utilities ─────────────────────────────────────────────────── */
+.transition-none    { transition: none; }
+.transition-all     { transition: all 0.15s ease; }
+.transition-colors  { transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease; }
+.transition-opacity { transition: opacity 0.15s ease; }
+.transition-transform { transition: transform 0.15s ease; }
+
+.duration-100 { transition-duration: 100ms; }
+.duration-150 { transition-duration: 150ms; }
+.duration-200 { transition-duration: 200ms; }
+.duration-300 { transition-duration: 300ms; }
+.duration-500 { transition-duration: 500ms; }
+
+/* ── Scale / hover effects ────────────────────────────────────────────────── */
+.hover-scale-sm:hover    { transform: scale(1.02); }
+.hover-scale:hover       { transform: scale(1.05); }
+.hover-scale-lg:hover    { transform: scale(1.25); }
+.active-scale:active     { transform: scale(0.97); }

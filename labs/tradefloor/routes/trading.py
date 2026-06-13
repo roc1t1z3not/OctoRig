@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from flask import request, render_template, session, redirect, url_for
+from flask import make_response, request, render_template, session, redirect, url_for
 from db import get_db
 
 
@@ -201,7 +201,10 @@ def init(app):
                 stocks = []
         else:
             stocks = db.execute("SELECT * FROM market_data ORDER BY symbol").fetchall()
-        return render_template('market.html', stocks=stocks, q=q)
+        resp = make_response(render_template('market.html', stocks=stocks, q=q))
+        # Non-HttpOnly cookie — readable via document.cookie (XSS challenge target)
+        resp.set_cookie('xss_challenge', 'FLAG{tf_reflected_xss_fired}', httponly=False)
+        return resp
 
     @app.route('/market/<symbol>', methods=['GET', 'POST'])
     def market_detail(symbol):

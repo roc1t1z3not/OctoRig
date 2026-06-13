@@ -152,4 +152,22 @@ def init(app):
         rows = get_db().execute(
             "SELECT id, username, email, balance, is_admin FROM users ORDER BY id"
         ).fetchall()
-        return jsonify({"users": [dict(r) for r in rows], "admin": True})
+        return jsonify({
+            "users": [dict(r) for r in rows],
+            "admin": True,
+            "flag": "FLAG{tf_fund_manager_found}",
+        })
+
+    # ── /api/admin/report — JWT required, role must be admin ─────────────────
+
+    @app.route("/api/admin/report")
+    @require_jwt
+    def api_admin_report():
+        if request.jwt_payload.get("role") != "admin":
+            return jsonify({"error": "forbidden"}), 403
+        return jsonify({
+            "report": "Q1 2000 risk summary",
+            "total_aum": 212670.50,
+            "open_orders": 7,
+            "flag": "FLAG{tf_jwt_alg_none_bypassed}",
+        })

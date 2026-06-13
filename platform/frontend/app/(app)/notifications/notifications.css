@@ -1,0 +1,21 @@
+/* page.tsx */
+
+.page { padding: 1.5rem; max-width: 680px; }
+        .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem; gap: 1rem; }
+        .page-title { font-size: 1.125rem; display: flex; align-items: center; }
+        .page-sub { font-size: 0.75rem; color: var(--g-text-muted); margin-top: 0.2rem; }
+
+        .empty-state { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 2.5rem; text-align: center; }
+
+        .notif-list { }
+        .notif-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.875rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.04); cursor: default; transition: background 0.15s; position: relative; }
+        .notif-row--unread { background: var(--g-elevated); cursor: pointer; }
+        .notif-row--unread:hover { background: var(--g-surface-hover); }
+        .notif-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--g-accent); flex-shrink: 0; margin-top: 0.3rem; }
+        .notif-content { flex: 1; min-width: 0; }
+        .notif-title { font-size: 0.8125rem; font-weight: 500; color: var(--g-text); }
+        .notif-body { font-size: 0.75rem; color: var(--g-text-secondary); line-height: 1.5; margin-top: 0.2rem; }
+        .notif-time { font-size: 0.5625rem; color: var(--g-text-muted); white-space: nowrap; margin-top: 0.15rem; flex-shrink: 0; }
+        .text-muted { color: var(--g-text-muted); }
+        .text-sm { font-size: 0.75rem; }
+        .font-mono { font-family: var(--font-mono, monospace); }

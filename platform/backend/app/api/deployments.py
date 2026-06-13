@@ -1,0 +1,312 @@
+from datetime import datetime, timedelta, timezone
+from typing import Optional
+
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, WebSocket, WebSocketDisconnect
+from sqlalchemy.orm import Session
+
+from app.api.deps import get_current_user_or_api_key, get_current_user_from_query, get_db
+from app.core.exceptions import bad_request, conflict, forbidden_exception, not_found
+from app.core.permissions import can_destroy_deployment, can_view_logs
+from app.models.challenge import Challenge
+from app.models.deployment import Deployment, DeploymentStatus
+from app.models.lab_template import LabTemplate
+from app.models.team import Team, TeamMember
+from app.models.user import User
+from app.schemas.deployment import DeploymentCreate, DeploymentResponse, DeploymentWithTemplate
+from app.services import audit_service, lab_service
+from app.services.docker_runtime import docker_service
+
+router = APIRouter(prefix="/deployments", tags=["deployments"])
+
+
+def _get_membership(db: Session, user: User, team_id: Optional[int]) -> Optional[TeamMember]:
+    if team_id is None:
+        return None
+    return (
+        db.query(TeamMember)
+        .filter(TeamMember.team_id == team_id, TeamMember.user_id == user.id)
+        .first()
+    )
+
+
+def _to_response(d: Deployment, db: Session) -> DeploymentWithTemplate:
+    template = db.get(LabTemplate, d.lab_template_id)
+    user = db.get(User, d.started_by_id)
+    team = db.get(Team, d.team_id) if d.team_id else None
+    base = DeploymentResponse.model_validate(d).model_dump()
+    return DeploymentWithTemplate(
+        **base,
+        lab_name=template.name if template else "Unknown",
+        lab_slug=template.slug if template else "",
+        lab_category=template.category if template else "",
+        started_by_username=user.username if user else "unknown",
+        team_name=team.name if team else None,
+    )
+
+
+def _visible_to_user(d: Deployment, user: User, db: Session) -> bool:
+    """True if `user` should be able to see this deployment."""
+    if user.is_superuser or user.is_admin:
+        return True
+    if d.started_by_id == user.id:
+        return True
+    if d.visibility.value == "public":
+        return True
+    if d.team_id and d.visibility.value == "team":
+        member = _get_membership(db, user, d.team_id)
+        return member is not None
+    return False
+
+
+@router.get("/", response_model=list[DeploymentWithTemplate])
+def list_deployments(
+    status: Optional[str] = Query(None),
+    team_id: Optional[int] = Query(None),
+    limit: int = Query(50, le=200),
+    offset: int = Query(0, ge=0),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_or_api_key),
+) -> list[DeploymentWithTemplate]:
+    q = db.query(Deployment)
+
+    if not (current_user.is_superuser or current_user.is_admin):
+        # Collect all team IDs the user belongs to
+        member_team_ids = [
+            m.team_id
+            for m in db.query(TeamMember).filter(TeamMember.user_id == current_user.id).all()
+        ]
+        from sqlalchemy import or_
+        q = q.filter(
+            or_(
+                Deployment.started_by_id == current_user.id,
+                Deployment.visibility == "public",
+                (Deployment.team_id.in_(member_team_ids) if member_team_ids else False),
+            )
+        )
+
+    if status:
+        q = q.filter(Deployment.status == status)
+    if team_id is not None:
+        q = q.filter(Deployment.team_id == team_id)
+
+    deployments = q.order_by(Deployment.created_at.desc()).offset(offset).limit(limit).all()
+    return [_to_response(d, db) for d in deployments]
+
+
+@router.get("/instance", response_model=Optional[DeploymentWithTemplate])
+def get_my_instance(
+    challenge_id: int = Query(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_or_api_key),
+) -> Optional[DeploymentWithTemplate]:
+    """Return the caller's active instance for a challenge, or null."""
+    d = (
+        db.query(Deployment)
+        .filter(
+            Deployment.challenge_id == challenge_id,
+            Deployment.instance_for_user_id == current_user.id,
+            Deployment.status.in_([DeploymentStatus.STARTING, DeploymentStatus.RUNNING]),
+        )
+        .first()
+    )
+    if d is None:
+        return None
+    return _to_response(d, db)
+
+
+@router.get("/{deployment_id}", response_model=DeploymentWithTemplate)
+def get_deployment(
+    deployment_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_or_api_key),
+) -> DeploymentWithTemplate:
+    d = db.get(Deployment, deployment_id)
+    if d is None:
+        raise not_found("Deployment")
+    if not _visible_to_user(d, current_user, db):
+        raise not_found("Deployment")  # don't leak existence
+    return _to_response(d, db)
+
+
+@router.post("/", response_model=DeploymentWithTemplate, status_code=202)
+def create_deployment(
+    payload: DeploymentCreate,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_or_api_key),
+) -> DeploymentWithTemplate:
+    # Resolve lab template id — challenge_id takes precedence when provided
+    lab_template_id = payload.lab_template_id
+    challenge_id = payload.challenge_id
+    instance_for_user_id = None
+    auto_destroy_at = None
+
+    if challenge_id is not None:
+        ch = db.get(Challenge, challenge_id)
+        if ch is None:
+            raise not_found("Challenge")
+        lab_template_id = ch.lab_template_id
+        if lab_template_id is None:
+            raise bad_request("Challenge has no associated lab template")
+        instance_for_user_id = current_user.id
+        auto_destroy_at = datetime.now(timezone.utc) + timedelta(hours=max(1, min(8, payload.ttl_hours)))
+
+    template = db.get(LabTemplate, lab_template_id)
+    if template is None:
+        raise not_found("Lab template")
+
+    # Verify team membership when deploying to a team
+    if payload.team_id is not None:
+        team = db.get(Team, payload.team_id)
+        if team is None:
+            raise not_found("Team")
+        membership = _get_membership(db, current_user, payload.team_id)
+        if membership is None and not (current_user.is_superuser or current_user.is_admin):
+            raise forbidden_exception
+
+    # Conflict check — per-user when challenge_id is set, global otherwise
+    if challenge_id is not None:
+        existing = (
+            db.query(Deployment)
+            .filter(
+                Deployment.challenge_id == challenge_id,
+                Deployment.instance_for_user_id == current_user.id,
+                Deployment.status.in_([DeploymentStatus.STARTING, DeploymentStatus.RUNNING]),
+            )
+            .first()
+        )
+        if existing is not None:
+            raise conflict(f"You already have an active instance for this challenge (id={existing.id})")
+    else:
+        existing = lab_service.get_active_deployment(db, template.id)
+        if existing is not None:
+            raise conflict(f"Lab '{template.name}' already has an active deployment (id={existing.id})")
+
+    deployment = Deployment(
+        lab_template_id=template.id,
+        started_by_id=current_user.id,
+        team_id=payload.team_id,
+        challenge_id=challenge_id,
+        instance_for_user_id=instance_for_user_id,
+        auto_destroy_at=auto_destroy_at,
+        status=DeploymentStatus.STARTING,
+        visibility=payload.visibility,
+        container_names=template.container_names,
+    )
+    db.add(deployment)
+    db.commit()
+    db.refresh(deployment)
+
+    background_tasks.add_task(lab_service.start_lab, deployment.id, current_user.id)
+    return _to_response(deployment, db)
+
+
+@router.delete("/{deployment_id}", response_model=DeploymentWithTemplate, status_code=202)
+def destroy_deployment(
+    deployment_id: int,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_or_api_key),
+) -> DeploymentWithTemplate:
+    d = db.get(Deployment, deployment_id)
+    if d is None:
+        raise not_found("Deployment")
+
+    membership = _get_membership(db, current_user, d.team_id)
+    if not can_destroy_deployment(current_user, d, membership):
+        raise forbidden_exception
+
+    if d.status not in (DeploymentStatus.RUNNING, DeploymentStatus.ERROR):
+        raise bad_request(f"Deployment is {d.status.value} — can only stop running or errored deployments")
+
+    d.status = DeploymentStatus.STOPPING
+    db.commit()
+
+    background_tasks.add_task(lab_service.stop_lab, deployment_id, current_user.id)
+    return _to_response(d, db)
+
+
+@router.patch("/{deployment_id}/visibility", response_model=DeploymentWithTemplate)
+def set_visibility(
+    deployment_id: int,
+    visibility: str = Query(..., regex="^(private|team|public)$"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_or_api_key),
+) -> DeploymentWithTemplate:
+    from app.models.deployment import DeploymentVisibility
+    d = db.get(Deployment, deployment_id)
+    if d is None:
+        raise not_found("Deployment")
+    membership = _get_membership(db, current_user, d.team_id)
+    if not can_destroy_deployment(current_user, d, membership):  # same permission as mutate
+        raise forbidden_exception
+    d.visibility = DeploymentVisibility(visibility)
+    db.commit()
+    return _to_response(d, db)
+
+
+@router.post("/{deployment_id}/reset", response_model=DeploymentWithTemplate, status_code=202)
+def reset_deployment(
+    deployment_id: int,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_or_api_key),
+) -> DeploymentWithTemplate:
+    d = db.get(Deployment, deployment_id)
+    if d is None:
+        raise not_found("Deployment")
+
+    membership = _get_membership(db, current_user, d.team_id)
+    if not can_destroy_deployment(current_user, d, membership):
+        raise forbidden_exception
+
+    template = db.get(LabTemplate, d.lab_template_id)
+    if template is None or template.category != "firerange":
+        raise bad_request("Reset is only available for fire-range labs")
+
+    background_tasks.add_task(lab_service.reset_lab, deployment_id, current_user.id)
+    return _to_response(d, db)
+
+
+@router.websocket("/{deployment_id}/logs")
+async def stream_logs(
+    websocket: WebSocket,
+    deployment_id: int,
+    container: str = Query("app", description="Container role to stream logs from"),
+    tail: int = Query(100, ge=1, le=2000),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_query),
+) -> None:
+    d = db.get(Deployment, deployment_id)
+    if d is None:
+        await websocket.close(code=4004)
+        return
+
+    membership = _get_membership(db, current_user, d.team_id)
+    if not can_view_logs(current_user, d, membership):
+        await websocket.close(code=4003)
+        return
+
+    template = db.get(LabTemplate, d.lab_template_id)
+    container_name = _resolve_container_name(d, template, container)
+
+    await websocket.accept()
+    try:
+        async for line in docker_service.stream_logs(container_name, tail=tail):
+            await websocket.send_text(line)
+    except WebSocketDisconnect:
+        pass
+    finally:
+        await websocket.close()
+
+
+def _resolve_container_name(deployment: Deployment, template: Optional[LabTemplate], role: str) -> str:
+    if template is None:
+        return deployment.container_names[0]
+    names = template.container_names
+    if len(names) == 1:
+        return names[0]
+    for name in names:
+        if name.endswith(f"-{role}"):
+            return name
+    return names[0]

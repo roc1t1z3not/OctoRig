@@ -12,6 +12,7 @@ trap 'echo ""; info "Caught interrupt — exiting OctoRig."; exit 0' INT
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LABS_DIR="${SCRIPT_DIR}/labs"
+PLATFORM_DIR="${SCRIPT_DIR}/platform"
 
 # ---------------- colours / output helpers -----------------------------------
 RED='\033[0;31m'
@@ -68,8 +69,7 @@ LABS=(
   "14|DVWA|dvwa.sh|Damn Vulnerable Web App - PHP/MySQL classic"
   "15|Metasploitable2|metasploitable.sh|Linux VM with intentionally vulnerable services"
   "16|WebGoat|webgoat.sh|OWASP WebGoat - PortSwigger-style lesson-based labs"
-  "17|HTB Style|htb_style.sh|HackTheBox-style CTFd platform + vulnerable challenge"
-  "18|VulnAD|vulnad.sh|Vulnerable Active Directory - Samba4 AD with AD attack paths"
+  "17|VulnAD|vulnad.sh|Vulnerable Active Directory - Samba4 AD with AD attack paths"
 )
 
 # IDs of real-world scenario labs (for "start world")
@@ -284,6 +284,111 @@ start_world() {
   fi
 }
 
+# ---------------- platform (docker compose) -----------------------------------
+_dc() {
+  docker compose -f "${PLATFORM_DIR}/docker-compose.yml" --project-directory "${PLATFORM_DIR}" "$@"
+}
+
+_platform_env_check() {
+  if [[ ! -f "${PLATFORM_DIR}/.env" ]]; then
+    warn "No .env found in platform/. Copying .env.example — edit it before going to production."
+    cp "${PLATFORM_DIR}/.env.example" "${PLATFORM_DIR}/.env"
+  fi
+}
+
+platform_action() {
+  local subcmd="${1:-help}"
+  local extra="${2:-}"
+
+  case "$subcmd" in
+    start)
+      _platform_env_check
+      check_docker
+      if [[ "$extra" == "dev" ]]; then
+        header "Starting platform (API + workers + frontend dev)..."
+        _dc --profile dev up -d --build
+      else
+        header "Starting platform (API + workers)..."
+        _dc up -d --build
+      fi
+      echo ""
+      # Wait for the API to be reachable
+      info "Waiting for API to be ready..."
+      local deadline=$(( $(date +%s) + 60 ))
+      while (( $(date +%s) < deadline )); do
+        if curl -sf http://localhost:8000/api/v1/system/health &>/dev/null; then
+          break
+        fi
+        sleep 2
+      done
+      echo ""
+      good "Platform is up"
+      echo ""
+      echo -e "  ${BOLD}Dashboard${RESET}  →  ${GREEN}http://localhost:3000${RESET}"
+      echo -e "  ${BOLD}API docs${RESET}   →  ${GREEN}http://localhost:8000/docs${RESET}"
+      echo ""
+      ;;
+    stop)
+      header "Stopping platform..."
+      _dc --profile dev down
+      good "Platform stopped (data volumes preserved)"
+      ;;
+    restart)
+      header "Restarting platform..."
+      _dc --profile dev down
+      _platform_env_check
+      if [[ "$extra" == "dev" ]]; then
+        _dc --profile dev up -d --build
+      else
+        _dc up -d --build
+      fi
+      good "Platform restarted"
+      ;;
+    wipe)
+      warn "This will DELETE all platform data (database, caches). Type 'yes' to confirm:"
+      read -r confirm
+      if [[ "$confirm" != "yes" ]]; then
+        info "Aborted."
+        return
+      fi
+      header "Wiping platform..."
+      _dc --profile dev down -v
+      good "Platform stopped and volumes removed"
+      ;;
+    status)
+      header "Platform Service Status"
+      echo ""
+      _dc ps 2>/dev/null || info "Platform is not running."
+      echo ""
+      ;;
+    logs)
+      local svc="${extra:-}"
+      if [[ -n "$svc" ]]; then
+        _dc logs -f --tail=100 "$svc"
+      else
+        _dc logs -f --tail=50
+      fi
+      ;;
+    import)
+      info "Running fire-range challenge import..."
+      _dc exec backend python scripts/import_firerange_challenges.py "${extra}"
+      ;;
+    help|*)
+      echo ""
+      echo -e "  ${BOLD}platform commands:${RESET}"
+      echo -e "  ${GREEN}platform start${RESET}          — Start API + workers"
+      echo -e "  ${GREEN}platform start dev${RESET}      — Start API + workers + frontend dev server"
+      echo -e "  ${GREEN}platform stop${RESET}           — Stop all platform services"
+      echo -e "  ${GREEN}platform restart${RESET}        — Rebuild and restart platform"
+      echo -e "  ${GREEN}platform wipe${RESET}           — Stop and delete all data volumes"
+      echo -e "  ${GREEN}platform status${RESET}         — Show platform container status"
+      echo -e "  ${GREEN}platform logs [service]${RESET} — Tail platform logs"
+      echo -e "  ${GREEN}platform import${RESET}         — Import fire-range challenges into platform DB"
+      echo ""
+      ;;
+  esac
+}
+
 # ---------------- interactive menu --------------------------------------------
 interactive_menu() {
   list_labs
@@ -297,12 +402,13 @@ interactive_menu() {
   echo -e "  ${GREEN}stop all${RESET}       — Stop all labs"
   echo -e "  ${GREEN}restart all${RESET}    — Restart all labs"
   echo -e "  ${GREEN}list${RESET}           — List available labs"
+  echo -e "  ${GREEN}platform <cmd>${RESET} — Manage the OctoRig training platform (start|stop|status|logs|wipe|import)"
   echo -e "  ${GREEN}quit${RESET}           — Exit"
   echo ""
 
   while true; do
     echo -ne "  ${BOLD}lab>${RESET} "
-    read -r cmd arg1 || break
+    read -r cmd arg1 arg2 || break
     case "$cmd" in
       start)
         check_docker
@@ -316,6 +422,7 @@ interactive_menu() {
         check_docker
         if [[ "${arg1:-}" == "all" ]]; then all_action stop; all_action start
         else dispatch stop "${arg1:-}"; dispatch start "${arg1:-}"; fi ;;
+      platform) platform_action "${arg1:-help}" "${arg2:-}" ;;
       status) status_all ;;
       list)   list_labs ;;
       quit|exit|q) info "Bye!"; exit 0 ;;
@@ -350,12 +457,14 @@ case "${1:-menu}" in
     check_docker
     if [[ "${2:-}" == "all" ]]; then all_action stop; all_action start
     else dispatch stop "${2:-}"; dispatch start "${2:-}"; fi ;;
+  platform)
+    platform_action "${2:-help}" "${3:-}" ;;
   help|-h|--help)
     list_labs
-    echo "Usage: $0 [menu|list|status|start <id|name|all|world>|stop <id|name|all>|restart <id|name|all>]"
+    echo "Usage: $0 [menu|list|status|start <id|name|all|world>|stop <id|name|all>|restart <id|name|all>|platform <cmd>]"
     echo "" ;;
   *)
     bad "Unknown command: ${1}"
-    echo "Usage: $0 [menu|list|status|start <id|name|all|world>|stop <id|name|all>|restart <id|name|all>]"
+    echo "Usage: $0 [menu|list|status|start <id|name|all|world>|stop <id|name|all>|restart <id|name|all>|platform <cmd>]"
     exit 1 ;;
 esac

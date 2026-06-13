@@ -1,0 +1,108 @@
+import { apiClient } from "./client";
+
+export type ChallengeDifficulty = "easy" | "medium" | "hard" | "insane";
+export type ChallengeType =
+  | "flag" | "mcq" | "short_answer" | "file_upload"
+  | "dynamic_flag" | "api" | "web" | "container";
+
+export interface HintSummary {
+  id: number;
+  order_num: number;
+  cost: number;
+  content: string | null;
+  unlocked: boolean;
+}
+
+export interface ChallengeListItem {
+  id: number;
+  slug: string;
+  title: string;
+  difficulty: ChallengeDifficulty;
+  category: string;
+  tags: string[];
+  points: number;
+  challenge_type: ChallengeType;
+  estimated_minutes: number | null;
+  solve_count: number;
+  solved_by_me: boolean;
+}
+
+export interface ChallengeDetail extends ChallengeListItem {
+  description: string;
+  skills: string[];
+  content: Record<string, unknown>;
+  hints: HintSummary[];
+  files: Array<{ id: number; filename: string; size_bytes: number }>;
+  version: number;
+}
+
+export interface FlagSubmitResult {
+  correct: boolean;
+  already_solved: boolean;
+  first_blood: boolean;
+  points_awarded: number;
+  message: string;
+}
+
+export interface HintUnlockResult {
+  hint_id: number;
+  content: string;
+  cost: number;
+}
+
+export interface ScoreboardEntry {
+  rank: number;
+  user_id: number | null;
+  team_id: number | null;
+  total: number;
+  last_tx: string | null;
+}
+
+export async function getChallenges(params?: {
+  category?: string;
+  difficulty?: string;
+  search?: string;
+  tag?: string;
+}): Promise<ChallengeListItem[]> {
+  const { data } = await apiClient.get<ChallengeListItem[]>("/challenges/", {
+    params,
+  });
+  return data;
+}
+
+export async function getChallenge(slug: string): Promise<ChallengeDetail> {
+  const { data } = await apiClient.get<ChallengeDetail>(`/challenges/${slug}`);
+  return data;
+}
+
+export async function submitFlag(
+  slug: string,
+  flag: string,
+  event_id?: number
+): Promise<FlagSubmitResult> {
+  const { data } = await apiClient.post<FlagSubmitResult>(
+    `/challenges/${slug}/submit`,
+    { flag, event_id: event_id ?? null }
+  );
+  return data;
+}
+
+export async function unlockHint(
+  slug: string,
+  hintId: number
+): Promise<HintUnlockResult> {
+  const { data } = await apiClient.post<HintUnlockResult>(
+    `/challenges/${slug}/hints/${hintId}/unlock`
+  );
+  return data;
+}
+
+export async function getGlobalScoreboard(
+  limit = 100
+): Promise<ScoreboardEntry[]> {
+  const { data } = await apiClient.get<ScoreboardEntry[]>(
+    "/scoreboards/global",
+    { params: { limit } }
+  );
+  return data;
+}

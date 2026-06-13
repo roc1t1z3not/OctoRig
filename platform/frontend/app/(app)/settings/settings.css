@@ -1,0 +1,65 @@
+/* page.tsx */
+
+.page { padding: 1.5rem; }
+        .page-title { font-size: 1.125rem; margin-bottom: 1.25rem; }
+        .settings-layout { display: grid; grid-template-columns: 180px 1fr; gap: 1rem; align-items: start; }
+        .settings-nav { display: flex; flex-direction: column; gap: 0.25rem; padding: 0.5rem; }
+        .settings-nav-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; border-radius: 4px; border: none; background: none; color: var(--g-text-secondary); cursor: pointer; font-size: 0.8125rem; text-align: left; transition: background 0.15s, color 0.15s; }
+        .settings-nav-item:hover { background: var(--g-raised); color: var(--g-text); }
+        .settings-nav-item.active { background: var(--g-accent-dim); color: var(--g-accent); }
+        .settings-content { padding: 1.25rem; }
+        .settings-section-title { font-size: 0.875rem; margin-bottom: 0.75rem; color: var(--g-text); }
+        .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+        .theme-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 0.75rem; border-radius: 6px; border: 1px solid var(--g-border); background: var(--g-raised); cursor: pointer; transition: border-color 0.15s; }
+        .theme-card:hover { border-color: var(--g-border-hover); }
+        .theme-card.active { border-color: var(--g-accent); }
+        .theme-swatches { display: flex; gap: 3px; }
+        .theme-swatch { width: 18px; height: 18px; border-radius: 50%; }
+        .theme-name { color: var(--g-text-secondary); }
+        .theme-active-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--g-accent); }
+        .meta-rows { display: flex; flex-direction: column; gap: 0.5rem; }
+        .admin-notice { display: flex; align-items: center; gap: 0.4rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        @media (max-width: 640px) { .settings-layout { grid-template-columns: 1fr; } .theme-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* Password change form */
+.settings-divider {
+  border: none;
+  border-top: 1px solid var(--g-border);
+  margin: 1.5rem 0;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  max-width: 360px;
+}
+
+.settings-field label {
+  font-size: 0.6875rem;
+  color: var(--g-text-muted);
+}
+
+.input-hint {
+  font-size: 0.625rem;
+  margin-top: 0.125rem;
+}
+
+.input-error {
+  border-color: var(--g-danger) !important;
+}
+
+.pw-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}

@@ -1,0 +1,59 @@
+/* Admin pages */
+
+.superadmin-badge {
+  background: var(--g-accent);
+  color: var(--g-bg);
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+}
+
+.stat-icon {
+  color: var(--g-accent);
+  margin-bottom: 0.25rem;
+}
+
+.stat-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.stat-label {
+  color: var(--g-text-muted);
+}
+
+/* User management */
+.role-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.role-pill--on {
+  background: color-mix(in srgb, var(--g-accent) 15%, transparent);
+  color: var(--g-accent);
+}
+
+.role-pill--off {
+  background: color-mix(in srgb, var(--g-text-muted) 10%, transparent);
+  color: var(--g-text-muted);
+}
+
+.user-panel {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .user-panel { grid-template-columns: 1fr; }
+}

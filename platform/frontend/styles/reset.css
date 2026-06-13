@@ -1,0 +1,79 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* Copyright (c) 2026 CommonHuman-Lab */
+
+/* Modern CSS reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0 solid transparent;
+}
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+}
+
+body {
+  line-height: inherit;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+b, strong { font-weight: bolder; }
+
+img, svg, video, canvas, audio, iframe, embed, object {
+  display: block;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+button, input, optgroup, select, textarea {
+  font-family: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+  background: transparent;
+}
+
+button, select { text-transform: none; }
+
+button, [role="button"] { cursor: pointer; }
+
+button:disabled { cursor: default; pointer-events: none; }
+
+:-moz-focusring { outline: auto; }
+:-moz-ui-invalid { box-shadow: none; }
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+pre, code, kbd, samp {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 1em;
+}
+
+ol, ul { list-style: none; }
+
+fieldset { padding: 0; }
+
+summary { display: list-item; }
+
+[hidden] { display: none; }

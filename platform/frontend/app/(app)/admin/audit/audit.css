@@ -1,0 +1,26 @@
+/* page.tsx */
+
+.page { padding: 1.5rem; }
+        .page-header { margin-bottom: 1rem; }
+        .page-title { font-size: 1.125rem; }
+        .filter-bar { padding: 0.875rem; margin-bottom: 0.875rem; display: flex; flex-direction: column; gap: 0.75rem; }
+        .filter-group { display: flex; flex-direction: column; gap: 0.375rem; }
+        .action-pills { display: flex; gap: 0.375rem; flex-wrap: wrap; }
+        .action-pill { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.6875rem; border: 1px solid var(--g-border); background: var(--g-raised); color: var(--g-text-muted); cursor: pointer; }
+        .action-pill:hover { border-color: var(--g-accent); color: var(--g-accent); }
+        .action-pill--active { border-color: var(--g-accent); background: var(--g-accent-dim); color: var(--g-accent); }
+        .filter-row { display: flex; gap: 0.5rem; align-items: flex-end; flex-wrap: wrap; }
+        .filter-field { display: flex; flex-direction: column; gap: 0.25rem; }
+        .self-end { align-self: flex-end; }
+        .log-panel { overflow-x: auto; }
+        .loading-cell, .empty-cell { padding: 1.5rem; }
+        .nowrap { white-space: nowrap; }
+        .detail-cell { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .action-badge { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.625rem; font-family: monospace; border: 1px solid; }
+        .badge--auth     { color: var(--g-accent); border-color: var(--g-accent); background: var(--g-accent-dim); }
+        .badge--team     { color: var(--g-success); border-color: var(--g-success); background: color-mix(in srgb, var(--g-success) 12%, transparent); }
+        .badge--lab      { color: var(--g-warning); border-color: var(--g-warning); background: color-mix(in srgb, var(--g-warning) 12%, transparent); }
+        .badge--key      { color: #c084fc; border-color: #c084fc; background: color-mix(in srgb, #c084fc 12%, transparent); }
+        .badge--admin    { color: var(--g-danger); border-color: var(--g-danger); background: color-mix(in srgb, var(--g-danger) 12%, transparent); }
+        .badge--schedule { color: var(--g-text-secondary); border-color: var(--g-border); background: var(--g-raised); }
+        .pagination { display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 0.75rem; border-top: 1px solid var(--g-border); }

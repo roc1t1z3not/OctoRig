@@ -104,6 +104,12 @@ CREATE TABLE IF NOT EXISTS messages (
     read    INTEGER DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS _flags (
+    id    INTEGER PRIMARY KEY,
+    name  TEXT UNIQUE NOT NULL,
+    value TEXT NOT NULL
+);
+
 INSERT OR IGNORE INTO users VALUES
   (1,'admin','123456789','admin@rewind.local','Admin','User',1,'1 Static Lane, Hollywood CA','555-0100',250.00),
   (2,'alice','iloveyou','alice@example.com','Alice','Hendricks',0,'42 Oak Street, Portland OR','555-0101',100.00),
@@ -289,7 +295,7 @@ INSERT OR IGNORE INTO board_replies VALUES
   (12,5,1,'Apologies for the delay — there have been carrier issues in some regions this week. Should resolve by Friday.','2026-05-20');
 
 INSERT OR IGNORE INTO messages VALUES
-  (1,1,2,'Welcome to Rewind Range','Hi Alice, thanks for joining. Let us know if you have any questions about your orders or anything in the collection.','2026-04-29',1),
+  (1,1,2,'Welcome to Rewind Range','Hi Alice, thanks for joining. Let us know if you have any questions about your orders or anything in the collection. FLAG{rw_idor_inbox_read}','2026-04-29',1),
   (2,2,3,'Seen the new arrivals?','Bob, did you check the new SNES stock that came in this week? Some real gems in there.','2026-05-11',1),
   (3,3,4,'Your review helped me decide','Carol, I bought Blade Runner after reading your review. You were absolutely right — the print quality is exceptional.','2026-05-08',1),
   (4,4,2,'Delivery question','Alice, did your last order arrive okay? Mine is showing as delivered but nothing has turned up.','2026-05-17',0),
@@ -297,6 +303,10 @@ INSERT OR IGNORE INTO messages VALUES
   (6,7,8,'WarGames copy','Dave, the copy I got from here is in excellent shape. Worth grabbing if they restock.','2026-05-19',0),
   (7,1,3,'Order #11 update','Hi Bob, your order has been dispatched and should arrive within two to three working days.','2026-05-15',1),
   (8,8,6,'GoldenEye session','Marcus, we need to arrange a four-player GoldenEye night. I have the TV, the N64, and four controllers.','2026-05-21',0);
+
+INSERT OR IGNORE INTO _flags VALUES
+  (1,'sqli-union',       'FLAG{rw_union_select_from_flags}'),
+  (2,'rental-idor',      'FLAG{rw_api_idor_rentals}');
 """
 
 

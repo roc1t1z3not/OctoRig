@@ -8,6 +8,7 @@ import routes.account, routes.api, routes.admin, routes.expanded
 
 app = Flask(__name__)
 app.secret_key = 'limelight-xK9mPq3'
+app.config['SSTI_FLAG'] = 'FLAG{ll_ssti_template_exec}'
 app.teardown_appcontext(close_db)
 app.jinja_env.globals.update(current_user=current_user)
 

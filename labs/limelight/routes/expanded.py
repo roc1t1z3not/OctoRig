@@ -136,7 +136,13 @@ def init(app):
     def projection_booth():
         if not session.get("user_id"):
             return jsonify({"error": "unauthorized"}), 401
-        return jsonify({"status": "online", "screen": "A", "admin": True, "role": "admin"})
+        return jsonify({
+            "status": "online",
+            "screen": "A",
+            "admin": True,
+            "role": "admin",
+            "flag": "FLAG{ll_robots_revealed}",
+        })
 
     # ── /gift-card-admin — no auth: exposes gift card codes ──────────────────
 
@@ -145,4 +151,24 @@ def init(app):
         rows = get_db().execute(
             "SELECT id, code, balance, redeemed_by FROM gift_cards"
         ).fetchall()
-        return jsonify({"cards": [dict(r) for r in rows], "admin": True})
+        return jsonify({
+            "cards": [dict(r) for r in rows],
+            "admin": True,
+            "flag": "FLAG{ll_gift_admin_no_auth}",
+        })
+
+    # ── /api/v1/admin/secret — requires DB is_admin=1 (mass-assignment target) ─
+
+    @app.route("/api/v1/admin/secret")
+    def api_v1_admin_secret():
+        if not session.get("user_id"):
+            return jsonify({"error": "unauthorized"}), 401
+        user = get_db().execute(
+            "SELECT is_admin FROM users WHERE id = ?", (session["user_id"],)
+        ).fetchone()
+        if not user or not user["is_admin"]:
+            return jsonify({"error": "forbidden — you are not an admin"}), 403
+        return jsonify({
+            "message": "Welcome, administrator.",
+            "flag": "FLAG{ll_mass_assign_privesc}",
+        })

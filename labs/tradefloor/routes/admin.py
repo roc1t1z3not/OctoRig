@@ -47,7 +47,14 @@ def init(app):
             "JOIN market_data m ON h.symbol = m.symbol WHERE h.user_id = ?",
             (user_id,)
         ).fetchall()
-        return render_template('admin_user.html', profile=user, orders=orders, holdings=holdings)
+        base = render_template('admin_user.html', profile=user, orders=orders, holdings=holdings)
+        banner = (
+            '<div style="background:#0b0f1a;color:#3b82f6;font-family:monospace;'
+            'padding:.5rem 1rem;border-bottom:1px solid #1f2d45;">'
+            '&#x1F3C6; Broken access control confirmed &mdash; '
+            '<code>FLAG{tf_bac_admin_user_detail}</code></div>'
+        )
+        return banner + base
 
     @app.route('/admin/corporate_action', methods=['POST'])
     def admin_corporate_action():

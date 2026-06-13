@@ -163,7 +163,7 @@ INSERT OR IGNORE INTO orders VALUES
   (23,7,'NOVA','buy', 100,'market',19.00,'filled','1999-11-05',''),
   (24,7,'PCFW','buy',  80,'market',14.00,'filled','1999-11-18',''),
   (25,7,'SLVR','sell', 50,'limit', 24.00,'open',  '2000-01-20',''),
-  (26,1,'ACME','buy', 500,'market',30.00,'filled','1999-06-01',''),
+  (26,1,'ACME','buy', 500,'market',30.00,'filled','1999-06-01','FLAG{tf_idor_order_memo}'),
   (27,1,'ZTRX','buy', 100,'market',60.00,'filled','1999-07-15',''),
   (28,1,'GMBT','buy', 200,'market',44.00,'filled','1999-08-01',''),
   (29,1,'ZTRX','sell', 50,'limit',100.00,'open',  '2000-01-18','');
@@ -185,6 +185,17 @@ INSERT OR IGNORE INTO filings VALUES
   (5,'GMBT','Regulatory Filing — Form 10-K','Gambit Financial annual report for fiscal year 1999. Net income $88.4M, total assets $4.2B. Full report available upon request from the Investor Relations department.','Finance','2000-01-25'),
   (6,'ACME','Patent Grant — Distributed Processing Architecture','The US Patent and Trademark Office has granted Acme Corporation patent number 6,140,892 covering our proprietary distributed processing architecture. This patent strengthens our IP portfolio and provides competitive protection for our core product lines.','Technology','2000-01-28'),
   (7,'CMNH','Initial Public Offering — CommonHuman Labs','CommonHuman Labs is not a company. CommonHuman Labs is a question. We are filing this document in accordance with applicable regulations, but we offer no further guidance on what we do, what we make, or what we are. Sector: Experimental. Handle with care.','Experimental','2026-05-22');
+
+CREATE TABLE IF NOT EXISTS _flags (
+    id    INTEGER PRIMARY KEY,
+    name  TEXT UNIQUE NOT NULL,
+    value TEXT NOT NULL
+);
+
+INSERT OR IGNORE INTO _flags VALUES
+  (1, 'sqli-market',   'FLAG{tf_union_select_from_flags}'),
+  (2, 'sqli-api',      'FLAG{tf_api_token_injected}'),
+  (3, 'sqli-creds',    'FLAG{tf_users_table_dumped}');
 
 INSERT OR IGNORE INTO alerts VALUES
   (1, 2,'ACME above $45',    'ACME','above',45.00,1,'2000-01-05'),

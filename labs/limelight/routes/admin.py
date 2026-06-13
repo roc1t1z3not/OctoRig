@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2026 CommonHuman-Lab
-from flask import request, render_template, render_template_string, session, redirect, url_for
+from flask import make_response, request, render_template, render_template_string, session, redirect, url_for
 from db import get_db
 
 
@@ -22,7 +22,14 @@ def init(app):
             " ORDER BY b.id DESC LIMIT 50"
         ).fetchall()
         movies   = db.execute("SELECT * FROM movies ORDER BY id").fetchall()
-        return render_template('admin.html', users=users, bookings=bookings, movies=movies)
+        html = render_template('admin.html', users=users, bookings=bookings, movies=movies)
+        banner = (
+            '<div style="background:#0b0f1a;color:#3b82f6;font-family:monospace;'
+            'font-size:0.75rem;padding:0.5rem 1rem;border-bottom:1px solid #1e3a5f;">'
+            '&#x1F3C6; Broken access control confirmed &mdash; '
+            '<code>FLAG{ll_bac_admin_access}</code></div>'
+        )
+        return make_response(banner + html)
 
     @app.route('/admin/movie/toggle/<int:movie_id>', methods=['POST'])
     def admin_toggle_movie(movie_id):

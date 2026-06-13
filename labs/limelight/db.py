@@ -64,6 +64,16 @@ CREATE TABLE IF NOT EXISTS gift_cards (
     redeemed_by INTEGER DEFAULT NULL
 );
 
+CREATE TABLE IF NOT EXISTS _flags (
+    id    INTEGER PRIMARY KEY,
+    name  TEXT UNIQUE NOT NULL,
+    value TEXT NOT NULL
+);
+INSERT OR IGNORE INTO _flags VALUES
+  (1, 'sqli-search',  'FLAG{ll_search_sqli_union}'),
+  (2, 'sqli-gift',    'FLAG{ll_gift_sqli_bypass}'),
+  (3, 'sqli-reviews', 'FLAG{ll_api_path_injection}');
+
 INSERT OR IGNORE INTO users VALUES
   (1,'admin','commonhuman-lab','admin@limelight.local','Cinema Admin',1,500.00,'2026-01-01 00:00:00'),
   (2,'john.doe','popcorn123','john@mail.example','John Doe',0,25.50,'2026-02-01 09:00:00'),
@@ -102,7 +112,7 @@ INSERT OR IGNORE INTO showings VALUES
   (18,6,'Hall 2','2026-05-25 18:00',12.00,120);
 
 INSERT OR IGNORE INTO bookings VALUES
-  (1,1,3, 'D7,D8',   24.00,'2026-05-22 10:00:00','LML-00001'),
+  (1,1,3, 'D7,D8',   24.00,'2026-05-22 10:00:00','FLAG{ll_idor_booking_leaked}'),
   (2,2,4, 'B5',       8.50,'2026-05-22 11:30:00','LML-00002'),
   (3,3,7, 'A1,A2,A3',25.50,'2026-05-23 09:15:00','LML-00003'),
   (4,4,12,'E1,E2',   24.00,'2026-05-23 14:00:00','LML-00004'),
