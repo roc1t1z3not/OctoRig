@@ -3,7 +3,7 @@ import "./challenges.css";
 
 import { useState } from "react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Search, CheckCircle2, Clock, Target } from "lucide-react";
 import { getChallenges, type ChallengeListItem, type ChallengeDifficulty } from "@/lib/api/challenges";
 import { getLabs, type LabTemplate } from "@/lib/api/labs";
@@ -15,6 +15,7 @@ const CATEGORIES = [
   { id: "idor", label: "IDOR" },
   { id: "web", label: "Web" },
   { id: "recon", label: "Recon" },
+  { id: "python", label: "Python" },
 ] as const;
 
 const DIFFICULTIES: { id: ChallengeDifficulty | undefined; label: string }[] = [
@@ -92,15 +93,15 @@ export default function ChallengesPage() {
   const [solvedFilter, setSolvedFilter] = useState<"all" | "solved" | "unsolved">("all");
   const [search, setSearch] = useState("");
 
-  const { data: challenges = [], isLoading } = useQuery({
+  const { data: challenges = [], isLoading, isFetching } = useQuery({
     queryKey: ["challenges", category, difficulty, search, labSlug],
     queryFn: () => getChallenges({
       category,
       difficulty,
       search: search || undefined,
-      lab_category: "world",
       lab_slug: labSlug || undefined,
     }),
+    placeholderData: keepPreviousData,
   });
 
   const { data: labs = [] } = useQuery<LabTemplate[]>({
@@ -112,6 +113,8 @@ export default function ChallengesPage() {
   const labsWithChallenges = labs.filter((l) => l.category === "world");
 
   const displayed = challenges.filter((c) => {
+    // Exclude firerange labs unless the user has pinned a specific lab
+    if (!labSlug && c.lab_category === "firerange") return false;
     if (solvedFilter === "solved") return c.solved_by_me;
     if (solvedFilter === "unsolved") return !c.solved_by_me;
     return true;
@@ -206,7 +209,7 @@ export default function ChallengesPage() {
         <div className="text-muted text-sm mt-4">Loading challenges…</div>
       ) : (
         <>
-          <div className="ch-grid mt-4">
+          <div className="ch-grid mt-4" style={{ opacity: isFetching ? 0.6 : 1, transition: "opacity 0.15s" }}>
             {displayed.map((ch) => (
               <ChallengeCard key={ch.id} ch={ch} />
             ))}

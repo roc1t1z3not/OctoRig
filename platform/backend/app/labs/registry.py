@@ -30,7 +30,7 @@ class ChallengeDef(TypedDict):
     slug: str
     title: str
     description: str
-    challenge_type: str     # "flag" | "web" | "container" etc.
+    challenge_type: str     # "flag" | "short_answer" | "web" | "container" etc.
     difficulty: str         # "easy" | "medium" | "hard" | "insane"
     category: str
     tags: list[str]
@@ -38,6 +38,7 @@ class ChallengeDef(TypedDict):
     points: int
     flags: list[FlagDef]
     hints: NotRequired[list[HintDef]]
+    content: NotRequired[dict]  # type-specific extra data (code_snippet, language, etc.)
 
 
 class LabDefinition(TypedDict):
@@ -1941,3 +1942,165 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
 
 REGISTRY_BY_SLUG: dict[str, LabDefinition] = {lab["slug"]: lab for lab in LAB_REGISTRY}
 REGISTRY_BY_ID: dict[int, LabDefinition] = {lab["id"]: lab for lab in LAB_REGISTRY}
+
+
+# ------------------------------------------------------------------ #
+# Standalone challenges — not tied to any lab/container               #
+# ------------------------------------------------------------------ #
+
+STANDALONE_CHALLENGES: list[ChallengeDef] = [
+    {
+        "slug": "py-reverse-gear",
+        "title": "Reverse Gear",
+        "description": "Something got flipped. Can you read it the right way?",
+        "challenge_type": "short_answer",
+        "difficulty": "easy",
+        "category": "python",
+        "tags": ["python", "strings"],
+        "skills": [],
+        "points": 50,
+        "content": {
+            "code_snippet": 'text = "OctoRig"\nprint(text[::-1])',
+            "language": "python",
+        },
+        "flags": [{"value": "giRotoO", "flag_type": "static", "case_sensitive": True}],
+        "hints": [
+            {"order_num": 1, "content": "Run it in a Python interpreter to verify.", "cost": 0},
+        ],
+    },
+    {
+        "slug": "py-sum-squares",
+        "title": "Sum of Squares",
+        "description": "Three integers, squared and summed. What's the total?",
+        "challenge_type": "short_answer",
+        "difficulty": "easy",
+        "category": "python",
+        "tags": ["python", "math"],
+        "skills": [],
+        "points": 50,
+        "content": {
+            "code_snippet": "result = sum(x**2 for x in range(1, 4))\nprint(result)",
+            "language": "python",
+        },
+        "flags": [{"value": "14", "flag_type": "static", "case_sensitive": False}],
+        "hints": [
+            {"order_num": 1, "content": "range(1, 4) produces the integers 1, 2, and 3.", "cost": 0},
+        ],
+    },
+    {
+        "slug": "py-bit-mask",
+        "title": "Bit Mask",
+        "description": "Two binary patterns overlap. What remains after the filter is applied?",
+        "challenge_type": "short_answer",
+        "difficulty": "easy",
+        "category": "python",
+        "tags": ["python", "bitwise"],
+        "skills": [],
+        "points": 75,
+        "content": {
+            "code_snippet": "x = 0b1010\ny = 0b1100\nprint(x & y)",
+            "language": "python",
+        },
+        "flags": [{"value": "8", "flag_type": "static", "case_sensitive": False}],
+        "hints": [
+            {"order_num": 1, "content": "The & operator keeps only bits that are 1 in both operands.", "cost": 0},
+            {"order_num": 2, "content": "0b1000 in decimal is 8.", "cost": 25},
+        ],
+    },
+    {
+        "slug": "py-last-in-line",
+        "title": "Last in Line",
+        "description": "The sequence is generated. Only the final element matters.",
+        "challenge_type": "short_answer",
+        "difficulty": "easy",
+        "category": "python",
+        "tags": ["python", "lists"],
+        "skills": [],
+        "points": 50,
+        "content": {
+            "code_snippet": "nums = [i * 3 for i in range(1, 6)]\nprint(nums[-1])",
+            "language": "python",
+        },
+        "flags": [{"value": "15", "flag_type": "static", "case_sensitive": False}],
+        "hints": [
+            {"order_num": 1, "content": "range(1, 6) produces five values. nums[-1] is the last one.", "cost": 0},
+        ],
+    },
+    {
+        "slug": "py-stripped",
+        "title": "Stripped",
+        "description": "Whitespace hides the truth. Remove it, then replace the gaps.",
+        "challenge_type": "short_answer",
+        "difficulty": "easy",
+        "category": "python",
+        "tags": ["python", "strings"],
+        "skills": [],
+        "points": 50,
+        "content": {
+            "code_snippet": 's = "  hello world  "\nprint(s.strip().replace(" ", "_"))',
+            "language": "python",
+        },
+        "flags": [{"value": "hello_world", "flag_type": "static", "case_sensitive": True}],
+        "hints": [
+            {"order_num": 1, "content": "strip() removes leading/trailing whitespace. replace() handles the rest.", "cost": 0},
+        ],
+    },
+    {
+        "slug": "py-letter-count",
+        "title": "Letter Count",
+        "description": "A letter repeats through the swamp. How many times?",
+        "challenge_type": "short_answer",
+        "difficulty": "easy",
+        "category": "python",
+        "tags": ["python", "strings"],
+        "skills": [],
+        "points": 50,
+        "content": {
+            "code_snippet": 'word = "mississippi"\nprint(word.count("s"))',
+            "language": "python",
+        },
+        "flags": [{"value": "4", "flag_type": "static", "case_sensitive": False}],
+        "hints": [
+            {"order_num": 1, "content": "Trace through: m-i-s-s-i-s-s-i-p-p-i", "cost": 0},
+        ],
+    },
+    {
+        "slug": "py-sorted-unique",
+        "title": "Sorted Unique",
+        "description": "Duplicates removed, sorted ascending. What sits at index 2?",
+        "challenge_type": "short_answer",
+        "difficulty": "easy",
+        "category": "python",
+        "tags": ["python", "lists", "sets"],
+        "skills": [],
+        "points": 75,
+        "content": {
+            "code_snippet": "nums = [3, 1, 4, 1, 5, 9, 2, 6]\nprint(sorted(set(nums))[2])",
+            "language": "python",
+        },
+        "flags": [{"value": "3", "flag_type": "static", "case_sensitive": False}],
+        "hints": [
+            {"order_num": 1, "content": "set() removes duplicates. sorted() returns them in ascending order. Indexing is zero-based.", "cost": 0},
+            {"order_num": 2, "content": "After dedup and sort: [1, 2, 3, 4, 5, 6, 9]. Index 2 is the third element.", "cost": 25},
+        ],
+    },
+    {
+        "slug": "py-chained-keys",
+        "title": "Chained Keys",
+        "description": "Three pairs, zipped into a map. Retrieve what was stored at the middle key.",
+        "challenge_type": "short_answer",
+        "difficulty": "easy",
+        "category": "python",
+        "tags": ["python", "dictionaries"],
+        "skills": [],
+        "points": 50,
+        "content": {
+            "code_snippet": 'keys = ["alpha", "beta", "gamma"]\nvals = [10, 20, 30]\nd = dict(zip(keys, vals))\nprint(d["beta"])',
+            "language": "python",
+        },
+        "flags": [{"value": "20", "flag_type": "static", "case_sensitive": False}],
+        "hints": [
+            {"order_num": 1, "content": "zip() pairs each key with the value at the same position.", "cost": 0},
+        ],
+    },
+]

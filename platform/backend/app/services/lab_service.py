@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import SessionLocal
-from app.labs.registry import LAB_REGISTRY, LabDefinition, REGISTRY_BY_ID
+from app.labs.registry import LAB_REGISTRY, LabDefinition, REGISTRY_BY_ID, STANDALONE_CHALLENGES
 from app.models.deployment import Deployment, DeploymentStatus
 from app.models.lab_template import LabTemplate
 from app.services.audit_service import write_audit
@@ -91,6 +91,7 @@ def sync_registry(db: Session) -> None:
                     tags=[lab_name_tag] + raw_tags,
                     skills=ch_def.get("skills", []),
                     points=ch_def.get("points", 100),
+                    content=ch_def.get("content", {}),
                     is_active=True,
                     is_archived=False,
                     lab_template_id=lab_def["id"],
@@ -120,9 +121,53 @@ def sync_registry(db: Session) -> None:
                 ch.title = ch_def["title"]
                 ch.description = ch_def["description"]
                 ch.points = ch_def.get("points", ch.points)
+                ch.content = ch_def.get("content", ch.content)
                 ch.tags = [lab_name_tag] + raw_tags
                 ch.skills = ch_def.get("skills", ch.skills)
                 ch.lab_template_id = lab_def["id"]
+
+    # Standalone challenges — no lab association
+    for ch_def in STANDALONE_CHALLENGES:
+        ch = db.query(Challenge).filter(Challenge.slug == ch_def["slug"]).first()
+        if ch is None:
+            ch = Challenge(
+                slug=ch_def["slug"],
+                title=ch_def["title"],
+                description=ch_def["description"],
+                challenge_type=ch_def["challenge_type"],
+                difficulty=ch_def["difficulty"],
+                category=ch_def["category"],
+                tags=ch_def.get("tags", []),
+                skills=ch_def.get("skills", []),
+                points=ch_def.get("points", 100),
+                content=ch_def.get("content", {}),
+                is_active=True,
+                is_archived=False,
+                lab_template_id=None,
+            )
+            db.add(ch)
+            db.flush()
+            for f in ch_def.get("flags", []):
+                db.add(ChallengeFlag(
+                    challenge_id=ch.id,
+                    value=f["value"],
+                    flag_type=f.get("flag_type", "static"),
+                    case_sensitive=f.get("case_sensitive", True),
+                ))
+            for h in ch_def.get("hints", []):
+                db.add(ChallengeHint(
+                    challenge_id=ch.id,
+                    order_num=h["order_num"],
+                    content=h["content"],
+                    cost=h.get("cost", 0),
+                ))
+        else:
+            ch.title = ch_def["title"]
+            ch.description = ch_def["description"]
+            ch.points = ch_def.get("points", ch.points)
+            ch.content = ch_def.get("content", ch.content)
+            ch.tags = ch_def.get("tags", ch.tags)
+            ch.skills = ch_def.get("skills", ch.skills)
 
     db.commit()
 
