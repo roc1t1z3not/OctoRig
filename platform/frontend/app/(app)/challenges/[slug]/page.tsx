@@ -221,6 +221,20 @@ export default function ChallengeDetailPage() {
     points: number;
   } | null>(null);
   const [localHints, setLocalHints] = useState<Record<number, string>>({});
+  const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
+
+  useEffect(() => {
+    if (!cooldownUntil) return;
+    const tick = () => {
+      const remaining = Math.ceil((cooldownUntil - Date.now()) / 1000);
+      if (remaining <= 0) { setCooldownRemaining(0); setCooldownUntil(null); return; }
+      setCooldownRemaining(remaining);
+    };
+    tick();
+    const id = setInterval(tick, 500);
+    return () => clearInterval(id);
+  }, [cooldownUntil]);
 
   const { data: profile } = useQuery({
     queryKey: ["profile", "me"],
@@ -304,8 +318,12 @@ export default function ChallengeDetailPage() {
       }
     },
     onError: (err: unknown) => {
-      const detail = (err as { response?: { data?: { detail?: string } } })
-        ?.response?.data?.detail;
+      const res = (err as { response?: { status?: number; data?: { detail?: string } } })?.response;
+      const detail = res?.data?.detail;
+      if (res?.status === 429 && detail) {
+        const match = detail.match(/(\d+)\s*second/i);
+        if (match) setCooldownUntil(Date.now() + parseInt(match[1]) * 1000);
+      }
       push("error", detail ?? "Submission failed");
     },
   });
@@ -520,9 +538,9 @@ export default function ChallengeDetailPage() {
                       type="submit"
                       className="g-btn g-btn-primary"
                       style={{ alignSelf: "flex-end" }}
-                      disabled={submitMutation.isPending || !flag.trim()}
+                      disabled={submitMutation.isPending || !flag.trim() || cooldownRemaining > 0}
                     >
-                      {submitMutation.isPending ? "Checking…" : "Submit"}
+                      {submitMutation.isPending ? "Checking…" : cooldownRemaining > 0 ? `Try again in ${cooldownRemaining}s` : "Submit"}
                     </button>
                   </div>
                 ) : (
@@ -531,7 +549,7 @@ export default function ChallengeDetailPage() {
                     placeholder="FLAG{...}"
                     value={flag}
                     onChange={(e) => setFlag(e.target.value)}
-                    disabled={submitMutation.isPending}
+                    disabled={submitMutation.isPending || cooldownRemaining > 0}
                     spellCheck={false}
                     autoComplete="off"
                   />
@@ -540,9 +558,9 @@ export default function ChallengeDetailPage() {
                   <button
                     type="submit"
                     className="g-btn g-btn-primary"
-                    disabled={submitMutation.isPending || !flag.trim()}
+                    disabled={submitMutation.isPending || !flag.trim() || cooldownRemaining > 0}
                   >
-                    {submitMutation.isPending ? "Checking…" : "Submit"}
+                    {submitMutation.isPending ? "Checking…" : cooldownRemaining > 0 ? `Try again in ${cooldownRemaining}s` : "Submit"}
                   </button>
                 )}
               </div>

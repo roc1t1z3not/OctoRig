@@ -8,6 +8,7 @@ import {
   ArrowLeft, CheckCircle2, Clock, ExternalLink,
   Flag, Globe, Lock, RotateCcw, Square, Target, Users,
 } from "lucide-react";
+import { CopyButton } from "@/components/ui/CopyButton";
 import Link from "next/link";
 import {
   getDeployment,
@@ -54,23 +55,23 @@ function addHours(h: number): string {
   return new Date(Date.now() + h * 3_600_000).toISOString().slice(0, 16);
 }
 
-function useCountdown(isoTarget: string | null): string {
-  const [label, setLabel] = useState("");
+function useCountdown(isoTarget: string | null): { label: string; remainingMs: number } {
+  const [state, setState] = useState({ label: "", remainingMs: Infinity });
   useEffect(() => {
     if (!isoTarget) return;
     const tick = () => {
       const diff = new Date(isoTarget).getTime() - Date.now();
-      if (diff <= 0) { setLabel("Expired"); return; }
+      if (diff <= 0) { setState({ label: "Expired", remainingMs: 0 }); return; }
       const h = Math.floor(diff / 3_600_000);
       const m = Math.floor((diff % 3_600_000) / 60_000);
       const s = Math.floor((diff % 60_000) / 1_000);
-      setLabel(h > 0 ? `${h}h ${m}m` : `${m}m ${s}s`);
+      setState({ label: h > 0 ? `${h}h ${m}m` : `${m}m ${s}s`, remainingMs: diff });
     };
     tick();
     const id = setInterval(tick, 1_000);
     return () => clearInterval(id);
   }, [isoTarget]);
-  return label;
+  return state;
 }
 
 function DiffBadge({ difficulty }: { difficulty: ChallengeDifficulty }) {
@@ -161,7 +162,7 @@ export default function DeploymentDetailPage() {
       push("error", err?.response?.data?.detail ?? "Failed to schedule destroy"),
   });
 
-  const countdown = useCountdown(deployment?.auto_destroy_at ?? null);
+  const { label: countdown, remainingMs: countdownMs } = useCountdown(deployment?.auto_destroy_at ?? null);
 
   if (isLoading) return <div className="page"><PageSpinner /></div>;
   if (!deployment) return <div className="page text-muted text-sm">Deployment not found.</div>;
@@ -248,6 +249,7 @@ export default function DeploymentDetailPage() {
                   <div key={row.key} className="dd-access-row">
                     <span className="dd-access-key">{row.key}</span>
                     <span className="dd-access-val font-mono">{row.value}</span>
+                    <CopyButton value={row.value} />
                     {(row.key === "URL" || row.value.startsWith("http")) && (
                       <a href={row.value} target="_blank" rel="noopener noreferrer" className="dd-access-link">
                         <ExternalLink size={11} />
@@ -262,7 +264,10 @@ export default function DeploymentDetailPage() {
           {/* Dynamic flag — challenge instance deployments */}
           {deployment.dynamic_flag && (
             <div className="g-card dd-card">
-              <div className="dd-section-title"><Flag size={11} /> Flag</div>
+              <div className="dd-section-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span><Flag size={11} /> Flag</span>
+                <CopyButton value={deployment.dynamic_flag!} />
+              </div>
               <code className="dd-flag">{deployment.dynamic_flag}</code>
             </div>
           )}
@@ -271,7 +276,16 @@ export default function DeploymentDetailPage() {
           {deployment.auto_destroy_at && countdown && (
             <div className="g-card dd-card">
               <div className="dd-section-title"><Clock size={11} /> Auto Destroy</div>
-              <div className="dd-countdown">{countdown}</div>
+              <div
+                className="dd-countdown"
+                style={{
+                  color: countdownMs <= 15 * 60_000
+                    ? "var(--g-danger)"
+                    : countdownMs <= 60 * 60_000
+                    ? "var(--g-warning)"
+                    : undefined,
+                }}
+              >{countdown}</div>
               <div className="dd-autodestroy-at">
                 {new Date(deployment.auto_destroy_at).toLocaleString()}
               </div>

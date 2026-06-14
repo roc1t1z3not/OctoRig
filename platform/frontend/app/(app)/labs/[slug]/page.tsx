@@ -18,6 +18,7 @@ import { DeploymentStatusBadge } from "@/components/deployments/DeploymentStatus
 import { StartLabDialog } from "@/components/deployments/StartLabDialog";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { PageSpinner } from "@/components/ui/Spinner";
+import { CopyButton } from "@/components/ui/CopyButton";
 
 const DIFF_COLOR: Record<ChallengeDifficulty, string> = {
   easy:   "diff-easy",
@@ -203,6 +204,7 @@ export default function LabDetailPage() {
                 <div key={row.key} className="ld-access-row">
                   <span className="ld-access-key">{row.key}</span>
                   <span className="ld-access-val font-mono">{row.value}</span>
+                  <CopyButton value={row.value} />
                   {(row.key === "URL" || row.value.startsWith("http")) && (
                     <a href={row.value} target="_blank" rel="noopener noreferrer" className="ld-access-link">
                       <ExternalLink size={11} />

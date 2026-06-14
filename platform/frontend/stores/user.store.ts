@@ -38,7 +38,6 @@ export const useUserStore = create<UserState>()(
     {
       name: "octorig_user",
       // Access token is NOT persisted — lives in memory only.
-      // On page reload the /auth/refresh endpoint silently issues a new one via the HttpOnly cookie.
       partialize: (state) => ({ user: state.user }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { X, Loader2, CheckCircle2 } from "lucide-react";
+import { X, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
+import { CopyButton } from "@/components/ui/CopyButton";
 import { useQuery } from "@tanstack/react-query";
 import type { LabTemplate } from "@/lib/api/labs";
 import { startDeployment, getDeployment, type Deployment } from "@/lib/api/deployments";
@@ -160,6 +161,12 @@ export function StartLabDialog({ lab, open, onClose }: Props) {
                   <div key={row.key} className="access-row">
                     <span className="text-muted text-11">{row.key}</span>
                     <span className="font-mono text-11 text-accent">{row.value}</span>
+                    <CopyButton value={row.value} />
+                    {(row.key === "URL" || row.value.startsWith("http")) && (
+                      <a href={row.value} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", color: "var(--g-text-muted)" }}>
+                        <ExternalLink size={11} />
+                      </a>
+                    )}
                   </div>
                 ))}
               </div>
