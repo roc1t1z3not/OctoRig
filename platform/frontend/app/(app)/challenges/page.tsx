@@ -26,6 +26,10 @@ const DIFFICULTIES: { id: ChallengeDifficulty | undefined; label: string }[] = [
   { id: "insane", label: "Insane" },
 ];
 
+const DIFF_ORDER: Record<ChallengeDifficulty, number> = {
+  easy: 0, medium: 1, hard: 2, insane: 3,
+};
+
 const DIFF_COLOR: Record<ChallengeDifficulty, string> = {
   easy:   "diff-easy",
   medium: "diff-medium",
@@ -112,13 +116,17 @@ export default function ChallengesPage() {
 
   const labsWithChallenges = labs.filter((l) => l.category === "world");
 
-  const displayed = challenges.filter((c) => {
-    // Exclude firerange labs unless the user has pinned a specific lab
-    if (!labSlug && c.lab_category === "firerange") return false;
-    if (solvedFilter === "solved") return c.solved_by_me;
-    if (solvedFilter === "unsolved") return !c.solved_by_me;
-    return true;
-  });
+  const displayed = challenges
+    .filter((c) => {
+      if (!labSlug && c.lab_category === "firerange") return false;
+      if (solvedFilter === "solved") return c.solved_by_me;
+      if (solvedFilter === "unsolved") return !c.solved_by_me;
+      return true;
+    })
+    .sort((a, b) =>
+      DIFF_ORDER[a.difficulty] - DIFF_ORDER[b.difficulty] ||
+      a.title.localeCompare(b.title)
+    );
 
   const solved = challenges.filter((c) => c.solved_by_me).length;
   const total = challenges.length;

@@ -20,12 +20,15 @@ export function useLogStream({ deploymentId, container = "app", tail = 100, enab
     if (!enabled || !accessToken) return;
 
     const wsBase = process.env.NEXT_PUBLIC_API_URL?.replace(/^http/, "ws") ?? "";
-    const url = `${wsBase}/api/v1/deployments/${deploymentId}/logs?container=${container}&tail=${tail}&token=${encodeURIComponent(accessToken)}`;
+    const url = `${wsBase}/api/v1/deployments/${deploymentId}/logs?container=${container}&tail=${tail}`;
 
     const ws = new WebSocket(url);
     wsRef.current = ws;
 
-    ws.onopen = () => setConnected(true);
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ token: accessToken }));
+      setConnected(true);
+    };
     ws.onmessage = (e) => {
       const chunk: string = e.data;
       const newLines = chunk.split(/\r?\n/);
