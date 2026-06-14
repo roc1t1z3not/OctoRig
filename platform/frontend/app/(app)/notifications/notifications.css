@@ -1,6 +1,6 @@
 /* page.tsx */
 
-.page { padding: 1.5rem; max-width: 680px; }
+.page { padding: 1.5rem; }
         .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem; gap: 1rem; }
         .page-title { font-size: 1.125rem; display: flex; align-items: center; }
         .page-sub { font-size: 0.75rem; color: var(--g-text-muted); margin-top: 0.2rem; }

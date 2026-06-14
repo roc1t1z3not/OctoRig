@@ -28,8 +28,6 @@ const DIFFICULTIES: { id: ChallengeDifficulty | undefined; label: string }[] = [
 const LAB_CATEGORIES: { id: string | undefined; label: string }[] = [
   { id: undefined, label: "All Labs" },
   { id: "world", label: "World" },
-  { id: "firerange", label: "Fire Range" },
-  { id: "thirdparty", label: "3rd Party" },
 ];
 
 const DIFF_COLOR: Record<ChallengeDifficulty, string> = {
@@ -116,10 +114,10 @@ export default function ChallengesPage() {
     staleTime: 60_000,
   });
 
-  // Filter to only labs that actually have challenges
-  const labsWithChallenges = labCategory
-    ? labs.filter((l) => l.category === labCategory)
-    : labs;
+  const labsWithChallenges = labs.filter((l) =>
+    challenges.some((c) => c.lab_slug === l.slug || c.lab_name === l.name) &&
+    (!labCategory || l.category === labCategory)
+  );
 
   const solved = challenges.filter((c) => c.solved_by_me).length;
   const total = challenges.length;

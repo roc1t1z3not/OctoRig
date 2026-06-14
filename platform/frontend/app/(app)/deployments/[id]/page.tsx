@@ -1,5 +1,5 @@
 "use client";
-import "./deployment-detail.css";
+import "../deployment-detail.css";
 
 import { useState } from "react";
 import { useParams } from "next/navigation";

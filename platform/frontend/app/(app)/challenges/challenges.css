@@ -24,7 +24,7 @@
         .filter-bar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
         .ch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.875rem; }
         .ch-lab-filters { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
-        .ch-lab-tag { font-size: 0.5625rem; color: var(--g-text-dim, var(--g-text-muted)); font-family: var(--font-mono, monospace); margin-bottom: 0.125rem; }
+        .ch-lab-tag { font-size: 0.5625rem; color: var(--g-text-accent, var(--g-text-muted)); font-family: var(--font-mono, monospace); margin-bottom: 0.125rem; }
         .mt-4 { margin-top: 1.5rem; }
         .flex { display: flex; }
         .gap-1 { gap: 0.25rem; }
