@@ -25,11 +25,6 @@ const DIFFICULTIES: { id: ChallengeDifficulty | undefined; label: string }[] = [
   { id: "insane", label: "Insane" },
 ];
 
-const LAB_CATEGORIES: { id: string | undefined; label: string }[] = [
-  { id: undefined, label: "All Labs" },
-  { id: "world", label: "World" },
-];
-
 const DIFF_COLOR: Record<ChallengeDifficulty, string> = {
   easy:   "diff-easy",
   medium: "diff-medium",
@@ -93,17 +88,16 @@ function ChallengeCard({ ch }: { ch: ChallengeListItem }) {
 export default function ChallengesPage() {
   const [category, setCategory] = useState<string | undefined>(undefined);
   const [difficulty, setDifficulty] = useState<ChallengeDifficulty | undefined>(undefined);
-  const [labCategory, setLabCategory] = useState<string | undefined>(undefined);
   const [labSlug, setLabSlug] = useState<string | undefined>(undefined);
   const [search, setSearch] = useState("");
 
   const { data: challenges = [], isLoading } = useQuery({
-    queryKey: ["challenges", category, difficulty, search, labCategory, labSlug],
+    queryKey: ["challenges", category, difficulty, search, labSlug],
     queryFn: () => getChallenges({
       category,
       difficulty,
       search: search || undefined,
-      lab_category: labCategory,
+      lab_category: "world",
       lab_slug: labSlug || undefined,
     }),
   });
@@ -114,10 +108,7 @@ export default function ChallengesPage() {
     staleTime: 60_000,
   });
 
-  const labsWithChallenges = labs.filter((l) =>
-    challenges.some((c) => c.lab_slug === l.slug || c.lab_name === l.name) &&
-    (!labCategory || l.category === labCategory)
-  );
+  const labsWithChallenges = labs.filter((l) => l.category === "world");
 
   const solved = challenges.filter((c) => c.solved_by_me).length;
   const total = challenges.length;
@@ -170,20 +161,8 @@ export default function ChallengesPage() {
       </div>
 
       {/* Lab filters */}
-      <div className="ch-lab-filters">
-        <div className="flex gap-1">
-          {LAB_CATEGORIES.map((lc) => (
-            <button
-              key={String(lc.id)}
-              className={`g-btn g-btn-sm ${labCategory === lc.id ? "g-btn-primary" : "g-btn-ghost"}`}
-              onClick={() => { setLabCategory(lc.id); setLabSlug(undefined); }}
-            >
-              {lc.label}
-            </button>
-          ))}
-        </div>
-
-        {labsWithChallenges.length > 0 && (
+      {labsWithChallenges.length > 0 && (
+        <div className="ch-lab-filters">
           <div className="flex gap-1 flex-wrap">
             <button
               className={`g-btn g-btn-sm ${!labSlug ? "g-btn-subtle" : "g-btn-ghost"}`}
@@ -201,8 +180,8 @@ export default function ChallengesPage() {
               </button>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {isLoading ? (
         <div className="text-muted text-sm mt-4">Loading challenges…</div>
