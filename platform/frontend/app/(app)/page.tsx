@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { getDeployments, stopDeployment } from "@/lib/api/deployments";
 import { getHealth, getContainers } from "@/lib/api/system";
+import { getLabs, type LabTemplate } from "@/lib/api/labs";
 import { DeploymentStatusBadge } from "@/components/deployments/DeploymentStatusBadge";
 import { useNotificationsStore } from "@/stores/notifications.store";
 
@@ -20,6 +21,11 @@ export default function Dashboard() {
   const { data: containers = [] } = useQuery({
     queryKey: ["containers"],
     queryFn: getContainers,
+  });
+  const { data: labs = [] } = useQuery<LabTemplate[]>({
+    queryKey: ["labs"],
+    queryFn: () => getLabs(),
+    staleTime: 60_000,
   });
   const { data: health } = useQuery({
     queryKey: ["health"],
@@ -42,6 +48,15 @@ export default function Dashboard() {
   const externalContainers = containers.filter(
     (c) => !knownNames.has(c.name) && c.name.startsWith("octorig-") && !c.name.includes("platform")
   );
+
+  const labByContainer = new Map<string, LabTemplate>();
+  for (const lab of labs) {
+    for (const cn of lab.container_names) labByContainer.set(cn, lab);
+  }
+  const getLabUrl = (containerName: string) => {
+    const lab = labByContainer.get(containerName);
+    return lab?.access_info.find((a) => a.key === "URL")?.value ?? null;
+  };
 
   return (
     <div className="page">
@@ -123,15 +138,27 @@ export default function Dashboard() {
           <div className="g-panel">
             <p className="text-muted text-11 mb-2">Containers started via the CLI — read-only in this view.</p>
             <table className="g-table">
-              <thead><tr><th>Container</th><th>Status</th><th>Image</th></tr></thead>
+              <thead><tr><th>Container</th><th>Status</th><th>Access</th></tr></thead>
               <tbody>
-                {externalContainers.map((c) => (
-                  <tr key={c.name}>
-                    <td className="font-mono text-11">{c.name}</td>
-                    <td><DeploymentStatusBadge status={c.status === "running" ? "running" : "stopped"} /></td>
-                    <td className="text-secondary text-11">{c.image}</td>
-                  </tr>
-                ))}
+                {externalContainers.map((c) => {
+                  const url = getLabUrl(c.name);
+                  return (
+                    <tr key={c.name}>
+                      <td className="font-mono text-11">{c.name}</td>
+                      <td><DeploymentStatusBadge status={c.status === "running" ? "running" : "stopped"} /></td>
+                      <td>
+                        {url ? (
+                          <a href={url} target="_blank" rel="noopener" className="text-accent flex items-center gap-1 text-11">
+                            {url}
+                            <ExternalLink size={11} />
+                          </a>
+                        ) : (
+                          <span className="text-muted text-11">{c.image}</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
