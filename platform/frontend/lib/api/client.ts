@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useUserStore } from "@/stores/user.store";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -21,7 +22,7 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Redirect to login on 401 — but never when already on /login (prevents reload loop)
+// On 401: wipe the session first so the login page doesn't bounce straight back
 apiClient.interceptors.response.use(
   (r) => r,
   (err) => {
@@ -30,6 +31,7 @@ apiClient.interceptors.response.use(
       typeof window !== "undefined" &&
       !window.location.pathname.startsWith("/login")
     ) {
+      useUserStore.getState().clearSession();
       window.location.href = "/login";
     }
     return Promise.reject(err);

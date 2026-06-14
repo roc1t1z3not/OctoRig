@@ -118,7 +118,7 @@ def pending_queue(
     db: Session = Depends(get_db),
     _: User = Depends(require_platform_role("reviewer")),
 ) -> list[SubmissionOut]:
-    return list_submissions(db, status="pending_review")
+    return list_submissions(db, statuses=["pending_review", "in_review"])
 
 
 @router.post("/{submission_id}/claim", response_model=SubmissionOut)

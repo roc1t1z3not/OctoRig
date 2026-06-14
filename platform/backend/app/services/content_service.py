@@ -57,11 +57,14 @@ def list_submissions(
     db: Session,
     author_id: Optional[int] = None,
     status: Optional[str] = None,
+    statuses: Optional[list[str]] = None,
 ) -> list[ContentSubmission]:
     q = db.query(ContentSubmission)
     if author_id is not None:
         q = q.filter(ContentSubmission.author_id == author_id)
-    if status is not None:
+    if statuses is not None:
+        q = q.filter(ContentSubmission.status.in_([ContentStatus(s) for s in statuses]))
+    elif status is not None:
         q = q.filter(ContentSubmission.status == ContentStatus(status))
     return q.order_by(ContentSubmission.created_at.desc()).all()
 
