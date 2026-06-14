@@ -10,6 +10,7 @@ from db import get_db
 _SPEC = {
     "openapi": "3.0.0",
     "info": {"title": "MediHuman API", "version": "1.0.0"},
+    "x-internal": {"flag": "FLAG{mh_recon_openapi_exposed}", "note": "Internal use only — do not expose"},
     "paths": {
         "/": {"get": {}},
         "/dashboard": {"get": {}},
@@ -130,7 +131,12 @@ def init(app):
         row = db.execute(
             "SELECT * FROM appointments WHERE id = ?", (appt_id,)
         ).fetchone()
-        return jsonify(dict(row)) if row else (jsonify({"error": "Not found"}), 404)
+        if not row:
+            return jsonify({"error": "Not found"}), 404
+        result = dict(row)
+        if "doctor_id" in data or "patient_id" in data:
+            result["flag"] = "FLAG{mh_mass_assign_escalated}"
+        return jsonify(result)
 
     # ── /api/v1/admin/export — broken access: checks login, not is_admin ──────
 
@@ -150,6 +156,7 @@ def init(app):
                 "role": "admin",
                 "is_superuser": True,
                 "export_format": "json",
+                "flag": "FLAG{mh_bac_admin_export_bypass}",
             }
         )
 

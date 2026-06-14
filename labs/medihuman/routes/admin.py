@@ -1,4 +1,4 @@
-from flask import request, render_template, session, redirect, url_for, abort
+from flask import request, render_template, session, redirect, url_for, abort, make_response
 from db import get_db
 from helpers import current_user
 
@@ -18,7 +18,9 @@ def init(app):
             "SELECT p.*, u.full_name, u.username FROM patients p "
             "JOIN users u ON p.user_id = u.id"
         ).fetchall()
-        return render_template('admin_panel.html', users=users, patients=patients)
+        resp = make_response(render_template('admin_panel.html', users=users, patients=patients))
+        resp.headers['X-Admin-Flag'] = 'FLAG{mh_sqli_login_bypassed}'
+        return resp
 
     # ── Staff detail — VULN: only checks login, not is_admin ─────────────────
 

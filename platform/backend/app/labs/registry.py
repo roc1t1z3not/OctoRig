@@ -988,7 +988,255 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
         "volume_names": [],
         "env_vars": {},
         "requires_privileged": False,
-        "challenges": [],
+        "challenges": [
+            # ── Recon ──────────────────────────────────────────────────────────
+            {
+                "slug": "mh-recon-openapi",
+                "title": "MediHuman: Open Spec",
+                "description": (
+                    "MediHuman exposes a machine-readable API specification at a "
+                    "well-known path — no authentication required. The spec lists "
+                    "every endpoint the portal has, including several that were "
+                    "never meant to be discoverable.\n\n"
+                    "Fetch the spec, read it carefully, and find the internal "
+                    "extension field the developer accidentally left in.\n\n"
+                    "**Target:** `http://172.28.5.2` (start Lab 5 — MediHuman)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "easy",
+                "category": "recon",
+                "tags": ["recon", "openapi", "unauthenticated", "information-disclosure"],
+                "skills": ["API enumeration", "OpenAPI spec reading"],
+                "points": 50,
+                "estimated_minutes": 10,
+                "flags": [
+                    {"value": "FLAG{mh_recon_openapi_exposed}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Try `/openapi.json` — it works without a session cookie.", "cost": 0},
+                    {"order_num": 2, "content": "Look for an `x-internal` extension key in the JSON response.", "cost": 25},
+                ],
+            },
+            # ── SQL Injection ───────────────────────────────────────────────────
+            {
+                "slug": "mh-sqli-login",
+                "title": "MediHuman: Doctor's Orders",
+                "description": (
+                    "MediHuman's login form constructs its query with an f-string — "
+                    "username and password land directly in the SQL with no escaping.\n\n"
+                    "Use a classic comment injection to bypass the password check and "
+                    "log in as the admin. Once in, check the admin panel response "
+                    "headers for something the server leaks.\n\n"
+                    "**Target:** `http://172.28.5.2/login` (start Lab 5 — MediHuman)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "easy",
+                "category": "sqli",
+                "tags": ["sqli", "login-bypass", "sqlite", "auth"],
+                "skills": ["SQL injection", "authentication bypass", "HTTP response headers"],
+                "points": 100,
+                "estimated_minutes": 15,
+                "flags": [
+                    {"value": "FLAG{mh_sqli_login_bypassed}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Username field: `admin'--` comments out the password check. Any password value.", "cost": 0},
+                    {"order_num": 2, "content": "After login, visit `/admin` and inspect the HTTP response headers.", "cost": 50},
+                ],
+            },
+            {
+                "slug": "mh-sqli-patient-search",
+                "title": "MediHuman: PHI Leak via Search",
+                "description": (
+                    "The patient search endpoint at `/patients?q=` concatenates your "
+                    "input directly into a SQL `LIKE` clause with no parameterisation. "
+                    "The database contains more than patient records.\n\n"
+                    "UNION-inject to pivot into the internal `_flags` table and "
+                    "retrieve the value for `sqli-search`.\n\n"
+                    "**Target:** `http://172.28.5.2/patients` (start Lab 5 — MediHuman)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "sqli",
+                "tags": ["sqli", "union", "sqlite", "phi", "healthcare"],
+                "skills": ["UNION SELECT", "SQLite schema enumeration"],
+                "points": 250,
+                "estimated_minutes": 25,
+                "flags": [
+                    {"value": "FLAG{mh_sqli_patient_search_union}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Count the columns returned by the base query first using `' UNION SELECT NULL,NULL,...--`.", "cost": 0},
+                    {"order_num": 2, "content": "The query returns 9 columns. Inject into `?q=`: `' UNION SELECT value,2,3,4,5,6,7,8,9 FROM _flags WHERE name='sqli-search'--`", "cost": 75},
+                ],
+            },
+            # ── IDOR ────────────────────────────────────────────────────────────
+            {
+                "slug": "mh-idor-lab-result",
+                "title": "MediHuman: Classified Test Result",
+                "description": (
+                    "Lab results at `/labs/<id>` have no ownership check — any "
+                    "authenticated user can retrieve any result by ID.\n\n"
+                    "There is a fifth lab result flagged as an unclassified panel "
+                    "submitted by an external party. The notes field contains "
+                    "something that should never have been filed in the system.\n\n"
+                    "**Target:** `http://172.28.5.2` (start Lab 5 — MediHuman)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "easy",
+                "category": "idor",
+                "tags": ["idor", "bola", "phi", "healthcare", "lab-results"],
+                "skills": ["IDOR", "object-level access control"],
+                "points": 100,
+                "estimated_minutes": 10,
+                "flags": [
+                    {"value": "FLAG{mh_idor_lab_result_exposed}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Log in as any user. Try `/labs/5` — the endpoint doesn't verify you own the record.", "cost": 0},
+                ],
+            },
+            {
+                "slug": "mh-idor-prescription",
+                "title": "MediHuman: Someone Else's Prescription",
+                "description": (
+                    "Prescription records at `/prescriptions/<id>` and "
+                    "`/api/v1/prescriptions/<id>` have no patient ownership check. "
+                    "Any logged-in user can retrieve any prescription by ID.\n\n"
+                    "Access prescription #5 — a Metformin record belonging to a "
+                    "different patient. The notes field contains the flag.\n\n"
+                    "**Target:** `http://172.28.5.2` (start Lab 5 — MediHuman)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "easy",
+                "category": "idor",
+                "tags": ["idor", "bola", "phi", "prescriptions"],
+                "skills": ["IDOR", "horizontal privilege escalation"],
+                "points": 100,
+                "estimated_minutes": 10,
+                "flags": [
+                    {"value": "FLAG{mh_idor_prescription_read}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Register or log in as any user. Navigate to `/prescriptions/5`.", "cost": 0},
+                ],
+            },
+            # ── Broken Access Control ───────────────────────────────────────────
+            {
+                "slug": "mh-bac-admin-export",
+                "title": "MediHuman: Patient Data Export",
+                "description": (
+                    "The REST endpoint `/api/v1/admin/export` is supposed to be "
+                    "restricted to administrators. Its access check is "
+                    "`if not session.get('user_id')` — any logged-in user qualifies.\n\n"
+                    "Log in as any patient and call the endpoint. The JSON "
+                    "response dumps every patient's full medical record — SSN, "
+                    "blood type, allergies — and something extra.\n\n"
+                    "**Target:** `http://172.28.5.2/api/v1/admin/export` "
+                    "(start Lab 5 — MediHuman)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "web",
+                "tags": ["bac", "broken-access-control", "api", "phi", "data-exposure"],
+                "skills": ["broken access control", "API testing", "PHI exposure"],
+                "points": 150,
+                "estimated_minutes": 15,
+                "flags": [
+                    {"value": "FLAG{mh_bac_admin_export_bypass}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Register any account. Call GET `/api/v1/admin/export` with your session cookie. Check the `flag` field in the JSON.", "cost": 0},
+                ],
+            },
+            {
+                "slug": "mh-bac-staff-detail",
+                "title": "MediHuman: Admin Profile Leak",
+                "description": (
+                    "Staff profile pages at `/admin/staff/<id>` are supposed to be "
+                    "admin-only. The check reads `if not session.get('user_id')` — "
+                    "it verifies you're logged in, not that you're an admin.\n\n"
+                    "Navigate to `/admin/staff/1` as a regular patient. "
+                    "The admin's full profile is rendered — including a field "
+                    "that shouldn't be there.\n\n"
+                    "**Target:** `http://172.28.5.2/admin/staff/1` "
+                    "(start Lab 5 — MediHuman)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "easy",
+                "category": "web",
+                "tags": ["bac", "broken-access-control", "admin-panel", "vertical-privesc"],
+                "skills": ["broken access control", "vertical privilege escalation"],
+                "points": 100,
+                "estimated_minutes": 10,
+                "flags": [
+                    {"value": "FLAG{mh_bac_staff_detail_exposed}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Log in as any user. Visit `/admin/staff/1`. The admin's `full_name` field contains the flag.", "cost": 0},
+                ],
+            },
+            # ── XSS ────────────────────────────────────────────────────────────
+            {
+                "slug": "mh-xss-reflected",
+                "title": "MediHuman: Search & Destroy",
+                "description": (
+                    "The patient search at `/patients?q=` renders the query parameter "
+                    "back into the page using `{{ q | safe }}` — no HTML escaping. "
+                    "The page also sets a non-HttpOnly session cookie, making it "
+                    "readable from JavaScript.\n\n"
+                    "Craft a reflected XSS payload in `?q=` that reads "
+                    "`document.cookie`. The cookie value is the flag.\n\n"
+                    "**Target:** `http://172.28.5.2/patients` "
+                    "(start Lab 5 — MediHuman)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "xss",
+                "tags": ["xss", "reflected-xss", "cookie-theft", "search"],
+                "skills": ["reflected XSS", "cookie exfiltration", "Jinja2 | safe"],
+                "points": 150,
+                "estimated_minutes": 20,
+                "flags": [
+                    {"value": "FLAG{mh_xss_reflected_patients}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Try `?q=<script>document.title=document.cookie</script>` — the page title changes to the cookie value.", "cost": 0},
+                    {"order_num": 2, "content": "The cookie is named `mh_session_data`. Its value is the flag.", "cost": 50},
+                ],
+            },
+            # ── Mass Assignment ─────────────────────────────────────────────────
+            {
+                "slug": "mh-mass-assign",
+                "title": "MediHuman: Appointment Escalation",
+                "description": (
+                    "The appointment API at `PUT /api/v1/appointments/<id>` accepts "
+                    "a JSON body and writes **every field** directly to the database "
+                    "with no allow-list. A patient can modify fields that only a "
+                    "doctor or admin should control.\n\n"
+                    "Send a PUT request with a `doctor_id` or `patient_id` field in "
+                    "the body — assigning yourself to a different doctor, or "
+                    "reassigning who the appointment belongs to. "
+                    "The server reveals the flag in the response.\n\n"
+                    "**Target:** `http://172.28.5.2/api/v1/appointments/1` "
+                    "(start Lab 5 — MediHuman)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "hard",
+                "category": "web",
+                "tags": ["mass-assignment", "api", "privilege-escalation", "bola"],
+                "skills": ["mass assignment", "REST API manipulation", "BOLA"],
+                "points": 300,
+                "estimated_minutes": 30,
+                "flags": [
+                    {"value": "FLAG{mh_mass_assign_escalated}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Log in, then: `curl -X PUT http://172.28.5.2/api/v1/appointments/1 -H 'Content-Type: application/json' -d '{\"doctor_id\": 1}' --cookie 'session=<your_session>'`", "cost": 0},
+                    {"order_num": 2, "content": "Any PUT body containing `doctor_id` or `patient_id` triggers the flag in the JSON response.", "cost": 50},
+                ],
+            },
+        ],
     },
     {
         "id": 6,

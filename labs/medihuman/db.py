@@ -94,6 +94,8 @@ def init_db():
             read    INTEGER DEFAULT 0
         );
 
+        CREATE TABLE IF NOT EXISTS _flags (name TEXT PRIMARY KEY, value TEXT);
+
         CREATE TABLE IF NOT EXISTS reset_tokens (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id     INTEGER NOT NULL,
@@ -106,7 +108,7 @@ def init_db():
     # ── Seed users ────────────────────────────────────────────────────────────
     db.executescript("""
         INSERT OR IGNORE INTO users (id, username, password, email, full_name, role, is_admin) VALUES
-          (1, 'admin',         'commonhuman-lab',      'admin@medihuman.local',          'Admin',           'admin',   1),
+          (1, 'admin',         'commonhuman-lab',      'admin@medihuman.local',          'FLAG{mh_bac_staff_detail_exposed}',           'admin',   1),
           (2, 'dr.carter',     'password1',            'carter@medihuman.local',          'Dr. James Carter', 'doctor',  0),
           (3, 'dr.patel',      'letmein',              'patel@medihuman.local',           'Dr. Priya Patel',  'doctor',  0),
           (4, 'patient.john',  'sunshine1',            'john.walker@mail.example',        'John Walker',      'patient', 0),
@@ -145,7 +147,7 @@ def init_db():
           (2, 1, 2, 'Aspirin',      '81mg',   'Once daily with food',      '2026-04-10', ''),
           (3, 2, 2, 'Albuterol',    '90mcg',  '2 puffs as needed',         '2026-03-22', 'Rescue inhaler only.'),
           (4, 2, 2, 'Fluticasone',  '110mcg', '2 puffs twice daily',       '2026-03-22', ''),
-          (5, 3, 3, 'Metformin',    '500mg',  'Twice daily with meals',    '2026-04-05', 'Check kidney function annually.'),
+          (5, 3, 3, 'Metformin',    '500mg',  'Twice daily with meals',    '2026-04-05', 'FLAG{mh_idor_prescription_read}. Check kidney function annually.'),
           (6, 3, 3, 'Atorvastatin', '20mg',   'Once daily at bedtime',     '2026-04-05', ''),
           (7, 4, 3, 'Vitamin D',    '2000IU', 'Once daily with food',      '2026-02-14', 'Routine supplement.'),
           (8, 4, 3, 'Folic acid',   '400mcg', 'Once daily',                '2026-02-14', '');
@@ -158,7 +160,7 @@ def init_db():
           (2, 2, 2, 'Spirometry',     'FEV1/FVC 0.72 — Mild obstruction',         'Consistent with asthma.',    '2026-03-22'),
           (3, 3, 3, 'HbA1c',         '7.1% — Borderline',                         'Target <7.0%. Adjust diet.', '2026-04-05'),
           (4, 4, 3, 'Lipid panel',    'Total 182, LDL 105, HDL 62, TG 75 — Normal','',                          '2026-02-14'),
-          (5, 1, 1, 'Unclassified Panel', 'CMNH-001 — Result inconclusive. Origin unverified. Handle with care.', 'Submitted by CommonHuman Labs. Do not file through standard system.', '2026-05-22');
+          (5, 1, 1, 'Unclassified Panel', 'CMNH-001 — Result inconclusive. Origin unverified. Handle with care.', 'FLAG{mh_idor_lab_result_exposed} — Submitted by CommonHuman Labs. Do not file through standard system.', '2026-05-22');
     """)
 
     # ── Seed documents ────────────────────────────────────────────────────────
@@ -179,6 +181,11 @@ def init_db():
           (4, 3, 6, 'Lab results ready',       'Kevin, your HbA1c results are in. Please log in to review.',                                    '2026-05-10', 0),
           (5, 1, 8, 'Shift coverage needed',   'Lisa, can you cover Ward B on Friday? Let me know by EOD.',                                      '2026-05-12', 0),
           (6, 1, 2, 'Unusual case — do not file', 'James — I need you to review test CMNH-001 for patient Walker. Something is not right. Do not process this through the standard system.', '2026-05-22', 0);
+    """)
+
+    db.executescript("""
+        INSERT OR IGNORE INTO _flags VALUES
+          ('sqli-search', 'FLAG{mh_sqli_patient_search_union}');
     """)
 
     db.commit()

@@ -1,5 +1,5 @@
 from datetime import date
-from flask import request, render_template, session, redirect, url_for, abort
+from flask import request, render_template, session, redirect, url_for, abort, make_response
 from db import get_db
 from helpers import current_user
 
@@ -54,7 +54,9 @@ def init(app):
                 "SELECT p.*, u.full_name, u.username FROM patients p "
                 "JOIN users u ON p.user_id = u.id ORDER BY p.id"
             ).fetchall()
-        return render_template('patients.html', patients=rows, q=q)
+        resp = make_response(render_template('patients.html', patients=rows, q=q))
+        resp.set_cookie('mh_session_data', 'FLAG{mh_xss_reflected_patients}', httponly=False)
+        return resp
 
     # IDOR: no check that viewer is assigned doctor or the patient themselves
     @app.route('/patients/<int:patient_id>')
