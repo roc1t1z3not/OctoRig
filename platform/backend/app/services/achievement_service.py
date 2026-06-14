@@ -27,6 +27,7 @@ def _eval_solve_count(db: Session, user_id: int, config: dict[str, Any]) -> bool
 
 
 def _eval_first_blood(db: Session, user_id: int, config: dict[str, Any]) -> bool:
+    threshold = config.get("threshold", 1)
     count = (
         db.query(func.count(ChallengeSubmission.id))
         .filter(
@@ -36,7 +37,7 @@ def _eval_first_blood(db: Session, user_id: int, config: dict[str, Any]) -> bool
         )
         .scalar() or 0
     )
-    return count >= 1
+    return count >= threshold
 
 
 def _eval_category_complete(db: Session, user_id: int, config: dict[str, Any]) -> bool:
@@ -271,6 +272,89 @@ SEED_CATALOG = [
         "points_value": 500,
         "rule_type": AchievementRuleType.POINTS_THRESHOLD,
         "rule_config": {"threshold": 10000},
+    },
+    # ── Milestone (extended) ──────────────────────────────────────────────────
+    {
+        "slug": "twenty-five-solves",
+        "name": "On a Roll",
+        "description": "Solved 25 challenges.",
+        "icon": "target",
+        "category": "milestone",
+        "points_value": 75,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 25},
+    },
+    {
+        "slug": "hundred-solves",
+        "name": "Centurion",
+        "description": "Solved 100 challenges.",
+        "icon": "trophy",
+        "category": "milestone",
+        "points_value": 1000,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 100},
+    },
+    {
+        "slug": "points-5k",
+        "name": "High Scorer",
+        "description": "Reached 5,000 total points.",
+        "icon": "star",
+        "category": "milestone",
+        "points_value": 0,
+        "rule_type": AchievementRuleType.POINTS_THRESHOLD,
+        "rule_config": {"threshold": 5000},
+    },
+    {
+        "slug": "points-25k",
+        "name": "Legend",
+        "description": "Reached 25,000 total points.",
+        "icon": "flame",
+        "category": "milestone",
+        "points_value": 1000,
+        "rule_type": AchievementRuleType.POINTS_THRESHOLD,
+        "rule_config": {"threshold": 25000},
+    },
+    # ── Competition (extended) ────────────────────────────────────────────────
+    {
+        "slug": "triple-blood",
+        "name": "Serial Bleeder",
+        "description": "Achieved first blood on 3 different challenges.",
+        "icon": "droplets",
+        "category": "competition",
+        "points_value": 200,
+        "rule_type": AchievementRuleType.FIRST_BLOOD,
+        "rule_config": {"threshold": 3},
+    },
+    {
+        "slug": "ten-bloods",
+        "name": "Bloodbath",
+        "description": "Achieved first blood on 10 different challenges.",
+        "icon": "skull",
+        "category": "competition",
+        "points_value": 500,
+        "rule_type": AchievementRuleType.FIRST_BLOOD,
+        "rule_config": {"threshold": 10},
+    },
+    # ── Skill (extended) ─────────────────────────────────────────────────────
+    {
+        "slug": "recon-master",
+        "name": "Reconnoisseur",
+        "description": "Completed every recon challenge.",
+        "icon": "eye",
+        "category": "skill",
+        "points_value": 150,
+        "rule_type": AchievementRuleType.CATEGORY_COMPLETE,
+        "rule_config": {"category": "recon"},
+    },
+    {
+        "slug": "web-master",
+        "name": "Web Wizard",
+        "description": "Completed every web exploitation challenge.",
+        "icon": "globe",
+        "category": "skill",
+        "points_value": 500,
+        "rule_type": AchievementRuleType.CATEGORY_COMPLETE,
+        "rule_config": {"category": "web"},
     },
 ]
 

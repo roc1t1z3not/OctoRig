@@ -17,6 +17,12 @@ const ICON_MAP: Record<string, string> = {
   star:      "⭐",
   crown:     "👑",
   shield:    "🛡️",
+  target:    "🎯",
+  trophy:    "🏆",
+  skull:     "💀",
+  eye:       "👁️",
+  globe:     "🌐",
+  flame:     "🔥",
 };
 
 function BadgeCard({ badge }: { badge: Badge }) {

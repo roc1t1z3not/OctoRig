@@ -14,6 +14,7 @@ import { useUserStore } from "@/stores/user.store";
 const ICON_MAP: Record<string, string> = {
   flag: "🚩", hash: "#", zap: "⚡", droplets: "🩸",
   database: "🗄️", code: "</>", lock: "🔒", star: "⭐", crown: "👑", shield: "🛡️",
+  target: "🎯", trophy: "🏆", skull: "💀", eye: "👁️", globe: "🌐", flame: "🔥",
 };
 
 function StatBlock({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
