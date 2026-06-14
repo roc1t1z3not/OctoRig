@@ -1,3 +1,5 @@
+import hashlib
+import secrets
 from datetime import datetime, timedelta, timezone
 
 from jose import JWTError, jwt
@@ -29,3 +31,13 @@ def decode_access_token(token: str) -> str:
     if sub is None:
         raise JWTError("Missing subject")
     return sub
+
+
+def generate_opaque_token() -> str:
+    """32-byte cryptographically secure random hex string for refresh tokens."""
+    return secrets.token_hex(32)
+
+
+def hash_token(token: str) -> str:
+    """SHA-256 hash of a token for safe storage — we never store the raw value."""
+    return hashlib.sha256(token.encode()).hexdigest()

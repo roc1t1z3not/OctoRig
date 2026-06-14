@@ -19,7 +19,8 @@ class Settings(BaseSettings):
     # Security
     secret_key: str = "change-me-in-production-use-a-long-random-string"
     algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60
+    access_token_expire_minutes: int = 15
+    refresh_token_expire_days: int = 7
 
     # Debug mode — enables /docs, /redoc, verbose errors. Never True in production.
     debug: bool = False

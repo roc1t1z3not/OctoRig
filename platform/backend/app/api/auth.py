@@ -1,6 +1,6 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.orm import Session
 
 from pydantic import BaseModel
@@ -9,8 +9,15 @@ from app.api.deps import get_current_user, get_current_user_or_api_key
 from app.config import settings
 from app.core.exceptions import bad_request, credentials_exception
 from app.core.limiter import limiter
-from app.core.security import create_access_token, hash_password, verify_password
+from app.core.security import (
+    create_access_token,
+    generate_opaque_token,
+    hash_password,
+    hash_token,
+    verify_password,
+)
 from app.database import get_db
+from app.models.refresh_token import RefreshToken
 from app.models.user import User
 from app.schemas.auth import LoginRequest, TokenResponse, UserResponse
 from app.services import audit_service
@@ -18,18 +25,58 @@ from app.services.audit_service import write_audit
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+_COOKIE_NAME = "octorig_refresh_token"
+_COOKIE_PATH = "/api/v1/auth"
+
+
+def _set_refresh_cookie(response: Response, token: str) -> None:
+    response.set_cookie(
+        key=_COOKIE_NAME,
+        value=token,
+        httponly=True,
+        samesite="lax",
+        secure=not settings.debug,
+        path=_COOKIE_PATH,
+        max_age=settings.refresh_token_expire_days * 86_400,
+    )
+
+
+def _clear_refresh_cookie(response: Response) -> None:
+    response.delete_cookie(key=_COOKIE_NAME, path=_COOKIE_PATH)
+
+
+def _issue_refresh_token(db: Session, user_id: int) -> str:
+    """Generate, store (hashed), and return a plain refresh token."""
+    raw = generate_opaque_token()
+    expires = datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days)
+    db.add(RefreshToken(user_id=user_id, token_hash=hash_token(raw), expires_at=expires))
+    db.commit()
+    return raw
+
+
+def _purge_expired(db: Session, user_id: int) -> None:
+    """Delete expired (not just revoked) tokens for this user to keep the table lean."""
+    db.query(RefreshToken).filter(
+        RefreshToken.user_id == user_id,
+        RefreshToken.expires_at < datetime.now(timezone.utc),
+    ).delete(synchronize_session=False)
+    db.commit()
+
 
 @router.post("/login", response_model=TokenResponse)
 @limiter.limit("10/minute")
-def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)) -> TokenResponse:
+def login(
+    payload: LoginRequest,
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+) -> TokenResponse:
     user = db.query(User).filter(User.username == payload.username).first()
     ip = request.client.host if request.client else None
 
     if user is None or not verify_password(payload.password, user.hashed_password):
-        write_audit(
-            db, action=audit_service.AUTH_LOGIN_FAILED,
-            detail={"username": payload.username}, ip=ip,
-        )
+        write_audit(db, action=audit_service.AUTH_LOGIN_FAILED,
+                    detail={"username": payload.username}, ip=ip)
         raise credentials_exception
 
     user.last_login_at = datetime.now(timezone.utc)
@@ -37,22 +84,75 @@ def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)
 
     write_audit(db, action=audit_service.AUTH_LOGIN, user_id=user.id, ip=ip)
 
-    # Ensure every user has a personal team (idempotent)
     from app.services.team_service import ensure_personal_team
     ensure_personal_team(db, user)
 
-    token = create_access_token(user.id)
+    _purge_expired(db, user.id)
+    raw_refresh = _issue_refresh_token(db, user.id)
+    _set_refresh_cookie(response, raw_refresh)
+
     return TokenResponse(
-        access_token=token,
+        access_token=create_access_token(user.id),
+        expires_in=settings.access_token_expire_minutes * 60,
+    )
+
+
+@router.post("/refresh", response_model=TokenResponse)
+@limiter.limit("30/minute")
+def refresh(
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+) -> TokenResponse:
+    """Exchange a valid refresh token cookie for a new access token.
+    The old refresh token is revoked and a new one is issued (rotation).
+    """
+    raw = request.cookies.get(_COOKIE_NAME)
+    if not raw:
+        raise credentials_exception
+
+    token_hash = hash_token(raw)
+    rt = db.query(RefreshToken).filter_by(token_hash=token_hash).first()
+
+    now = datetime.now(timezone.utc)
+    if rt is None or rt.revoked or rt.expires_at.replace(tzinfo=timezone.utc) < now:
+        _clear_refresh_cookie(response)
+        raise credentials_exception
+
+    user = db.get(User, rt.user_id)
+    if user is None or not user.is_active:
+        _clear_refresh_cookie(response)
+        raise credentials_exception
+
+    # Rotate: revoke the old token, issue a new one
+    rt.revoked = True
+    db.commit()
+
+    raw_new = _issue_refresh_token(db, user.id)
+    _set_refresh_cookie(response, raw_new)
+
+    return TokenResponse(
+        access_token=create_access_token(user.id),
         expires_in=settings.access_token_expire_minutes * 60,
     )
 
 
 @router.post("/logout")
 def logout(
+    request: Request,
+    response: Response,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
+    raw = request.cookies.get(_COOKIE_NAME)
+    if raw:
+        rt = db.query(RefreshToken).filter_by(
+            token_hash=hash_token(raw), user_id=current_user.id
+        ).first()
+        if rt:
+            rt.revoked = True
+            db.commit()
+    _clear_refresh_cookie(response)
     write_audit(db, action=audit_service.AUTH_LOGOUT, user_id=current_user.id)
     return {"message": "logged out"}
 

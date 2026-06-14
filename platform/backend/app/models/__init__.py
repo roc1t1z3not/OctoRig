@@ -10,6 +10,7 @@ from app.models.ctf_event import CtfEvent, EventChallengeMap, EventRegistration,
 from app.models.deployment import Deployment, DeploymentStatus, DeploymentVisibility
 from app.models.lab_template import LabTemplate
 from app.models.marketplace import MarketplacePackage, PackageInstallation, PackageType
+from app.models.refresh_token import RefreshToken
 from app.models.notification import Notification, NotificationPreference
 from app.models.profile import PrivacyLevel, UserProfile
 from app.models.scheduled_action import ScheduledAction, ScheduledActionStatus, ScheduledActionType
@@ -37,4 +38,5 @@ __all__ = [
     "Notification", "NotificationPreference",
     "ContentSubmission", "ContentReview", "ContentType", "ContentStatus", "ReviewVerdict",
     "MarketplacePackage", "PackageInstallation", "PackageType",
+    "RefreshToken",
 ]
