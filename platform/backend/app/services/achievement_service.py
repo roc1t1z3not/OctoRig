@@ -14,16 +14,22 @@ from app.services.scoring_service import ScoreTransactionSource, award_points
 # Each evaluator returns True if the rule is satisfied for the given user.
 
 def _eval_solve_count(db: Session, user_id: int, config: dict[str, Any]) -> bool:
+    from app.models.challenge import Challenge
     threshold = config.get("threshold", 1)
-    count = (
+    category = config.get("category")
+    q = (
         db.query(func.count(ChallengeSubmission.id))
         .filter(
             ChallengeSubmission.user_id == user_id,
             ChallengeSubmission.is_correct.is_(True),
         )
-        .scalar() or 0
     )
-    return count >= threshold
+    if category:
+        q = (
+            q.join(Challenge, ChallengeSubmission.challenge_id == Challenge.id)
+            .filter(Challenge.category == category)
+        )
+    return (q.scalar() or 0) >= threshold
 
 
 def _eval_first_blood(db: Session, user_id: int, config: dict[str, Any]) -> bool:
@@ -356,11 +362,231 @@ SEED_CATALOG = [
         "rule_type": AchievementRuleType.CATEGORY_COMPLETE,
         "rule_config": {"category": "web"},
     },
+    # ── XSS progression (9 total) ─────────────────────────────────────────────
+    {
+        "slug": "xss-first",
+        "name": "Script Kiddie",
+        "description": "Solved your first XSS challenge.",
+        "icon": "code",
+        "category": "skill",
+        "points_value": 0,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 1, "category": "xss"},
+    },
+    {
+        "slug": "xss-three",
+        "name": "Alert!",
+        "description": "Solved 3 XSS challenges.",
+        "icon": "code",
+        "category": "skill",
+        "points_value": 25,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 3, "category": "xss"},
+    },
+    {
+        "slug": "xss-five",
+        "name": "DOM Defacer",
+        "description": "Solved 5 XSS challenges.",
+        "icon": "code",
+        "category": "skill",
+        "points_value": 75,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 5, "category": "xss"},
+    },
+    # ── SQLi progression (20 total) ───────────────────────────────────────────
+    {
+        "slug": "sqli-first",
+        "name": "Injector",
+        "description": "Solved your first SQL injection challenge.",
+        "icon": "database",
+        "category": "skill",
+        "points_value": 0,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 1, "category": "sqli"},
+    },
+    {
+        "slug": "sqli-five",
+        "name": "Query Bender",
+        "description": "Solved 5 SQL injection challenges.",
+        "icon": "database",
+        "category": "skill",
+        "points_value": 50,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 5, "category": "sqli"},
+    },
+    {
+        "slug": "sqli-ten",
+        "name": "SQL Ninja",
+        "description": "Solved 10 SQL injection challenges.",
+        "icon": "database",
+        "category": "skill",
+        "points_value": 150,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 10, "category": "sqli"},
+    },
+    # ── IDOR progression (13 total) ───────────────────────────────────────────
+    {
+        "slug": "idor-first",
+        "name": "Snooper",
+        "description": "Solved your first IDOR challenge.",
+        "icon": "lock",
+        "category": "skill",
+        "points_value": 0,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 1, "category": "idor"},
+    },
+    {
+        "slug": "idor-three",
+        "name": "Boundary Pusher",
+        "description": "Solved 3 IDOR challenges.",
+        "icon": "lock",
+        "category": "skill",
+        "points_value": 25,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 3, "category": "idor"},
+    },
+    {
+        "slug": "idor-seven",
+        "name": "Access Broker",
+        "description": "Solved 7 IDOR challenges.",
+        "icon": "lock",
+        "category": "skill",
+        "points_value": 100,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 7, "category": "idor"},
+    },
+    # ── Recon progression (8 total) ───────────────────────────────────────────
+    {
+        "slug": "recon-first",
+        "name": "Lurker",
+        "description": "Completed your first recon challenge.",
+        "icon": "eye",
+        "category": "skill",
+        "points_value": 0,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 1, "category": "recon"},
+    },
+    {
+        "slug": "recon-three",
+        "name": "Intel Gatherer",
+        "description": "Completed 3 recon challenges.",
+        "icon": "eye",
+        "category": "skill",
+        "points_value": 25,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 3, "category": "recon"},
+    },
+    {
+        "slug": "recon-five",
+        "name": "Surface Mapper",
+        "description": "Completed 5 recon challenges.",
+        "icon": "eye",
+        "category": "skill",
+        "points_value": 75,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 5, "category": "recon"},
+    },
+    # ── Web progression (22 total) ────────────────────────────────────────────
+    {
+        "slug": "web-first",
+        "name": "Web Rookie",
+        "description": "Solved your first web exploitation challenge.",
+        "icon": "globe",
+        "category": "skill",
+        "points_value": 0,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 1, "category": "web"},
+    },
+    {
+        "slug": "web-five",
+        "name": "Exploit Curious",
+        "description": "Solved 5 web exploitation challenges.",
+        "icon": "globe",
+        "category": "skill",
+        "points_value": 50,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 5, "category": "web"},
+    },
+    {
+        "slug": "web-ten",
+        "name": "Exploit Dev",
+        "description": "Solved 10 web exploitation challenges.",
+        "icon": "globe",
+        "category": "skill",
+        "points_value": 150,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 10, "category": "web"},
+    },
+    # ── Milestone (extended) ──────────────────────────────────────────────────
+    {
+        "slug": "five-solves",
+        "name": "Getting Started",
+        "description": "Solved 5 challenges.",
+        "icon": "flag",
+        "category": "milestone",
+        "points_value": 0,
+        "rule_type": AchievementRuleType.SOLVE_COUNT,
+        "rule_config": {"threshold": 5},
+    },
+    {
+        "slug": "points-500",
+        "name": "First Score",
+        "description": "Reached 500 total points.",
+        "icon": "zap",
+        "category": "milestone",
+        "points_value": 0,
+        "rule_type": AchievementRuleType.POINTS_THRESHOLD,
+        "rule_config": {"threshold": 500},
+    },
+    {
+        "slug": "points-2500",
+        "name": "Gaining Ground",
+        "description": "Reached 2,500 total points.",
+        "icon": "star",
+        "category": "milestone",
+        "points_value": 0,
+        "rule_type": AchievementRuleType.POINTS_THRESHOLD,
+        "rule_config": {"threshold": 2500},
+    },
+    {
+        "slug": "points-50k",
+        "name": "Unstoppable",
+        "description": "Reached 50,000 total points.",
+        "icon": "flame",
+        "category": "milestone",
+        "points_value": 2000,
+        "rule_type": AchievementRuleType.POINTS_THRESHOLD,
+        "rule_config": {"threshold": 50000},
+    },
+    # ── Competition (extended) ────────────────────────────────────────────────
+    {
+        "slug": "five-bloods",
+        "name": "Knife's Edge",
+        "description": "Achieved first blood on 5 different challenges.",
+        "icon": "skull",
+        "category": "competition",
+        "points_value": 300,
+        "rule_type": AchievementRuleType.FIRST_BLOOD,
+        "rule_config": {"threshold": 5},
+    },
 ]
+
+
+# rule_config corrections for already-seeded badges
+_RULE_CONFIG_FIXUPS: dict[str, dict] = {
+    "sql-master": {"category": "sqli"},  # was "sql-injection", challenges use "sqli"
+}
 
 
 def seed_badge_catalog(db: Session) -> int:
     """Insert built-in badges if they don't already exist. Returns count inserted."""
+    # Patch any stale rule configs before seeding new ones
+    for slug, correct_config in _RULE_CONFIG_FIXUPS.items():
+        badge = db.query(BadgeDefinition).filter(BadgeDefinition.slug == slug).first()
+        if badge and badge.rules and badge.rules[0].rule_config != correct_config:
+            badge.rules[0].rule_config = correct_config
+            db.commit()
+
     inserted = 0
     for entry in SEED_CATALOG:
         existing = db.query(BadgeDefinition).filter(BadgeDefinition.slug == entry["slug"]).first()
