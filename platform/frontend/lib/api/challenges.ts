@@ -25,6 +25,7 @@ export interface ChallengeListItem {
   estimated_minutes: number | null;
   solve_count: number;
   solved_by_me: boolean;
+  is_active: boolean;
   lab_slug: string | null;
   lab_name: string | null;
   lab_category: string | null;
@@ -112,5 +113,18 @@ export async function getGlobalScoreboard(
     "/scoreboards/global",
     { params: { limit } }
   );
+  return data;
+}
+
+export async function getAdminChallenges(): Promise<ChallengeListItem[]> {
+  const { data } = await apiClient.get<ChallengeListItem[]>("/challenges/admin/all");
+  return data;
+}
+
+export async function setChallengeActive(
+  slug: string,
+  is_active: boolean
+): Promise<{ slug: string; is_active: boolean }> {
+  const { data } = await apiClient.patch(`/challenges/${slug}/active`, { is_active });
   return data;
 }

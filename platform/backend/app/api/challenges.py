@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field, model_validator
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user, get_db, require_admin
 from app.config import settings
 from app.core.exceptions import bad_request, not_found
 from app.models.challenge import ChallengeDifficulty, ChallengeType
@@ -73,11 +73,16 @@ class ChallengeListItem(BaseModel):
     estimated_minutes: Optional[int]
     solve_count: int = 0
     solved_by_me: bool = False
+    is_active: bool = True
     lab_slug: Optional[str] = None
     lab_name: Optional[str] = None
     lab_category: Optional[str] = None
 
     model_config = {"from_attributes": True}
+
+
+class SetActiveRequest(BaseModel):
+    is_active: bool
 
 
 class ChallengeDetail(BaseModel):
@@ -182,6 +187,7 @@ def list_challenges_endpoint(
                 estimated_minutes=ch.estimated_minutes,
                 solve_count=get_solve_count(db, ch.id),
                 solved_by_me=check_already_solved(db, ch.id, current_user.id),
+                is_active=ch.is_active,
                 lab_slug=lab.slug if lab else None,
                 lab_name=lab.name if lab else None,
                 lab_category=lab.category if lab else None,
@@ -321,3 +327,58 @@ def unlock_hint_endpoint(
         deduct_hint_cost(db, user_id=current_user.id, cost=hint.cost, hint_id=hint_id, team_id=team_id)
 
     return HintUnlockResponse(hint_id=hint.id, content=hint.content, cost=hint.cost)
+
+
+# ── Admin endpoints ───────────────────────────────────────────────────────────
+
+@router.get("/admin/all", response_model=list[ChallengeListItem])
+def admin_list_challenges(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+) -> list[ChallengeListItem]:
+    from app.models.challenge import Challenge as Ch
+    challenges = (
+        db.query(Ch)
+        .filter(Ch.is_archived.is_(False))
+        .order_by(Ch.created_at.desc())
+        .all()
+    )
+    from app.services.challenge_service import get_solve_count
+    items = []
+    for ch in challenges:
+        lab = ch.lab_template
+        items.append(ChallengeListItem(
+            id=ch.id,
+            slug=ch.slug,
+            title=ch.title,
+            difficulty=ch.difficulty,
+            category=ch.category,
+            tags=ch.tags,
+            points=ch.points,
+            challenge_type=ch.challenge_type,
+            estimated_minutes=ch.estimated_minutes,
+            solve_count=get_solve_count(db, ch.id),
+            solved_by_me=False,
+            is_active=ch.is_active,
+            lab_slug=lab.slug if lab else None,
+            lab_name=lab.name if lab else None,
+            lab_category=lab.category if lab else None,
+        ))
+    return items
+
+
+@router.patch("/{slug}/active")
+def set_challenge_active(
+    slug: str,
+    body: SetActiveRequest,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+) -> dict:
+    from app.models.challenge import Challenge as Ch
+    ch = db.query(Ch).filter(Ch.slug == slug).first()
+    if ch is None:
+        raise not_found("Challenge")
+    ch.is_active = body.is_active
+    ch.updated_at = datetime.now(timezone.utc)
+    db.commit()
+    return {"slug": ch.slug, "is_active": ch.is_active}

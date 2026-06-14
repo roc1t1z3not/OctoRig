@@ -22,6 +22,7 @@ router = APIRouter(prefix="/content", tags=["content"])
 class SubmissionOut(BaseModel):
     id: int
     author_id: int
+    author_username: Optional[str] = None
     content_type: ContentType
     title: str
     body: dict[str, Any]
@@ -31,6 +32,21 @@ class SubmissionOut(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+def _sub_out(sub) -> SubmissionOut:
+    return SubmissionOut(
+        id=sub.id,
+        author_id=sub.author_id,
+        author_username=sub.author.username if sub.author else None,
+        content_type=sub.content_type,
+        title=sub.title,
+        body=sub.body,
+        status=sub.status,
+        reviewer_id=sub.reviewer_id,
+        created_at=sub.created_at,
+        updated_at=sub.updated_at,
+    )
 
 
 class CreateRequest(BaseModel):
@@ -57,7 +73,7 @@ def create_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_platform_role("creator")),
 ) -> SubmissionOut:
-    return create_submission(db, current_user.id, body.content_type, body.title, body.body)
+    return _sub_out(create_submission(db, current_user.id, body.content_type, body.title, body.body))
 
 
 @router.get("/mine", response_model=list[SubmissionOut])
@@ -66,7 +82,7 @@ def list_mine(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[SubmissionOut]:
-    return list_submissions(db, author_id=current_user.id, status=status)
+    return [_sub_out(s) for s in list_submissions(db, author_id=current_user.id, status=status)]
 
 
 @router.get("/{submission_id}", response_model=SubmissionOut)
@@ -81,7 +97,7 @@ def get_endpoint(
         if "reviewer" not in roles and "publisher" not in roles:
             from app.core.exceptions import forbidden_exception
             raise forbidden_exception
-    return sub
+    return _sub_out(sub)
 
 
 @router.patch("/{submission_id}", response_model=SubmissionOut)
@@ -95,7 +111,7 @@ def update_endpoint(
     if sub.author_id != current_user.id:
         from app.core.exceptions import forbidden_exception
         raise forbidden_exception
-    return update_submission(db, sub, body.title, body.body)
+    return _sub_out(update_submission(db, sub, body.title, body.body))
 
 
 @router.post("/{submission_id}/submit", response_model=SubmissionOut)
@@ -108,7 +124,7 @@ def submit_endpoint(
     if sub.author_id != current_user.id:
         from app.core.exceptions import forbidden_exception
         raise forbidden_exception
-    return submit_for_review(db, sub)
+    return _sub_out(submit_for_review(db, sub))
 
 
 # ── Reviewer endpoints ────────────────────────────────────────────────────────
@@ -118,7 +134,7 @@ def pending_queue(
     db: Session = Depends(get_db),
     _: User = Depends(require_platform_role("reviewer")),
 ) -> list[SubmissionOut]:
-    return list_submissions(db, statuses=["pending_review", "in_review"])
+    return [_sub_out(s) for s in list_submissions(db, statuses=["pending_review", "in_review"])]
 
 
 @router.post("/{submission_id}/claim", response_model=SubmissionOut)
@@ -128,7 +144,7 @@ def claim_endpoint(
     current_user: User = Depends(require_platform_role("reviewer")),
 ) -> SubmissionOut:
     sub = get_submission_or_404(db, submission_id)
-    return claim_review(db, sub, current_user.id)
+    return _sub_out(claim_review(db, sub, current_user.id))
 
 
 @router.post("/{submission_id}/review", response_model=dict[str, Any])
@@ -154,7 +170,7 @@ def approved_queue(
     db: Session = Depends(get_db),
     _: User = Depends(require_platform_role("publisher")),
 ) -> list[SubmissionOut]:
-    return list_submissions(db, status="approved")
+    return [_sub_out(s) for s in list_submissions(db, status="approved")]
 
 
 @router.post("/{submission_id}/publish", response_model=SubmissionOut)
@@ -164,4 +180,4 @@ def publish_endpoint(
     current_user: User = Depends(require_platform_role("publisher")),
 ) -> SubmissionOut:
     sub = get_submission_or_404(db, submission_id)
-    return publish_submission(db, sub, current_user.id)
+    return _sub_out(publish_submission(db, sub, current_user.id))

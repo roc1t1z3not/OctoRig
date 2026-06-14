@@ -330,6 +330,8 @@ export default function ChallengeDetailPage() {
 
   const diffColor = DIFF_COLOR[ch.difficulty];
   const solvedByMe = ch.solved_by_me;
+  const codeSnippet = ch.challenge_type === "short_answer" ? (ch.content?.code_snippet as string | undefined) : undefined;
+  const language = (ch.content?.language as string | undefined) ?? "text";
 
   const hints: HintSummary[] = ch.hints.map((h) => ({
     ...h,
@@ -416,6 +418,32 @@ export default function ChallengeDetailPage() {
           )}
         </section>
 
+        {/* Code snippet for coding challenges */}
+        {codeSnippet && (
+          <section className="g-card">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+              <h2 className="section-title" style={{ margin: 0 }}>Code</h2>
+              <span style={{
+                fontSize: "0.625rem", fontFamily: "var(--font-mono, monospace)",
+                textTransform: "uppercase", letterSpacing: "0.08em",
+                color: "var(--g-text-muted)", background: "var(--g-surface-2)",
+                padding: "0.15rem 0.4rem", borderRadius: "3px",
+              }}>
+                {language}
+              </span>
+            </div>
+            <pre style={{
+              margin: 0, padding: "1rem",
+              background: "var(--g-surface-2)", border: "1px solid var(--g-border)",
+              borderRadius: "6px", fontSize: "0.8125rem", lineHeight: 1.6,
+              color: "var(--g-text)", whiteSpace: "pre", overflowX: "auto",
+              fontFamily: "var(--font-mono, monospace)",
+            }}>
+              <code>{codeSnippet}</code>
+            </pre>
+          </section>
+        )}
+
         {/* Hints */}
         {hints.length > 0 && (
           <section>
@@ -464,7 +492,7 @@ export default function ChallengeDetailPage() {
 
         {/* Flag submission */}
         <section className="g-card submit-card">
-          <h2 className="section-title">Submit Flag</h2>
+          <h2 className="section-title">{codeSnippet ? "Submit Answer" : "Submit Flag"}</h2>
 
           {solvedByMe ? (
             <div className="submit-solved">
@@ -473,23 +501,49 @@ export default function ChallengeDetailPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="submit-form">
-              <div className="submit-row">
-                <input
-                  className="g-input submit-input font-mono"
-                  placeholder="FLAG{...}"
-                  value={flag}
-                  onChange={(e) => setFlag(e.target.value)}
-                  disabled={submitMutation.isPending}
-                  spellCheck={false}
-                  autoComplete="off"
-                />
-                <button
-                  type="submit"
-                  className="g-btn g-btn-primary"
-                  disabled={submitMutation.isPending || !flag.trim()}
-                >
-                  {submitMutation.isPending ? "Checking…" : "Submit"}
-                </button>
+              <div className={codeSnippet ? undefined : "submit-row"}>
+                {codeSnippet ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                    <textarea
+                      className="g-input font-mono"
+                      placeholder="Enter the expected output…"
+                      rows={3}
+                      value={flag}
+                      onChange={(e) => setFlag(e.target.value)}
+                      disabled={submitMutation.isPending}
+                      spellCheck={false}
+                      autoComplete="off"
+                      style={{ resize: "vertical" }}
+                    />
+                    <button
+                      type="submit"
+                      className="g-btn g-btn-primary"
+                      style={{ alignSelf: "flex-end" }}
+                      disabled={submitMutation.isPending || !flag.trim()}
+                    >
+                      {submitMutation.isPending ? "Checking…" : "Submit"}
+                    </button>
+                  </div>
+                ) : (
+                  <input
+                    className="g-input submit-input font-mono"
+                    placeholder="FLAG{...}"
+                    value={flag}
+                    onChange={(e) => setFlag(e.target.value)}
+                    disabled={submitMutation.isPending}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                )}
+                {!codeSnippet && (
+                  <button
+                    type="submit"
+                    className="g-btn g-btn-primary"
+                    disabled={submitMutation.isPending || !flag.trim()}
+                  >
+                    {submitMutation.isPending ? "Checking…" : "Submit"}
+                  </button>
+                )}
               </div>
 
               {submitResult && (

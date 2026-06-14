@@ -5,9 +5,22 @@ export type ContentStatus =
   | "draft" | "pending_review" | "in_review" | "approved" | "published" | "rejected";
 export type ReviewVerdict = "approved" | "rejected" | "needs_changes";
 
+export interface FlagInput {
+  value: string;
+  flag_type: "static" | "dynamic" | "per_user" | "per_team";
+  case_sensitive: boolean;
+}
+
+export interface HintInput {
+  order_num: number;
+  content: string;
+  cost: number;
+}
+
 export interface ContentSubmission {
   id: number;
   author_id: number;
+  author_username: string | null;
   content_type: ContentType;
   title: string;
   body: Record<string, unknown>;
