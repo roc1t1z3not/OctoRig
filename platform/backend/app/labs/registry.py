@@ -103,7 +103,7 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "difficulty": "easy",
                 "category": "recon",
-                "tags": ["recon", "robots.txt", "information-disclosure"],
+                "tags": ["recon", "information-disclosure"],
                 "skills": ["passive recon", "directory enumeration"],
                 "points": 50,
                 "flags": [
@@ -356,7 +356,7 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "difficulty": "easy",
                 "category": "recon",
-                "tags": ["recon", "robots.txt", "information-disclosure", "bac"],
+                "tags": ["recon", "information-disclosure", "bac"],
                 "skills": ["passive recon", "broken access control"],
                 "points": 50,
                 "flags": [
@@ -573,7 +573,7 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "points": 50,
                 "challenge_type": "flag",
                 "estimated_minutes": 5,
-                "tags": ["recon", "robots.txt"],
+                "tags": ["recon"],
                 "hints": [
                     {"order_num": 1, "content": "Web servers publish a list of paths they'd prefer crawlers ignored. That list is itself public.", "cost": 0},
                     {"order_num": 2, "content": "Some of the restricted paths don't actually require authentication. Try each one.", "cost": 25},
@@ -1409,7 +1409,7 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "points": 50,
                 "challenge_type": "flag",
                 "estimated_minutes": 5,
-                "tags": ["recon", "robots.txt"],
+                "tags": ["recon"],
                 "hints": [
                     {"order_num": 1, "content": "Every web server's first secret lives at a well-known path in the root.", "cost": 0},
                     {"order_num": 2, "content": "One of the disallowed paths responds to authenticated users with internal status information and something extra.", "cost": 25},
@@ -1583,7 +1583,7 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "category": "recon",
                 "difficulty": "easy",
                 "points": 50,
-                "tags": ["information-disclosure", "robots.txt"],
+                "tags": ["information-disclosure"],
                 "hints": [
                     {"order_num": 1, "content": "Check the standard file that web crawlers are expected to read before indexing a site.", "cost": 0},
                     {"order_num": 2, "content": "One of the disallowed paths is a community that isn't linked from anywhere. Visit it and read the announcements.", "cost": 25},
