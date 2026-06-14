@@ -1,50 +1,267 @@
-/* Deployment detail page */
+/* ── Deployment detail page ─────────────────────────────────────────────── */
 
-.detail-grid {
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 1.5rem;
-  align-items: start;
+.dd-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--g-text-muted);
+  text-decoration: none;
+  margin-bottom: 1.25rem;
+  transition: color 0.15s;
 }
+.dd-back-link:hover { color: var(--g-text-secondary); }
 
-@media (max-width: 900px) {
-  .detail-grid { grid-template-columns: 1fr; }
-}
+/* ── Header ──────────────────────────────────────────────────────────────── */
 
-.detail-meta-row {
+.dd-header { margin-bottom: 1.5rem; }
+
+.dd-title-row {
   display: flex;
+  align-items: center;
+  gap: 0.75rem;
   flex-wrap: wrap;
-  gap: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.dd-title { font-size: 1.375rem; font-weight: 700; }
+.dd-badges { display: flex; align-items: center; gap: 0.375rem; flex-wrap: wrap; }
+
+.dd-desc {
+  font-size: 0.8125rem;
+  color: var(--g-text-secondary);
+  line-height: 1.6;
   margin-bottom: 1rem;
 }
 
-.detail-meta-item {
+.dd-controls {
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
-.detail-meta-label {
+/* ── Two-column body ─────────────────────────────────────────────────────── */
+
+.dd-body {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1rem;
+  align-items: start;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 960px) {
+  .dd-body { grid-template-columns: 1fr; }
+}
+
+/* Log viewer panel — fixed height so it doesn't collapse */
+.dd-logs {
+  height: 520px;
+  min-height: 380px;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────────────── */
+
+.dd-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dd-card { padding: 0.875rem; }
+
+.dd-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
   font-size: 0.625rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--g-text-muted);
+  margin-bottom: 0.625rem;
 }
 
-.detail-meta-value {
-  font-size: 0.8125rem;
-  font-family: var(--font-mono, monospace);
-}
+/* ── Access info ─────────────────────────────────────────────────────────── */
 
-.vis-btn-group {
+.dd-access-rows { display: flex; flex-direction: column; }
+
+.dd-access-row {
   display: flex;
-  gap: 0.25rem;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--g-border);
+}
+.dd-access-row:last-child { border-bottom: none; }
+
+.dd-access-key {
+  font-size: 0.625rem;
+  color: var(--g-text-muted);
+  min-width: 68px;
+  flex-shrink: 0;
+}
+.dd-access-val {
+  font-size: 0.6875rem;
+  color: var(--g-accent);
+  flex: 1;
+  word-break: break-all;
+}
+.dd-access-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--g-text-muted);
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.dd-access-link:hover { color: var(--g-accent); }
+
+/* ── Dynamic flag ────────────────────────────────────────────────────────── */
+
+.dd-flag {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--g-success);
+  background: var(--g-success-bg);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: 0.25rem;
+  padding: 0.375rem 0.625rem;
+  word-break: break-all;
+  font-family: var(--font-mono);
 }
 
-.schedule-row {
+/* ── Auto-destroy countdown ──────────────────────────────────────────────── */
+
+.dd-countdown {
+  font-size: 1.375rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--g-warning);
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+.dd-autodestroy-at {
+  font-size: 0.625rem;
+  color: var(--g-text-muted);
+}
+
+/* ── Deployment metadata rows ────────────────────────────────────────────── */
+
+.dd-meta-rows { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.dd-meta-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.dd-meta-label {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--g-text-muted);
+  min-width: 68px;
+  flex-shrink: 0;
+  padding-top: 0.1rem;
+}
+.dd-meta-value {
+  font-size: 0.6875rem;
+  color: var(--g-text-secondary);
+  word-break: break-word;
+}
+.dd-meta-chips { display: flex; flex-wrap: wrap; gap: 0.2rem; }
+
+/* ── Visibility pills ────────────────────────────────────────────────────── */
+
+.dd-vis-pills { display: flex; gap: 0.25rem; }
+
+.dd-vis-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.625rem;
+  font-family: var(--font-mono);
+  border-radius: 0.3rem;
+  border: 1px solid var(--g-border);
+  background: transparent;
+  color: var(--g-text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.dd-vis-pill:hover:not(:disabled) {
+  border-color: var(--g-border-hover);
+  color: var(--g-text-secondary);
+  background: var(--g-elevated);
+}
+.dd-vis-pill--active {
+  background: var(--g-accent-dim);
+  color: var(--g-accent);
+  border-color: color-mix(in srgb, var(--g-accent) 35%, transparent);
+}
+.dd-vis-pill:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Error message ───────────────────────────────────────────────────────── */
+
+.dd-error-msg {
+  font-size: 0.6875rem;
+  color: var(--g-danger);
+  line-height: 1.5;
+  word-break: break-word;
+  margin: 0;
+}
+
+/* ── Challenges section (full-width below columns) ───────────────────────── */
+
+.dd-challenges { padding: 1rem; }
+
+.dd-ch-count {
+  background: var(--g-accent-dim);
+  color: var(--g-accent);
+  border-radius: 0.25rem;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.625rem;
+  margin-left: 0.375rem;
+}
+
+.dd-ch-list { display: flex; flex-direction: column; }
+
+.dd-ch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.625rem 0.375rem;
+  border-bottom: 1px solid var(--g-border);
+  text-decoration: none;
+  color: inherit;
+  border-radius: 0.375rem;
+  transition: background 0.12s;
+}
+.dd-ch-row:last-child { border-bottom: none; }
+.dd-ch-row:hover { background: var(--g-surface-hover); }
+
+.dd-ch-info { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; flex: 1; }
+.dd-ch-cat { font-size: 0.5625rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--g-text-muted); }
+.dd-ch-title { font-size: 0.8125rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dd-ch-tags { display: flex; flex-wrap: wrap; gap: 0.2rem; margin-top: 0.1rem; }
+
+.dd-ch-right { display: flex; align-items: center; gap: 0.625rem; flex-shrink: 0; }
+.dd-ch-pts { font-size: 0.6875rem; font-weight: 700; color: var(--g-accent); font-variant-numeric: tabular-nums; }
+.dd-ch-meta { display: flex; align-items: center; gap: 0.4rem; }
+.dd-ch-meta-item { display: flex; align-items: center; gap: 0.2rem; font-size: 0.5625rem; color: var(--g-text-muted); }
+.dd-ch-solved { display: flex; align-items: center; gap: 0.2rem; font-size: 0.5625rem; color: var(--g-success); }
+
+.dd-diff-badge { font-size: 0.5625rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-weight: 600; }
+.dd-diff-easy   { color: var(--g-success); background: var(--g-success-bg); }
+.dd-diff-medium { color: var(--g-warning); background: var(--g-warning-bg); }
+.dd-diff-hard   { color: var(--g-orange);  background: rgba(251, 146, 60, 0.1); }
+.dd-diff-insane { color: var(--g-danger);  background: var(--g-danger-bg); }
+
+/* ── Schedule modal helpers ──────────────────────────────────────────────── */
+
+.dd-preset-row {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
-  align-items: center;
+  margin-bottom: 0.75rem;
 }

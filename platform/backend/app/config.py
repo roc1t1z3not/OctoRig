@@ -1,4 +1,13 @@
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_INSECURE_SECRETS = {
+    "change-me-in-production-use-a-long-random-string",
+    "change-me-in-production",
+    "secret",
+    "changeme",
+}
+_INSECURE_PASSWORDS = {"changeme", "admin", "password", "octorig", "letmein", "123456"}
 
 
 class Settings(BaseSettings):
@@ -11,6 +20,9 @@ class Settings(BaseSettings):
     secret_key: str = "change-me-in-production-use-a-long-random-string"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
+
+    # Debug mode — enables /docs, /redoc, verbose errors. Never True in production.
+    debug: bool = False
 
     # Admin seeding (used on first startup if no users exist)
     admin_username: str = "admin"
@@ -30,6 +42,35 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
     celery_broker_url: str = "redis://localhost:6379/0"
     celery_result_backend: str = "redis://localhost:6379/1"
+
+    # Marketplace — comma-separated hex-encoded Ed25519 public keys.
+    # Leave empty to disable marketplace package installation entirely.
+    marketplace_trusted_keys: str = ""
+
+    def get_marketplace_trusted_keys(self) -> list[str]:
+        return [k.strip() for k in self.marketplace_trusted_keys.split(",") if k.strip()]
+
+    # ── Startup safety validators ──────────────────────────────────────────────
+
+    @field_validator("secret_key")
+    @classmethod
+    def _require_strong_secret(cls, v: str) -> str:
+        if v in _INSECURE_SECRETS or len(v) < 32:
+            raise ValueError(
+                "SECRET_KEY is insecure. Set it to a random string of at least 32 characters "
+                "(e.g. openssl rand -hex 32). See .env.example."
+            )
+        return v
+
+    @field_validator("admin_password")
+    @classmethod
+    def _require_strong_admin_password(cls, v: str) -> str:
+        if v.lower() in _INSECURE_PASSWORDS:
+            raise ValueError(
+                f"ADMIN_PASSWORD '{v}' is a known-weak default. "
+                "Set a strong password in your .env file."
+            )
+        return v
 
 
 settings = Settings()

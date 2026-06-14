@@ -20,9 +20,11 @@ from typing import Any, Optional
 
 import docker
 import docker.types
+from circuitbreaker import CircuitBreakerError, circuit
 from docker.errors import BuildError, DockerException, NotFound
 from docker.models.containers import Container
 from docker.models.networks import Network
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 
 class DockerRuntimeService:
@@ -48,8 +50,12 @@ class DockerRuntimeService:
     # Network                                                              #
     # ------------------------------------------------------------------ #
 
-    def ensure_network(self, name: str, subnet: str) -> None:
-        """Idempotent bridge network creation — matches ensure_network() in _common.sh."""
+    def ensure_network(self, name: str, subnet: str, internal: bool = True) -> None:
+        """Idempotent bridge network creation — matches ensure_network() in _common.sh.
+
+        internal=True (default) blocks all outbound traffic from lab containers.
+        Set internal=False only for labs that explicitly require internet access.
+        """
         try:
             self._get_client().networks.get(name)
             return
@@ -58,6 +64,7 @@ class DockerRuntimeService:
         self._get_client().networks.create(
             name,
             driver="bridge",
+            internal=internal,
             ipam=docker.types.IPAMConfig(
                 pool_configs=[docker.types.IPAMPool(subnet=subnet)]
             ),
@@ -92,10 +99,17 @@ class DockerRuntimeService:
     # Images                                                               #
     # ------------------------------------------------------------------ #
 
+    @circuit(failure_threshold=5, recovery_timeout=30, expected_exception=DockerException)
     def build_image(self, tag: str, context_path: str) -> None:
         """Blocking build from a Dockerfile directory. Raises BuildError on failure."""
         self._get_client().images.build(path=context_path, tag=tag, rm=True, forcerm=True)
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=2, min=4, max=30),
+        retry=retry_if_exception_type(DockerException),
+        reraise=True,
+    )
     def pull_image(self, image: str) -> None:
         """Pull with local cache check — matches docker_pull() in _common.sh."""
         try:
@@ -117,6 +131,15 @@ class DockerRuntimeService:
         except NotFound:
             pass
 
+    # Default resource constraints applied to every lab container unless overridden.
+    _DEFAULT_LIMITS: dict = {
+        "mem_limit": "512m",
+        "memswap_limit": "512m",  # equal to mem_limit disables swap
+        "cpu_quota": 50_000,      # 50% of one CPU core (cpu_period defaults to 100 000)
+        "pids_limit": 256,
+    }
+
+    @circuit(failure_threshold=5, recovery_timeout=30, expected_exception=DockerException)
     def run_container(
         self,
         name: str,
@@ -127,6 +150,7 @@ class DockerRuntimeService:
         volumes: Optional[dict[str, dict[str, str]]] = None,
         privileged: bool = False,
         command: Optional[str] = None,
+        resource_limits: Optional[dict] = None,
     ) -> str:
         """
         Start a detached container with restart=unless-stopped.
@@ -140,6 +164,8 @@ class DockerRuntimeService:
                 network: self._get_client().api.create_endpoint_config(ipv4_address=ip)
             })
 
+        limits = {**self._DEFAULT_LIMITS, **(resource_limits or {})}
+
         container: Container = self._get_client().containers.run(
             image=image,
             name=name,
@@ -151,6 +177,13 @@ class DockerRuntimeService:
             volumes=volumes or {},
             privileged=privileged,
             command=command,
+            mem_limit=limits["mem_limit"],
+            memswap_limit=limits["memswap_limit"],
+            cpu_quota=limits["cpu_quota"],
+            pids_limit=limits["pids_limit"],
+            ulimits=[
+                docker.types.Ulimit(name="nofile", soft=1024, hard=2048),
+            ],
         )
         if ip:
             # When networking_config is used, the container starts without network,

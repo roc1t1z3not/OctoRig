@@ -30,6 +30,56 @@ services:
     networks:
       - platform-internal
 
+  # Docker socket proxy — limits which Docker API operations backend/worker can
+  # perform. Removes the raw /var/run/docker.sock bind-mount from application
+  # containers so a compromised process cannot directly escalate to host root.
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    container_name: octorig-socket-proxy
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      # Read operations
+      CONTAINERS: 1
+      NETWORKS: 1
+      VOLUMES: 1
+      IMAGES: 1
+      INFO: 1
+      # Write operations required for full lab lifecycle
+      POST: 1     # create containers, networks, volumes
+      DELETE: 1   # remove containers, networks, volumes
+      BUILD: 1    # build images from Dockerfile contexts
+      EXEC: 1     # exec in containers (required for VulnAD _populate_ad post-start)
+      # Deny everything else
+      AUTH: 0
+      SECRETS: 0
+      SWARM: 0
+      SERVICES: 0
+      TASKS: 0
+      NODES: 0
+      CONFIGS: 0
+      PLUGINS: 0
+    # Expose only on the internal network — never on the host
+    networks:
+      - platform-internal
+
+  migrate:
+    build:
+      context: ./backend
+    container_name: octorig-platform-migrate
+    command: python -m app.cli migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql+psycopg2://octorig:${POSTGRES_PASSWORD:-octorig}@postgres:5432/octorig"
+      SECRET_KEY: "${SECRET_KEY:-change-me-in-production}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-changeme}"
+    networks:
+      - platform-internal
+    restart: "no"
+
   backend:
     build:
       context: ./backend
@@ -40,6 +90,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+      socket-proxy:
+        condition: service_started
     environment:
       DATABASE_URL: "postgresql+psycopg2://octorig:${POSTGRES_PASSWORD:-octorig}@postgres:5432/octorig"
       SECRET_KEY: "${SECRET_KEY:-change-me-in-production}"
@@ -51,8 +105,8 @@ services:
       CELERY_BROKER_URL: "redis://redis:6379/0"
       CELERY_RESULT_BACKEND: "redis://redis:6379/1"
       REDIS_URL: "redis://redis:6379/0"
+      DOCKER_HOST: "tcp://socket-proxy:2375"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - ..:/octorig:ro
     networks:
       - platform-internal
@@ -64,12 +118,16 @@ services:
       context: ./backend
     container_name: octorig-platform-worker
     restart: unless-stopped
-    command: celery -A app.worker.celery_app worker --loglevel=info --concurrency=4
+    command: celery -A app.worker.celery_app worker --loglevel=info --concurrency=4 -Q lab_ops,celery
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+      socket-proxy:
+        condition: service_started
     environment:
       DATABASE_URL: "postgresql+psycopg2://octorig:${POSTGRES_PASSWORD:-octorig}@postgres:5432/octorig"
       SECRET_KEY: "${SECRET_KEY:-change-me-in-production}"
@@ -77,8 +135,8 @@ services:
       CELERY_BROKER_URL: "redis://redis:6379/0"
       CELERY_RESULT_BACKEND: "redis://redis:6379/1"
       REDIS_URL: "redis://redis:6379/0"
+      DOCKER_HOST: "tcp://socket-proxy:2375"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - ..:/octorig:ro
     networks:
       - platform-internal
@@ -94,6 +152,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     environment:
       DATABASE_URL: "postgresql+psycopg2://octorig:${POSTGRES_PASSWORD:-octorig}@postgres:5432/octorig"
       SECRET_KEY: "${SECRET_KEY:-change-me-in-production}"

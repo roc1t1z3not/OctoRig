@@ -47,8 +47,16 @@ def install_package(
     db: Session,
     zip_bytes: bytes,
     installed_by_id: int,
-    public_key_hex: str | None = None,
 ) -> MarketplacePackage:
+    from app.config import settings
+
+    trusted_keys = settings.get_marketplace_trusted_keys()
+    if not trusted_keys:
+        raise bad_request(
+            "Marketplace installation is disabled: no trusted keys are configured. "
+            "Set MARKETPLACE_TRUSTED_KEYS in your environment."
+        )
+
     checksum = _sha256(zip_bytes)
 
     try:
@@ -62,13 +70,14 @@ def install_package(
 
     manifest = _parse_manifest(zf.read("manifest.json"))
 
-    # Optional Ed25519 signature verification
-    is_verified = False
-    signature_hex: str | None = None
-    if "signature.sig" in names:
-        signature_hex = zf.read("signature.sig").decode().strip()
-        if public_key_hex:
-            is_verified = _verify_ed25519(zip_bytes, signature_hex, public_key_hex)
+    # Mandatory Ed25519 signature verification against all configured trusted keys.
+    if "signature.sig" not in names:
+        raise bad_request("Package must include a signature.sig file signed with a trusted key")
+
+    signature_hex = zf.read("signature.sig").decode().strip()
+    is_verified = any(_verify_ed25519(zip_bytes, signature_hex, key) for key in trusted_keys)
+    if not is_verified:
+        raise bad_request("Package signature verification failed against all configured trusted keys")
 
     slug = manifest["slug"]
     existing = db.query(MarketplacePackage).filter(MarketplacePackage.slug == slug).first()

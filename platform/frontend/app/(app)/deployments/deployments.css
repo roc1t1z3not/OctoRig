@@ -1,2 +1,9 @@
 /* Deployments list page */
-/* Most styles come from shared pages.css — nothing page-specific needed yet. */
+
+.g-table-row-link {
+  cursor: pointer;
+}
+
+.g-table-row-link:hover td {
+  background: var(--g-surface-hover);
+}

@@ -244,8 +244,11 @@ def _do_start(db: Session, deployment: Deployment, template: LabTemplate, lab_de
     for vol_name in lab_def["volume_names"]:
         docker_service.ensure_volume(vol_name)
 
-    # 4. Create network
-    docker_service.ensure_network(lab_def["network_name"], lab_def["subnet"])
+    # 4. Create network — internal by default to block lab egress traffic
+    requires_internet = lab_def.get("requires_internet", False)
+    docker_service.ensure_network(
+        lab_def["network_name"], lab_def["subnet"], internal=not requires_internet
+    )
 
     # 5. Generate dynamic flag if this is a challenge-linked deployment
     dynamic_flag: Optional[str] = None
@@ -281,6 +284,7 @@ def _do_start(db: Session, deployment: Deployment, template: LabTemplate, lab_de
             environment=base_env,
             volumes=volumes,
             privileged=lab_def["requires_privileged"],
+            resource_limits=lab_def.get("resource_limits"),
         )
         container_ids[role] = cid
 
@@ -332,6 +336,10 @@ def stop_lab(deployment_id: int, user_id: int, remove_volumes: bool = False) -> 
     try:
         deployment = db.get(Deployment, deployment_id)
         if deployment is None:
+            return
+
+        # Idempotent — already stopped means nothing to do.
+        if deployment.status == DeploymentStatus.STOPPED:
             return
 
         template = db.get(LabTemplate, deployment.lab_template_id)

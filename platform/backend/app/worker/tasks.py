@@ -1,13 +1,16 @@
 """
 Celery tasks for scheduled lab actions.
 
-dispatch_due_actions: runs every 60s via Celery beat, picks up pending
-ScheduledAction rows whose scheduled_at has passed, and fires the appropriate task.
+Queue model:
+  - scheduler: dispatch_due_actions (fast, cron-like)
+  - lab_ops:   execute_deploy, execute_destroy, auto_destroy_dynamic_labs,
+               cleanup_stale_deployments (slow, Docker-bound)
 
-auto_destroy_dynamic_labs: runs every 60s via Celery beat, destroys dynamic
-lab deployments that have passed their auto_destroy_at timestamp.
+Worker invocation:
+  celery -A app.worker.celery_app worker -Q lab_ops --concurrency=4
+  celery -A app.worker.celery_app worker -Q scheduler --concurrency=2 --beat
 """
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from app.worker.celery_app import celery_app
 
@@ -32,9 +35,9 @@ def dispatch_due_actions() -> None:
             action.status = ScheduledActionStatus.EXECUTING
             db.commit()
             if action.action.value == "destroy" and action.deployment_id:
-                execute_destroy.delay(action.id)
+                execute_destroy.apply_async(args=[action.id], queue="lab_ops")
             elif action.action.value == "deploy" and action.lab_template_id:
-                execute_deploy.delay(action.id)
+                execute_deploy.apply_async(args=[action.id], queue="lab_ops")
             else:
                 action.status = ScheduledActionStatus.FAILED
                 action.error_message = "Missing target (deployment_id or lab_template_id)"
@@ -44,7 +47,12 @@ def dispatch_due_actions() -> None:
         db.close()
 
 
-@celery_app.task(name="app.worker.tasks.execute_destroy", bind=True, max_retries=2)
+@celery_app.task(
+    name="app.worker.tasks.execute_destroy",
+    bind=True,
+    max_retries=3,
+    default_retry_delay=30,
+)
 def execute_destroy(self, scheduled_action_id: int) -> None:
     from app.database import SessionLocal
     from app.models.scheduled_action import ScheduledAction, ScheduledActionStatus
@@ -71,15 +79,23 @@ def execute_destroy(self, scheduled_action_id: int) -> None:
                 detail={"scheduled_action_id": scheduled_action_id, "action": "destroy"},
             )
         except Exception as exc:
-            action.status = ScheduledActionStatus.FAILED
-            action.error_message = str(exc)
-            action.executed_at = now
-            db.commit()
+            try:
+                raise self.retry(exc=exc, countdown=30 * (2 ** self.request.retries))
+            except self.MaxRetriesExceededError:
+                action.status = ScheduledActionStatus.FAILED
+                action.error_message = str(exc)
+                action.executed_at = now
+                db.commit()
     finally:
         db.close()
 
 
-@celery_app.task(name="app.worker.tasks.execute_deploy", bind=True, max_retries=2)
+@celery_app.task(
+    name="app.worker.tasks.execute_deploy",
+    bind=True,
+    max_retries=3,
+    default_retry_delay=30,
+)
 def execute_deploy(self, scheduled_action_id: int) -> None:
     from app.database import SessionLocal
     from app.models.deployment import Deployment, DeploymentStatus
@@ -95,7 +111,12 @@ def execute_deploy(self, scheduled_action_id: int) -> None:
 
         now = datetime.now(timezone.utc)
         try:
-            template = db.get(LabTemplate, action.lab_template_id)
+            template = (
+                db.query(LabTemplate)
+                .filter(LabTemplate.id == action.lab_template_id)
+                .with_for_update()
+                .first()
+            )
             if template is None:
                 raise ValueError("Lab template not found")
 
@@ -130,10 +151,13 @@ def execute_deploy(self, scheduled_action_id: int) -> None:
                 detail={"scheduled_action_id": scheduled_action_id, "action": "deploy"},
             )
         except Exception as exc:
-            action.status = ScheduledActionStatus.FAILED
-            action.error_message = str(exc)
-            action.executed_at = now
-            db.commit()
+            try:
+                raise self.retry(exc=exc, countdown=30 * (2 ** self.request.retries))
+            except self.MaxRetriesExceededError:
+                action.status = ScheduledActionStatus.FAILED
+                action.error_message = str(exc)
+                action.executed_at = now
+                db.commit()
     finally:
         db.close()
 
@@ -160,5 +184,41 @@ def auto_destroy_dynamic_labs() -> None:
         )
         for deployment in expired:
             lab_service.stop_lab(deployment.id, deployment.started_by_id)
+    finally:
+        db.close()
+
+
+@celery_app.task(name="app.worker.tasks.cleanup_stale_deployments")
+def cleanup_stale_deployments() -> None:
+    """Mark deployments stuck in STARTING > 15 minutes as ERROR.
+
+    Handles the case where the backend process was killed mid-deployment,
+    leaving containers running but the DB status never advancing to RUNNING.
+    """
+    from app.database import SessionLocal
+    from app.models.deployment import Deployment, DeploymentStatus
+    from app.ws.manager import emit as ws_emit
+
+    db = SessionLocal()
+    try:
+        cutoff = datetime.now(timezone.utc) - timedelta(minutes=15)
+        stale = (
+            db.query(Deployment)
+            .filter(
+                Deployment.status == DeploymentStatus.STARTING,
+                Deployment.created_at <= cutoff,
+            )
+            .all()
+        )
+        for deployment in stale:
+            deployment.status = DeploymentStatus.ERROR
+            deployment.error_message = "Deployment timed out in STARTING state (orphan cleanup)"
+            db.commit()
+            ws_emit("deployment.update", {
+                "id": deployment.id,
+                "lab_template_id": deployment.lab_template_id,
+                "status": "error",
+                "error_message": deployment.error_message,
+            })
     finally:
         db.close()

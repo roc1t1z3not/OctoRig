@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from app.api.deps import get_current_user, get_current_user_or_api_key
 from app.config import settings
 from app.core.exceptions import bad_request, credentials_exception
+from app.core.limiter import limiter
 from app.core.security import create_access_token, hash_password, verify_password
 from app.database import get_db
 from app.models.user import User
@@ -19,6 +20,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/login", response_model=TokenResponse)
+@limiter.limit("10/minute")
 def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)) -> TokenResponse:
     user = db.query(User).filter(User.username == payload.username).first()
     ip = request.client.host if request.client else None

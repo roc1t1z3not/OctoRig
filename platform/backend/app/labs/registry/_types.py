@@ -28,6 +28,18 @@ class ChallengeDef(TypedDict):
     content: NotRequired[dict]  # type-specific extra data (code_snippet, language, etc.)
 
 
+class ResourceLimits(TypedDict, total=False):
+    """Per-lab Docker resource constraints applied to every container in the lab.
+
+    Keys map directly to docker-py containers.run() parameters.
+    Omit a key to accept the platform default for that constraint.
+    """
+    mem_limit: str        # e.g. "512m", "2g"
+    memswap_limit: str    # total memory+swap; set equal to mem_limit to disable swap
+    cpu_quota: int        # microseconds per cpu_period (100 000); 50 000 = 50% of one core
+    pids_limit: int       # max PIDs; -1 = unlimited (avoid)
+
+
 class LabDefinition(TypedDict):
     id: int
     slug: str
@@ -46,4 +58,6 @@ class LabDefinition(TypedDict):
     volume_names: list[str]
     env_vars: dict[str, str]
     requires_privileged: bool
+    resource_limits: NotRequired[ResourceLimits]  # overrides platform defaults
+    requires_internet: NotRequired[bool]          # allow outbound traffic (default: False)
     challenges: NotRequired[list[ChallengeDef]]

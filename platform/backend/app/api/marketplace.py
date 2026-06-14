@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import Any, Optional
+from typing import Optional
 
-from fastapi import APIRouter, Depends, File, Form, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -41,12 +41,11 @@ def list_packages_endpoint(
 @router.post("/install", response_model=PackageOut, dependencies=[Depends(require_admin)])
 async def install_endpoint(
     file: UploadFile = File(..., description="Octopack ZIP file"),
-    public_key: Optional[str] = Form(None, description="Ed25519 public key hex for signature verification"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> PackageOut:
     zip_bytes = await file.read()
-    pkg = install_package(db, zip_bytes, current_user.id, public_key_hex=public_key)
+    pkg = install_package(db, zip_bytes, current_user.id)
     return pkg
 
 

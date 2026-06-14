@@ -3,13 +3,15 @@ import "./deployments.css";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { ExternalLink, Square, RotateCcw } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Square, RotateCcw } from "lucide-react";
 import { getDeployments, stopDeployment, resetDeployment } from "@/lib/api/deployments";
 import { DeploymentStatusBadge } from "@/components/deployments/DeploymentStatusBadge";
 import { useNotificationsStore } from "@/stores/notifications.store";
 
 export default function DeploymentsPage() {
   const qc = useQueryClient();
+  const router = useRouter();
   const { push } = useNotificationsStore();
 
   const { data: deployments = [], isLoading } = useQuery({
@@ -66,13 +68,12 @@ export default function DeploymentsPage() {
               const canStop = d.status === "running" || d.status === "starting";
               const canReset = d.status === "running" && d.lab_category === "firerange";
               return (
-                <tr key={d.id}>
-                  <td>
-                    <Link href={`/deployments/${d.id}`} className="text-accent inline-flex items-center gap-1">
-                      {d.lab_name}
-                      <ExternalLink size={12} />
-                    </Link>
-                  </td>
+                <tr
+                  key={d.id}
+                  className="g-table-row-link"
+                  onClick={() => router.push(`/deployments/${d.id}`)}
+                >
+                  <td className="text-secondary">{d.lab_name}</td>
                   <td className="text-secondary text-11">{d.lab_category}</td>
                   <td><DeploymentStatusBadge status={d.status} /></td>
                   <td className="text-secondary">{d.started_by_username}</td>
@@ -82,7 +83,7 @@ export default function DeploymentsPage() {
                   <td className="font-mono text-11 text-muted">
                     {d.stopped_at ? new Date(d.stopped_at).toLocaleString() : "—"}
                   </td>
-                  <td>
+                  <td onClick={(e) => e.stopPropagation()}>
                     <div className="flex gap-1">
                       {canStop && (
                         <button

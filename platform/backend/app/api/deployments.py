@@ -4,7 +4,7 @@ from typing import Optional
 from fastapi import APIRouter, BackgroundTasks, Depends, Query, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user_or_api_key, get_current_user_from_query, get_db
+from app.api.deps import get_current_user_or_api_key, get_db
 from app.core.exceptions import bad_request, conflict, forbidden_exception, not_found
 from app.core.permissions import can_destroy_deployment, can_view_logs
 from app.models.challenge import Challenge
@@ -151,7 +151,14 @@ def create_deployment(
         instance_for_user_id = current_user.id
         auto_destroy_at = datetime.now(timezone.utc) + timedelta(hours=max(1, min(8, payload.ttl_hours)))
 
-    template = db.get(LabTemplate, lab_template_id)
+    # Lock the template row for the duration of this transaction so that concurrent
+    # deployment requests serialize here rather than racing past the conflict check.
+    template = (
+        db.query(LabTemplate)
+        .filter(LabTemplate.id == lab_template_id)
+        .with_for_update()
+        .first()
+    )
     if template is None:
         raise not_found("Lab template")
 
@@ -164,7 +171,10 @@ def create_deployment(
         if membership is None and not (current_user.is_superuser or current_user.is_admin):
             raise forbidden_exception
 
-    # Conflict check — per-user when challenge_id is set, global otherwise
+    # Conflict check — per-user when challenge_id is set, global otherwise.
+    # The SELECT FOR UPDATE above serializes concurrent requests; these checks are now
+    # race-free. The DB partial unique index (uq_one_active_deployment_per_template)
+    # provides a second line of defence.
     if challenge_id is not None:
         existing = (
             db.query(Deployment)
@@ -275,8 +285,29 @@ async def stream_logs(
     container: str = Query("app", description="Container role to stream logs from"),
     tail: int = Query(100, ge=1, le=2000),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user_from_query),
 ) -> None:
+    # Accept the connection first so we can send close codes back to the client.
+    await websocket.accept()
+
+    # Auth via first message — avoids placing JWT in the URL where it is logged
+    # by every proxy, load balancer, and web server in the chain.
+    import asyncio
+    import json as _json
+    from jose import JWTError
+    from app.core.security import decode_access_token
+
+    try:
+        raw = await asyncio.wait_for(websocket.receive_text(), timeout=10.0)
+        token = _json.loads(raw).get("token", "")
+        user_id = decode_access_token(token)
+        current_user = db.get(User, int(user_id))
+        if current_user is None or not current_user.is_active:
+            await websocket.close(code=4001)
+            return
+    except (asyncio.TimeoutError, JWTError, Exception):
+        await websocket.close(code=4001)
+        return
+
     d = db.get(Deployment, deployment_id)
     if d is None:
         await websocket.close(code=4004)
@@ -290,7 +321,6 @@ async def stream_logs(
     template = db.get(LabTemplate, d.lab_template_id)
     container_name = _resolve_container_name(d, template, container)
 
-    await websocket.accept()
     try:
         async for line in docker_service.stream_logs(container_name, tail=tail):
             await websocket.send_text(line)

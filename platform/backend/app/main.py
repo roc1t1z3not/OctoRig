@@ -1,35 +1,44 @@
 import asyncio
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config import settings
+from app.core.limiter import limiter
+from app.core.logging import configure_logging
 
-limiter = Limiter(key_func=get_remote_address)
+configure_logging(level="DEBUG" if settings.debug else "INFO")
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next) -> Response:
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        # API serves no HTML — tightest possible CSP
+        response.headers["Content-Security-Policy"] = "default-src 'none'"
+        if not settings.debug:
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     from app.ws.manager import manager
     manager.set_loop(asyncio.get_running_loop())
-    _run_migrations()
+    # Migrations are run by the 'migrate' init container before this process starts.
+    # Do NOT call alembic here — it races in multi-replica deployments.
     _seed_admin()
     _seed_badges()
     _sync_labs()      # upserts lab templates + any inline challenges
     _load_plugins(app)
     yield
-
-
-def _run_migrations() -> None:
-    from alembic import command
-    from alembic.config import Config
-
-    alembic_cfg = Config("alembic.ini")
-    command.upgrade(alembic_cfg, "head")
 
 
 def _load_plugins(app: FastAPI) -> None:
@@ -93,17 +102,25 @@ def create_app() -> FastAPI:
         version="3.0.0",
         description="Offensive security training platform — labs, CTF events, challenges, badges",
         lifespan=lifespan,
+        # Disable interactive API docs in production — they expose the full schema
+        docs_url="/docs" if settings.debug else None,
+        redoc_url="/redoc" if settings.debug else None,
+        openapi_url="/openapi.json" if settings.debug else None,
     )
 
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+    # Security headers on every response
+    app.add_middleware(SecurityHeadersMiddleware)
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.get_cors_origins(),
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type", "X-API-Key"],
+        max_age=600,
     )
 
     from app.api.events_ws import router as ws_router
