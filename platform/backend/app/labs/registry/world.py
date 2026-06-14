@@ -1,71 +1,6 @@
-"""
-Lab registry — authoritative Python source for all 18 OctoRig labs.
+from ._types import LabDefinition
 
-Mirrors the LABS array in octorig.sh (lines 54-72) but adds the full
-Docker orchestration metadata needed by DockerRuntimeService.
-
-Each entry is a LabDefinition TypedDict. The keys map 1-to-1 to the
-LabTemplate SQLAlchemy model so sync_registry() can upsert them directly.
-
-Labs that ship with challenges define them inline via the optional
-`challenges` key. sync_registry() upserts those into the platform DB so
-they appear in /challenges immediately, no separate seed step needed.
-"""
-from typing import NotRequired, TypedDict
-
-
-class FlagDef(TypedDict):
-    value: str
-    flag_type: str          # "static" | "dynamic" | "regex"
-    case_sensitive: bool
-
-
-class HintDef(TypedDict):
-    order_num: int
-    content: str
-    cost: int               # 0 = free hint
-
-
-class ChallengeDef(TypedDict):
-    slug: str
-    title: str
-    description: str
-    challenge_type: str     # "flag" | "short_answer" | "web" | "container" etc.
-    difficulty: str         # "easy" | "medium" | "hard" | "insane"
-    category: str
-    tags: list[str]
-    skills: list[str]
-    points: int
-    flags: list[FlagDef]
-    hints: NotRequired[list[HintDef]]
-    content: NotRequired[dict]  # type-specific extra data (code_snippet, language, etc.)
-
-
-class LabDefinition(TypedDict):
-    id: int
-    slug: str
-    name: str
-    description: str
-    category: str           # "world" | "firerange" | "thirdparty"
-    container_names: list[str]
-    images: dict[str, str]  # role → image tag
-    build_contexts: dict[str, str]  # role → path relative to OctoRig repo root
-    start_order: list[str]  # roles in the order containers must start
-    network_name: str
-    subnet: str
-    app_ip: str
-    exposed_ports: dict[str, int]   # service name → port number
-    access_info: list[dict[str, str]]  # [{"key": "URL", "value": "..."}]
-    volume_names: list[str]
-    env_vars: dict[str, str]
-    requires_privileged: bool
-    challenges: NotRequired[list[ChallengeDef]]
-
-
-LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
-    # ------------------------------------------------------------------ #
-    # World scenarios (1–8) — realistic apps, Flask + SSH + FTP           #
-    # ------------------------------------------------------------------ #
+WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
     {
         "id": 1,
         "slug": "rewindrange",
@@ -89,7 +24,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
         "env_vars": {},
         "requires_privileged": False,
         "challenges": [
-            # ── Recon ──────────────────────────────────────────────────────
             {
                 "slug": "rw-recon-robots",
                 "title": "What's Off-Limits?",
@@ -114,7 +48,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 3, "content": "Visit /robots.txt, then browse to each Disallow path as a logged-in user.", "cost": 50},
                 ],
             },
-            # ── SQL Injection ───────────────────────────────────────────────
             {
                 "slug": "rw-sqli-browse-union",
                 "title": "Browse & Conquer",
@@ -180,7 +113,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "skills": ["UNION SELECT", "credential extraction"],
                 "points": 250,
                 "flags": [
-                    # Value matches the seeded admin password in db.py
                     {"value": "FLAG{123456789}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
@@ -189,7 +121,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 3, "content": "The admin's password is stored in plaintext. Extract it and wrap it in FLAG{}.", "cost": 75},
                 ],
             },
-            # ── XSS ────────────────────────────────────────────────────────
             {
                 "slug": "rw-xss-reflected-search",
                 "title": "Search and Destroy",
@@ -235,7 +166,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 3, "content": "The admin reviews feedback at /admin/feedback. Their session cookie is not HttpOnly.", "cost": 100},
                 ],
             },
-            # ── IDOR ────────────────────────────────────────────────────────
             {
                 "slug": "rw-idor-inbox",
                 "title": "You've Got Mail",
@@ -284,7 +214,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 3, "content": "GET /api/v1/rentals/<id> as any logged-in user. Check a few IDs for a memo field.", "cost": 75},
                 ],
             },
-            # ── Session Forgery ─────────────────────────────────────────────
             {
                 "slug": "rw-session-forge",
                 "title": "Rewind the Cookie",
@@ -336,7 +265,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
         "env_vars": {},
         "requires_privileged": False,
         "challenges": [
-            # ── Recon ──────────────────────────────────────────────────────
             {
                 "slug": "tf-recon-robots",
                 "title": "Off the Books",
@@ -361,7 +289,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 2, "content": "Some of the restricted paths don't actually enforce authentication.", "cost": 50},
                 ],
             },
-            # ── SQL Injection ───────────────────────────────────────────────
             {
                 "slug": "tf-sqli-market-union",
                 "title": "Inside the Order Book",
@@ -434,7 +361,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 3, "content": "The _flags table has a row called sqli-creds containing the answer.", "cost": 75},
                 ],
             },
-            # ── XSS ────────────────────────────────────────────────────────
             {
                 "slug": "tf-xss-reflected-market",
                 "title": "Ticker Injection",
@@ -458,7 +384,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 3, "content": "A script that reads document.cookie will find it.", "cost": 75},
                 ],
             },
-            # ── IDOR ────────────────────────────────────────────────────────
             {
                 "slug": "tf-idor-order-detail",
                 "title": "Someone Else's Trade",
@@ -482,7 +407,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 3, "content": "Check the admin's orders. A memo field on one of them contains the flag.", "cost": 75},
                 ],
             },
-            # ── Broken Access Control ───────────────────────────────────────
             {
                 "slug": "tf-bac-admin-view",
                 "title": "The Compliance Desk",
@@ -507,7 +431,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 3, "content": "Try /admin/users/1 while logged in as alice.p.", "cost": 75},
                 ],
             },
-            # ── JWT ─────────────────────────────────────────────────────────
             {
                 "slug": "tf-jwt-alg-none",
                 "title": "Trust Nobody, Sign Nothing",
@@ -568,6 +491,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 5,
                 "tags": ["recon"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Web servers publish a list of paths they'd prefer crawlers ignored. That list is itself public.", "cost": 0},
                     {"order_num": 2, "content": "Some of the restricted paths don't actually require authentication. Try each one.", "cost": 25},
@@ -583,6 +508,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 20,
                 "tags": ["sqli", "union", "sqlite"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "What happens when you put special characters in the promo code field?", "cost": 0},
                     {"order_num": 2, "content": "The injection takes you to the database. Use sqlite_master to see what tables exist.", "cost": 50},
@@ -599,6 +526,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 15,
                 "tags": ["sqli", "union", "reflected-xss"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Enter an unusual character in the search. What does the response tell you about how it's processed?", "cost": 0},
                     {"order_num": 2, "content": "The query uses a LIKE clause. What happens when you close it early?", "cost": 50},
@@ -615,6 +544,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 15,
                 "tags": ["xss", "stored", "cookies"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Post a message with some HTML in it. Does the chat render it?", "cost": 0},
                     {"order_num": 2, "content": "If HTML renders, so does JavaScript. The page sets a cookie when it loads.", "cost": 50},
@@ -631,6 +562,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 10,
                 "tags": ["idor", "access-control"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Room numbers are sequential integers in the URL.", "cost": 0},
                     {"order_num": 2, "content": "Start from room 1. Game history memos sometimes contain more than scores.", "cost": 50},
@@ -646,6 +579,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 15,
                 "tags": ["business-logic", "parameter-tampering"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Intercept the bet submission. What fields are in the POST body?", "cost": 0},
                     {"order_num": 2, "content": "The bet field accepts numbers. Explore its boundaries — in both directions.", "cost": 50},
@@ -661,6 +596,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 10,
                 "tags": ["bac", "access-control"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Register a regular account and navigate to /admin.", "cost": 0},
                     {"order_num": 2, "content": "The flag is displayed on the admin panel page.", "cost": 25},
@@ -676,6 +613,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 10,
                 "tags": ["bac", "access-control", "recon"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "The path to the VIP area is listed in a file crawlers are told to avoid.", "cost": 0},
                     {"order_num": 2, "content": "Log in as any user and request the path directly.", "cost": 25},
@@ -691,6 +630,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 15,
                 "tags": ["business-logic", "promo-abuse"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Redeem a valid promo code. Now try redeeming it again with the same account.", "cost": 0},
                     {"order_num": 2, "content": "The system tracks total redemptions across all users, but not per-user redemptions.", "cost": 50},
@@ -721,7 +662,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
         "env_vars": {},
         "requires_privileged": False,
         "challenges": [
-            # ── Recon ──────────────────────────────────────────────────────────
             {
                 "slug": "hb-recon-audit-log",
                 "title": "Open Books",
@@ -746,7 +686,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 2, "content": "One of the paths listed contains audit information. Try accessing it without a session cookie.", "cost": 25},
                 ],
             },
-            # ── SQL Injection ───────────────────────────────────────────────────
             {
                 "slug": "hb-sqli-login",
                 "title": "Master Key",
@@ -825,7 +764,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 3, "content": "UNION SELECT into the `_flags` table from the memo param. The original query returns 6 columns.", "cost": 75},
                 ],
             },
-            # ── IDOR ────────────────────────────────────────────────────────────
             {
                 "slug": "hb-idor-accounts",
                 "title": "Everyone's Balance",
@@ -876,7 +814,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 2, "content": "Internal support tickets were created before any customer accounts. Try the earliest IDs.", "cost": 25},
                 ],
             },
-            # ── Broken Access Control ───────────────────────────────────────────
             {
                 "slug": "hb-bac-admin-api",
                 "title": "Teller Without a Badge",
@@ -926,7 +863,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 2, "content": "The admin user-detail path takes a user ID. User ID 1 is the admin. The flag is in the profile data.", "cost": 50},
                 ],
             },
-            # ── XSS ────────────────────────────────────────────────────────────
             {
                 "slug": "hb-xss-stored-ticket",
                 "title": "Support Ticket Hijack",
@@ -977,7 +913,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
         "env_vars": {},
         "requires_privileged": False,
         "challenges": [
-            # ── Recon ──────────────────────────────────────────────────────────
             {
                 "slug": "mh-recon-openapi",
                 "title": "Open Spec",
@@ -1002,7 +937,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 2, "content": "Scan the JSON for any non-standard extension fields — keys that start with `x-`.", "cost": 25},
                 ],
             },
-            # ── SQL Injection ───────────────────────────────────────────────────
             {
                 "slug": "mh-sqli-login",
                 "title": "Doctor's Orders",
@@ -1055,7 +989,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 3, "content": "UNION SELECT into a hidden table. The original query returns 9 columns — match that count.", "cost": 75},
                 ],
             },
-            # ── IDOR ────────────────────────────────────────────────────────────
             {
                 "slug": "mh-idor-lab-result",
                 "title": "Classified Test Result",
@@ -1108,7 +1041,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 2, "content": "Your own prescription might not be ID 1. Try IDs you weren't assigned.", "cost": 25},
                 ],
             },
-            # ── Broken Access Control ───────────────────────────────────────────
             {
                 "slug": "mh-bac-admin-export",
                 "title": "Patient Data Export",
@@ -1158,7 +1090,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 2, "content": "Request staff ID 1. The profile data includes a field that shouldn't be visible to patients.", "cost": 25},
                 ],
             },
-            # ── XSS ────────────────────────────────────────────────────────────
             {
                 "slug": "mh-xss-reflected",
                 "title": "Search & Destroy",
@@ -1185,7 +1116,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 3, "content": "Read `document.cookie` from your script. The session cookie value is the flag.", "cost": 75},
                 ],
             },
-            # ── Mass Assignment ─────────────────────────────────────────────────
             {
                 "slug": "mh-mass-assign",
                 "title": "Appointment Escalation",
@@ -1247,6 +1177,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "easy",
                 "points": 50,
                 "tags": ["unauthenticated", "information-disclosure"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Web servers often publish a file telling crawlers which paths to avoid. That list can be revealing.", "cost": 0},
                     {"order_num": 2, "content": "One of the disallowed paths serves raw JSON without requiring authentication. Look through the records.", "cost": 25},
@@ -1261,6 +1193,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "easy",
                 "points": 100,
                 "tags": ["authentication", "boolean-based"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Try entering unusual characters in the username. Does the error change?", "cost": 0},
                     {"order_num": 2, "content": "A quote in the username changes the query structure. A comment character ends it early.", "cost": 50},
@@ -1276,6 +1210,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "medium",
                 "points": 250,
                 "tags": ["union-based", "sqlite"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Try entering a single quote in the search. What does the response tell you?", "cost": 0},
                     {"order_num": 2, "content": "The database stores more than posts. Enumerate the schema to find what else is there.", "cost": 50},
@@ -1291,6 +1227,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "easy",
                 "points": 100,
                 "tags": ["api", "horizontal-privilege-escalation"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "The API spec lists a users endpoint. Try accessing IDs other than your own.", "cost": 0},
                     {"order_num": 2, "content": "The first user created in the system usually has the lowest ID.", "cost": 25},
@@ -1305,6 +1243,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "easy",
                 "points": 100,
                 "tags": ["api", "information-disclosure"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Browse to the tickets API. What happens when you try IDs you didn't create?", "cost": 0},
                     {"order_num": 2, "content": "Internal ops tickets were created before customer accounts. Try lower IDs.", "cost": 25},
@@ -1319,6 +1259,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "easy",
                 "points": 150,
                 "tags": ["broken-access-control", "api"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Check robots.txt or the API spec for admin paths.", "cost": 0},
                     {"order_num": 2, "content": "Try accessing an admin path while logged in as a regular user. The check may only verify you have a session.", "cost": 50},
@@ -1333,6 +1275,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "hard",
                 "points": 450,
                 "tags": ["ssti", "jinja2", "broken-access-control"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Try submitting `{{ 7*7 }}` in the preview body. If the result is 49, the server is evaluating your input.", "cost": 0},
                     {"order_num": 2, "content": "The preview endpoint doesn't verify admin role — any logged-in user can reach it.", "cost": 50},
@@ -1348,6 +1292,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "medium",
                 "points": 350,
                 "tags": ["command-injection", "rce"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "What separates one shell command from another? Try those characters in the hostname field.", "cost": 0},
                     {"order_num": 2, "content": "The tool runs a DNS lookup command. Appending a shell separator lets you run something else after it.", "cost": 50},
@@ -1363,6 +1309,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "easy",
                 "points": 150,
                 "tags": ["reflected", "cookie-theft"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Try entering some HTML in the search. Does the page render it?", "cost": 0},
                     {"order_num": 2, "content": "If HTML renders, JavaScript does too. The page sets a cookie that JavaScript can read.", "cost": 50},
@@ -1404,6 +1352,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 5,
                 "tags": ["recon"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Every web server's first secret lives at a well-known path in the root.", "cost": 0},
                     {"order_num": 2, "content": "One of the disallowed paths responds to authenticated users with internal status information and something extra.", "cost": 25},
@@ -1419,6 +1369,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 20,
                 "tags": ["sqli", "union", "sqlite"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Try unusual characters in the search. Does the error reveal how your input is being used?", "cost": 0},
                     {"order_num": 2, "content": "The search wraps your input in a string comparison. Closing that string lets you append your own query.", "cost": 50},
@@ -1435,6 +1387,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 25,
                 "tags": ["sqli", "union", "sqlite"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Try putting a special character in the gift code field. What does the response look like?", "cost": 0},
                     {"order_num": 2, "content": "The code field goes straight into a WHERE clause. Enumerate the database schema to find what other tables exist.", "cost": 50},
@@ -1451,6 +1405,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 20,
                 "tags": ["sqli", "api", "path-injection"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Check /openapi.json — the spec lists every available route including newer v1 endpoints.", "cost": 0},
                     {"order_num": 2, "content": "The review endpoint uses an f-string SQL query. The path parameter is the injection point.", "cost": 50},
@@ -1466,6 +1422,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 15,
                 "tags": ["xss", "stored", "cookies"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Review text is rendered with no output encoding. A script tag in a review runs for every visitor.", "cost": 0},
                     {"order_num": 2, "content": "Check what cookies are present when the movie page loads. Not all of them carry the HttpOnly flag.", "cost": 25},
@@ -1481,6 +1439,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 10,
                 "tags": ["idor", "access-control"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Booking IDs are sequential integers. Start from 1.", "cost": 0},
                     {"order_num": 2, "content": "The confirmation code field on the first booking contains something unusual.", "cost": 25},
@@ -1496,6 +1456,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 10,
                 "tags": ["bac", "access-control"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Register a regular account and navigate to the path listed in robots.txt.", "cost": 0},
                 ],
@@ -1510,6 +1472,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 35,
                 "tags": ["ssti", "jinja2", "flask"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Try submitting `{{ 7*7 }}` in the preview body. If you see 49, the server is evaluating your input.", "cost": 0},
                     {"order_num": 2, "content": "The server-side context exposes internal application state. What objects are available in the template?", "cost": 75},
@@ -1525,6 +1489,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 20,
                 "tags": ["mass-assignment", "privilege-escalation"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "The profile form shows display_name, email, and password — but the endpoint accepts every user column.", "cost": 0},
                     {"order_num": 2, "content": "After updating your own profile with extra fields, an authenticated API endpoint will unlock. Check /api/v1/.", "cost": 50},
@@ -1540,6 +1506,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "estimated_minutes": 5,
                 "tags": ["bac", "unauthenticated", "recon"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "robots.txt lists several disallowed paths. One of them needs no credentials at all.", "cost": 0},
                 ],
@@ -1578,6 +1546,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "easy",
                 "points": 50,
                 "tags": ["information-disclosure"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Check the standard file that web crawlers are expected to read before indexing a site.", "cost": 0},
                     {"order_num": 2, "content": "One of the disallowed paths is a community that isn't linked from anywhere. Visit it and read the announcements.", "cost": 25},
@@ -1592,6 +1562,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "easy",
                 "points": 100,
                 "tags": ["authentication", "boolean-based"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Try entering a special character in the username. What does the server respond with?", "cost": 0},
                     {"order_num": 2, "content": "A quote character breaks the authentication query. A comment character ends the query before the password check.", "cost": 50},
@@ -1607,6 +1579,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "medium",
                 "points": 250,
                 "tags": ["union-based", "sqlite"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Try unusual characters in the search box. Does the error reveal anything about how the query works?", "cost": 0},
                     {"order_num": 2, "content": "The database has internal tables not visible through the UI. You can enumerate them.", "cost": 50},
@@ -1622,6 +1596,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "easy",
                 "points": 100,
                 "tags": ["api", "information-disclosure"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Browse to the messages endpoint. Try IDs you didn't send or receive.", "cost": 0},
                     {"order_num": 2, "content": "Early messages in the system were sent between admin accounts. Low IDs may contain sensitive information.", "cost": 25},
@@ -1636,6 +1612,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "easy",
                 "points": 100,
                 "tags": ["information-disclosure", "broken-access-control"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Draft posts have their own URL pattern. Log in and explore the post path — there may be a draft sub-path.", "cost": 0},
                     {"order_num": 2, "content": "Try iterating post IDs on the draft path. Some posts were never published but are still accessible.", "cost": 25},
@@ -1650,6 +1628,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "medium",
                 "points": 250,
                 "tags": ["mass-assignment", "privilege-escalation"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Intercept the profile update request. Are there fields the server accepts that aren't in the HTML form?", "cost": 0},
                     {"order_num": 2, "content": "Try including fields related to account standing or permissions in the POST body.", "cost": 50},
@@ -1665,6 +1645,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "hard",
                 "points": 450,
                 "tags": ["ssti", "jinja2", "broken-access-control"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Try submitting `{{ 7*7 }}` in the announcement preview. If the response shows 49, the server evaluates your input.", "cost": 0},
                     {"order_num": 2, "content": "The preview endpoint checks login but not role. Any registered user can submit a preview.", "cost": 50},
@@ -1680,6 +1662,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "medium",
                 "points": 350,
                 "tags": ["command-injection", "rce"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Try submitting a URL with shell metacharacters in it. What does the server return?", "cost": 0},
                     {"order_num": 2, "content": "The URL is passed to a shell command. Characters that separate shell commands can break out of the URL argument.", "cost": 50},
@@ -1695,412 +1679,14 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "difficulty": "easy",
                 "points": 200,
                 "tags": ["stored", "cookie-theft"],
+                "skills": [],
+                "flags": [],
                 "hints": [
                     {"order_num": 1, "content": "Edit your profile bio. Try including some HTML. Does your profile page render it?", "cost": 0},
                     {"order_num": 2, "content": "If HTML renders in the bio, JavaScript does too. The profile page sets a session cookie.", "cost": 50},
                     {"order_num": 3, "content": "The session cookie on this page is not HttpOnly — JavaScript can read it with `document.cookie`.", "cost": 75},
                 ],
             },
-        ],
-    },
-    # ------------------------------------------------------------------ #
-    # Scanner fire-ranges (9–12) — structured challenges for tool testing  #
-    # ------------------------------------------------------------------ #
-    {
-        "id": 9,
-        "slug": "breachsql",
-        "name": "BreachSQL",
-        "description": "57 SQL injection challenges across MySQL, PostgreSQL, and SQLite. Tiered T1–T5.",
-        "category": "firerange",
-        "container_names": [
-            "octorig-breachsql-db",
-            "octorig-breachsql-pg",
-            "octorig-breachsql-app",
-        ],
-        "images": {
-            "db": "mysql:8.0",
-            "pg": "postgres:16-alpine",
-            "app": "octorig-breachsql:latest",
-        },
-        "build_contexts": {"app": "labs/firerange"},
-        "start_order": ["db", "pg", "app"],
-        "network_name": "octorig-breachsql-net",
-        "subnet": "172.28.8.0/24",
-        "app_ip": "172.28.8.2",
-        "exposed_ports": {"http": 80},
-        "access_info": [
-            {"key": "URL", "value": "http://172.28.8.2"},
-            {"key": "Challenges", "value": "GET /api/challenges"},
-            {"key": "Submit flag", "value": "POST /api/submit-flag"},
-            {"key": "Scoreboard", "value": "GET /scoreboard"},
-        ],
-        "volume_names": ["octorig-breachsql-scores"],
-        "env_vars": {
-            "MYSQL_HOST": "octorig-breachsql-db",
-            "MYSQL_PORT": "3306",
-            "MYSQL_USER": "firerange",
-            "MYSQL_PASSWORD": "firerange",
-            "MYSQL_DATABASE": "firerange",
-            "PG_HOST": "octorig-breachsql-pg",
-            "PG_PORT": "5432",
-            "PG_USER": "firerange",
-            "PG_PASSWORD": "firerange",
-            "PG_DATABASE": "firerange",
-        },
-        "requires_privileged": False,
-        "challenges": [],
-    },
-    {
-        "id": 10,
-        "slug": "stingxss",
-        "name": "StingXSS",
-        "description": "40+ XSS challenges: reflected, stored, DOM, blind, WAF bypass, CSP, GraphQL, WebSocket.",
-        "category": "firerange",
-        "container_names": ["octorig-stingxss"],
-        "images": {"app": "octorig-stingxss:latest"},
-        "build_contexts": {"app": "labs/stingxss"},
-        "start_order": ["app"],
-        "network_name": "octorig-stingxss-net",
-        "subnet": "172.28.9.0/24",
-        "app_ip": "172.28.9.2",
-        "exposed_ports": {"http": 80},
-        "access_info": [
-            {"key": "URL", "value": "http://172.28.9.2"},
-            {"key": "Challenges", "value": "GET /api/challenges"},
-            {"key": "Submit flag", "value": "POST /api/submit-flag"},
-            {"key": "XSS beacon", "value": "GET /api/catch?cid=...&player=..."},
-        ],
-        "volume_names": [],
-        "env_vars": {},
-        "requires_privileged": False,
-        "challenges": [],
-    },
-    {
-        "id": 11,
-        "slug": "vaultgate",
-        "name": "VaultGate",
-        "description": "IDOR / BOLA benchmarking: horizontal, obfuscated IDs, JWT tampering, mass assignment.",
-        "category": "firerange",
-        "container_names": ["octorig-vaultgate"],
-        "images": {"app": "octorig-vaultgate:latest"},
-        "build_contexts": {"app": "labs/vaultgate"},
-        "start_order": ["app"],
-        "network_name": "octorig-vaultgate-net",
-        "subnet": "172.28.10.0/24",
-        "app_ip": "172.28.10.2",
-        "exposed_ports": {"http": 80},
-        "access_info": [
-            {"key": "URL", "value": "http://172.28.10.2"},
-            {"key": "Challenges", "value": "GET /api/challenges"},
-            {"key": "Submit flag", "value": "POST /api/submit-flag"},
-        ],
-        "volume_names": [],
-        "env_vars": {},
-        "requires_privileged": False,
-        "challenges": [],
-    },
-    {
-        "id": 12,
-        "slug": "vaultriprange",
-        "name": "VaultRip Range",
-        "description": "Credential harvesting lab. SSH services with intentionally weak/exposed secrets.",
-        "category": "firerange",
-        "container_names": ["octorig-vaultriprange"],
-        "images": {"app": "octorig-vaultriprange:latest"},
-        "build_contexts": {"app": "labs/vaultriprange"},
-        "start_order": ["app"],
-        "network_name": "octorig-vaultriprange-net",
-        "subnet": "172.28.11.0/24",
-        "app_ip": "172.28.11.2",
-        "exposed_ports": {"ssh": 22},
-        "access_info": [
-            {"key": "SSH", "value": "ssh admin@172.28.11.2"},
-        ],
-        "volume_names": [],
-        "env_vars": {},
-        "requires_privileged": False,
-        "challenges": [],
-    },
-    # ------------------------------------------------------------------ #
-    # Third-party images (13–18) — pulled from Docker Hub                  #
-    # ------------------------------------------------------------------ #
-    {
-        "id": 13,
-        "slug": "juiceshop",
-        "name": "Juice Shop",
-        "description": "OWASP Juice Shop — deliberately insecure Node.js web application.",
-        "category": "thirdparty",
-        "container_names": ["octorig-juiceshop"],
-        "images": {"app": "bkimminich/juice-shop:latest"},
-        "build_contexts": {},
-        "start_order": ["app"],
-        "network_name": "octorig-juiceshop-net",
-        "subnet": "172.28.12.0/24",
-        "app_ip": "172.28.12.2",
-        "exposed_ports": {"http": 3000},
-        "access_info": [
-            {"key": "URL", "value": "http://172.28.12.2:3000"},
-        ],
-        "volume_names": [],
-        "env_vars": {},
-        "requires_privileged": False,
-        "challenges": [],
-    },
-    {
-        "id": 14,
-        "slug": "dvwa",
-        "name": "DVWA",
-        "description": "Damn Vulnerable Web Application. Classic PHP/MySQL training target.",
-        "category": "thirdparty",
-        "container_names": ["octorig-dvwa"],
-        "images": {"app": "ghcr.io/digininja/dvwa:latest"},
-        "build_contexts": {},
-        "start_order": ["app"],
-        "network_name": "octorig-dvwa-net",
-        "subnet": "172.28.13.0/24",
-        "app_ip": "172.28.13.2",
-        "exposed_ports": {"http": 80},
-        "access_info": [
-            {"key": "URL", "value": "http://172.28.13.2"},
-            {"key": "Login", "value": "admin / password"},
-        ],
-        "volume_names": [],
-        "env_vars": {},
-        "requires_privileged": False,
-        "challenges": [],
-    },
-    {
-        "id": 15,
-        "slug": "metasploitable",
-        "name": "Metasploitable2",
-        "description": "Classic intentionally vulnerable Linux VM in Docker form. Multi-service.",
-        "category": "thirdparty",
-        "container_names": ["octorig-metasploitable"],
-        "images": {"app": "tleemcjr/metasploitable2:latest"},
-        "build_contexts": {},
-        "start_order": ["app"],
-        "network_name": "octorig-metasploitable-net",
-        "subnet": "172.28.14.0/24",
-        "app_ip": "172.28.14.2",
-        "exposed_ports": {"http": 80, "ftp": 21, "ssh": 22, "telnet": 23},
-        "access_info": [
-            {"key": "URL", "value": "http://172.28.14.2"},
-            {"key": "SSH", "value": "ssh msfadmin@172.28.14.2 (password: msfadmin)"},
-        ],
-        "volume_names": [],
-        "env_vars": {},
-        "requires_privileged": True,
-        "challenges": [],
-    },
-    {
-        "id": 16,
-        "slug": "webgoat",
-        "name": "WebGoat",
-        "description": "OWASP WebGoat — deliberately insecure Java web application for training.",
-        "category": "thirdparty",
-        "container_names": ["octorig-webgoat"],
-        "images": {"app": "webgoat/webgoat:latest"},
-        "build_contexts": {},
-        "start_order": ["app"],
-        "network_name": "octorig-webgoat-net",
-        "subnet": "172.28.15.0/24",
-        "app_ip": "172.28.15.2",
-        "exposed_ports": {"http": 8080},
-        "access_info": [
-            {"key": "URL", "value": "http://172.28.15.2:8080/WebGoat"},
-        ],
-        "volume_names": [],
-        "env_vars": {},
-        "requires_privileged": False,
-        "challenges": [],
-    },
-    {
-        "id": 17,
-        "slug": "vulnad",
-        "name": "VulnAD",
-        "description": "Vulnerable Active Directory environment. Samba4 DC with misconfigured GPOs.",
-        "category": "thirdparty",
-        "container_names": ["octorig-vulnad"],
-        "images": {"app": "octorig-vulnad:latest"},
-        "build_contexts": {"app": "labs/vulnad"},
-        "start_order": ["app"],
-        "network_name": "octorig-vulnad-net",
-        "subnet": "172.28.17.0/24",
-        "app_ip": "172.28.17.2",
-        "exposed_ports": {"ldap": 389, "smb": 445, "kerberos": 88},
-        "access_info": [
-            {"key": "Domain", "value": "VULNAD.LOCAL"},
-            {"key": "DC IP", "value": "172.28.17.2"},
-            {"key": "Admin", "value": "Administrator / Passw0rd!"},
-        ],
-        "volume_names": [],
-        "env_vars": {},
-        "requires_privileged": True,
-        "challenges": [],
-    },
-]
-
-REGISTRY_BY_SLUG: dict[str, LabDefinition] = {lab["slug"]: lab for lab in LAB_REGISTRY}
-REGISTRY_BY_ID: dict[int, LabDefinition] = {lab["id"]: lab for lab in LAB_REGISTRY}
-
-
-# ------------------------------------------------------------------ #
-# Standalone challenges — not tied to any lab/container               #
-# ------------------------------------------------------------------ #
-
-STANDALONE_CHALLENGES: list[ChallengeDef] = [
-    {
-        "slug": "py-reverse-gear",
-        "title": "Reverse Gear",
-        "description": "Something got flipped. Can you read it the right way?",
-        "challenge_type": "short_answer",
-        "difficulty": "easy",
-        "category": "python",
-        "tags": ["python", "strings"],
-        "skills": [],
-        "points": 50,
-        "content": {
-            "code_snippet": 'text = "OctoRig"\nprint(text[::-1])',
-            "language": "python",
-        },
-        "flags": [{"value": "giRotoO", "flag_type": "static", "case_sensitive": True}],
-        "hints": [
-            {"order_num": 1, "content": "Run it in a Python interpreter to verify.", "cost": 0},
-        ],
-    },
-    {
-        "slug": "py-sum-squares",
-        "title": "Sum of Squares",
-        "description": "Three integers, squared and summed. What's the total?",
-        "challenge_type": "short_answer",
-        "difficulty": "easy",
-        "category": "python",
-        "tags": ["python", "math"],
-        "skills": [],
-        "points": 50,
-        "content": {
-            "code_snippet": "result = sum(x**2 for x in range(1, 4))\nprint(result)",
-            "language": "python",
-        },
-        "flags": [{"value": "14", "flag_type": "static", "case_sensitive": False}],
-        "hints": [
-            {"order_num": 1, "content": "range(1, 4) produces the integers 1, 2, and 3.", "cost": 0},
-        ],
-    },
-    {
-        "slug": "py-bit-mask",
-        "title": "Bit Mask",
-        "description": "Two binary patterns overlap. What remains after the filter is applied?",
-        "challenge_type": "short_answer",
-        "difficulty": "easy",
-        "category": "python",
-        "tags": ["python", "bitwise"],
-        "skills": [],
-        "points": 75,
-        "content": {
-            "code_snippet": "x = 0b1010\ny = 0b1100\nprint(x & y)",
-            "language": "python",
-        },
-        "flags": [{"value": "8", "flag_type": "static", "case_sensitive": False}],
-        "hints": [
-            {"order_num": 1, "content": "The & operator keeps only bits that are 1 in both operands.", "cost": 0},
-            {"order_num": 2, "content": "0b1000 in decimal is 8.", "cost": 25},
-        ],
-    },
-    {
-        "slug": "py-last-in-line",
-        "title": "Last in Line",
-        "description": "The sequence is generated. Only the final element matters.",
-        "challenge_type": "short_answer",
-        "difficulty": "easy",
-        "category": "python",
-        "tags": ["python", "lists"],
-        "skills": [],
-        "points": 50,
-        "content": {
-            "code_snippet": "nums = [i * 3 for i in range(1, 6)]\nprint(nums[-1])",
-            "language": "python",
-        },
-        "flags": [{"value": "15", "flag_type": "static", "case_sensitive": False}],
-        "hints": [
-            {"order_num": 1, "content": "range(1, 6) produces five values. nums[-1] is the last one.", "cost": 0},
-        ],
-    },
-    {
-        "slug": "py-stripped",
-        "title": "Stripped",
-        "description": "Whitespace hides the truth. Remove it, then replace the gaps.",
-        "challenge_type": "short_answer",
-        "difficulty": "easy",
-        "category": "python",
-        "tags": ["python", "strings"],
-        "skills": [],
-        "points": 50,
-        "content": {
-            "code_snippet": 's = "  hello world  "\nprint(s.strip().replace(" ", "_"))',
-            "language": "python",
-        },
-        "flags": [{"value": "hello_world", "flag_type": "static", "case_sensitive": True}],
-        "hints": [
-            {"order_num": 1, "content": "strip() removes leading/trailing whitespace. replace() handles the rest.", "cost": 0},
-        ],
-    },
-    {
-        "slug": "py-letter-count",
-        "title": "Letter Count",
-        "description": "A letter repeats through the swamp. How many times?",
-        "challenge_type": "short_answer",
-        "difficulty": "easy",
-        "category": "python",
-        "tags": ["python", "strings"],
-        "skills": [],
-        "points": 50,
-        "content": {
-            "code_snippet": 'word = "mississippi"\nprint(word.count("s"))',
-            "language": "python",
-        },
-        "flags": [{"value": "4", "flag_type": "static", "case_sensitive": False}],
-        "hints": [
-            {"order_num": 1, "content": "Trace through: m-i-s-s-i-s-s-i-p-p-i", "cost": 0},
-        ],
-    },
-    {
-        "slug": "py-sorted-unique",
-        "title": "Sorted Unique",
-        "description": "Duplicates removed, sorted ascending. What sits at index 2?",
-        "challenge_type": "short_answer",
-        "difficulty": "easy",
-        "category": "python",
-        "tags": ["python", "lists", "sets"],
-        "skills": [],
-        "points": 75,
-        "content": {
-            "code_snippet": "nums = [3, 1, 4, 1, 5, 9, 2, 6]\nprint(sorted(set(nums))[2])",
-            "language": "python",
-        },
-        "flags": [{"value": "3", "flag_type": "static", "case_sensitive": False}],
-        "hints": [
-            {"order_num": 1, "content": "set() removes duplicates. sorted() returns them in ascending order. Indexing is zero-based.", "cost": 0},
-            {"order_num": 2, "content": "After dedup and sort: [1, 2, 3, 4, 5, 6, 9]. Index 2 is the third element.", "cost": 25},
-        ],
-    },
-    {
-        "slug": "py-chained-keys",
-        "title": "Chained Keys",
-        "description": "Three pairs, zipped into a map. Retrieve what was stored at the middle key.",
-        "challenge_type": "short_answer",
-        "difficulty": "easy",
-        "category": "python",
-        "tags": ["python", "dictionaries"],
-        "skills": [],
-        "points": 50,
-        "content": {
-            "code_snippet": 'keys = ["alpha", "beta", "gamma"]\nvals = [10, 20, 30]\nd = dict(zip(keys, vals))\nprint(d["beta"])',
-            "language": "python",
-        },
-        "flags": [{"value": "20", "flag_type": "static", "case_sensitive": False}],
-        "hints": [
-            {"order_num": 1, "content": "zip() pairs each key with the value at the same position.", "cost": 0},
         ],
     },
 ]
