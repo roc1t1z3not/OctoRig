@@ -79,6 +79,8 @@ def sync_registry(db: Session) -> None:
         for ch_def in lab_def.get("challenges", []):
             ch = db.query(Challenge).filter(Challenge.slug == ch_def["slug"]).first()
             if ch is None:
+                lab_name_tag = lab_def["name"]
+                raw_tags = [t for t in ch_def.get("tags", []) if t != lab_name_tag]
                 ch = Challenge(
                     slug=ch_def["slug"],
                     title=ch_def["title"],
@@ -86,7 +88,7 @@ def sync_registry(db: Session) -> None:
                     challenge_type=ch_def["challenge_type"],
                     difficulty=ch_def["difficulty"],
                     category=ch_def["category"],
-                    tags=ch_def.get("tags", []),
+                    tags=[lab_name_tag] + raw_tags,
                     skills=ch_def.get("skills", []),
                     points=ch_def.get("points", 100),
                     is_active=True,
@@ -113,10 +115,12 @@ def sync_registry(db: Session) -> None:
                     ))
             else:
                 # Keep title/description/points in sync if the registry changes
+                lab_name_tag = lab_def["name"]
+                raw_tags = [t for t in ch_def.get("tags", ch.tags) if t != lab_name_tag]
                 ch.title = ch_def["title"]
                 ch.description = ch_def["description"]
                 ch.points = ch_def.get("points", ch.points)
-                ch.tags = ch_def.get("tags", ch.tags)
+                ch.tags = [lab_name_tag] + raw_tags
                 ch.skills = ch_def.get("skills", ch.skills)
                 ch.lab_template_id = lab_def["id"]
 

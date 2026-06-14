@@ -1,4 +1,4 @@
-from flask import request, render_template, session, redirect, url_for
+from flask import make_response, request, render_template, session, redirect, url_for
 from db import get_db
 
 
@@ -20,7 +20,14 @@ def init(app):
             'total_wagered':  db.execute("SELECT COALESCE(SUM(bet),0) FROM game_history").fetchone()[0],
             'total_messages': db.execute("SELECT COUNT(*) FROM chat_messages").fetchone()[0],
         }
-        return render_template('admin.html', users=users, stats=stats)
+        html = render_template('admin.html', users=users, stats=stats)
+        banner = (
+            '<div style="background:#0b0f1a;color:#f59e0b;font-family:monospace;'
+            'font-size:0.75rem;padding:0.5rem 1rem;border-bottom:1px solid #78350f;">'
+            '&#x1F3C6; Broken access control confirmed &mdash; '
+            '<code>FLAG{ga_bac_admin_panel}</code></div>'
+        )
+        return make_response(banner + html)
 
     # VULN: IDOR — no is_admin check on GET
     @app.route('/admin/users/<int:user_id>', methods=['GET', 'POST'])

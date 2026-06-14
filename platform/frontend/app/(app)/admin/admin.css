@@ -47,6 +47,26 @@
   color: var(--g-text-muted);
 }
 
+/* Stat cards grid on admin dashboard */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Quick-links section */
+.quick-links {
+  margin-bottom: 1.5rem;
+}
+
+.link-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
 .user-panel {
   display: grid;
   grid-template-columns: 1fr 340px;

@@ -9,8 +9,10 @@ from app.core.exceptions import bad_request, conflict, not_found
 from app.core.security import hash_password
 from app.models.api_key import ApiKey
 from app.models.audit_log import AuditLog
+from app.models.challenge import ChallengeSubmission, HintUnlock
 from app.models.deployment import Deployment, DeploymentStatus
 from app.models.scheduled_action import ScheduledAction, ScheduledActionStatus
+from app.models.scoring import ScoreTransaction
 from app.models.team import Team, TeamMember
 from app.models.user import User
 from app.schemas.admin import (
@@ -182,6 +184,48 @@ def reset_password(
     audit_service.write_audit(
         db, action="admin.password_reset", user_id=actor.id,
         detail={"target_user_id": user_id},
+        ip=request.client.host if request.client else None,
+    )
+
+
+@router.post("/users/{user_id}/reset-points", status_code=204)
+def reset_user_points(
+    user_id: int,
+    request: Request,
+    actor: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> None:
+    user = db.get(User, user_id)
+    if user is None:
+        raise not_found("User")
+    db.query(ScoreTransaction).filter(ScoreTransaction.user_id == user_id).delete()
+    db.query(ChallengeSubmission).filter(ChallengeSubmission.user_id == user_id).delete()
+    db.query(HintUnlock).filter(HintUnlock.user_id == user_id).delete()
+    db.commit()
+    audit_service.write_audit(
+        db, action="admin.reset_points", user_id=actor.id,
+        detail={"target_user_id": user_id},
+        ip=request.client.host if request.client else None,
+    )
+
+
+@router.post("/reset-db", status_code=204)
+def reset_database(
+    request: Request,
+    actor: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> None:
+    """Wipe all user-generated data, keeping accounts, teams, labs and challenges."""
+    db.query(ScoreTransaction).delete()
+    db.query(ChallengeSubmission).delete()
+    db.query(HintUnlock).delete()
+    db.query(AuditLog).delete()
+    db.query(Deployment).delete()
+    db.query(ScheduledAction).delete()
+    db.commit()
+    audit_service.write_audit(
+        db, action="admin.reset_db", user_id=actor.id,
+        detail={"triggered_by": actor.username},
         ip=request.client.host if request.client else None,
     )
 

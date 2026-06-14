@@ -23,7 +23,6 @@ const NAV_MAIN = [
   { href: "/deployments", icon: Rocket,          label: "Deployments" },
   { href: "/teams",       icon: Users,           label: "Teams" },
   { href: "/api-keys",    icon: KeyRound,        label: "API Keys" },
-  { href: "/settings",    icon: Settings,        label: "Settings" },
 ];
 
 const NAV_ADMIN = [
@@ -32,6 +31,7 @@ const NAV_ADMIN = [
   { href: "/admin/teams",        icon: FolderGit2,  label: "Teams" },
   { href: "/admin/deployments",  icon: Container,   label: "Deployments" },
   { href: "/admin/audit",        icon: ScrollText,  label: "Audit Log" },
+  { href: "/admin/settings",     icon: Settings,    label: "Settings" },
 ];
 
 export function Sidebar() {

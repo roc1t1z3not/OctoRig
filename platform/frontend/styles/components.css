@@ -198,6 +198,12 @@ a.g-card:hover,
   background-color: var(--g-danger-bg);
 }
 
+/* Small variant */
+.g-btn-sm {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.6875rem;
+}
+
 /* Icon button (square, no label) */
 .g-btn-icon {
   background-color: transparent;

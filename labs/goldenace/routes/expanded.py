@@ -159,7 +159,11 @@ def init(app):
             "SELECT id, username, display_name, balance FROM users "
             "WHERE is_vip = 1 OR balance > 10000 ORDER BY balance DESC"
         ).fetchall()
-        return jsonify({"players": [dict(r) for r in rows], "admin": True})
+        return jsonify({
+            "players": [dict(r) for r in rows],
+            "admin": True,
+            "flag": "FLAG{ga_high_rollers_bac}",
+        })
 
     # ── /cashier-office — no auth: exposes promo codes ────────────────────────
 
@@ -168,4 +172,8 @@ def init(app):
         rows = get_db().execute(
             "SELECT id, code, value, max_uses, uses_count FROM promo_codes"
         ).fetchall()
-        return jsonify({"promos": [dict(r) for r in rows], "admin": True})
+        return jsonify({
+            "promos": [dict(r) for r in rows],
+            "admin": True,
+            "flag": "FLAG{ga_cashier_no_auth}",
+        })

@@ -23,6 +23,8 @@
         .page-sub { font-size: 0.75rem; color: var(--g-text-muted); margin-top: 0.2rem; }
         .filter-bar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
         .ch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.875rem; }
+        .ch-lab-filters { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+        .ch-lab-tag { font-size: 0.5625rem; color: var(--g-text-dim, var(--g-text-muted)); font-family: var(--font-mono, monospace); margin-bottom: 0.125rem; }
         .mt-4 { margin-top: 1.5rem; }
         .flex { display: flex; }
         .gap-1 { gap: 0.25rem; }
@@ -36,6 +38,14 @@
 
         .ch-header { margin-bottom: 1.25rem; }
         .ch-meta-row { display: flex; align-items: center; gap: 0.625rem; margin-bottom: 0.5rem; }
+        .ch-lab-status-group { display: inline-flex; align-items: center; gap: 0.3rem; }
+        .ch-lab-badge { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.5625rem; font-family: var(--font-mono, monospace); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.15rem 0.5rem; border-radius: 0.25rem; background: var(--g-accent-dim); color: var(--g-accent); text-decoration: none; }
+        .ch-lab-badge:hover { opacity: 0.8; }
+        .ch-lab-status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .ch-lab-status-dot--live { background: var(--g-success); box-shadow: 0 0 4px var(--g-success); }
+        .ch-lab-status-dot--off  { background: var(--g-text-dim, var(--g-text-muted)); }
+        .ch-lab-open-link { display: inline-flex; align-items: center; gap: 0.2rem; font-size: 0.5625rem; font-family: var(--font-mono, monospace); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.15rem 0.5rem; border-radius: 0.25rem; background: color-mix(in srgb, var(--g-success) 15%, transparent); color: var(--g-success); text-decoration: none; }
+        .ch-lab-open-link:hover { opacity: 0.8; }
         .ch-cat { font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--g-text-muted); }
         .ch-diff { font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
         .ch-solved { display: flex; align-items: center; gap: 0.2rem; font-size: 0.625rem; color: var(--g-success); }

@@ -222,6 +222,18 @@ INSERT OR IGNORE INTO chat_messages VALUES
   (14,6,'card counting, obviously ;)','2026-05-22 10:15:00'),
   (15,7,'has anyone tried the cmnh-lab promo? wild value if it still works','2026-05-22 10:20:00');
 
+CREATE TABLE IF NOT EXISTS _flags (
+    id    INTEGER PRIMARY KEY,
+    name  TEXT UNIQUE NOT NULL,
+    value TEXT NOT NULL
+);
+INSERT OR IGNORE INTO _flags VALUES
+  (1, 'sqli-promo',       'FLAG{ga_promo_sqli_union}'),
+  (2, 'sqli-leaderboard', 'FLAG{ga_leaderboard_sqli_union}');
+
+INSERT OR IGNORE INTO game_history VALUES
+  (41,1,'slots',0.0,'win',0.0,'FLAG{ga_idor_suite_exposed}','2026-01-01 00:01:00');
+
 INSERT OR IGNORE INTO live_feed VALUES
   (1, 'lucky_larry won $500.00 on slots!','2026-05-22 09:10:00'),
   (2, 'high_roller won $2,000.00 on blackjack!','2026-05-22 09:00:00'),

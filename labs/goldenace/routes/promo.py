@@ -27,6 +27,10 @@ def init(app):
                 error = 'This code has already been fully redeemed.'
             else:
                 # VULN: promo reuse — no check in promo_redemptions before redeeming
+                already = db.execute(
+                    "SELECT 1 FROM promo_redemptions WHERE user_id=? AND promo_id=?",
+                    (uid, row['id'])
+                ).fetchone()
                 now = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
                 db.execute(
                     "UPDATE promo_codes SET uses_count = uses_count + 1 WHERE id = ?",
@@ -45,6 +49,8 @@ def init(app):
                 )
                 db.commit()
                 success = f'Code redeemed! ${row["value"]:,.2f} added to your balance.'
+                if already:
+                    success += ' FLAG{ga_promo_reuse_exploit}'
 
         user = db.execute("SELECT * FROM users WHERE id = ?", (uid,)).fetchone()
         return render_template('promo.html', user=user, error=error, success=success)

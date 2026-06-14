@@ -3,15 +3,17 @@ import "./users-admin.css";
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, UserPlus, ShieldCheck, ShieldOff, MoreHorizontal } from "lucide-react";
+import { Search, UserPlus, ShieldCheck, ShieldOff, RotateCcw } from "lucide-react";
 import {
   getAdminUsers,
   createAdminUser,
   updateAdminUser,
   resetUserPassword,
+  resetUserPoints,
   type AdminUser,
 } from "@/lib/api/admin";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { useConfirmStore } from "@/stores/confirm.store";
 
 type Tab = "list" | "create";
 
@@ -28,6 +30,7 @@ function RolePill({ label, active }: { label: string; active: boolean }) {
 export default function AdminUsersPage() {
   const qc = useQueryClient();
   const { push } = useNotificationsStore();
+  const { confirm } = useConfirmStore();
   const [tab, setTab] = useState<Tab>("list");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<AdminUser | null>(null);
@@ -87,6 +90,15 @@ export default function AdminUsersPage() {
       push("success", "Password reset");
     },
     onError: () => push("error", "Failed to reset password"),
+  });
+
+  const resetPointsMutation = useMutation({
+    mutationFn: (id: number) => resetUserPoints(id),
+    onSuccess: (_, id) => {
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+      push("success", "Points reset — all submissions and scores cleared");
+    },
+    onError: () => push("error", "Failed to reset points"),
   });
 
   return (
@@ -218,6 +230,21 @@ export default function AdminUsersPage() {
                         onClick={() => { setSelected(u); setShowReset(true); }}
                       >
                         Reset PW
+                      </button>
+                      <button
+                        className="g-btn g-btn-ghost g-btn-sm"
+                        title="Reset points &amp; submissions"
+                        disabled={resetPointsMutation.isPending}
+                        onClick={() => confirm({
+                          title: `Reset points for ${u.username}?`,
+                          body: "This will delete all their challenge submissions, scores, and hint unlocks. This cannot be undone.",
+                          confirmLabel: "Reset Points",
+                          dangerous: true,
+                          onConfirm: () => resetPointsMutation.mutate(u.id),
+                        })}
+                      >
+                        <RotateCcw size={12} />
+                        Pts
                       </button>
                     </div>
                   </td>

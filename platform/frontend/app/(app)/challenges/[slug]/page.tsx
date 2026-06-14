@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, CheckCircle2, XCircle, Eye, EyeOff,
-  Clock, Target, Zap, Lightbulb, Flag, Container, Trash2, Copy,
+  Clock, Target, Zap, Lightbulb, Flag, Container, Trash2, Copy, FlaskConical, ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -15,6 +15,7 @@ import {
 } from "@/lib/api/challenges";
 import { getMyProfile } from "@/lib/api/profiles";
 import { deployInstance, getMyInstance, stopDeployment, type Deployment } from "@/lib/api/deployments";
+import { getLabs } from "@/lib/api/labs";
 import { useNotificationsStore } from "@/stores/notifications.store";
 
 const DIFF_COLOR: Record<ChallengeDifficulty, string> = {
@@ -232,6 +233,24 @@ export default function ChallengeDetailPage() {
     queryFn: () => getChallenge(slug),
   });
 
+  const { data: labs = [] } = useQuery({
+    queryKey: ["labs"],
+    queryFn: () => getLabs(),
+    staleTime: 30_000,
+    enabled: !!ch?.lab_slug,
+  });
+
+  const labTemplate = ch?.lab_slug
+    ? labs.find((l) => l.slug === ch.lab_slug) ?? null
+    : null;
+
+  const labIsLive =
+    labTemplate?.current_deployment?.status === "running" ||
+    labTemplate?.current_deployment?.status === "starting";
+
+  const labUrl =
+    labTemplate?.access_info.find((a) => a.key === "URL")?.value ?? null;
+
   const { data: instance = null } = useQuery({
     queryKey: ["challenge-instance", ch?.id],
     queryFn: () => getMyInstance(ch!.id),
@@ -329,6 +348,32 @@ export default function ChallengeDetailPage() {
       {/* Header */}
       <div className="ch-header">
         <div className="ch-meta-row">
+          {ch.lab_name && (
+            <span className="ch-lab-status-group">
+              <Link href="/labs" className="ch-lab-badge">
+                <FlaskConical size={10} />
+                {ch.lab_name}
+              </Link>
+              {labTemplate && (
+                <span
+                  className={`ch-lab-status-dot ${labIsLive ? "ch-lab-status-dot--live" : "ch-lab-status-dot--off"}`}
+                  title={labIsLive ? "Lab is running" : "Lab is offline"}
+                />
+              )}
+              {labIsLive && labUrl && (
+                <a
+                  href={labUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ch-lab-open-link"
+                  title={`Open ${ch.lab_name}`}
+                >
+                  <ExternalLink size={10} />
+                  Open Lab
+                </a>
+              )}
+            </span>
+          )}
           <span className="ch-cat">{ch.category.replace(/-/g, " ")}</span>
           <span className="ch-diff" style={{ color: diffColor }}>{ch.difficulty}</span>
           {solvedByMe && (

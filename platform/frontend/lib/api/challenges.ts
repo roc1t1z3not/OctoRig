@@ -25,6 +25,9 @@ export interface ChallengeListItem {
   estimated_minutes: number | null;
   solve_count: number;
   solved_by_me: boolean;
+  lab_slug: string | null;
+  lab_name: string | null;
+  lab_category: string | null;
 }
 
 export interface ChallengeDetail extends ChallengeListItem {
@@ -34,6 +37,9 @@ export interface ChallengeDetail extends ChallengeListItem {
   hints: HintSummary[];
   files: Array<{ id: number; filename: string; size_bytes: number }>;
   version: number;
+  lab_slug: string | null;
+  lab_name: string | null;
+  lab_category: string | null;
 }
 
 export interface FlagSubmitResult {
@@ -63,6 +69,8 @@ export async function getChallenges(params?: {
   difficulty?: string;
   search?: string;
   tag?: string;
+  lab_category?: string;
+  lab_slug?: string;
 }): Promise<ChallengeListItem[]> {
   const { data } = await apiClient.get<ChallengeListItem[]>("/challenges/", {
     params,

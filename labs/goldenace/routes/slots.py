@@ -37,6 +37,7 @@ def init(app):
 
         # VULN: client-supplied bet, no validation — negative bet = free money
         bet  = float(request.form.get('bet', 10))
+        negative_bet_flag = 'FLAG{ga_negative_bet_exploit}' if bet < 0 else None
         memo = request.form.get('memo', '')
 
         reels  = _spin()
@@ -71,12 +72,13 @@ def init(app):
 
         display_reels = [DISPLAY[s] for s in reels]
         return render_template('slots.html', user=user, result={
-            'reels':       display_reels,
-            'reels_raw':   reels,
-            'bet':         bet,
-            'payout':      payout,
-            'net':         net,
-            'outcome':     result,
-            'new_balance': new_balance,
-            'memo':        memo,
+            'reels':              display_reels,
+            'reels_raw':          reels,
+            'bet':                bet,
+            'payout':             payout,
+            'net':                net,
+            'outcome':            result,
+            'new_balance':        new_balance,
+            'memo':               memo,
+            'negative_bet_flag':  negative_bet_flag,
         })

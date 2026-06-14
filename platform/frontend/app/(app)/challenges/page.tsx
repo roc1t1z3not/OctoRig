@@ -6,13 +6,15 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Search, CheckCircle2, Clock, Target } from "lucide-react";
 import { getChallenges, type ChallengeListItem, type ChallengeDifficulty } from "@/lib/api/challenges";
+import { getLabs, type LabTemplate } from "@/lib/api/labs";
 
 const CATEGORIES = [
   { id: undefined, label: "All" },
-  { id: "sql-injection", label: "SQLi" },
+  { id: "sqli", label: "SQLi" },
   { id: "xss", label: "XSS" },
   { id: "idor", label: "IDOR" },
   { id: "web", label: "Web" },
+  { id: "recon", label: "Recon" },
 ] as const;
 
 const DIFFICULTIES: { id: ChallengeDifficulty | undefined; label: string }[] = [
@@ -21,6 +23,13 @@ const DIFFICULTIES: { id: ChallengeDifficulty | undefined; label: string }[] = [
   { id: "medium", label: "Medium" },
   { id: "hard", label: "Hard" },
   { id: "insane", label: "Insane" },
+];
+
+const LAB_CATEGORIES: { id: string | undefined; label: string }[] = [
+  { id: undefined, label: "All Labs" },
+  { id: "world", label: "World" },
+  { id: "firerange", label: "Fire Range" },
+  { id: "thirdparty", label: "3rd Party" },
 ];
 
 const DIFF_COLOR: Record<ChallengeDifficulty, string> = {
@@ -47,6 +56,10 @@ function ChallengeCard({ ch }: { ch: ChallengeListItem }) {
       </div>
 
       <h3 className="ch-title">{ch.title}</h3>
+
+      {ch.lab_name && (
+        <span className="ch-lab-tag">{ch.lab_name}</span>
+      )}
 
       <div className="ch-tags">
         {ch.tags.slice(0, 3).map((t) => (
@@ -82,12 +95,31 @@ function ChallengeCard({ ch }: { ch: ChallengeListItem }) {
 export default function ChallengesPage() {
   const [category, setCategory] = useState<string | undefined>(undefined);
   const [difficulty, setDifficulty] = useState<ChallengeDifficulty | undefined>(undefined);
+  const [labCategory, setLabCategory] = useState<string | undefined>(undefined);
+  const [labSlug, setLabSlug] = useState<string | undefined>(undefined);
   const [search, setSearch] = useState("");
 
   const { data: challenges = [], isLoading } = useQuery({
-    queryKey: ["challenges", category, difficulty, search],
-    queryFn: () => getChallenges({ category, difficulty, search: search || undefined }),
+    queryKey: ["challenges", category, difficulty, search, labCategory, labSlug],
+    queryFn: () => getChallenges({
+      category,
+      difficulty,
+      search: search || undefined,
+      lab_category: labCategory,
+      lab_slug: labSlug || undefined,
+    }),
   });
+
+  const { data: labs = [] } = useQuery<LabTemplate[]>({
+    queryKey: ["labs"],
+    queryFn: () => getLabs(),
+    staleTime: 60_000,
+  });
+
+  // Filter to only labs that actually have challenges
+  const labsWithChallenges = labCategory
+    ? labs.filter((l) => l.category === labCategory)
+    : labs;
 
   const solved = challenges.filter((c) => c.solved_by_me).length;
   const total = challenges.length;
@@ -137,6 +169,41 @@ export default function ChallengesPage() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Lab filters */}
+      <div className="ch-lab-filters">
+        <div className="flex gap-1">
+          {LAB_CATEGORIES.map((lc) => (
+            <button
+              key={String(lc.id)}
+              className={`g-btn g-btn-sm ${labCategory === lc.id ? "g-btn-primary" : "g-btn-ghost"}`}
+              onClick={() => { setLabCategory(lc.id); setLabSlug(undefined); }}
+            >
+              {lc.label}
+            </button>
+          ))}
+        </div>
+
+        {labsWithChallenges.length > 0 && (
+          <div className="flex gap-1 flex-wrap">
+            <button
+              className={`g-btn g-btn-sm ${!labSlug ? "g-btn-subtle" : "g-btn-ghost"}`}
+              onClick={() => setLabSlug(undefined)}
+            >
+              All
+            </button>
+            {labsWithChallenges.map((lab) => (
+              <button
+                key={lab.slug}
+                className={`g-btn g-btn-sm ${labSlug === lab.slug ? "g-btn-subtle" : "g-btn-ghost"}`}
+                onClick={() => setLabSlug(lab.slug === labSlug ? undefined : lab.slug)}
+              >
+                {lab.name}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {isLoading ? (

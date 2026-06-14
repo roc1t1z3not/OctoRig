@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Notifications } from "@/components/ui/Notifications";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { useUserStore } from "@/stores/user.store";
 import { useThemeStore } from "@/stores/theme.store";
 
@@ -34,6 +35,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
       <Notifications />
+      <ConfirmModal />
     </>
   );
 }

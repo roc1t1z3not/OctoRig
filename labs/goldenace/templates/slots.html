@@ -26,6 +26,11 @@
       {% if result.memo %}
       <p style="color:var(--muted);font-size:0.82rem;">Memo: {{ result.memo | safe }}</p>
       {% endif %}
+      {% if result.negative_bet_flag %}
+      <p style="font-family:monospace;font-size:0.82rem;color:#f59e0b;margin-top:0.5rem;">
+        &#x26A0; Anomalous bet detected. Server audit log: <code>{{ result.negative_bet_flag }}</code>
+      </p>
+      {% endif %}
     </div>
     {% else %}
     <div class="reel-row">

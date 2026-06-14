@@ -35,7 +35,10 @@ def list_challenges(
     difficulty: Optional[str] = None,
     search: Optional[str] = None,
     tag: Optional[str] = None,
+    lab_category: Optional[str] = None,
+    lab_slug: Optional[str] = None,
 ) -> list[Challenge]:
+    from app.models.lab_template import LabTemplate
     q = db.query(Challenge).filter(
         Challenge.is_active.is_(True),
         Challenge.is_archived.is_(False),
@@ -49,6 +52,12 @@ def list_challenges(
         q = q.filter(Challenge.title.ilike(term) | Challenge.description.ilike(term))
     if tag:
         q = q.filter(Challenge.tags.contains([tag]))
+    if lab_category or lab_slug:
+        q = q.join(LabTemplate, Challenge.lab_template_id == LabTemplate.id)
+        if lab_category:
+            q = q.filter(LabTemplate.category == lab_category)
+        if lab_slug:
+            q = q.filter(LabTemplate.slug == lab_slug)
     return q.order_by(Challenge.difficulty, Challenge.points, Challenge.id).all()
 
 

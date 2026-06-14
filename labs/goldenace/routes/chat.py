@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from flask import request, render_template, session, redirect, url_for
+from flask import make_response, request, render_template, session, redirect, url_for
 from db import get_db
 
 
@@ -30,4 +30,6 @@ def init(app):
             " ORDER BY c.id DESC LIMIT 50"
         ).fetchall()
         user = db.execute("SELECT * FROM users WHERE id = ?", (uid,)).fetchone()
-        return render_template('chat.html', messages=messages, user=user)
+        resp = make_response(render_template('chat.html', messages=messages, user=user))
+        resp.set_cookie('xss_challenge', 'FLAG{ga_xss_chat_cookie}', httponly=False)
+        return resp

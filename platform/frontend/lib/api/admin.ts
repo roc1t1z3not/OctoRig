@@ -160,3 +160,11 @@ export async function getAdminDeployments(params?: {
   const { data } = await apiClient.get<AdminDeployment[]>("/admin/deployments/", { params });
   return data;
 }
+
+export async function resetUserPoints(userId: number): Promise<void> {
+  await apiClient.post(`/admin/users/${userId}/reset-points`);
+}
+
+export async function resetDatabase(): Promise<void> {
+  await apiClient.post("/admin/reset-db");
+}

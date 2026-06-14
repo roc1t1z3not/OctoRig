@@ -73,6 +73,9 @@ class ChallengeListItem(BaseModel):
     estimated_minutes: Optional[int]
     solve_count: int = 0
     solved_by_me: bool = False
+    lab_slug: Optional[str] = None
+    lab_name: Optional[str] = None
+    lab_category: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -95,6 +98,9 @@ class ChallengeDetail(BaseModel):
     solve_count: int = 0
     solved_by_me: bool = False
     version: int
+    lab_slug: Optional[str] = None
+    lab_name: Optional[str] = None
+    lab_category: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -149,13 +155,20 @@ def list_challenges_endpoint(
     difficulty: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
     tag: Optional[str] = Query(None),
+    lab_category: Optional[str] = Query(None, description="world | firerange | thirdparty"),
+    lab_slug: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[ChallengeListItem]:
     from app.services.challenge_service import check_already_solved
-    challenges = list_challenges(db, category=category, difficulty=difficulty, search=search, tag=tag)
+    challenges = list_challenges(
+        db, category=category, difficulty=difficulty,
+        search=search, tag=tag,
+        lab_category=lab_category, lab_slug=lab_slug,
+    )
     items = []
     for ch in challenges:
+        lab = ch.lab_template
         items.append(
             ChallengeListItem(
                 id=ch.id,
@@ -169,6 +182,9 @@ def list_challenges_endpoint(
                 estimated_minutes=ch.estimated_minutes,
                 solve_count=get_solve_count(db, ch.id),
                 solved_by_me=check_already_solved(db, ch.id, current_user.id),
+                lab_slug=lab.slug if lab else None,
+                lab_name=lab.name if lab else None,
+                lab_category=lab.category if lab else None,
             )
         )
     return items
@@ -183,6 +199,7 @@ def get_challenge_endpoint(
     from app.services.challenge_service import check_already_solved
     ch = get_challenge_by_slug_or_404(db, slug)
     unlocked_ids = get_unlocked_hint_ids(db, current_user.id, ch.id)
+    lab = ch.lab_template
     return ChallengeDetail(
         id=ch.id,
         slug=ch.slug,
@@ -201,6 +218,9 @@ def get_challenge_endpoint(
         solve_count=get_solve_count(db, ch.id),
         solved_by_me=check_already_solved(db, ch.id, current_user.id),
         version=ch.version,
+        lab_slug=lab.slug if lab else None,
+        lab_name=lab.name if lab else None,
+        lab_category=lab.category if lab else None,
     )
 
 
