@@ -89,6 +89,7 @@ export default function ChallengesPage() {
   const [category, setCategory] = useState<string | undefined>(undefined);
   const [difficulty, setDifficulty] = useState<ChallengeDifficulty | undefined>(undefined);
   const [labSlug, setLabSlug] = useState<string | undefined>(undefined);
+  const [solvedFilter, setSolvedFilter] = useState<"all" | "solved" | "unsolved">("all");
   const [search, setSearch] = useState("");
 
   const { data: challenges = [], isLoading } = useQuery({
@@ -109,6 +110,12 @@ export default function ChallengesPage() {
   });
 
   const labsWithChallenges = labs.filter((l) => l.category === "world");
+
+  const displayed = challenges.filter((c) => {
+    if (solvedFilter === "solved") return c.solved_by_me;
+    if (solvedFilter === "unsolved") return !c.solved_by_me;
+    return true;
+  });
 
   const solved = challenges.filter((c) => c.solved_by_me).length;
   const total = challenges.length;
@@ -158,6 +165,18 @@ export default function ChallengesPage() {
             </button>
           ))}
         </div>
+
+        <div className="flex gap-1">
+          {(["all", "unsolved", "solved"] as const).map((s) => (
+            <button
+              key={s}
+              className={`g-btn ${solvedFilter === s ? "g-btn-primary" : "g-btn-ghost"}`}
+              onClick={() => setSolvedFilter(s)}
+            >
+              {s.charAt(0).toUpperCase() + s.slice(1)}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Lab filters */}
@@ -188,11 +207,11 @@ export default function ChallengesPage() {
       ) : (
         <>
           <div className="ch-grid mt-4">
-            {challenges.map((ch) => (
+            {displayed.map((ch) => (
               <ChallengeCard key={ch.id} ch={ch} />
             ))}
           </div>
-          {challenges.length === 0 && (
+          {displayed.length === 0 && (
             <div className="text-muted text-sm mt-4">No challenges match your filter.</div>
           )}
         </>

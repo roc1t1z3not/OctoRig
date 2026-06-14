@@ -94,8 +94,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "title": "What's Off-Limits?",
                 "description": (
                     "Every web server has a way to tell search engines what *not* to index. "
-                    "Rewind Range is no exception — and the things it wants crawlers to ignore "
-                    "are worth a look.\n\n"
                     "Find the right file, follow where it leads, and you'll end up somewhere "
                     "the store would rather keep private.\n\n"
                     "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
@@ -147,8 +145,6 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "description": (
                     "You don't have admin credentials. You might not need them.\n\n"
                     "Rewind Range's login form makes a decision based on what you submit. "
-                    "That decision process has a flaw — the right input in the username "
-                    "field might be enough to walk right in.\n\n"
                     "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
@@ -220,10 +216,7 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "slug": "rw-xss-stored-feedback",
                 "title": "Leave Your Mark",
                 "description": (
-                    "Happy customers leave feedback. Admins read it.\n\n"
-                    "The store has a way to submit comments, and whoever reviews them does "
-                    "so in a browser with elevated privileges. If what you submit "
-                    "gets rendered without scrutiny, that browser might do more than just read.\n\n"
+                    "Happy customers leave feedback. \n\n"
                     "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",

@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard, FlaskConical, Rocket, Settings, LogOut, Users,
   KeyRound, ShieldCheck, UserCog, FolderGit2, Container, ScrollText,
-  Swords, Flag, Award, ChevronUp, Zap, PenTool, User,
+  Swords, Flag, Award, ChevronUp, Zap, PenTool, User, ClipboardList,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useUserStore } from "@/stores/user.store";
@@ -30,8 +30,9 @@ const NAV_ADMIN = [
   { href: "/admin/users",        icon: UserCog,     label: "Users" },
   { href: "/admin/teams",        icon: FolderGit2,  label: "Teams" },
   { href: "/admin/deployments",  icon: Container,   label: "Deployments" },
-  { href: "/admin/audit",        icon: ScrollText,  label: "Audit Log" },
-  { href: "/admin/settings",     icon: Settings,    label: "Settings" },
+  { href: "/admin/audit",        icon: ScrollText,    label: "Audit Log" },
+  { href: "/admin/content",      icon: ClipboardList, label: "Content" },
+  { href: "/admin/settings",     icon: Settings,      label: "Settings" },
 ];
 
 export function Sidebar() {

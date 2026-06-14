@@ -103,10 +103,31 @@ function ReviewForm({
   );
 }
 
+function BodyPreview({ body }: { body: Record<string, unknown> }) {
+  return (
+    <div style={{
+      background: "var(--g-surface)", border: "1px solid var(--g-border)",
+      borderRadius: "4px", padding: "0.75rem",
+    }}>
+      <div style={{ fontSize: "0.625rem", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--g-text-muted)", marginBottom: "0.5rem" }}>
+        Body
+      </div>
+      {Object.keys(body).length === 0 ? (
+        <span style={{ fontSize: "0.75rem", color: "var(--g-text-muted)", fontStyle: "italic" }}>No body content.</span>
+      ) : (
+        <pre style={{ margin: 0, fontSize: "0.75rem", color: "var(--g-text-secondary)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "var(--font-mono, monospace)" }}>
+          {JSON.stringify(body, null, 2)}
+        </pre>
+      )}
+    </div>
+  );
+}
+
 function PendingRow({ sub }: { sub: ContentSubmission }) {
   const qc = useQueryClient();
   const { push } = useNotificationsStore();
   const [showReview, setShowReview] = useState(false);
+  const [showBody, setShowBody] = useState(false);
 
   const { mutate: claim, isPending: claiming } = useMutation({
     mutationFn: () => claimSubmission(sub.id),
@@ -122,12 +143,23 @@ function PendingRow({ sub }: { sub: ContentSubmission }) {
   return (
     <>
       <tr>
-        <td style={{ color: "var(--g-text)" }}>{sub.title}</td>
+        <td>
+          <button
+            className="g-btn g-btn-ghost g-btn-sm"
+            style={{ padding: "0.1rem 0.4rem", fontSize: "0.7rem" }}
+            onClick={() => setShowBody((v) => !v)}
+            title="Toggle body"
+          >
+            {showBody ? "▾" : "▸"}
+          </button>
+          {" "}
+          <span style={{ color: "var(--g-text)" }}>{sub.title}</span>
+        </td>
         <td>
           <span className="role-pill role-pill--on">{sub.content_type}</span>
         </td>
         <td style={{ color: "var(--g-text-muted)", fontFamily: "var(--font-mono, monospace)", fontSize: "0.75rem" }}>
-          {sub.author_id}
+          #{sub.author_id}
         </td>
         <td><StatusBadge status={sub.status} /></td>
         <td>
@@ -152,6 +184,13 @@ function PendingRow({ sub }: { sub: ContentSubmission }) {
           </div>
         </td>
       </tr>
+      {showBody && (
+        <tr>
+          <td colSpan={5} style={{ padding: "0 0.75rem 0.5rem" }}>
+            <BodyPreview body={sub.body} />
+          </td>
+        </tr>
+      )}
       {showReview && isClaimed && (
         <tr>
           <td colSpan={5} style={{ padding: "0 0.75rem 0.75rem" }}>
@@ -166,6 +205,7 @@ function PendingRow({ sub }: { sub: ContentSubmission }) {
 function ApprovedRow({ sub }: { sub: ContentSubmission }) {
   const qc = useQueryClient();
   const { push } = useNotificationsStore();
+  const [showBody, setShowBody] = useState(false);
 
   const { mutate: publish, isPending } = useMutation({
     mutationFn: () => publishSubmission(sub.id),
@@ -177,26 +217,46 @@ function ApprovedRow({ sub }: { sub: ContentSubmission }) {
   });
 
   return (
-    <tr>
-      <td style={{ color: "var(--g-text)" }}>{sub.title}</td>
-      <td>
-        <span className="role-pill role-pill--on">{sub.content_type}</span>
-      </td>
-      <td style={{ color: "var(--g-text-muted)", fontFamily: "var(--font-mono, monospace)", fontSize: "0.75rem" }}>
-        {sub.author_id}
-      </td>
-      <td><StatusBadge status={sub.status} /></td>
-      <td>
-        <button
-          className="g-btn g-btn-primary g-btn-sm"
-          disabled={isPending}
-          onClick={() => publish()}
-        >
-          <Printer size={12} />
-          {isPending ? "Publishing…" : "Publish"}
-        </button>
-      </td>
-    </tr>
+    <>
+      <tr>
+        <td>
+          <button
+            className="g-btn g-btn-ghost g-btn-sm"
+            style={{ padding: "0.1rem 0.4rem", fontSize: "0.7rem" }}
+            onClick={() => setShowBody((v) => !v)}
+            title="Toggle body"
+          >
+            {showBody ? "▾" : "▸"}
+          </button>
+          {" "}
+          <span style={{ color: "var(--g-text)" }}>{sub.title}</span>
+        </td>
+        <td>
+          <span className="role-pill role-pill--on">{sub.content_type}</span>
+        </td>
+        <td style={{ color: "var(--g-text-muted)", fontFamily: "var(--font-mono, monospace)", fontSize: "0.75rem" }}>
+          #{sub.author_id}
+        </td>
+        <td><StatusBadge status={sub.status} /></td>
+        <td>
+          <button
+            className="g-btn g-btn-primary g-btn-sm"
+            disabled={isPending}
+            onClick={() => publish()}
+          >
+            <Printer size={12} />
+            {isPending ? "Publishing…" : "Publish"}
+          </button>
+        </td>
+      </tr>
+      {showBody && (
+        <tr>
+          <td colSpan={5} style={{ padding: "0 0.75rem 0.75rem" }}>
+            <BodyPreview body={sub.body} />
+          </td>
+        </tr>
+      )}
+    </>
   );
 }
 
