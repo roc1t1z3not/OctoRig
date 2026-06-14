@@ -1,5 +1,5 @@
 from datetime import date
-from flask import request, render_template, session, redirect, url_for, abort
+from flask import request, render_template, session, redirect, url_for, abort, make_response
 from db import get_db
 from helpers import current_user
 
@@ -24,7 +24,9 @@ def init(app):
                 "JOIN users u ON r.user_id = u.id ORDER BY r.created_at ASC"
             ).fetchall()
         }
-        return render_template('admin_tickets.html', tickets=tickets, replies=replies)
+        resp = make_response(render_template('admin_tickets.html', tickets=tickets, replies=replies))
+        resp.set_cookie('hb_admin_token', 'FLAG{hb_xss_admin_cookie_stolen}', httponly=False)
+        return resp
 
     @app.route('/admin/tickets/<int:ticket_id>/reply', methods=['POST'])
     def admin_ticket_reply(ticket_id):

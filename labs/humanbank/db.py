@@ -63,6 +63,8 @@ CREATE TABLE IF NOT EXISTS documents (
     uploaded_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS _flags (name TEXT PRIMARY KEY, value TEXT);
+
 CREATE TABLE IF NOT EXISTS reset_tokens (
     id         INTEGER PRIMARY KEY,
     user_id    INTEGER NOT NULL,
@@ -72,7 +74,7 @@ CREATE TABLE IF NOT EXISTS reset_tokens (
 );
 
 INSERT OR IGNORE INTO users VALUES
-  (1,'admin','commonhuman-lab','admin@humanbank.local','HumanBank Admin',1,'','555-0100','HumanBank HQ'),
+  (1,'admin','commonhuman-lab','admin@humanbank.local','HumanBank Admin',1,'FLAG{hb_bac_admin_detail_exposed}','555-0100','FLAG{hb_sqli_login_bypassed}'),
   (2,'alice.wang','sunshine1','alice@example.com','Alice Wang',0,'Passionate about personal finance and travel.','+1 503 555 0201','14 Cedar Ave, Portland OR'),
   (3,'bob.harris','baseball99','bob@example.com','Bob Harris',0,'','','42 Oak Street, Seattle WA'),
   (4,'carol.lee','iloveyou','carol@example.com','Carol Lee',0,'Coffee addict. Saving for a house.','','88 Pine Road, Austin TX'),
@@ -410,6 +412,23 @@ INSERT OR IGNORE INTO support_tickets VALUES
   (15,35,'Account locked — cannot log in','When I try to log in I receive an error that my account is locked. I have not done anything unusual. Please unlock my account.','open','2026-05-21'),
   (16,42,'Unexpected monthly fee','I noticed a $12 maintenance fee on my checking statement. I was not informed of this charge when I opened the account. Please refund and waive this fee.','closed','2026-05-14'),
   (17,50,'Update mailing address','I have moved and need to update my address to: 83 Eastside Ave, Seattle WA 98101. Please also direct future statements there.','open','2026-05-22');
+
+-- Challenge flags reachable via SQLi UNION injection
+INSERT OR IGNORE INTO _flags VALUES
+  ('sqli-search', 'FLAG{hb_sqli_search_union}'),
+  ('sqli-txn',    'FLAG{hb_sqli_txn_dump}');
+
+-- Recon flag: visible unauthenticated at /audit-log (transaction memo)
+INSERT OR IGNORE INTO transactions VALUES
+  (127,13,'credit',0.01,'FLAG{hb_recon_audit_exposed}','INTERNAL AUDIT','2026-01-01');
+
+-- IDOR flag: visible on CommonHuman account transaction list (account_id=13)
+INSERT OR IGNORE INTO transactions VALUES
+  (128,13,'debit',0.01,'FLAG{hb_idor_cmnh_exposed}','INTERNAL AUDIT','2026-01-02');
+
+-- IDOR ticket flag: ticket owned by admin, readable by any user at /tickets/18
+INSERT OR IGNORE INTO support_tickets VALUES
+  (18,1,'Internal Security Audit Note','Quarterly penetration test complete. Auditors confirmed critical IDOR on ticket endpoint. FLAG{hb_idor_ticket_read}','closed','2026-05-01');
 
 INSERT OR IGNORE INTO ticket_replies VALUES
   (3, 8, 1,'Hi Grace, we have sent a one-time security code to your registered email. Use it to verify your new device on the login page. Contact us again if the issue persists.',1,'2026-05-03'),

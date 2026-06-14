@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Play, Square, RotateCcw } from "lucide-react";
 import type { LabTemplate } from "@/lib/api/labs";
 import { LabCategoryBadge } from "./LabCategoryBadge";
@@ -15,6 +16,7 @@ interface Props {
 
 export function LabCard({ lab, onStop, onReset }: Props) {
   const [startOpen, setStartOpen] = useState(false);
+  const router = useRouter();
   const deployment = lab.current_deployment;
   const isRunning = deployment?.status === "running" || deployment?.status === "starting";
 
@@ -26,7 +28,11 @@ export function LabCard({ lab, onStop, onReset }: Props) {
 
   return (
     <>
-      <div className="g-card lab-card">
+      <div
+        className="g-card lab-card"
+        onClick={() => router.push(`/labs/${lab.slug}`)}
+        style={{ cursor: "pointer" }}
+      >
         <div className="lab-card-header">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-mono font-bold text-sm">{lab.name}</span>
@@ -39,7 +45,7 @@ export function LabCard({ lab, onStop, onReset }: Props) {
 
         <div className="flex flex-wrap gap-1 mb-3">{portChips}</div>
 
-        <div className="lab-card-actions">
+        <div className="lab-card-actions" onClick={(e) => e.stopPropagation()}>
           {!isRunning ? (
             <button className="g-btn g-btn-primary" onClick={() => setStartOpen(true)}>
               <Play size={14} />

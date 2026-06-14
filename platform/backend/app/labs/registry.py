@@ -61,7 +61,7 @@ class LabDefinition(TypedDict):
     challenges: NotRequired[list[ChallengeDef]]
 
 
-LAB_REGISTRY: list[LabDefinition] = [
+LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
     # ------------------------------------------------------------------ #
     # World scenarios (1–8) — realistic apps, Flask + SSH + FTP           #
     # ------------------------------------------------------------------ #
@@ -716,6 +716,256 @@ LAB_REGISTRY: list[LabDefinition] = [
         "volume_names": [],
         "env_vars": {},
         "requires_privileged": False,
+        "challenges": [
+            # ── Recon ──────────────────────────────────────────────────────────
+            {
+                "slug": "hb-recon-audit-log",
+                "title": "HumanBank: Open Books",
+                "description": (
+                    "HumanBank exposes an internal endpoint that was never meant to be "
+                    "public. No authentication required — it just responds with the "
+                    "raw transaction log for the entire bank.\n\n"
+                    "Find the endpoint (the OpenAPI spec at `/openapi.json` is a good "
+                    "starting point), call it without logging in, and read the flag "
+                    "buried in the transaction memos.\n\n"
+                    "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "easy",
+                "category": "recon",
+                "tags": ["recon", "openapi", "unauthenticated", "information-disclosure"],
+                "skills": ["API enumeration", "OpenAPI spec reading"],
+                "points": 50,
+                "estimated_minutes": 10,
+                "flags": [
+                    {"value": "FLAG{hb_recon_audit_exposed}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Check `/openapi.json` for a full list of endpoints.", "cost": 0},
+                    {"order_num": 2, "content": "One of the listed paths under `/audit-log` requires no session cookie at all.", "cost": 25},
+                ],
+            },
+            # ── SQL Injection ───────────────────────────────────────────────────
+            {
+                "slug": "hb-sqli-login",
+                "title": "HumanBank: Master Key",
+                "description": (
+                    "HumanBank's login form builds its SQL query by stitching username "
+                    "and password directly into an f-string — no parameterisation, no "
+                    "escaping.\n\n"
+                    "Comment out the password check with a classic injection payload "
+                    "and log in as the admin. Once in, check the admin profile for "
+                    "something the bank keeps very close to its chest.\n\n"
+                    "**Target:** `http://172.28.4.2/login` (start Lab 4 — HumanBank)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "easy",
+                "category": "sqli",
+                "tags": ["sqli", "login-bypass", "sqlite", "auth"],
+                "skills": ["SQL injection", "authentication bypass"],
+                "points": 100,
+                "estimated_minutes": 15,
+                "flags": [
+                    {"value": "FLAG{hb_sqli_login_bypassed}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Try the username field. A single quote followed by `--` comments out the rest of the query.", "cost": 0},
+                    {"order_num": 2, "content": "Payload: `admin'--` as the username. Any password.", "cost": 50},
+                    {"order_num": 3, "content": "After logging in as admin, check `/profile` — the admin's address field holds the flag.", "cost": 75},
+                ],
+            },
+            {
+                "slug": "hb-sqli-search",
+                "title": "HumanBank: Transaction Miner",
+                "description": (
+                    "The transaction search at `/search?q=` drops your input straight "
+                    "into a `LIKE` clause with no sanitisation. The database has more "
+                    "than just transactions.\n\n"
+                    "Use a UNION-based injection to pivot into the internal `_flags` "
+                    "table and retrieve the value for `sqli-search`.\n\n"
+                    "**Target:** `http://172.28.4.2/search` (start Lab 4 — HumanBank)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "sqli",
+                "tags": ["sqli", "union", "sqlite", "search"],
+                "skills": ["UNION SELECT", "SQLite schema enumeration"],
+                "points": 250,
+                "estimated_minutes": 25,
+                "flags": [
+                    {"value": "FLAG{hb_sqli_search_union}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Count the columns first: try `' UNION SELECT NULL--` and add NULLs until the error disappears.", "cost": 0},
+                    {"order_num": 2, "content": "The query returns 7 columns. Inject: `' UNION SELECT value,2,3,4,5,6,7 FROM _flags WHERE name='sqli-search'--`", "cost": 75},
+                ],
+            },
+            {
+                "slug": "hb-sqli-txn-memo",
+                "title": "HumanBank: Filter Bypass",
+                "description": (
+                    "The transaction list at `/accounts/<id>/transactions` accepts "
+                    "filter parameters — `memo`, `type`, `date_from`, `date_to` — and "
+                    "concatenates every one of them directly into the SQL WHERE clause.\n\n"
+                    "Inject into the `memo` parameter to UNION-select from the internal "
+                    "`_flags` table and retrieve the value for `sqli-txn`.\n\n"
+                    "**Target:** `http://172.28.4.2/accounts/1/transactions` "
+                    "(start Lab 4 — HumanBank)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "sqli",
+                "tags": ["sqli", "union", "sqlite", "filter"],
+                "skills": ["UNION SELECT", "filter parameter injection"],
+                "points": 200,
+                "estimated_minutes": 20,
+                "flags": [
+                    {"value": "FLAG{hb_sqli_txn_dump}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "The `memo` param is injected as: `memo LIKE '%<your input>%'`. Close the LIKE, then UNION.", "cost": 0},
+                    {"order_num": 2, "content": "Payload: `?memo=' UNION SELECT name,value,3,4,5,6 FROM _flags WHERE name='sqli-txn'--`", "cost": 75},
+                ],
+            },
+            # ── IDOR ────────────────────────────────────────────────────────────
+            {
+                "slug": "hb-idor-accounts",
+                "title": "HumanBank: Everyone's Balance",
+                "description": (
+                    "HumanBank's `/accounts` route lists every account in the database "
+                    "regardless of who is logged in — no ownership filter at all.\n\n"
+                    "Log in as any user, browse to `/accounts`, and find the mysterious "
+                    "`HB-CMNH` account. Navigate to its transaction history "
+                    "to find the flag hidden in an internal audit memo.\n\n"
+                    "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "easy",
+                "category": "idor",
+                "tags": ["idor", "bola", "accounts", "banking"],
+                "skills": ["IDOR", "object-level access control"],
+                "points": 100,
+                "estimated_minutes": 10,
+                "flags": [
+                    {"value": "FLAG{hb_idor_cmnh_exposed}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Register or log in as any user. `/accounts` shows ALL bank accounts.", "cost": 0},
+                    {"order_num": 2, "content": "Find account HB-CMNH in the list and click through to its transactions.", "cost": 25},
+                ],
+            },
+            {
+                "slug": "hb-idor-ticket",
+                "title": "HumanBank: Someone Else's Ticket",
+                "description": (
+                    "Support tickets at `/tickets/<id>` don't verify that the ticket "
+                    "belongs to the logged-in user. The endpoint just looks up by ID "
+                    "and returns whatever it finds.\n\n"
+                    "Enumerate ticket IDs to find an internal admin-created ticket "
+                    "that was never meant to be visible to customers. The flag is in "
+                    "the ticket body.\n\n"
+                    "**Target:** `http://172.28.4.2/tickets/` (start Lab 4 — HumanBank)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "easy",
+                "category": "idor",
+                "tags": ["idor", "bola", "tickets", "enumeration"],
+                "skills": ["IDOR", "horizontal privilege escalation"],
+                "points": 100,
+                "estimated_minutes": 10,
+                "flags": [
+                    {"value": "FLAG{hb_idor_ticket_read}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Try incrementing the ticket ID in the URL. You can access tickets that don't belong to your account.", "cost": 0},
+                ],
+            },
+            # ── Broken Access Control ───────────────────────────────────────────
+            {
+                "slug": "hb-bac-admin-api",
+                "title": "HumanBank: Fake Admin API",
+                "description": (
+                    "The REST endpoint `/api/v1/admin/users` is supposed to be "
+                    "admin-only. The access check reads `if not session.get('user_id')` "
+                    "— it verifies you're *logged in*, but never checks `is_admin`.\n\n"
+                    "Log in as any regular customer and call the endpoint. The JSON "
+                    "response exposes the full user list — and something extra the "
+                    "developer left in the payload.\n\n"
+                    "**Target:** `http://172.28.4.2/api/v1/admin/users` "
+                    "(start Lab 4 — HumanBank)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "web",
+                "tags": ["bac", "broken-access-control", "api", "privilege-escalation"],
+                "skills": ["broken access control", "API testing"],
+                "points": 150,
+                "estimated_minutes": 15,
+                "flags": [
+                    {"value": "FLAG{hb_bac_api_admin_bypass}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Register any account. Call `/api/v1/admin/users` with your session cookie. Inspect the JSON response carefully.", "cost": 0},
+                ],
+            },
+            {
+                "slug": "hb-bac-user-detail",
+                "title": "HumanBank: Admin Panel Without the Admin",
+                "description": (
+                    "The admin user-detail page at `/admin/users/<id>` checks "
+                    "`if not session.get('user_id')` — any logged-in customer can "
+                    "access it. No `is_admin` check in sight.\n\n"
+                    "Navigate directly to `/admin/users/1` as a regular user. "
+                    "The rendered page leaks the admin account's internal profile, "
+                    "including a field that was never meant to be public.\n\n"
+                    "**Target:** `http://172.28.4.2/admin/users/1` "
+                    "(start Lab 4 — HumanBank)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "easy",
+                "category": "web",
+                "tags": ["bac", "broken-access-control", "admin-panel"],
+                "skills": ["broken access control", "vertical privilege escalation"],
+                "points": 100,
+                "estimated_minutes": 10,
+                "flags": [
+                    {"value": "FLAG{hb_bac_admin_detail_exposed}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Log in as any user. Navigate to `/admin/users/1`. The admin's bio field contains the flag.", "cost": 0},
+                ],
+            },
+            # ── XSS ────────────────────────────────────────────────────────────
+            {
+                "slug": "hb-xss-stored-ticket",
+                "title": "HumanBank: Support Ticket Hijack",
+                "description": (
+                    "Support ticket bodies are stored without sanitisation and rendered "
+                    "unescaped in the admin panel at `/admin/tickets`. The admin panel "
+                    "sets a non-HttpOnly cookie — meaning any JavaScript running on "
+                    "that page can read it.\n\n"
+                    "Submit a support ticket with an XSS payload. Then log in as admin "
+                    "(the login form is also injectable) and visit `/admin/tickets`. "
+                    "Your payload fires — `document.cookie` contains the flag.\n\n"
+                    "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "hard",
+                "category": "xss",
+                "tags": ["xss", "stored-xss", "cookie-theft", "admin-panel"],
+                "skills": ["stored XSS", "cookie exfiltration", "session hijacking"],
+                "points": 300,
+                "estimated_minutes": 30,
+                "flags": [
+                    {"value": "FLAG{hb_xss_admin_cookie_stolen}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Submit a ticket with `<script>document.title=document.cookie</script>` as the body.", "cost": 0},
+                    {"order_num": 2, "content": "The admin template renders ticket bodies with `| safe` — no escaping. Log in as admin (use SQLi on the login form) and check `/admin/tickets`.", "cost": 50},
+                    {"order_num": 3, "content": "The cookie name is `hb_admin_token`. Its value is the flag.", "cost": 100},
+                ],
+            },
+        ],
     },
     {
         "id": 5,
@@ -738,6 +988,7 @@ LAB_REGISTRY: list[LabDefinition] = [
         "volume_names": [],
         "env_vars": {},
         "requires_privileged": False,
+        "challenges": [],
     },
     {
         "id": 6,
@@ -760,6 +1011,7 @@ LAB_REGISTRY: list[LabDefinition] = [
         "volume_names": [],
         "env_vars": {},
         "requires_privileged": False,
+        "challenges": [],
     },
     {
         "id": 7,
@@ -956,6 +1208,7 @@ LAB_REGISTRY: list[LabDefinition] = [
         "volume_names": [],
         "env_vars": {},
         "requires_privileged": False,
+        "challenges": [],
     },
     # ------------------------------------------------------------------ #
     # Scanner fire-ranges (9–12) — structured challenges for tool testing  #
@@ -1002,6 +1255,7 @@ LAB_REGISTRY: list[LabDefinition] = [
             "PG_DATABASE": "firerange",
         },
         "requires_privileged": False,
+        "challenges": [],
     },
     {
         "id": 10,
@@ -1026,6 +1280,7 @@ LAB_REGISTRY: list[LabDefinition] = [
         "volume_names": [],
         "env_vars": {},
         "requires_privileged": False,
+        "challenges": [],
     },
     {
         "id": 11,
@@ -1049,6 +1304,7 @@ LAB_REGISTRY: list[LabDefinition] = [
         "volume_names": [],
         "env_vars": {},
         "requires_privileged": False,
+        "challenges": [],
     },
     {
         "id": 12,
@@ -1070,6 +1326,7 @@ LAB_REGISTRY: list[LabDefinition] = [
         "volume_names": [],
         "env_vars": {},
         "requires_privileged": False,
+        "challenges": [],
     },
     # ------------------------------------------------------------------ #
     # Third-party images (13–18) — pulled from Docker Hub                  #
@@ -1094,6 +1351,7 @@ LAB_REGISTRY: list[LabDefinition] = [
         "volume_names": [],
         "env_vars": {},
         "requires_privileged": False,
+        "challenges": [],
     },
     {
         "id": 14,
@@ -1116,6 +1374,7 @@ LAB_REGISTRY: list[LabDefinition] = [
         "volume_names": [],
         "env_vars": {},
         "requires_privileged": False,
+        "challenges": [],
     },
     {
         "id": 15,
@@ -1138,6 +1397,7 @@ LAB_REGISTRY: list[LabDefinition] = [
         "volume_names": [],
         "env_vars": {},
         "requires_privileged": True,
+        "challenges": [],
     },
     {
         "id": 16,
@@ -1159,6 +1419,7 @@ LAB_REGISTRY: list[LabDefinition] = [
         "volume_names": [],
         "env_vars": {},
         "requires_privileged": False,
+        "challenges": [],
     },
     {
         "id": 17,
@@ -1182,6 +1443,7 @@ LAB_REGISTRY: list[LabDefinition] = [
         "volume_names": [],
         "env_vars": {},
         "requires_privileged": True,
+        "challenges": [],
     },
 ]
 

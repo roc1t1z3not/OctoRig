@@ -132,6 +132,7 @@ def init(app):
                 "admin": True,
                 "role": "admin",
                 "is_superuser": True,
+                "flag": "FLAG{hb_bac_api_admin_bypass}",
             }
         )
 
