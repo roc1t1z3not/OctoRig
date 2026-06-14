@@ -17,6 +17,7 @@ import { getMyProfile } from "@/lib/api/profiles";
 import { deployInstance, getMyInstance, stopDeployment, type Deployment } from "@/lib/api/deployments";
 import { getLabs } from "@/lib/api/labs";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { PageSpinner } from "@/components/ui/Spinner";
 
 const DIFF_COLOR: Record<ChallengeDifficulty, string> = {
   easy:   "var(--g-success)",
@@ -322,7 +323,7 @@ export default function ChallengeDetailPage() {
   }
 
   if (isLoading) {
-    return <div className="page text-muted text-sm">Loading challenge…</div>;
+    return <div className="page"><PageSpinner /></div>;
   }
   if (!ch) {
     return <div className="page text-muted text-sm">Challenge not found.</div>;

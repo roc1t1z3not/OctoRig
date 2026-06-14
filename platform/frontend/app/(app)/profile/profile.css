@@ -43,9 +43,11 @@
 
         .solves-list { display: flex; flex-direction: column; gap: 0.25rem; }
         .solve-row { display: flex; align-items: center; gap: 0.75rem; font-size: 0.75rem; padding: 0.375rem 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .solve-pts { font-weight: 700; color: var(--g-accent); min-width: 4rem; }
-        .solve-fb { font-size: 0.625rem; color: var(--g-danger); }
-        .solve-date { font-size: 0.6125rem; color: var(--g-text-muted); margin-left: auto; }
+        .solve-title { flex: 1; min-width: 0; color: var(--g-text-secondary); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .solve-title:hover { color: var(--g-accent); }
+        .solve-pts { font-weight: 700; color: var(--g-accent); white-space: nowrap; }
+        .solve-fb { font-size: 0.625rem; color: var(--g-danger); white-space: nowrap; }
+        .solve-date { font-size: 0.6125rem; color: var(--g-text-muted); white-space: nowrap; }
 
 .page { padding: 1.5rem; }
         .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }

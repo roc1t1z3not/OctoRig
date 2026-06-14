@@ -97,6 +97,9 @@ function ProfileView({ profile }: { profile: UserProfile }) {
             <div className="solves-list">
               {profile.recent_solves.map((s, i) => (
                 <div key={i} className="solve-row">
+                  <Link href={`/challenges/${s.challenge_slug}`} className="solve-title">
+                    {s.challenge_title}
+                  </Link>
                   <span className="solve-pts">+{s.points_awarded} pts</span>
                   {s.is_first_blood && <span className="solve-fb">🩸 First Blood</span>}
                   <span className="solve-date">

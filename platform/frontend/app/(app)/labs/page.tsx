@@ -8,6 +8,7 @@ import { getLabs } from "@/lib/api/labs";
 import { stopDeployment, resetDeployment } from "@/lib/api/deployments";
 import { LabCard } from "@/components/labs/LabCard";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { PageSpinner } from "@/components/ui/Spinner";
 
 const CATEGORIES = [
   { id: undefined, label: "All" },
@@ -72,7 +73,7 @@ export default function LabsPage() {
       </div>
 
       {isLoading ? (
-        <div className="text-muted text-sm mt-4">Loading labs…</div>
+        <PageSpinner />
       ) : (
         <div className="labs-grid mt-4">
           {filtered.map((lab) => (

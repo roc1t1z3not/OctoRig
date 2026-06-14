@@ -27,6 +27,7 @@ import { DeploymentStatusBadge } from "@/components/deployments/DeploymentStatus
 import { LabCategoryBadge } from "@/components/labs/LabCategoryBadge";
 import { LogViewer } from "@/components/deployments/LogViewer";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { PageSpinner } from "@/components/ui/Spinner";
 
 type Visibility = "private" | "team" | "public";
 
@@ -162,7 +163,7 @@ export default function DeploymentDetailPage() {
 
   const countdown = useCountdown(deployment?.auto_destroy_at ?? null);
 
-  if (isLoading) return <div className="page text-muted text-sm">Loading…</div>;
+  if (isLoading) return <div className="page"><PageSpinner /></div>;
   if (!deployment) return <div className="page text-muted text-sm">Deployment not found.</div>;
 
   const isActive = deployment.status === "running" || deployment.status === "starting";

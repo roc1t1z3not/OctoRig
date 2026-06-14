@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.exceptions import not_found
 from app.models.badge import UserBadge
-from app.models.challenge import ChallengeSubmission
+from app.models.challenge import Challenge, ChallengeSubmission
 from app.models.profile import PrivacyLevel, UserProfile
 from app.models.scoring import ScoreTransaction
 from app.models.team import TeamMember
@@ -72,7 +72,8 @@ def get_profile(db: Session, username: str, viewer_id: Optional[int] = None) -> 
     recent_solves: list[dict] = []
     if profile.show_activity or is_own:
         rows = (
-            db.query(ChallengeSubmission)
+            db.query(ChallengeSubmission, Challenge)
+            .join(Challenge, Challenge.id == ChallengeSubmission.challenge_id)
             .filter(
                 ChallengeSubmission.user_id == user.id,
                 ChallengeSubmission.is_correct.is_(True),
@@ -83,12 +84,14 @@ def get_profile(db: Session, username: str, viewer_id: Optional[int] = None) -> 
         )
         recent_solves = [
             {
-                "challenge_id": r.challenge_id,
-                "points_awarded": r.points_awarded,
-                "submitted_at": r.submitted_at.isoformat(),
-                "is_first_blood": r.is_first_blood,
+                "challenge_id": sub.challenge_id,
+                "challenge_title": ch.title,
+                "challenge_slug": ch.slug,
+                "points_awarded": sub.points_awarded,
+                "submitted_at": sub.submitted_at.isoformat(),
+                "is_first_blood": sub.is_first_blood,
             }
-            for r in rows
+            for sub, ch in rows
         ]
 
     return {

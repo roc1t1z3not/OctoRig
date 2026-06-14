@@ -9,6 +9,8 @@ export interface ProfileBadge {
 
 export interface RecentSolve {
   challenge_id: number;
+  challenge_title: string;
+  challenge_slug: string;
   points_awarded: number;
   submitted_at: string;
   is_first_blood: boolean;

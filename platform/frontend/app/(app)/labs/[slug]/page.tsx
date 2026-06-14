@@ -1,5 +1,6 @@
 "use client";
 import "./lab-detail.css";
+import "../../challenges/challenges.css";
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
@@ -16,6 +17,7 @@ import { LabCategoryBadge } from "@/components/labs/LabCategoryBadge";
 import { DeploymentStatusBadge } from "@/components/deployments/DeploymentStatusBadge";
 import { StartLabDialog } from "@/components/deployments/StartLabDialog";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { PageSpinner } from "@/components/ui/Spinner";
 
 const DIFF_COLOR: Record<ChallengeDifficulty, string> = {
   easy:   "diff-easy",
@@ -94,7 +96,7 @@ export default function LabDetailPage() {
   if (labsLoading) {
     return (
       <div className="page">
-        <div className="text-muted text-sm mt-4">Loading…</div>
+        <PageSpinner />
       </div>
     );
   }
@@ -238,13 +240,6 @@ export default function LabDetailPage() {
         <StartLabDialog lab={lab} open={startOpen} onClose={() => setStartOpen(false)} />
       )}
 
-      <style>{`
-        .diff-badge { font-size: 0.5625rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-weight: 600; }
-        .diff-easy   { color: var(--g-success); background: var(--g-success-bg); }
-        .diff-medium { color: var(--g-warning); background: var(--g-warning-bg); }
-        .diff-hard   { color: var(--g-orange); background: rgba(251,146,60,0.1); }
-        .diff-insane { color: var(--g-danger); background: var(--g-danger-bg); }
-      `}</style>
     </div>
   );
 }

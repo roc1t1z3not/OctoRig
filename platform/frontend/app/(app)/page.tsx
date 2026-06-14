@@ -7,8 +7,20 @@ import { ExternalLink } from "lucide-react";
 import { getDeployments, stopDeployment } from "@/lib/api/deployments";
 import { getHealth, getContainers } from "@/lib/api/system";
 import { getLabs, type LabTemplate } from "@/lib/api/labs";
+import { getMyProfile } from "@/lib/api/profiles";
 import { DeploymentStatusBadge } from "@/components/deployments/DeploymentStatusBadge";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { PageSpinner } from "@/components/ui/Spinner";
+
+function formatRelative(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60_000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
 
 export default function Dashboard() {
   const qc = useQueryClient();
@@ -31,6 +43,11 @@ export default function Dashboard() {
     queryKey: ["health"],
     queryFn: getHealth,
     refetchInterval: 30_000,
+  });
+  const { data: profile } = useQuery({
+    queryKey: ["profile", "me"],
+    queryFn: getMyProfile,
+    staleTime: 60_000,
   });
 
   const stopMutation = useMutation({
@@ -78,13 +95,17 @@ export default function Dashboard() {
             {health?.docker === "ok" ? "Healthy" : "-"}
           </span>
         </div>
+        <div className="g-card stat-card">
+          <span className="text-muted text-11">My Solves</span>
+          <span className="stat-value text-accent">{profile?.solve_count ?? "—"}</span>
+        </div>
       </div>
 
       {/* Active deployments */}
       <section className="mt-4">
         <h2 className="section-title font-mono">Active Deployments</h2>
         {isLoading ? (
-          <div className="text-muted text-sm">Loading…</div>
+          <PageSpinner />
         ) : activeDeployments.length === 0 ? (
           <div className="g-panel empty-state">
             <p className="text-muted text-sm">No active labs.</p>
@@ -97,6 +118,7 @@ export default function Dashboard() {
                 <th>Lab</th>
                 <th>Status</th>
                 <th>Started By</th>
+                <th>Started</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -111,6 +133,9 @@ export default function Dashboard() {
                   </td>
                   <td><DeploymentStatusBadge status={d.status} /></td>
                   <td className="text-secondary">{d.started_by_username}</td>
+                  <td className="text-muted font-mono" style={{ fontSize: "0.6875rem" }}>
+                    {d.started_at ? formatRelative(d.started_at) : "—"}
+                  </td>
                   <td>
                     <button
                       className="g-btn g-btn-danger g-btn-icon"

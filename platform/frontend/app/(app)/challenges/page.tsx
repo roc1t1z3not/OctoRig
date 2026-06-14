@@ -7,6 +7,7 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Search, CheckCircle2, Clock, Target } from "lucide-react";
 import { getChallenges, type ChallengeListItem, type ChallengeDifficulty } from "@/lib/api/challenges";
 import { getLabs, type LabTemplate } from "@/lib/api/labs";
+import { PageSpinner } from "@/components/ui/Spinner";
 
 const CATEGORIES = [
   { id: undefined, label: "All" },
@@ -190,34 +191,57 @@ export default function ChallengesPage() {
         </div>
       </div>
 
-      {/* Lab filters */}
-      {labsWithChallenges.length > 0 && (
-        <div className="ch-lab-filters">
-          <div className="flex gap-1 flex-wrap">
-            <button
-              className={`g-btn g-btn-sm ${!labSlug ? "g-btn-subtle" : "g-btn-ghost"}`}
-              onClick={() => setLabSlug(undefined)}
-            >
-              All
-            </button>
-            {labsWithChallenges.map((lab) => (
+      {/* Lab filters + result count + clear */}
+      <div className="ch-filter-meta">
+        {labsWithChallenges.length > 0 && (
+          <div className="ch-lab-filters">
+            <div className="flex gap-1 flex-wrap">
               <button
-                key={lab.slug}
-                className={`g-btn g-btn-sm ${labSlug === lab.slug ? "g-btn-subtle" : "g-btn-ghost"}`}
-                onClick={() => setLabSlug(lab.slug === labSlug ? undefined : lab.slug)}
+                className={`g-btn g-btn-sm ${!labSlug ? "g-btn-subtle" : "g-btn-ghost"}`}
+                onClick={() => setLabSlug(undefined)}
               >
-                {lab.name}
+                All
               </button>
-            ))}
+              {labsWithChallenges.map((lab) => (
+                <button
+                  key={lab.slug}
+                  className={`g-btn g-btn-sm ${labSlug === lab.slug ? "g-btn-subtle" : "g-btn-ghost"}`}
+                  onClick={() => setLabSlug(lab.slug === labSlug ? undefined : lab.slug)}
+                >
+                  {lab.name}
+                </button>
+              ))}
+            </div>
           </div>
+        )}
+        <div className="ch-filter-status">
+          {!isLoading && (
+            <span className="ch-result-count">
+              {displayed.length} challenge{displayed.length !== 1 ? "s" : ""}
+            </span>
+          )}
+          {(category || difficulty || labSlug || solvedFilter !== "all" || search) && (
+            <button
+              className="g-btn g-btn-ghost g-btn-sm"
+              onClick={() => {
+                setCategory(undefined);
+                setDifficulty(undefined);
+                setLabSlug(undefined);
+                setSolvedFilter("all");
+                setSearch("");
+              }}
+            >
+              Clear filters
+            </button>
+          )}
         </div>
-      )}
+      </div>
 
       {isLoading ? (
-        <div className="text-muted text-sm mt-4">Loading challenges…</div>
+        <PageSpinner />
       ) : (
         <>
-          <div className="ch-grid mt-4" style={{ opacity: isFetching ? 0.6 : 1, transition: "opacity 0.15s" }}>
+          <div className="ch-grid" style={{ opacity: isFetching ? 0.6 : 1, transition: "opacity 0.15s" }}>
             {displayed.map((ch) => (
               <ChallengeCard key={ch.id} ch={ch} />
             ))}

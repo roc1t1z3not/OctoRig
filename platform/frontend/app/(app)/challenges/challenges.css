@@ -22,8 +22,11 @@
         .page-title { font-size: 1.125rem; }
         .page-sub { font-size: 0.75rem; color: var(--g-text-muted); margin-top: 0.2rem; }
         .filter-bar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
-        .ch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.875rem; }
-        .ch-lab-filters { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+        .ch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.875rem; margin-top: 1rem; }
+        .ch-filter-meta { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+        .ch-filter-status { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; padding-top: 0.125rem; }
+        .ch-result-count { font-size: 0.6875rem; color: var(--g-text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .ch-lab-filters { display: flex; flex-direction: column; gap: 0.5rem; }
         .ch-lab-tag { font-size: 0.5625rem; color: var(--g-text-accent, var(--g-text-muted)); font-family: var(--font-mono, monospace); margin-bottom: 0.125rem; }
         .mt-4 { margin-top: 1.5rem; }
         .flex { display: flex; }
