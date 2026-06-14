@@ -2,6 +2,7 @@
 import "./users-admin.css";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, UserPlus, ShieldCheck, ShieldOff, RotateCcw } from "lucide-react";
 import {
@@ -188,7 +189,11 @@ export default function AdminUsersPage() {
             <tbody>
               {users.map((u) => (
                 <tr key={u.id} className={!u.is_active ? "row-inactive" : ""}>
-                  <td className="font-mono text-sm">{u.username}</td>
+                  <td className="font-mono text-sm">
+                    <Link href={`/profile/${u.username}`} style={{ color: "var(--g-accent)" }}>
+                      {u.username}
+                    </Link>
+                  </td>
                   <td className="text-11 text-muted">{u.email}</td>
                   <td>
                     <div className="role-pills">

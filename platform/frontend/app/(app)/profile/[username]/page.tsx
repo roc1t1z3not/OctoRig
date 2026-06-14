@@ -6,9 +6,10 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft, MapPin, Globe, Link2, AtSign,
-  Trophy, Target, Droplets, Users,
+  Trophy, Target, Droplets, Users, Pencil,
 } from "lucide-react";
 import { getUserProfile, type UserProfile } from "@/lib/api/profiles";
+import { useUserStore } from "@/stores/user.store";
 
 const ICON_MAP: Record<string, string> = {
   flag: "🚩", hash: "#", zap: "⚡", droplets: "🩸",
@@ -112,6 +113,8 @@ function ProfileView({ profile }: { profile: UserProfile }) {
 
 export default function UserProfilePage() {
   const { username } = useParams<{ username: string }>();
+  const { user } = useUserStore();
+  const isOwnProfile = user?.username === username;
 
   const { data: profile, isLoading, isError } = useQuery({
     queryKey: ["profile", username],
@@ -120,10 +123,18 @@ export default function UserProfilePage() {
 
   return (
     <div className="page">
-      <Link href="/" className="back-link">
-        <ArrowLeft size={14} />
-        <span>Back</span>
-      </Link>
+      <div className="page-header">
+        <Link href="/" className="back-link">
+          <ArrowLeft size={14} />
+          <span>Back</span>
+        </Link>
+        {isOwnProfile && (
+          <Link href="/profile/me" className="g-btn g-btn-ghost g-btn-sm" style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}>
+            <Pencil size={13} />
+            Edit Profile
+          </Link>
+        )}
+      </div>
 
       {isLoading && <div className="text-muted text-sm">Loading profile…</div>}
       {isError && <div className="text-muted text-sm">Profile not found.</div>}

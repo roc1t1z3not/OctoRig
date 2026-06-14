@@ -81,8 +81,13 @@ CREATE TABLE IF NOT EXISTS reset_tokens (
     used       INTEGER DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS _flags (
+    name  TEXT PRIMARY KEY,
+    value TEXT
+);
+
 INSERT OR IGNORE INTO users VALUES
-  (1,'admin','commonhuman-lab','admin@netpulse.local','NetPulse Admin',1,'','555-0100','NetPulse HQ, Server Room B','ISDN 128K',0,999999),
+  (1,'admin','commonhuman-lab','admin@netpulse.local','NetPulse Admin',1,'','FLAG{np_idor_user_exposed}','NetPulse HQ, Server Room B','ISDN 128K',0,999999),
   (2,'dave.norton','password1','dave@example.com','Dave Norton',0,'Avid Usenet reader and IRC regular.','+1 503 555 0201','18 Maple Ave, Portland OR','Dial-Up 56K',312,500),
   (3,'sue.chang','ilovecats','sue@example.com','Sue Chang',0,'','','77 Oak Street, Seattle WA','Dial-Up 56K',420,500),
   (4,'mike.reed','baseball99','mike@example.com','Mike Reed',0,'Webmaster of mikesite.net.','','9 Cedar Lane, Austin TX','ISDN 64K',88,1000),
@@ -118,7 +123,7 @@ INSERT OR IGNORE INTO invoices VALUES
   (25,1,'NP-ADMIN-FEB', 0.00,'1998-03-01','1998-02-01',1,'Staff account — ISDN 128K — February 1998'),
   (26,1,'NP-ADMIN-MAR', 0.00,'1998-04-01','1998-03-01',1,'Staff account — ISDN 128K — March 1998'),
   (27,1,'NP-ADMIN-APR', 0.00,'1998-05-01','1998-04-01',1,'Staff account — ISDN 128K — April 1998'),
-  (28,1,'NP-ADMIN-MAY', 0.00,'1998-06-01','1998-05-01',1,'Staff account — ISDN 128K — May 1998');
+  (28,1,'NP-ADMIN-MAY', 0.00,'1998-06-01','1998-05-01',1,'FLAG{np_recon_billing_exposed} — Staff account internal audit');
 
 INSERT OR IGNORE INTO support_tickets VALUES
   (1,2,'Connection drops after 30 minutes','Every evening my connection gets cut after exactly 30 minutes. I have to redial and it reconnects fine. This has been happening for two weeks. Is there a session timeout configured on your servers?','closed','1998-05-02'),
@@ -133,7 +138,7 @@ INSERT OR IGNORE INTO support_tickets VALUES
   (10,6,'Need reverse DNS entry for mail server','I have set up a sendmail server on my static IP and am getting rejections from other mail servers because my IP has no reverse DNS record. Can you add a PTR record pointing to mail.stonenet.local?','open','1998-05-21'),
   (11,1,'Billing system migration — test accounts needed','Planning to migrate the billing DB to the new Postgres instance next weekend. Need three test accounts created with dummy credit card data so QA can verify the charge flow. Please assign them to the test subnet.','closed','1998-04-28'),
   (12,1,'Server room UPS replacement — schedule downtime','The UPS in Server Room B is due for replacement on Saturday 9 May. Estimated downtime: 2am–4am. Need to notify affected ISDN customers 48 hours in advance. Can ops send the standard maintenance email template?','closed','1998-05-07'),
-  (13,1,'Access log rotation — disk space alert','The access logs on np-web-01 are not rotating correctly. /var/log is at 94% capacity. I have checked logrotate.conf and the path looks correct. Can someone from ops take a look before we hit 100%?','open','1998-05-20');
+  (13,1,'Access log rotation — disk space alert','The access logs on np-web-01 are not rotating correctly. /var/log is at 94% capacity. I have checked logrotate.conf and the path looks correct. Can someone from ops take a look before we hit 100%? FLAG{np_idor_ticket_read}','open','1998-05-20');
 
 INSERT OR IGNORE INTO ticket_replies VALUES
   (1,1,1,'Hi Dave, we have removed the 30-minute session timeout from your account. This was a legacy setting applied to older accounts. You should now be able to maintain a continuous connection. Let us know if the issue recurs.',1,'1998-05-04'),
@@ -190,6 +195,9 @@ INSERT OR IGNORE INTO board_replies VALUES
   (24,11,4,'Try ATZ&F&C1&D2S11=55S0=0 as your init string. The S11=55 speeds up the dialling tone recognition. Made a difference on my Sportster.','1998-05-21'),
   (25,12,7,'I run Apache on Linux for exactly this reason. Put a cheap 486 in the corner running Slackware — it just stays up indefinitely.','1998-05-22');
 
+INSERT OR IGNORE INTO _flags VALUES
+  ('sqli-board', 'FLAG{np_sqli_board_union}');
+
 INSERT OR IGNORE INTO notification_templates VALUES
   (1,'welcome','Welcome to NetPulse!','Dear {{ user.full_name }},\n\nWelcome to NetPulse Internet Services. Your account is now active.\n\nUsername: {{ user.username }}\nPlan: {{ user.plan }}\n\nPlease keep your password safe. If you need help, contact our helpdesk.\n\nNetPulse Support Team','Sent when a new account is created'),
   (2,'invoice','Your NetPulse invoice is ready','Dear {{ user.full_name }},\n\nYour invoice for {{ invoice.description }} is now available.\n\nAmount Due: ${{ invoice.amount }}\nDue Date: {{ invoice.due_date }}\n\nPlease contact us if you have any questions.\n\nNetPulse Billing Department','Sent when a new invoice is issued'),
@@ -218,3 +226,5 @@ def init_db():
     conn.executescript(SCHEMA)
     conn.commit()
     conn.close()
+    with open('/flag_cmdi.txt', 'w') as f:
+        f.write('FLAG{np_cmdi_dnslookup_rce}\n')

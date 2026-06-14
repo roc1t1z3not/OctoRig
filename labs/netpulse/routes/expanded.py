@@ -133,6 +133,7 @@ def init(app):
                 "admin": True,
                 "role": "admin",
                 "is_superuser": True,
+                "flag": "FLAG{np_bac_admin_config_exposed}",
                 "config": {
                     "db_path": "/data/netpulse.db",
                     "debug": False,

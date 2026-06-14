@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import request, render_template, session, redirect, url_for
+from flask import request, render_template, make_response, session, redirect, url_for
 from db import get_db
 
 
@@ -29,7 +29,9 @@ def init(app):
                 "SELECT t.*, u.username FROM board_threads t JOIN users u ON t.user_id = u.id "
                 "ORDER BY t.created_at DESC"
             ).fetchall()
-        return render_template('board.html', threads=threads, q=q)
+        resp = make_response(render_template('board.html', threads=threads, q=q))
+        resp.set_cookie('np_session', 'FLAG{np_xss_reflected_board}', httponly=False)
+        return resp
 
     @app.route('/board/new', methods=['GET', 'POST'])
     def board_new():

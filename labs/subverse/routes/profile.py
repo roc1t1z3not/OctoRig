@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2026 CommonHuman-Lab
 import os
-from flask import request, render_template, session, redirect, url_for
+from flask import request, render_template, make_response, session, redirect, url_for
 from db import get_db
 
 
@@ -23,7 +23,9 @@ def init(app):
             "WHERE p.user_id = ? AND p.status = 'published' ORDER BY p.created_at DESC LIMIT 10",
             (user['id'],)
         ).fetchall()
-        return render_template('profile.html', target=user, posts=posts)
+        resp = make_response(render_template('profile.html', target=user, posts=posts))
+        resp.set_cookie('sv_session', 'FLAG{sv_xss_stored_bio}', httponly=False)
+        return resp
 
     @app.route('/profile/edit', methods=['GET', 'POST'])
     def profile_edit():

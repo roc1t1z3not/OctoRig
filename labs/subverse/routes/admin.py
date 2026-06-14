@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2026 CommonHuman-Lab
 import jinja2
-from flask import request, render_template, session, redirect, url_for, render_template_string
+from flask import current_app, jsonify, request, render_template, make_response, session, redirect, url_for, render_template_string
 from db import get_db
 
 
@@ -27,10 +27,26 @@ def init(app):
         communities_count= db.execute("SELECT COUNT(*) AS c FROM communities").fetchone()['c']
         comments_count   = db.execute("SELECT COUNT(*) AS c FROM comments").fetchone()['c']
         users            = db.execute("SELECT * FROM users ORDER BY id").fetchall()
-        return render_template('admin.html',
+        resp = make_response(render_template('admin.html',
             user_count=user_count, post_count=post_count,
             communities_count=communities_count, comments_count=comments_count,
-            users=users)
+            users=users))
+        resp.headers['X-Admin-Flag'] = 'FLAG{sv_sqli_login_bypassed}'
+        return resp
+
+    # VULN: broken access — checks is_admin, but mass assignment lets any user escalate first
+    @app.route('/admin/secret')
+    def admin_secret():
+        if not session.get('user_id'):
+            return jsonify({'error': 'unauthorized'}), 401
+        user = get_db().execute("SELECT * FROM users WHERE id = ?", (session['user_id'],)).fetchone()
+        if not user or user['role'] != 'admin':
+            return jsonify({'error': 'forbidden'}), 403
+        return jsonify({
+            'status': 'ok',
+            'flag': current_app.config.get('ADMIN_SECRET_FLAG'),
+            'message': 'You escalated privileges via mass assignment.',
+        })
 
     @app.route('/admin/users')
     def admin_users():

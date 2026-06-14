@@ -105,6 +105,13 @@ def init_db():
             reason       TEXT DEFAULT '',
             created_at   TEXT
         );
+
+        CREATE TABLE IF NOT EXISTS _flags (
+            name  TEXT PRIMARY KEY,
+            value TEXT
+        );
+
+        INSERT OR IGNORE INTO _flags VALUES ('sqli-search', 'FLAG{sv_sqli_search_union}');
     """)
 
     # MD5 hashes — plaintext passwords (all in rockyou.txt):
@@ -160,7 +167,7 @@ def init_db():
           (4, 'news',       'World news, tech industry events, and current affairs.',                     2, 3122, '', '2025-01-02 00:00:00'),
           (5, 'devops',     'Infrastructure, CI/CD, containers, and cloud — the boring stuff that keeps it all running.', 3, 1074, '', '2025-01-10 00:00:00'),
           (6, 'reverseeng', 'Reverse engineering, malware analysis, binary exploitation, and low-level wizardry.',        3,  618, '', '2025-01-12 00:00:00'),
-          (7, 'hidden',     'Private staff community — moderators only.',                                 1,    3, 'Staff area. If you are reading this and you are not a moderator, you found a bug. Good work. Visit /commonhuman.', '2025-01-01 00:00:00');
+          (7, 'hidden',     'Private staff community — moderators only.',                                 1,    3, 'FLAG{sv_recon_hidden_community} — Staff area. If you are reading this and you are not a moderator, you found a bug. Good work. Visit /commonhuman.', '2025-01-01 00:00:00');
     """)
 
     db.executescript("""
@@ -341,7 +348,7 @@ def init_db():
                 'Ran all three against the same vulnerable-by-design codebase. Precision vs recall tradeoffs, false positive rates, and CI integration notes.',
                 12, 5, 198, 'published', 'Tools', '2025-05-19 11:00:00'),
           (50, 'DRAFT: Admin password rotation — DO NOT POST',
-                'INTERNAL DRAFT — This post should not be visible to regular users.\n\nNew admin password will be changed to: subverse2025admin\nEffective date: next Monday 09:00 UTC\nDo not share this information outside of the moderation team.',
+                'INTERNAL DRAFT — This post should not be visible to regular users.\n\nNew admin password will be changed to: subverse2025admin\nEffective date: next Monday 09:00 UTC\nDo not share this information outside of the moderation team.\n\nFLAG{sv_idor_draft_post_read}',
                 1, 7,   0, 'draft', '', '2025-05-20 08:00:00');
     """)
 
@@ -430,7 +437,7 @@ def init_db():
     db.executescript("""
         INSERT OR IGNORE INTO messages (id, sender_id, recipient_id, subject, body, read, created_at) VALUES
           (1, 1, 2, 'Site secret key — DO NOT SHARE',
-              'Alice, storing this here for the record. Flask SECRET_KEY: subverse-2026-xK9mQp7\nDB is at /data/subverse.db\nDo not share outside the team.',
+              'Alice, storing this here for the record. Flask SECRET_KEY: subverse-2026-xK9mQp7\nDB is at /data/subverse.db\nDo not share outside the team.\nFLAG{sv_idor_message_read}',
               0, '2025-04-01 00:00:00'),
           (2, 2, 4, 'Welcome to SubVerse, cipher_dev',
               'Hi cipher_dev, welcome to the community! Looks like you have been posting great content already. Let us know if you have any questions.',
@@ -574,3 +581,5 @@ def init_db():
 
     db.commit()
     db.close()
+    with open('/flag_cmdi.txt', 'w') as f:
+        f.write('FLAG{sv_cmdi_preview_rce}\n')

@@ -8,6 +8,8 @@ import routes.messages, routes.profile, routes.admin, routes.api
 
 app = Flask(__name__)
 app.secret_key = 'subverse-2026-xK9mQp7'
+app.config['SSTI_FLAG'] = 'FLAG{sv_ssti_announce_exec}'
+app.config['ADMIN_SECRET_FLAG'] = 'FLAG{sv_mass_assign_escalated}'
 app.teardown_appcontext(close_db)
 app.jinja_env.globals.update(current_user=current_user)
 

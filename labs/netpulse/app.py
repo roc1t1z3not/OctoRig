@@ -6,6 +6,7 @@ import routes.tickets, routes.board, routes.admin, routes.api, routes.expanded
 
 app = Flask(__name__)
 app.secret_key = 'netpulse-1998-xT7kLm9'
+app.config['SSTI_FLAG'] = 'FLAG{np_ssti_template_exec}'
 app.teardown_appcontext(close_db)
 app.jinja_env.globals.update(current_user=current_user)
 

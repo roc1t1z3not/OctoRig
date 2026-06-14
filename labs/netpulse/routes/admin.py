@@ -1,5 +1,5 @@
 import jinja2
-from flask import request, render_template, session, redirect, url_for
+from flask import request, render_template, make_response, session, redirect, url_for
 from db import get_db
 
 
@@ -27,7 +27,9 @@ def init(app):
             return err
         users    = get_db().execute("SELECT COUNT(*) AS c FROM users").fetchone()['c']
         tickets  = get_db().execute("SELECT COUNT(*) AS c FROM support_tickets WHERE status='open'").fetchone()['c']
-        return render_template('admin.html', user_count=users, open_tickets=tickets)
+        resp = make_response(render_template('admin.html', user_count=users, open_tickets=tickets))
+        resp.headers['X-Admin-Flag'] = 'FLAG{np_sqli_login_bypassed}'
+        return resp
 
     @app.route('/admin/users')
     def admin_users():

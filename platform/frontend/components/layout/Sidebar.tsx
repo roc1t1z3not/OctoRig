@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard, FlaskConical, Rocket, Settings, LogOut, Users,
   KeyRound, ShieldCheck, UserCog, FolderGit2, Container, ScrollText,
-  Swords, Flag, Award, ChevronUp, Zap, PenTool,
+  Swords, Flag, Award, ChevronUp, Zap, PenTool, User,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useUserStore } from "@/stores/user.store";
@@ -177,6 +177,15 @@ export function Sidebar() {
             className="border-b overflow-hidden"
             style={{ borderColor: "var(--g-border)", background: "var(--g-surface)" }}
           >
+            <Link
+              href={`/profile/${user?.username}`}
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-[var(--g-accent-dim)] transition-colors"
+              style={{ color: "var(--g-text-muted)" }}
+            >
+              <User size={13} />
+              My Profile
+            </Link>
             <Link
               href="/settings"
               onClick={() => setMenuOpen(false)}

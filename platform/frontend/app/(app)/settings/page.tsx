@@ -26,7 +26,7 @@ export default function SettingsPage() {
         <nav className="settings-nav g-panel">
           {([
             { id: "appearance", label: "Appearance", icon: <Palette size={15} /> },
-            { id: "account", label: "Account", icon: <User size={15} /> },
+            { id: "account",    label: "Account",    icon: <User size={15} /> },
           ] as const).map((item) => (
             <button
               key={item.id}
