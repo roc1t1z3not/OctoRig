@@ -91,7 +91,7 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
             # ── Recon ──────────────────────────────────────────────────────
             {
                 "slug": "rw-recon-robots",
-                "title": "Rewind: What's Off-Limits?",
+                "title": "What's Off-Limits?",
                 "description": (
                     "Every web server has a way to tell search engines what *not* to index. "
                     "Rewind Range is no exception — and the things it wants crawlers to ignore "
@@ -110,19 +110,20 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{rw_manager_office_found}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Start at http://172.28.1.2/robots.txt", "cost": 0},
+                    {"order_num": 1, "content": "Search engines are told what to ignore — that instruction list is itself public.", "cost": 0},
+                    {"order_num": 2, "content": "The file lives at a standard path in the web root. Follow each path it lists.", "cost": 25},
+                    {"order_num": 3, "content": "Visit /robots.txt, then browse to each Disallow path as a logged-in user.", "cost": 50},
                 ],
             },
             # ── SQL Injection ───────────────────────────────────────────────
             {
                 "slug": "rw-sqli-browse-union",
-                "title": "Rewind: Browse & Conquer",
+                "title": "Browse & Conquer",
                 "description": (
                     "The browsing experience on Rewind Range is built on a query that "
                     "trusts user input a little too much. One of the filter parameters "
-                    "goes straight into the SQL — no escaping, no parameterisation.\n\n"
-                    "Extend that query to reach data the application never intended to "
-                    "show you. The database has more tables than the product catalogue.\n\n"
+                    "deserves a closer look — what you find there may reach further than "
+                    "the product catalogue.\n\n"
                     "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
@@ -135,19 +136,19 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{rw_union_select_from_flags}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Determine column count first: ORDER BY 1, ORDER BY 2, … until an error.", "cost": 0},
-                    {"order_num": 2, "content": "SELECT * FROM products returns 10 columns. Match that count in your UNION.", "cost": 25},
-                    {"order_num": 3, "content": "SELECT name FROM sqlite_master WHERE type='table' to list all tables.", "cost": 50},
+                    {"order_num": 1, "content": "The category or genre filter on the browse page is worth inspecting. Try an unusual character.", "cost": 0},
+                    {"order_num": 2, "content": "Column count matters. Use ORDER BY to count them before extending the query.", "cost": 25},
+                    {"order_num": 3, "content": "SELECT name FROM sqlite_master WHERE type='table' lists all tables in the database.", "cost": 75},
                 ],
             },
             {
                 "slug": "rw-sqli-login-bypass",
-                "title": "Rewind: Bypass the Velvet Rope",
+                "title": "Bypass the Velvet Rope",
                 "description": (
-                    "You don't have admin credentials. You don't need them.\n\n"
-                    "Rewind Range's login form builds its authentication query the old-fashioned "
-                    "way — by gluing strings together. A well-placed quote and a comment can "
-                    "make any query return true.\n\n"
+                    "You don't have admin credentials. You might not need them.\n\n"
+                    "Rewind Range's login form makes a decision based on what you submit. "
+                    "That decision process has a flaw — the right input in the username "
+                    "field might be enough to walk right in.\n\n"
                     "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
@@ -160,17 +161,19 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{rw_admin_login_bypassed}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Classic: username = admin'-- and any password.", "cost": 0},
+                    {"order_num": 1, "content": "What does the server do when you put a quote character in the username field?", "cost": 0},
+                    {"order_num": 2, "content": "SQL comment sequences can neutralise parts of a query.", "cost": 50},
+                    {"order_num": 3, "content": "Try username: admin'-- with any password.", "cost": 100},
                 ],
             },
             {
                 "slug": "rw-sqli-cred-dump",
-                "title": "Rewind: Dump the Membership List",
+                "title": "Dump the Membership List",
                 "description": (
-                    "Rewind Range keeps a membership list. Usernames, email addresses, "
-                    "and — because it was 2003 when this app was written — plaintext passwords.\n\n"
-                    "The same injection point you used to pull hidden data can reach the "
-                    "users table too. Find the admin's password and wrap it in `FLAG{}`.\n\n"
+                    "Rewind Range keeps a membership list. Once you've found your way "
+                    "into the database, there's more to collect than product data — "
+                    "the users table holds secrets its customers never intended to share.\n\n"
+                    "Find the admin's password and wrap it in `FLAG{}`.\n\n"
                     "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
@@ -184,18 +187,18 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{123456789}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Target the `users` table. Columns include username and password.", "cost": 25},
+                    {"order_num": 1, "content": "You already found an injection point. What other tables exist in this database?", "cost": 0},
+                    {"order_num": 2, "content": "There is a users table. Columns include username and password.", "cost": 50},
+                    {"order_num": 3, "content": "The admin's password is stored in plaintext. Extract it and wrap it in FLAG{}.", "cost": 75},
                 ],
             },
             # ── XSS ────────────────────────────────────────────────────────
             {
                 "slug": "rw-xss-reflected-search",
-                "title": "Rewind: Search and Destroy",
+                "title": "Search and Destroy",
                 "description": (
-                    "Whatever you search for, Rewind Range helpfully echoes it back on "
-                    "the results page. The kind of helpful that skips HTML encoding.\n\n"
-                    "Make the page execute something it wasn't asked to run, and the flag "
-                    "will confirm it worked.\n\n"
+                    "Whatever you search for, Rewind Range echoes it back on the results "
+                    "page. The question is whether it echoes *only* what you typed.\n\n"
                     "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
@@ -208,17 +211,19 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{rw_reflected_xss_fired}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Try: /search?q=<script>alert(1)</script>", "cost": 0},
+                    {"order_num": 1, "content": "Does the search input appear verbatim on the results page? Try some HTML.", "cost": 0},
+                    {"order_num": 2, "content": "HTML tags in the query — do they render, or get escaped?", "cost": 50},
+                    {"order_num": 3, "content": "Try: /search?q=<script>alert(1)</script> — the flag will appear in the page.", "cost": 75},
                 ],
             },
             {
                 "slug": "rw-xss-stored-feedback",
-                "title": "Rewind: Leave Your Mark",
+                "title": "Leave Your Mark",
                 "description": (
                     "Happy customers leave feedback. Admins read it.\n\n"
                     "The store has a way to submit comments, and whoever reviews them does "
-                    "so in a browser with elevated privileges. If the content isn't sanitised "
-                    "before it's rendered, you can make the reviewer's browser work for you.\n\n"
+                    "so in a browser with elevated privileges. If what you submit "
+                    "gets rendered without scrutiny, that browser might do more than just read.\n\n"
                     "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
@@ -231,20 +236,19 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{rw_stored_xss_admin_pwned}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Visit /admin/feedback (requires admin session) to see the flag.", "cost": 0},
-                    {"order_num": 2, "content": "The admin cookie is named `session`. Forge it or steal it via XSS.", "cost": 50},
+                    {"order_num": 1, "content": "There is a feedback form. Submit something unusual and think about who reads it and how.", "cost": 0},
+                    {"order_num": 2, "content": "If the admin's browser renders your submission, and the admin has a cookie you want...", "cost": 50},
+                    {"order_num": 3, "content": "The admin reviews feedback at /admin/feedback. Their session cookie is not HttpOnly.", "cost": 100},
                 ],
             },
             # ── IDOR ────────────────────────────────────────────────────────
             {
                 "slug": "rw-idor-inbox",
-                "title": "Rewind: You've Got Mail",
+                "title": "You've Got Mail",
                 "description": (
-                    "Rewind Range has a private messaging feature. Messages are stored "
-                    "with a number, and the app fetches them by that number alone — "
-                    "without checking whether the message belongs to you.\n\n"
-                    "Log in as any regular user and start counting. Someone important "
-                    "left a message you weren't supposed to read.\n\n"
+                    "Rewind Range has a private messaging feature. Messages are fetched "
+                    "by number — but whose messages can you actually read?\n\n"
+                    "Log in as any regular user and find out.\n\n"
                     "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
@@ -257,19 +261,18 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{rw_idor_inbox_read}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Log in as alice (password: iloveyou), then try /inbox/1, /inbox/7…", "cost": 0},
+                    {"order_num": 1, "content": "Log in and find the inbox URL. The message ID is in the path.", "cost": 0},
+                    {"order_num": 2, "content": "Try different message IDs. The server may not check who the message belongs to.", "cost": 50},
+                    {"order_num": 3, "content": "Log in as alice (password: iloveyou). Try /inbox/1, /inbox/7 and nearby IDs.", "cost": 75},
                 ],
             },
             {
                 "slug": "rw-idor-rental-api",
-                "title": "Rewind: Someone Else's Rental",
+                "title": "Someone Else's Rental",
                 "description": (
-                    "Rewind Range has a REST API for rental orders. Each order has an ID, "
-                    "and the API will hand back the full record — customer name, email, "
-                    "everything — to any authenticated user who asks.\n\n"
-                    "It never verifies that the order belongs to you. Explore the API, "
-                    "enumerate some records, and you'll find something hidden in someone "
-                    "else's order.\n\n"
+                    "Rewind Range has a REST API for rental orders. Each order has an ID. "
+                    "As an authenticated user, how many orders can you actually access?\n\n"
+                    "Explore the API and see what turns up in records that aren't yours.\n\n"
                     "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind, requires auth)"
                 ),
                 "challenge_type": "flag",
@@ -282,18 +285,21 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{rw_api_idor_rentals}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Send an authenticated GET to /api/v1/rentals/5 as alice.", "cost": 0},
+                    {"order_num": 1, "content": "Authenticate and look for a rental orders endpoint in the API.", "cost": 0},
+                    {"order_num": 2, "content": "Try different order IDs. Does the API only return your own?", "cost": 50},
+                    {"order_num": 3, "content": "GET /api/v1/rentals/<id> as any logged-in user. Check a few IDs for a memo field.", "cost": 75},
                 ],
             },
             # ── Session Forgery ─────────────────────────────────────────────
             {
                 "slug": "rw-session-forge",
-                "title": "Rewind: Rewind the Cookie",
+                "title": "Rewind the Cookie",
                 "description": (
                     "Session cookies are signed, not encrypted. The signature is only as "
-                    "strong as the secret behind it — and secrets have a way of leaking.\n\n"
-                    "Find the signing key, craft a session that says you're the admin, "
-                    "and walk through a door you were never given a key to.\n\n"
+                    "strong as the secret behind it — and secrets sometimes find their "
+                    "way into source code.\n\n"
+                    "Craft a session that says you're the admin and walk through a door "
+                    "you were never given a key to.\n\n"
                     "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
@@ -306,8 +312,9 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{rw_session_forged_as_admin}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "The secret key is hardcoded in app.py. Read the source.", "cost": 0},
-                    {"order_num": 2, "content": "flask-unsign --sign --cookie '{\"user_id\": 1}' --secret '<key>'", "cost": 50},
+                    {"order_num": 1, "content": "Flask session cookies are signed with a SECRET_KEY. What if you could find it?", "cost": 0},
+                    {"order_num": 2, "content": "The source code is available in the lab. Look for the secret key in app.py.", "cost": 75},
+                    {"order_num": 3, "content": "Use flask-unsign: --sign --cookie '{\"user_id\": 1}' --secret '<key>'", "cost": 100},
                 ],
             },
         ],
@@ -338,13 +345,12 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
             # ── Recon ──────────────────────────────────────────────────────
             {
                 "slug": "tf-recon-robots",
-                "title": "TradeFloor: Off the Books",
+                "title": "Off the Books",
                 "description": (
                     "Every exchange has areas it doesn't want indexed. TradeFloor is "
-                    "no different — the server's crawl exclusion file hints at paths "
-                    "the operators would prefer you didn't visit.\n\n"
-                    "Find one of those paths, access it as a logged-in user, and "
-                    "collect what the response leaks.\n\n"
+                    "no different — there's a public file that hints at paths the "
+                    "operators would prefer you didn't visit.\n\n"
+                    "Find one of those paths and access it as a logged-in user.\n\n"
                     "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
@@ -357,18 +363,18 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{tf_fund_manager_found}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Check /robots.txt and pick one of the Disallow paths.", "cost": 0},
+                    {"order_num": 1, "content": "Web servers publish a list of paths they'd prefer crawlers ignored. That list is public.", "cost": 0},
+                    {"order_num": 2, "content": "Some of the restricted paths don't actually enforce authentication.", "cost": 50},
                 ],
             },
             # ── SQL Injection ───────────────────────────────────────────────
             {
                 "slug": "tf-sqli-market-union",
-                "title": "TradeFloor: Inside the Order Book",
+                "title": "Inside the Order Book",
                 "description": (
-                    "The market search feature accepts a ticker query and builds its "
-                    "SQL by concatenating your input directly into the string.\n\n"
-                    "Extend the query with a UNION to reach a table that shouldn't "
-                    "be in the product catalogue at all.\n\n"
+                    "The market search feature accepts a ticker query. Try entering "
+                    "something the search wasn't designed to handle — some inputs "
+                    "travel further than just the product catalogue.\n\n"
                     "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
@@ -381,19 +387,19 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{tf_union_select_from_flags}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Try closing the LIKE clause: %' UNION SELECT ...", "cost": 0},
-                    {"order_num": 2, "content": "market_data has 6 columns. Match that in your UNION.", "cost": 25},
-                    {"order_num": 3, "content": "SELECT name FROM sqlite_master WHERE type='table' to find hidden tables.", "cost": 50},
+                    {"order_num": 1, "content": "Enter an unusual character in the ticker search and observe the response.", "cost": 0},
+                    {"order_num": 2, "content": "Column count must match before extending a query. Use ORDER BY to determine it.", "cost": 25},
+                    {"order_num": 3, "content": "SELECT name FROM sqlite_master WHERE type='table' reveals what else is stored.", "cost": 75},
                 ],
             },
             {
                 "slug": "tf-sqli-api-token",
-                "title": "TradeFloor: Token Without a Password",
+                "title": "Token Without a Password",
                 "description": (
-                    "TradeFloor's REST API issues JWT tokens via a login endpoint. "
-                    "The credential check builds its query by string concatenation.\n\n"
-                    "Obtain an admin token without knowing the admin's password, "
-                    "then call a privileged endpoint to collect the flag.\n\n"
+                    "TradeFloor's REST API issues tokens via a login endpoint. "
+                    "The credential check has a flaw — the right username might "
+                    "bypass the need for a password entirely.\n\n"
+                    "Obtain an admin token, then call a privileged endpoint.\n\n"
                     "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
@@ -406,18 +412,17 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{tf_api_token_injected}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "POST JSON to /api/token with a username that breaks the SQL.", "cost": 0},
-                    {"order_num": 2, "content": "username: admin'-- works if the query is: WHERE username='...' AND password='...'", "cost": 25},
+                    {"order_num": 1, "content": "The API token endpoint is at /api/token. Try a POST with unusual username values.", "cost": 0},
+                    {"order_num": 2, "content": "What if the username contained a character that changes how the query is interpreted?", "cost": 50},
+                    {"order_num": 3, "content": "Once you have an admin token, look for a privileged API endpoint that returns the flag.", "cost": 75},
                 ],
             },
             {
                 "slug": "tf-sqli-cred-dump",
-                "title": "TradeFloor: Membership Leaked",
+                "title": "Membership Leaked",
                 "description": (
-                    "The same injection that gets you a token can reach further. "
-                    "TradeFloor's user table stores credentials in the clear — "
-                    "names, emails, and passwords that belong on a Post-it note.\n\n"
-                    "Dump the users table and collect what's inside.\n\n"
+                    "You've found a way into the database. There's more stored there "
+                    "than market data — and not everything is encrypted.\n\n"
                     "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
@@ -430,18 +435,18 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{tf_users_table_dumped}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "The _flags table has a row called sqli-creds.", "cost": 25},
+                    {"order_num": 1, "content": "You already have an injection point. What other tables exist?", "cost": 0},
+                    {"order_num": 2, "content": "Enumerate with sqlite_master. Look for a users or members table.", "cost": 50},
+                    {"order_num": 3, "content": "The _flags table has a row called sqli-creds containing the answer.", "cost": 75},
                 ],
             },
             # ── XSS ────────────────────────────────────────────────────────
             {
                 "slug": "tf-xss-reflected-market",
-                "title": "TradeFloor: Ticker Injection",
+                "title": "Ticker Injection",
                 "description": (
-                    "The market search field reflects your input back on the results "
-                    "page without HTML encoding.\n\n"
-                    "Inject a script and read `document.cookie` — the flag is "
-                    "sitting in a cookie waiting to be stolen.\n\n"
+                    "The market search field echoes your query back on the results page. "
+                    "How faithfully does it reproduce what you type?\n\n"
                     "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
@@ -454,18 +459,18 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{tf_reflected_xss_fired}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "The search query parameter is reflected raw in the HTML.", "cost": 0},
+                    {"order_num": 1, "content": "Enter some HTML into the search field. Does the page reflect it back?", "cost": 0},
+                    {"order_num": 2, "content": "If your HTML renders, can you go further? The flag is in the browser's cookie jar.", "cost": 50},
+                    {"order_num": 3, "content": "A script that reads document.cookie will find it.", "cost": 75},
                 ],
             },
             # ── IDOR ────────────────────────────────────────────────────────
             {
                 "slug": "tf-idor-order-detail",
-                "title": "TradeFloor: Someone Else's Trade",
+                "title": "Someone Else's Trade",
                 "description": (
-                    "Trade orders each have an ID. The order detail page fetches "
-                    "the record by that ID alone — no check that it belongs to you.\n\n"
-                    "Log in as any user and enumerate order records until you find "
-                    "something that wasn't meant for you.\n\n"
+                    "Trade orders each have an ID. As a logged-in user, you can view "
+                    "your own orders — but are they truly *your* orders?\n\n"
                     "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
@@ -478,20 +483,19 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{tf_idor_order_memo}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Log in as alice.p (password: abc1234) and browse to /orders/<id>.", "cost": 0},
-                    {"order_num": 2, "content": "The flag is in a memo field on one of the admin's orders.", "cost": 25},
+                    {"order_num": 1, "content": "Log in and find the order detail URL. The ID is in the path.", "cost": 0},
+                    {"order_num": 2, "content": "Try other IDs. The server may hand back orders belonging to different users.", "cost": 50},
+                    {"order_num": 3, "content": "Check the admin's orders. A memo field on one of them contains the flag.", "cost": 75},
                 ],
             },
             # ── Broken Access Control ───────────────────────────────────────
             {
                 "slug": "tf-bac-admin-view",
-                "title": "TradeFloor: The Compliance Desk",
+                "title": "The Compliance Desk",
                 "description": (
-                    "TradeFloor's admin panel has a per-user detail view. "
-                    "The access check on that page only verifies you're logged in — "
-                    "it never checks whether you're actually an admin.\n\n"
-                    "Reach the admin's user detail page as a regular user and "
-                    "collect the flag that confirms you got in.\n\n"
+                    "TradeFloor's admin panel has a per-user detail view. Being logged "
+                    "in might be enough to reach it — try navigating there as a "
+                    "regular user.\n\n"
                     "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
@@ -504,20 +508,20 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{tf_bac_admin_user_detail}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Admin routes are under /admin/. Not all of them properly check is_admin.", "cost": 0},
-                    {"order_num": 2, "content": "Try /admin/users/1 while logged in as alice.p.", "cost": 25},
+                    {"order_num": 1, "content": "Admin routes are under /admin/. Log in as any user and explore.", "cost": 0},
+                    {"order_num": 2, "content": "The user detail page takes an ID. User IDs are sequential integers.", "cost": 50},
+                    {"order_num": 3, "content": "Try /admin/users/1 while logged in as alice.p.", "cost": 75},
                 ],
             },
             # ── JWT ─────────────────────────────────────────────────────────
             {
                 "slug": "tf-jwt-alg-none",
-                "title": "TradeFloor: Trust Nobody, Sign Nothing",
+                "title": "Trust Nobody, Sign Nothing",
                 "description": (
-                    "TradeFloor's API uses JWT tokens. The verification code "
-                    "reads the algorithm from the token header itself — and it "
-                    "accepts a value that skips signature verification entirely.\n\n"
-                    "Forge an admin token, call the privileged report endpoint, "
-                    "and retrieve the flag from the response.\n\n"
+                    "TradeFloor's API uses tokens. The way the server verifies them "
+                    "is worth examining — specifically, what the token itself says "
+                    "about how it should be verified.\n\n"
+                    "Forge an admin token and call a privileged endpoint.\n\n"
                     "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
@@ -530,9 +534,9 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{tf_jwt_alg_none_bypassed}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Decode a real token (base64url). Look at the header's 'alg' field.", "cost": 0},
-                    {"order_num": 2, "content": "Set alg to 'none' and drop the signature. Include role: admin in the payload.", "cost": 50},
-                    {"order_num": 3, "content": "Call GET /api/admin/report with your forged token as Bearer.", "cost": 75},
+                    {"order_num": 1, "content": "Decode your JWT (base64url). What's in the header? Pay attention to the alg field.", "cost": 0},
+                    {"order_num": 2, "content": "The server reads the algorithm from the token itself. What happens if you change it?", "cost": 75},
+                    {"order_num": 3, "content": "Set alg to 'none', drop the signature, add role: admin to the payload. Call GET /api/admin/report as Bearer.", "cost": 100},
                 ],
             },
         ],
@@ -571,13 +575,14 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "estimated_minutes": 5,
                 "tags": ["recon", "robots.txt"],
                 "hints": [
-                    {"order_num": 1, "content": "Start at robots.txt. One of the disallowed paths needs no authentication at all.", "cost": 0},
+                    {"order_num": 1, "content": "Web servers publish a list of paths they'd prefer crawlers ignored. That list is itself public.", "cost": 0},
+                    {"order_num": 2, "content": "Some of the restricted paths don't actually require authentication. Try each one.", "cost": 25},
                 ],
             },
             {
                 "slug": "ga-sqli-promo",
                 "title": "Free Chips",
-                "description": "The promo redemption desk feeds your code directly into the database query. Go further than the code field was meant to reach.",
+                "description": "The promo redemption desk accepts codes. Some codes may do more than redeem credits — try entering something the field wasn't designed for.",
                 "difficulty": "medium",
                 "category": "sqli",
                 "points": 200,
@@ -585,14 +590,15 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "estimated_minutes": 20,
                 "tags": ["sqli", "union", "sqlite"],
                 "hints": [
-                    {"order_num": 1, "content": "The promo code field is interpolated directly into a SQL WHERE clause — no parameterisation.", "cost": 0},
-                    {"order_num": 2, "content": "UNION SELECT against a hidden table. Use sqlite_master to enumerate table names first.", "cost": 50},
+                    {"order_num": 1, "content": "What happens when you put special characters in the promo code field?", "cost": 0},
+                    {"order_num": 2, "content": "The injection takes you to the database. Use sqlite_master to see what tables exist.", "cost": 50},
+                    {"order_num": 3, "content": "UNION SELECT against a hidden table. Column count must match the original query.", "cost": 75},
                 ],
             },
             {
                 "slug": "ga-sqli-leaderboard",
                 "title": "Rigged Rankings",
-                "description": "The leaderboard search echoes your query into both the SQL and the page output without filtering either. One request, two vulnerabilities.",
+                "description": "The leaderboard has a search. Your input ends up in more than one place — try something you wouldn't normally type as a player name.",
                 "difficulty": "medium",
                 "category": "sqli",
                 "points": 150,
@@ -600,14 +606,15 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "estimated_minutes": 15,
                 "tags": ["sqli", "union", "reflected-xss"],
                 "hints": [
-                    {"order_num": 1, "content": "The ?q= parameter on /leaderboard is concatenated directly into a LIKE query.", "cost": 0},
-                    {"order_num": 2, "content": "UNION SELECT to pivot into a hidden table. Match the column count of the users query.", "cost": 50},
+                    {"order_num": 1, "content": "Enter an unusual character in the search. What does the response tell you about how it's processed?", "cost": 0},
+                    {"order_num": 2, "content": "The query uses a LIKE clause. What happens when you close it early?", "cost": 50},
+                    {"order_num": 3, "content": "UNION SELECT to pivot into a hidden table. Match the column count of the users query.", "cost": 75},
                 ],
             },
             {
                 "slug": "ga-xss-chat",
                 "title": "Dealer's Message",
-                "description": "The live casino chat stores and renders every message raw. A script posted in the chat room runs in the browser of every player who loads the page.",
+                "description": "The live casino chat is open to all registered players. What you post is visible to everyone who loads the room — including what you didn't intend to post.",
                 "difficulty": "easy",
                 "category": "xss",
                 "points": 150,
@@ -615,14 +622,15 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "estimated_minutes": 15,
                 "tags": ["xss", "stored", "cookies"],
                 "hints": [
-                    {"order_num": 1, "content": "Messages are rendered with no output encoding. A script tag in the chat executes for every visitor.", "cost": 0},
-                    {"order_num": 2, "content": "Check what cookies are set when the chat page loads — not all carry the HttpOnly flag.", "cost": 25},
+                    {"order_num": 1, "content": "Post a message with some HTML in it. Does the chat render it?", "cost": 0},
+                    {"order_num": 2, "content": "If HTML renders, so does JavaScript. The page sets a cookie when it loads.", "cost": 50},
+                    {"order_num": 3, "content": "Not all cookies have the HttpOnly flag. Some are readable from JavaScript.", "cost": 75},
                 ],
             },
             {
                 "slug": "ga-idor-suite",
                 "title": "Wrong Room",
-                "description": "Player suites display a full game history. The room number is an integer in the URL, and the door has no lock that checks whose name is on the booking.",
+                "description": "Player suites display a full game history. The room number is in the URL — is it verified against your session?",
                 "difficulty": "easy",
                 "category": "idor",
                 "points": 100,
@@ -630,14 +638,14 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "estimated_minutes": 10,
                 "tags": ["idor", "access-control"],
                 "hints": [
-                    {"order_num": 1, "content": "Suite IDs are sequential integers. Start from 1 — the house always gets suite one.", "cost": 0},
-                    {"order_num": 2, "content": "The admin's game history contains an unusual entry in the memo field.", "cost": 25},
+                    {"order_num": 1, "content": "Room numbers are sequential integers in the URL.", "cost": 0},
+                    {"order_num": 2, "content": "Start from room 1. Game history memos sometimes contain more than scores.", "cost": 50},
                 ],
             },
             {
                 "slug": "ga-biz-negative-bet",
                 "title": "The House Loses",
-                "description": "The slot machine trusts the bet amount submitted in the POST body without checking its sign. Maths works in both directions.",
+                "description": "The slot machine accepts your bet via a form. The server processes what you send — but does it validate it?",
                 "difficulty": "medium",
                 "category": "web",
                 "points": 200,
@@ -645,14 +653,14 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "estimated_minutes": 15,
                 "tags": ["business-logic", "parameter-tampering"],
                 "hints": [
-                    {"order_num": 1, "content": "The bet field is a hidden form input. Intercept the request and change its value.", "cost": 0},
-                    {"order_num": 2, "content": "Try submitting a negative number. Watch what the server logs in the audit trail.", "cost": 25},
+                    {"order_num": 1, "content": "Intercept the bet submission. What fields are in the POST body?", "cost": 0},
+                    {"order_num": 2, "content": "The bet field accepts numbers. Explore its boundaries — in both directions.", "cost": 50},
                 ],
             },
             {
                 "slug": "ga-bac-admin",
                 "title": "Staff Only",
-                "description": "The admin panel gates on a session existing — not on the session belonging to an admin. Any registered player can walk behind the counter.",
+                "description": "The admin panel is behind a door marked staff only. As a registered player, try walking through it.",
                 "difficulty": "easy",
                 "category": "web",
                 "points": 150,
@@ -660,13 +668,14 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "estimated_minutes": 10,
                 "tags": ["bac", "access-control"],
                 "hints": [
-                    {"order_num": 1, "content": "Register a regular account and visit /admin.", "cost": 0},
+                    {"order_num": 1, "content": "Register a regular account and navigate to /admin.", "cost": 0},
+                    {"order_num": 2, "content": "The flag is displayed on the admin panel page.", "cost": 25},
                 ],
             },
             {
                 "slug": "ga-bac-high-rollers",
                 "title": "VIP Lounge",
-                "description": "A restricted lounge for high-rollers and VIPs is linked from the crawlers-only file. The endpoint checks for a session — but never whether the session holder qualifies.",
+                "description": "Somewhere on this site there's a restricted area for high-rollers. The path is hinted at in a familiar file. Being registered might be enough to get in.",
                 "difficulty": "easy",
                 "category": "web",
                 "points": 100,
@@ -674,13 +683,14 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "estimated_minutes": 10,
                 "tags": ["bac", "access-control", "recon"],
                 "hints": [
-                    {"order_num": 1, "content": "robots.txt lists a path restricted to high-rollers. Log in as any user and request it directly.", "cost": 0},
+                    {"order_num": 1, "content": "The path to the VIP area is listed in a file crawlers are told to avoid.", "cost": 0},
+                    {"order_num": 2, "content": "Log in as any user and request the path directly.", "cost": 25},
                 ],
             },
             {
                 "slug": "ga-promo-reuse",
                 "title": "Double Down",
-                "description": "The promo system records each redemption — but never consults that record before accepting another. Redeem the same code twice to prove the gap.",
+                "description": "The promo system hands out rewards. What happens if you try to collect more than once?",
                 "difficulty": "medium",
                 "category": "web",
                 "points": 150,
@@ -688,8 +698,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "estimated_minutes": 15,
                 "tags": ["business-logic", "promo-abuse"],
                 "hints": [
-                    {"order_num": 1, "content": "The system checks max_uses against uses_count, but never checks if you personally have already redeemed the code.", "cost": 0},
-                    {"order_num": 2, "content": "Redeem any multi-use promo code (like WELCOME100) twice with the same account.", "cost": 25},
+                    {"order_num": 1, "content": "Redeem a valid promo code. Now try redeeming it again with the same account.", "cost": 0},
+                    {"order_num": 2, "content": "The system tracks total redemptions across all users, but not per-user redemptions.", "cost": 50},
                 ],
             },
         ],
@@ -720,14 +730,11 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
             # ── Recon ──────────────────────────────────────────────────────────
             {
                 "slug": "hb-recon-audit-log",
-                "title": "HumanBank: Open Books",
+                "title": "Open Books",
                 "description": (
-                    "HumanBank exposes an internal endpoint that was never meant to be "
-                    "public. No authentication required — it just responds with the "
-                    "raw transaction log for the entire bank.\n\n"
-                    "Find the endpoint (the OpenAPI spec at `/openapi.json` is a good "
-                    "starting point), call it without logging in, and read the flag "
-                    "buried in the transaction memos.\n\n"
+                    "An internal diagnostics endpoint was deployed and never locked down. "
+                    "It responds to anyone who asks — no session required. "
+                    "The raw financial history of the entire bank is there for the taking.\n\n"
                     "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
@@ -741,21 +748,20 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{hb_recon_audit_exposed}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Check `/openapi.json` for a full list of endpoints.", "cost": 0},
-                    {"order_num": 2, "content": "One of the listed paths under `/audit-log` requires no session cookie at all.", "cost": 25},
+                    {"order_num": 1, "content": "The API publishes a machine-readable description of every endpoint it exposes.", "cost": 0},
+                    {"order_num": 2, "content": "One of the paths listed contains audit information. Try accessing it without a session cookie.", "cost": 25},
                 ],
             },
             # ── SQL Injection ───────────────────────────────────────────────────
             {
                 "slug": "hb-sqli-login",
-                "title": "HumanBank: Master Key",
+                "title": "Master Key",
                 "description": (
-                    "HumanBank's login form builds its SQL query by stitching username "
-                    "and password directly into an f-string — no parameterisation, no "
-                    "escaping.\n\n"
-                    "Comment out the password check with a classic injection payload "
-                    "and log in as the admin. Once in, check the admin profile for "
-                    "something the bank keeps very close to its chest.\n\n"
+                    "The login screen accepts your name and passphrase. "
+                    "What if the passphrase weren't the deciding factor? "
+                    "A carefully chosen username might make the decision for you.\n\n"
+                    "Once inside as admin, check the admin profile — "
+                    "there is a field the bank keeps very close to its chest.\n\n"
                     "**Target:** `http://172.28.4.2/login` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
@@ -769,20 +775,18 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{hb_sqli_login_bypassed}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Try the username field. A single quote followed by `--` comments out the rest of the query.", "cost": 0},
-                    {"order_num": 2, "content": "Payload: `admin'--` as the username. Any password.", "cost": 50},
-                    {"order_num": 3, "content": "After logging in as admin, check `/profile` — the admin's address field holds the flag.", "cost": 75},
+                    {"order_num": 1, "content": "What happens when you put special characters in the username field?", "cost": 0},
+                    {"order_num": 2, "content": "A single quote in the username causes an error. What if you also added a comment character after the username?", "cost": 50},
+                    {"order_num": 3, "content": "Username: `admin'--`, any password. After login, the flag is in `/profile` under the admin's address field.", "cost": 75},
                 ],
             },
             {
                 "slug": "hb-sqli-search",
-                "title": "HumanBank: Transaction Miner",
+                "title": "Transaction Miner",
                 "description": (
-                    "The transaction search at `/search?q=` drops your input straight "
-                    "into a `LIKE` clause with no sanitisation. The database has more "
-                    "than just transactions.\n\n"
-                    "Use a UNION-based injection to pivot into the internal `_flags` "
-                    "table and retrieve the value for `sqli-search`.\n\n"
+                    "The transaction search takes your query and goes hunting. "
+                    "What it brings back might surprise you — especially if you ask "
+                    "it to go looking somewhere it wasn't designed to reach.\n\n"
                     "**Target:** `http://172.28.4.2/search` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
@@ -796,19 +800,18 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{hb_sqli_search_union}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Count the columns first: try `' UNION SELECT NULL--` and add NULLs until the error disappears.", "cost": 0},
-                    {"order_num": 2, "content": "The query returns 7 columns. Inject: `' UNION SELECT value,2,3,4,5,6,7 FROM _flags WHERE name='sqli-search'--`", "cost": 75},
+                    {"order_num": 1, "content": "Try entering unusual characters in the search box. Does the response change?", "cost": 0},
+                    {"order_num": 2, "content": "The database has more tables than the app shows you. SQLite keeps a schema table you can query.", "cost": 50},
+                    {"order_num": 3, "content": "UNION SELECT into the `_flags` table. Match the 7-column count of the original query.", "cost": 75},
                 ],
             },
             {
                 "slug": "hb-sqli-txn-memo",
-                "title": "HumanBank: Filter Bypass",
+                "title": "Filter Bypass",
                 "description": (
-                    "The transaction list at `/accounts/<id>/transactions` accepts "
-                    "filter parameters — `memo`, `type`, `date_from`, `date_to` — and "
-                    "concatenates every one of them directly into the SQL WHERE clause.\n\n"
-                    "Inject into the `memo` parameter to UNION-select from the internal "
-                    "`_flags` table and retrieve the value for `sqli-txn`.\n\n"
+                    "The transaction list accepts filter fields — memo, type, date range. "
+                    "Each one goes straight into the query logic. "
+                    "The database knows more than transaction history.\n\n"
                     "**Target:** `http://172.28.4.2/accounts/1/transactions` "
                     "(start Lab 4 — HumanBank)"
                 ),
@@ -823,20 +826,20 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{hb_sqli_txn_dump}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "The `memo` param is injected as: `memo LIKE '%<your input>%'`. Close the LIKE, then UNION.", "cost": 0},
-                    {"order_num": 2, "content": "Payload: `?memo=' UNION SELECT name,value,3,4,5,6 FROM _flags WHERE name='sqli-txn'--`", "cost": 75},
+                    {"order_num": 1, "content": "Try putting unusual characters in the `memo` filter. What does the server respond with?", "cost": 0},
+                    {"order_num": 2, "content": "The memo filter wraps your input in a LIKE clause. Closing it early opens the door to appending your own query.", "cost": 50},
+                    {"order_num": 3, "content": "UNION SELECT into the `_flags` table from the memo param. The original query returns 6 columns.", "cost": 75},
                 ],
             },
             # ── IDOR ────────────────────────────────────────────────────────────
             {
                 "slug": "hb-idor-accounts",
-                "title": "HumanBank: Everyone's Balance",
+                "title": "Everyone's Balance",
                 "description": (
-                    "HumanBank's `/accounts` route lists every account in the database "
-                    "regardless of who is logged in — no ownership filter at all.\n\n"
-                    "Log in as any user, browse to `/accounts`, and find the mysterious "
-                    "`HB-CMNH` account. Navigate to its transaction history "
-                    "to find the flag hidden in an internal audit memo.\n\n"
+                    "Banking works on the assumption that you can only see your own accounts. "
+                    "But what if the account list page didn't share that assumption?\n\n"
+                    "One account in the system belongs to an entity that shouldn't be visible "
+                    "to regular customers. Its transaction history has a memo worth reading.\n\n"
                     "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
@@ -850,20 +853,18 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{hb_idor_cmnh_exposed}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Register or log in as any user. `/accounts` shows ALL bank accounts.", "cost": 0},
-                    {"order_num": 2, "content": "Find account HB-CMNH in the list and click through to its transactions.", "cost": 25},
+                    {"order_num": 1, "content": "Log in as any user. Browse to the accounts list — does it only show your own?", "cost": 0},
+                    {"order_num": 2, "content": "Look for an account with an unusual holder name. Its transactions contain a flag in an internal memo.", "cost": 25},
                 ],
             },
             {
                 "slug": "hb-idor-ticket",
-                "title": "HumanBank: Someone Else's Ticket",
+                "title": "Someone Else's Ticket",
                 "description": (
-                    "Support tickets at `/tickets/<id>` don't verify that the ticket "
-                    "belongs to the logged-in user. The endpoint just looks up by ID "
-                    "and returns whatever it finds.\n\n"
-                    "Enumerate ticket IDs to find an internal admin-created ticket "
-                    "that was never meant to be visible to customers. The flag is in "
-                    "the ticket body.\n\n"
+                    "Support tickets are assigned a number when filed. "
+                    "Does the system verify that the number you're requesting belongs to you?\n\n"
+                    "An internal ticket was created by bank staff and was never meant "
+                    "to be seen by customers. Find it.\n\n"
                     "**Target:** `http://172.28.4.2/tickets/` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
@@ -877,22 +878,19 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{hb_idor_ticket_read}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Try incrementing the ticket ID in the URL. You can access tickets that don't belong to your account.", "cost": 0},
+                    {"order_num": 1, "content": "Ticket IDs are sequential numbers. Try visiting a ticket that isn't yours.", "cost": 0},
+                    {"order_num": 2, "content": "Internal support tickets were created before any customer accounts. Try the earliest IDs.", "cost": 25},
                 ],
             },
             # ── Broken Access Control ───────────────────────────────────────────
             {
                 "slug": "hb-bac-admin-api",
-                "title": "HumanBank: Fake Admin API",
+                "title": "Teller Without a Badge",
                 "description": (
-                    "The REST endpoint `/api/v1/admin/users` is supposed to be "
-                    "admin-only. The access check reads `if not session.get('user_id')` "
-                    "— it verifies you're *logged in*, but never checks `is_admin`.\n\n"
-                    "Log in as any regular customer and call the endpoint. The JSON "
-                    "response exposes the full user list — and something extra the "
-                    "developer left in the payload.\n\n"
-                    "**Target:** `http://172.28.4.2/api/v1/admin/users` "
-                    "(start Lab 4 — HumanBank)"
+                    "There's an API endpoint meant for administrators only. "
+                    "The door asks if you have a key — not whether the key is the right one. "
+                    "Any customer who walks in authenticated might find the vault wide open.\n\n"
+                    "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -905,21 +903,19 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{hb_bac_api_admin_bypass}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Register any account. Call `/api/v1/admin/users` with your session cookie. Inspect the JSON response carefully.", "cost": 0},
+                    {"order_num": 1, "content": "The API spec lists every endpoint. Look for paths under an `/admin/` prefix.", "cost": 0},
+                    {"order_num": 2, "content": "Log in as any regular customer and call an admin endpoint. Inspect the JSON response carefully.", "cost": 25},
                 ],
             },
             {
                 "slug": "hb-bac-user-detail",
-                "title": "HumanBank: Admin Panel Without the Admin",
+                "title": "Admin Panel Without the Admin",
                 "description": (
-                    "The admin user-detail page at `/admin/users/<id>` checks "
-                    "`if not session.get('user_id')` — any logged-in customer can "
-                    "access it. No `is_admin` check in sight.\n\n"
-                    "Navigate directly to `/admin/users/1` as a regular user. "
-                    "The rendered page leaks the admin account's internal profile, "
-                    "including a field that was never meant to be public.\n\n"
-                    "**Target:** `http://172.28.4.2/admin/users/1` "
-                    "(start Lab 4 — HumanBank)"
+                    "The admin area has a page that shows detailed user profiles. "
+                    "It checks that you're logged in — but not who you're logged in as.\n\n"
+                    "Any registered customer can walk straight in. "
+                    "The first user account has something stored in a field that should never be public.\n\n"
+                    "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -932,21 +928,19 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{hb_bac_admin_detail_exposed}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Log in as any user. Navigate to `/admin/users/1`. The admin's bio field contains the flag.", "cost": 0},
+                    {"order_num": 1, "content": "Look for an admin section in the API spec or robots.txt. Try navigating there while logged in as a regular user.", "cost": 0},
+                    {"order_num": 2, "content": "The admin user-detail path takes a user ID. User ID 1 is the admin. The flag is in the profile data.", "cost": 50},
                 ],
             },
             # ── XSS ────────────────────────────────────────────────────────────
             {
                 "slug": "hb-xss-stored-ticket",
-                "title": "HumanBank: Support Ticket Hijack",
+                "title": "Support Ticket Hijack",
                 "description": (
-                    "Support ticket bodies are stored without sanitisation and rendered "
-                    "unescaped in the admin panel at `/admin/tickets`. The admin panel "
-                    "sets a non-HttpOnly cookie — meaning any JavaScript running on "
-                    "that page can read it.\n\n"
-                    "Submit a support ticket with an XSS payload. Then log in as admin "
-                    "(the login form is also injectable) and visit `/admin/tickets`. "
-                    "Your payload fires — `document.cookie` contains the flag.\n\n"
+                    "The bank's support ticket system stores everything customers submit "
+                    "and displays it to staff in the admin panel. "
+                    "What gets stored, gets rendered — and the admin panel isn't as safe as it looks.\n\n"
+                    "Leave something in a ticket that will run when the admin reads it.\n\n"
                     "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
@@ -960,9 +954,9 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{hb_xss_admin_cookie_stolen}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Submit a ticket with `<script>document.title=document.cookie</script>` as the body.", "cost": 0},
-                    {"order_num": 2, "content": "The admin template renders ticket bodies with `| safe` — no escaping. Log in as admin (use SQLi on the login form) and check `/admin/tickets`.", "cost": 50},
-                    {"order_num": 3, "content": "The cookie name is `hb_admin_token`. Its value is the flag.", "cost": 100},
+                    {"order_num": 1, "content": "Try submitting HTML in a ticket body. Does the admin panel render it?", "cost": 0},
+                    {"order_num": 2, "content": "The admin ticket view renders content without escaping. JavaScript submitted in a ticket runs when an admin views it.", "cost": 50},
+                    {"order_num": 3, "content": "Log in as admin (hint: the login form has its own flaw) and visit the ticket list. `document.cookie` will have the flag.", "cost": 100},
                 ],
             },
         ],
@@ -992,14 +986,11 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
             # ── Recon ──────────────────────────────────────────────────────────
             {
                 "slug": "mh-recon-openapi",
-                "title": "MediHuman: Open Spec",
+                "title": "Open Spec",
                 "description": (
-                    "MediHuman exposes a machine-readable API specification at a "
-                    "well-known path — no authentication required. The spec lists "
-                    "every endpoint the portal has, including several that were "
-                    "never meant to be discoverable.\n\n"
-                    "Fetch the spec, read it carefully, and find the internal "
-                    "extension field the developer accidentally left in.\n\n"
+                    "The portal publishes a complete map of itself — every endpoint, "
+                    "every parameter — without requiring a login. "
+                    "Read it carefully. Developers sometimes leave notes in places they assume nobody will look.\n\n"
                     "**Target:** `http://172.28.5.2` (start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
@@ -1013,20 +1004,20 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{mh_recon_openapi_exposed}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Try `/openapi.json` — it works without a session cookie.", "cost": 0},
-                    {"order_num": 2, "content": "Look for an `x-internal` extension key in the JSON response.", "cost": 25},
+                    {"order_num": 1, "content": "Most REST APIs publish their schema at a well-known path. No authentication needed.", "cost": 0},
+                    {"order_num": 2, "content": "Scan the JSON for any non-standard extension fields — keys that start with `x-`.", "cost": 25},
                 ],
             },
             # ── SQL Injection ───────────────────────────────────────────────────
             {
                 "slug": "mh-sqli-login",
-                "title": "MediHuman: Doctor's Orders",
+                "title": "Doctor's Orders",
                 "description": (
-                    "MediHuman's login form constructs its query with an f-string — "
-                    "username and password land directly in the SQL with no escaping.\n\n"
-                    "Use a classic comment injection to bypass the password check and "
-                    "log in as the admin. Once in, check the admin panel response "
-                    "headers for something the server leaks.\n\n"
+                    "The login screen trusts what you give it. "
+                    "A username crafted to speak directly to the database might "
+                    "bypass the password check entirely.\n\n"
+                    "Once inside as admin, check the HTTP response from the admin panel — "
+                    "the server reveals more than just the page.\n\n"
                     "**Target:** `http://172.28.5.2/login` (start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
@@ -1040,19 +1031,18 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{mh_sqli_login_bypassed}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Username field: `admin'--` comments out the password check. Any password value.", "cost": 0},
-                    {"order_num": 2, "content": "After login, visit `/admin` and inspect the HTTP response headers.", "cost": 50},
+                    {"order_num": 1, "content": "Try unusual characters in the username field. Notice any difference in how the server responds?", "cost": 0},
+                    {"order_num": 2, "content": "A quote character breaks the query. A comment character after the username silences the rest.", "cost": 50},
+                    {"order_num": 3, "content": "Username: `admin'--`, any password. After logging in, check the HTTP response headers on `/admin`.", "cost": 75},
                 ],
             },
             {
                 "slug": "mh-sqli-patient-search",
-                "title": "MediHuman: PHI Leak via Search",
+                "title": "Records Request",
                 "description": (
-                    "The patient search endpoint at `/patients?q=` concatenates your "
-                    "input directly into a SQL `LIKE` clause with no parameterisation. "
-                    "The database contains more than patient records.\n\n"
-                    "UNION-inject to pivot into the internal `_flags` table and "
-                    "retrieve the value for `sqli-search`.\n\n"
+                    "The patient search accepts a name and queries the database. "
+                    "What the database returns depends entirely on how you frame the question.\n\n"
+                    "The system stores more than patient names.\n\n"
                     "**Target:** `http://172.28.5.2/patients` (start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
@@ -1066,20 +1056,21 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{mh_sqli_patient_search_union}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Count the columns returned by the base query first using `' UNION SELECT NULL,NULL,...--`.", "cost": 0},
-                    {"order_num": 2, "content": "The query returns 9 columns. Inject into `?q=`: `' UNION SELECT value,2,3,4,5,6,7,8,9 FROM _flags WHERE name='sqli-search'--`", "cost": 75},
+                    {"order_num": 1, "content": "Put a special character in the search. Does the error tell you how the query is structured?", "cost": 0},
+                    {"order_num": 2, "content": "The database schema is readable if you know where to look. What tables does SQLite expose by default?", "cost": 50},
+                    {"order_num": 3, "content": "UNION SELECT into a hidden table. The original query returns 9 columns — match that count.", "cost": 75},
                 ],
             },
             # ── IDOR ────────────────────────────────────────────────────────────
             {
                 "slug": "mh-idor-lab-result",
-                "title": "MediHuman: Classified Test Result",
+                "title": "Classified Test Result",
                 "description": (
-                    "Lab results at `/labs/<id>` have no ownership check — any "
-                    "authenticated user can retrieve any result by ID.\n\n"
-                    "There is a fifth lab result flagged as an unclassified panel "
-                    "submitted by an external party. The notes field contains "
-                    "something that should never have been filed in the system.\n\n"
+                    "Lab results are accessed by ID. The portal verifies you're "
+                    "authenticated — but not that the result belongs to you.\n\n"
+                    "One result in the system was filed by an external party "
+                    "and should never have been accessible to patients. "
+                    "The notes field tells a different story.\n\n"
                     "**Target:** `http://172.28.5.2` (start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
@@ -1093,18 +1084,19 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{mh_idor_lab_result_exposed}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Log in as any user. Try `/labs/5` — the endpoint doesn't verify you own the record.", "cost": 0},
+                    {"order_num": 1, "content": "Log in as any user. Browse lab result IDs. Does the system restrict which records you can see?", "cost": 0},
+                    {"order_num": 2, "content": "There are more results in the database than are shown in your patient dashboard.", "cost": 25},
                 ],
             },
             {
                 "slug": "mh-idor-prescription",
-                "title": "MediHuman: Someone Else's Prescription",
+                "title": "Second Opinion",
                 "description": (
-                    "Prescription records at `/prescriptions/<id>` and "
-                    "`/api/v1/prescriptions/<id>` have no patient ownership check. "
-                    "Any logged-in user can retrieve any prescription by ID.\n\n"
-                    "Access prescription #5 — a Metformin record belonging to a "
-                    "different patient. The notes field contains the flag.\n\n"
+                    "Prescription records are stored by ID. "
+                    "The system trusts that you'll only ask for your own — "
+                    "but it doesn't enforce it.\n\n"
+                    "There is a prescription in the system that belongs to someone else. "
+                    "The notes field carries something that shouldn't be there.\n\n"
                     "**Target:** `http://172.28.5.2` (start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
@@ -1118,22 +1110,19 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{mh_idor_prescription_read}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Register or log in as any user. Navigate to `/prescriptions/5`.", "cost": 0},
+                    {"order_num": 1, "content": "Log in as any user. Try accessing prescriptions by their ID number.", "cost": 0},
+                    {"order_num": 2, "content": "Your own prescription might not be ID 1. Try IDs you weren't assigned.", "cost": 25},
                 ],
             },
             # ── Broken Access Control ───────────────────────────────────────────
             {
                 "slug": "mh-bac-admin-export",
-                "title": "MediHuman: Patient Data Export",
+                "title": "Patient Data Export",
                 "description": (
-                    "The REST endpoint `/api/v1/admin/export` is supposed to be "
-                    "restricted to administrators. Its access check is "
-                    "`if not session.get('user_id')` — any logged-in user qualifies.\n\n"
-                    "Log in as any patient and call the endpoint. The JSON "
-                    "response dumps every patient's full medical record — SSN, "
-                    "blood type, allergies — and something extra.\n\n"
-                    "**Target:** `http://172.28.5.2/api/v1/admin/export` "
-                    "(start Lab 5 — MediHuman)"
+                    "The admin section has a data export that dumps every patient record "
+                    "in the system. The door is labelled admin-only — "
+                    "but the bouncer just checks if you exist, not who you are.\n\n"
+                    "**Target:** `http://172.28.5.2` (start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -1146,21 +1135,19 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{mh_bac_admin_export_bypass}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Register any account. Call GET `/api/v1/admin/export` with your session cookie. Check the `flag` field in the JSON.", "cost": 0},
+                    {"order_num": 1, "content": "The API spec lists admin paths. Try calling one while logged in as a regular patient.", "cost": 0},
+                    {"order_num": 2, "content": "The export endpoint returns JSON with all patient records — and one extra field.", "cost": 25},
                 ],
             },
             {
                 "slug": "mh-bac-staff-detail",
-                "title": "MediHuman: Admin Profile Leak",
+                "title": "Admin Profile Leak",
                 "description": (
-                    "Staff profile pages at `/admin/staff/<id>` are supposed to be "
-                    "admin-only. The check reads `if not session.get('user_id')` — "
-                    "it verifies you're logged in, not that you're an admin.\n\n"
-                    "Navigate to `/admin/staff/1` as a regular patient. "
-                    "The admin's full profile is rendered — including a field "
-                    "that shouldn't be there.\n\n"
-                    "**Target:** `http://172.28.5.2/admin/staff/1` "
-                    "(start Lab 5 — MediHuman)"
+                    "Staff profiles are tucked behind an admin path. "
+                    "The lock on the door checks whether you're logged in — "
+                    "not whether you're staff.\n\n"
+                    "The first staff member's profile has a field that doesn't belong there.\n\n"
+                    "**Target:** `http://172.28.5.2` (start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -1173,20 +1160,18 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{mh_bac_staff_detail_exposed}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Log in as any user. Visit `/admin/staff/1`. The admin's `full_name` field contains the flag.", "cost": 0},
+                    {"order_num": 1, "content": "Log in as any user. Look for an admin staff path — the API spec will list it.", "cost": 0},
+                    {"order_num": 2, "content": "Request staff ID 1. The profile data includes a field that shouldn't be visible to patients.", "cost": 25},
                 ],
             },
             # ── XSS ────────────────────────────────────────────────────────────
             {
                 "slug": "mh-xss-reflected",
-                "title": "MediHuman: Search & Destroy",
+                "title": "Search & Destroy",
                 "description": (
-                    "The patient search at `/patients?q=` renders the query parameter "
-                    "back into the page using `{{ q | safe }}` — no HTML escaping. "
-                    "The page also sets a non-HttpOnly session cookie, making it "
-                    "readable from JavaScript.\n\n"
-                    "Craft a reflected XSS payload in `?q=` that reads "
-                    "`document.cookie`. The cookie value is the flag.\n\n"
+                    "The patient search echoes your search term back on the results page. "
+                    "It reads it in, and it reads it back out — without checking what it contains.\n\n"
+                    "There is a cookie set on this page that is readable from the browser.\n\n"
                     "**Target:** `http://172.28.5.2/patients` "
                     "(start Lab 5 — MediHuman)"
                 ),
@@ -1201,23 +1186,21 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{mh_xss_reflected_patients}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Try `?q=<script>document.title=document.cookie</script>` — the page title changes to the cookie value.", "cost": 0},
-                    {"order_num": 2, "content": "The cookie is named `mh_session_data`. Its value is the flag.", "cost": 50},
+                    {"order_num": 1, "content": "Try putting some HTML in the search field. Does the page render it?", "cost": 0},
+                    {"order_num": 2, "content": "If HTML renders, JavaScript runs too. The page sets a session cookie that isn't flagged HttpOnly.", "cost": 50},
+                    {"order_num": 3, "content": "Read `document.cookie` from your script. The session cookie value is the flag.", "cost": 75},
                 ],
             },
             # ── Mass Assignment ─────────────────────────────────────────────────
             {
                 "slug": "mh-mass-assign",
-                "title": "MediHuman: Appointment Escalation",
+                "title": "Appointment Escalation",
                 "description": (
-                    "The appointment API at `PUT /api/v1/appointments/<id>` accepts "
-                    "a JSON body and writes **every field** directly to the database "
-                    "with no allow-list. A patient can modify fields that only a "
-                    "doctor or admin should control.\n\n"
-                    "Send a PUT request with a `doctor_id` or `patient_id` field in "
-                    "the body — assigning yourself to a different doctor, or "
-                    "reassigning who the appointment belongs to. "
-                    "The server reveals the flag in the response.\n\n"
+                    "The appointment system lets you update your own bookings. "
+                    "It accepts a JSON body and trusts you to only send fields "
+                    "that belong to you.\n\n"
+                    "Some fields are never shown in the patient form — but the server "
+                    "will accept them anyway.\n\n"
                     "**Target:** `http://172.28.5.2/api/v1/appointments/1` "
                     "(start Lab 5 — MediHuman)"
                 ),
@@ -1232,8 +1215,9 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                     {"value": "FLAG{mh_mass_assign_escalated}", "flag_type": "static", "case_sensitive": False}
                 ],
                 "hints": [
-                    {"order_num": 1, "content": "Log in, then: `curl -X PUT http://172.28.5.2/api/v1/appointments/1 -H 'Content-Type: application/json' -d '{\"doctor_id\": 1}' --cookie 'session=<your_session>'`", "cost": 0},
-                    {"order_num": 2, "content": "Any PUT body containing `doctor_id` or `patient_id` triggers the flag in the JSON response.", "cost": 50},
+                    {"order_num": 1, "content": "Intercept a PUT request to the appointments endpoint. What fields does the server actually accept?", "cost": 0},
+                    {"order_num": 2, "content": "Try adding fields that control who the appointment is assigned to — fields not present in the patient-facing form.", "cost": 50},
+                    {"order_num": 3, "content": "Including `doctor_id` or `patient_id` in the PUT body triggers the flag in the JSON response.", "cost": 75},
                 ],
             },
         ],
@@ -1262,128 +1246,133 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
         "challenges": [
             {
                 "slug": "np-recon-billing-db",
-                "title": "Exposed Billing Endpoint",
-                "description": "The ISP's internal billing database is accessible without any authentication. `robots.txt` hints at the endpoint. Find it and retrieve the flag hidden in an internal staff invoice.",
+                "title": "Off the Books",
+                "description": "An internal endpoint was left exposed during a rushed deployment. It requires no login and speaks freely to anyone who requests it. Internal invoices are there for the taking.",
                 "challenge_type": "flag",
                 "category": "recon",
                 "difficulty": "easy",
                 "points": 50,
                 "tags": ["unauthenticated", "information-disclosure"],
                 "hints": [
-                    {"order_num": 1, "content": "Check robots.txt for disallowed paths.", "cost": 0},
-                    {"order_num": 2, "content": "The endpoint returns raw JSON. Look at internal staff invoices.", "cost": 0},
+                    {"order_num": 1, "content": "Web servers often publish a file telling crawlers which paths to avoid. That list can be revealing.", "cost": 0},
+                    {"order_num": 2, "content": "One of the disallowed paths serves raw JSON without requiring authentication. Look through the records.", "cost": 25},
                 ],
             },
             {
                 "slug": "np-sqli-login",
-                "title": "Login Bypass",
-                "description": "The NetPulse login form passes username and password directly into a raw SQL query. Bypass authentication as `admin` and collect the flag from the admin panel response header.",
+                "title": "Ghost Credentials",
+                "description": "The login form accepts a username and password. The check that validates them might be easier to sidestep than it appears — especially if you phrase your username carefully.",
                 "challenge_type": "flag",
                 "category": "sqli",
                 "difficulty": "easy",
                 "points": 100,
                 "tags": ["authentication", "boolean-based"],
                 "hints": [
-                    {"order_num": 1, "content": "Classic: username = `admin'--` and any password.", "cost": 0},
-                    {"order_num": 2, "content": "The flag is in an HTTP response header — check with Burp or `curl -I`.", "cost": 0},
+                    {"order_num": 1, "content": "Try entering unusual characters in the username. Does the error change?", "cost": 0},
+                    {"order_num": 2, "content": "A quote in the username changes the query structure. A comment character ends it early.", "cost": 50},
+                    {"order_num": 3, "content": "After logging in as admin, check the HTTP response headers on the admin panel page.", "cost": 75},
                 ],
             },
             {
                 "slug": "np-sqli-board-search",
-                "title": "Community Board Union Injection",
-                "description": "The community board search injects the `q` parameter directly into a SQL LIKE query. Exploit UNION injection to dump the internal `_flags` table and retrieve the hidden flag.",
+                "title": "Thread Unraveled",
+                "description": "The community board has a search box. Your query travels further than the forum posts — the database has more to offer if you ask the right way.",
                 "challenge_type": "flag",
                 "category": "sqli",
                 "difficulty": "medium",
                 "points": 250,
                 "tags": ["union-based", "sqlite"],
                 "hints": [
-                    {"order_num": 1, "content": "SQLite: use `UNION SELECT null,null,...` — match the column count first.", "cost": 0},
-                    {"order_num": 2, "content": "The target table is `_flags` with columns `name` and `value`.", "cost": 25},
+                    {"order_num": 1, "content": "Try entering a single quote in the search. What does the response tell you?", "cost": 0},
+                    {"order_num": 2, "content": "The database stores more than posts. Enumerate the schema to find what else is there.", "cost": 50},
+                    {"order_num": 3, "content": "Use UNION SELECT — match the column count, then target the internal flags table.", "cost": 75},
                 ],
             },
             {
                 "slug": "np-idor-user",
-                "title": "Account Enumeration via API",
-                "description": "The `/api/v1/users/<id>` endpoint returns full account details including sensitive fields for any authenticated user. Access the admin account record and retrieve the flag.",
+                "title": "Wrong Account",
+                "description": "The user API returns account details by ID. You are logged in — but does that mean you can only see yourself?",
                 "challenge_type": "flag",
                 "category": "idor",
                 "difficulty": "easy",
                 "points": 100,
                 "tags": ["api", "horizontal-privilege-escalation"],
                 "hints": [
-                    {"order_num": 1, "content": "You are logged in as a regular user. Try accessing a different user ID.", "cost": 0},
-                    {"order_num": 2, "content": "The admin account is always user ID 1.", "cost": 0},
+                    {"order_num": 1, "content": "The API spec lists a users endpoint. Try accessing IDs other than your own.", "cost": 0},
+                    {"order_num": 2, "content": "The first user created in the system usually has the lowest ID.", "cost": 25},
                 ],
             },
             {
                 "slug": "np-idor-ticket",
-                "title": "Support Ticket Peek",
-                "description": "The support ticket API endpoint has no ownership check. Browse to an admin-created internal ticket and retrieve the flag embedded in its body.",
+                "title": "Internal Dispatch",
+                "description": "Support tickets are accessed by number. The system verifies you're logged in — not that the ticket is yours.",
                 "challenge_type": "flag",
                 "category": "idor",
                 "difficulty": "easy",
                 "points": 100,
                 "tags": ["api", "information-disclosure"],
                 "hints": [
-                    {"order_num": 1, "content": "Use `/api/v1/tickets/<id>` — iterate IDs.", "cost": 0},
-                    {"order_num": 2, "content": "Internal ops tickets were created by the admin user. The last one has something interesting.", "cost": 0},
+                    {"order_num": 1, "content": "Browse to the tickets API. What happens when you try IDs you didn't create?", "cost": 0},
+                    {"order_num": 2, "content": "Internal ops tickets were created before customer accounts. Try lower IDs.", "cost": 25},
                 ],
             },
             {
                 "slug": "np-bac-admin-config",
-                "title": "Broken Access on Config Endpoint",
-                "description": "An internal admin config endpoint only checks that the user is logged in — not that they are an admin. Any authenticated user can access it. Find the endpoint and retrieve the flag.",
+                "title": "Backdoor Config",
+                "description": "The admin area has a configuration endpoint. The path is listed in a file you should check early. Getting in may be easier than you'd expect.",
                 "challenge_type": "flag",
                 "category": "web",
                 "difficulty": "easy",
                 "points": 150,
                 "tags": ["broken-access-control", "api"],
                 "hints": [
-                    {"order_num": 1, "content": "Check robots.txt or the OpenAPI spec for the endpoint path.", "cost": 0},
-                    {"order_num": 2, "content": "Send a request as a regular user — the server trusts your session cookie but never checks `is_admin`.", "cost": 0},
+                    {"order_num": 1, "content": "Check robots.txt or the API spec for admin paths.", "cost": 0},
+                    {"order_num": 2, "content": "Try accessing an admin path while logged in as a regular user. The check may only verify you have a session.", "cost": 50},
                 ],
             },
             {
                 "slug": "np-ssti-template",
-                "title": "SSTI in Template Preview",
-                "description": "The notification template editor includes a preview feature that renders body content through an unsandboxed Jinja2 environment. The edit endpoint also fails to verify admin role — any logged-in user can trigger it. Exploit SSTI to read the server-side flag from Flask config.",
+                "title": "Preview Flaw",
+                "description": "The notification system lets admins preview message templates before sending. The preview renders content on the server side — and the render context is richer than the feature implies.",
                 "challenge_type": "flag",
                 "category": "web",
                 "difficulty": "hard",
                 "points": 450,
                 "tags": ["ssti", "jinja2", "broken-access-control"],
                 "hints": [
-                    {"order_num": 1, "content": "The preview action is at `/admin/templates/<id>/edit` with `action=preview`. You don't need to be admin.", "cost": 0},
-                    {"order_num": 2, "content": "Jinja2 exposes `{{ config }}` — look for SSTI_FLAG in the config dict.", "cost": 50},
+                    {"order_num": 1, "content": "Try submitting `{{ 7*7 }}` in the preview body. If the result is 49, the server is evaluating your input.", "cost": 0},
+                    {"order_num": 2, "content": "The preview endpoint doesn't verify admin role — any logged-in user can reach it.", "cost": 50},
+                    {"order_num": 3, "content": "The server exposes its configuration object in the template context. Look for the flag there.", "cost": 75},
                 ],
             },
             {
                 "slug": "np-cmdi-dnslookup",
-                "title": "DNS Lookup Command Injection",
-                "description": "The network diagnostic tool at `/tools/dnslookup` passes the hostname field directly into a shell command without sanitisation. Inject a subcommand to read the flag file from the server filesystem.",
+                "title": "Diagnostic Override",
+                "description": "The network tools section has a hostname lookup feature. It runs a system command in the background. What happens when the hostname isn't a hostname?",
                 "challenge_type": "flag",
                 "category": "web",
                 "difficulty": "medium",
                 "points": 350,
                 "tags": ["command-injection", "rce"],
                 "hints": [
-                    {"order_num": 1, "content": "Try appending a semicolon followed by a system command.", "cost": 0},
-                    {"order_num": 2, "content": "The flag file is at `/flag_cmdi.txt` — read it with `cat`.", "cost": 25},
+                    {"order_num": 1, "content": "What separates one shell command from another? Try those characters in the hostname field.", "cost": 0},
+                    {"order_num": 2, "content": "The tool runs a DNS lookup command. Appending a shell separator lets you run something else after it.", "cost": 50},
+                    {"order_num": 3, "content": "The flag is in a file at the root of the filesystem. Read it with `cat`.", "cost": 75},
                 ],
             },
             {
                 "slug": "np-xss-reflected-board",
-                "title": "Reflected XSS on Community Board",
-                "description": "The board search endpoint reflects the `q` parameter unsanitised into the page HTML. The response also sets a non-HttpOnly cookie. Craft an XSS payload in the search field and steal the cookie.",
+                "title": "Open Mic Night",
+                "description": "The community board search reflects your search term back in the response. The page also sets a cookie that isn't protected from client-side access.",
                 "challenge_type": "flag",
                 "category": "xss",
                 "difficulty": "easy",
                 "points": 150,
                 "tags": ["reflected", "cookie-theft"],
                 "hints": [
-                    {"order_num": 1, "content": "The `q` param is reflected with `| safe` in the Jinja2 template — no escaping.", "cost": 0},
-                    {"order_num": 2, "content": "Trigger `document.cookie` exfil or just read the cookie directly — it is not HttpOnly.", "cost": 0},
+                    {"order_num": 1, "content": "Try entering some HTML in the search. Does the page render it?", "cost": 0},
+                    {"order_num": 2, "content": "If HTML renders, JavaScript does too. The page sets a cookie that JavaScript can read.", "cost": 50},
+                    {"order_num": 3, "content": "Read `document.cookie` from your script. The cookie value is the flag.", "cost": 75},
                 ],
             },
         ],
@@ -1429,7 +1418,7 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ll-sqli-search",
                 "title": "Search and Destroy",
-                "description": "The film catalogue search hands your input directly to the database. Craft a query that reaches far beyond the movie listings.",
+                "description": "The film catalogue search takes your query and asks the database. What it returns depends on how you phrase the question.",
                 "difficulty": "medium",
                 "category": "sqli",
                 "points": 200,
@@ -1437,14 +1426,15 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "estimated_minutes": 20,
                 "tags": ["sqli", "union", "sqlite"],
                 "hints": [
-                    {"order_num": 1, "content": "The search term lands inside a LIKE clause with no parameterisation — try closing the string.", "cost": 0},
-                    {"order_num": 2, "content": "UNION SELECT requires matching column count. Count the columns in the movies table and enumerate tables with sqlite_master.", "cost": 50},
+                    {"order_num": 1, "content": "Try unusual characters in the search. Does the error reveal how your input is being used?", "cost": 0},
+                    {"order_num": 2, "content": "The search wraps your input in a string comparison. Closing that string lets you append your own query.", "cost": 50},
+                    {"order_num": 3, "content": "Use UNION SELECT — match the column count of the movies query and pivot to the schema tables.", "cost": 75},
                 ],
             },
             {
                 "slug": "ll-sqli-gift",
                 "title": "Redeem Yourself",
-                "description": "Gift card validation passes the submitted code straight into a SQL query. The right injection might redeem something the database was never meant to give away.",
+                "description": "Gift cards are validated by code. The redemption form accepts your code and checks it against the database. What if the code contained more than a card number?",
                 "difficulty": "medium",
                 "category": "sqli",
                 "points": 250,
@@ -1452,8 +1442,9 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "estimated_minutes": 25,
                 "tags": ["sqli", "union", "sqlite"],
                 "hints": [
-                    {"order_num": 1, "content": "The gift card code field is interpolated directly into a WHERE clause.", "cost": 0},
-                    {"order_num": 2, "content": "UNION-based injection on the redemption form. Enumerate tables first, then look for a hidden one.", "cost": 50},
+                    {"order_num": 1, "content": "Try putting a special character in the gift code field. What does the response look like?", "cost": 0},
+                    {"order_num": 2, "content": "The code field goes straight into a WHERE clause. Enumerate the database schema to find what other tables exist.", "cost": 50},
+                    {"order_num": 3, "content": "UNION SELECT into a hidden table. Match the column count of the gift card query.", "cost": 75},
                 ],
             },
             {
@@ -1518,7 +1509,7 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ll-ssti-announce",
                 "title": "The Projectionist's Script",
-                "description": "The announcement preview feature passes submitted content directly to a Python template engine at render time. The engine is more powerful than the feature suggests.",
+                "description": "The announcement editor lets you preview your message before publishing. The preview is rendered on the server — and the render context may know more than the message author.",
                 "difficulty": "hard",
                 "category": "web",
                 "points": 450,
@@ -1526,8 +1517,8 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
                 "estimated_minutes": 35,
                 "tags": ["ssti", "jinja2", "flask"],
                 "hints": [
-                    {"order_num": 1, "content": "{{ 7*7 }} is a reliable first test for server-side template injection.", "cost": 0},
-                    {"order_num": 2, "content": "Flask's config object is accessible from the template context. What keys are stored in it?", "cost": 75},
+                    {"order_num": 1, "content": "Try submitting `{{ 7*7 }}` in the preview body. If you see 49, the server is evaluating your input.", "cost": 0},
+                    {"order_num": 2, "content": "The server-side context exposes internal application state. What objects are available in the template?", "cost": 75},
                 ],
             },
             {
@@ -1587,127 +1578,133 @@ LAB_REGISTRY: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "sv-recon-robots",
                 "title": "Hidden Community",
-                "description": "SubVerse's `robots.txt` disallows several paths. One of them leads to a private staff community whose announcement contains a flag. Find and read it.",
+                "description": "SubVerse hosts communities for all kinds of groups. Not all of them are listed publicly. A file the site publishes for crawlers hints at where the private ones live.",
                 "challenge_type": "flag",
                 "category": "recon",
                 "difficulty": "easy",
                 "points": 50,
                 "tags": ["information-disclosure", "robots.txt"],
                 "hints": [
-                    {"order_num": 1, "content": "Start at /robots.txt and check every Disallow entry.", "cost": 0},
-                    {"order_num": 2, "content": "The hidden community's announcement text contains the flag.", "cost": 0},
+                    {"order_num": 1, "content": "Check the standard file that web crawlers are expected to read before indexing a site.", "cost": 0},
+                    {"order_num": 2, "content": "One of the disallowed paths is a community that isn't linked from anywhere. Visit it and read the announcements.", "cost": 25},
                 ],
             },
             {
                 "slug": "sv-sqli-login",
-                "title": "SQLi Login Bypass",
-                "description": "The SubVerse login form passes the username directly into a raw SQL query. Bypass authentication as `admin` and retrieve the flag from the admin panel's response header.",
+                "title": "Ghost Credentials",
+                "description": "The login form asks for a username and password. There may be a way to make the password check irrelevant — depending on how you craft the username.",
                 "challenge_type": "flag",
                 "category": "sqli",
                 "difficulty": "easy",
                 "points": 100,
                 "tags": ["authentication", "boolean-based"],
                 "hints": [
-                    {"order_num": 1, "content": "Username: `admin'--` with any password bypasses the query.", "cost": 0},
-                    {"order_num": 2, "content": "Check the response headers on /admin after logging in as admin.", "cost": 0},
+                    {"order_num": 1, "content": "Try entering a special character in the username. What does the server respond with?", "cost": 0},
+                    {"order_num": 2, "content": "A quote character breaks the authentication query. A comment character ends the query before the password check.", "cost": 50},
+                    {"order_num": 3, "content": "After gaining access as admin, inspect the HTTP response headers on the admin panel.", "cost": 75},
                 ],
             },
             {
                 "slug": "sv-sqli-search-union",
-                "title": "Search UNION Injection",
-                "description": "The post search endpoint injects the `q` parameter directly into a SQL query without sanitisation. Use UNION injection to dump the internal `_flags` table.",
+                "title": "Search Party",
+                "description": "The post search takes your query and finds matching content. The database stores more than forum posts — and how you phrase the query affects what comes back.",
                 "challenge_type": "flag",
                 "category": "sqli",
                 "difficulty": "medium",
                 "points": 250,
                 "tags": ["union-based", "sqlite"],
                 "hints": [
-                    {"order_num": 1, "content": "Count columns first: `' ORDER BY 1--`, `' ORDER BY 12--` etc.", "cost": 0},
-                    {"order_num": 2, "content": "Target the `_flags` table: `' UNION SELECT null,value,...FROM _flags--`", "cost": 25},
+                    {"order_num": 1, "content": "Try unusual characters in the search box. Does the error reveal anything about how the query works?", "cost": 0},
+                    {"order_num": 2, "content": "The database has internal tables not visible through the UI. You can enumerate them.", "cost": 50},
+                    {"order_num": 3, "content": "UNION SELECT — determine the column count, then target the internal flags table.", "cost": 75},
                 ],
             },
             {
                 "slug": "sv-idor-message",
-                "title": "Private Message IDOR",
-                "description": "The `/messages/<id>` endpoint fetches a message by ID without verifying the requester is the sender or recipient. Browse to an admin-created message to retrieve the flag.",
+                "title": "Someone's DM",
+                "description": "Direct messages are stored by ID. The endpoint retrieves them by that ID. It verifies you're logged in — but whose message it is, it does not check.",
                 "challenge_type": "flag",
                 "category": "idor",
                 "difficulty": "easy",
                 "points": 100,
                 "tags": ["api", "information-disclosure"],
                 "hints": [
-                    {"order_num": 1, "content": "Login as any user, then navigate to /messages/1.", "cost": 0},
-                    {"order_num": 2, "content": "Message id=1 was sent by admin to a moderator and contains sensitive data.", "cost": 0},
+                    {"order_num": 1, "content": "Browse to the messages endpoint. Try IDs you didn't send or receive.", "cost": 0},
+                    {"order_num": 2, "content": "Early messages in the system were sent between admin accounts. Low IDs may contain sensitive information.", "cost": 25},
                 ],
             },
             {
                 "slug": "sv-idor-draft-post",
-                "title": "Draft Post Leak",
-                "description": "The `/post/<id>/draft` endpoint checks login but not ownership. An admin draft post containing sensitive internal information is accessible to any authenticated user.",
+                "title": "Unpublished",
+                "description": "Before a post goes live, it lives as a draft. Draft posts aren't linked in the UI — but if you know the path, and you're logged in, the server will show you.",
                 "challenge_type": "flag",
                 "category": "idor",
                 "difficulty": "easy",
                 "points": 100,
                 "tags": ["information-disclosure", "broken-access-control"],
                 "hints": [
-                    {"order_num": 1, "content": "Draft posts are not linked anywhere in the UI — enumerate /post/<id>/draft.", "cost": 0},
-                    {"order_num": 2, "content": "Post id=50 is an admin draft that was never published.", "cost": 0},
+                    {"order_num": 1, "content": "Draft posts have their own URL pattern. Log in and explore the post path — there may be a draft sub-path.", "cost": 0},
+                    {"order_num": 2, "content": "Try iterating post IDs on the draft path. Some posts were never published but are still accessible.", "cost": 25},
                 ],
             },
             {
                 "slug": "sv-mass-assign-escalate",
-                "title": "Mass Assignment Privilege Escalation",
-                "description": "The profile edit endpoint processes any POST field including `role=` and `karma=`, which are not rendered in the HTML form but are accepted by the backend. Escalate your account to admin and retrieve the flag from the secret admin endpoint.",
+                "title": "Power Up",
+                "description": "The profile editor lets you update your display name and bio. The server processes whatever fields you send — not just the ones shown in the form.",
                 "challenge_type": "flag",
                 "category": "web",
                 "difficulty": "medium",
                 "points": 250,
                 "tags": ["mass-assignment", "privilege-escalation"],
                 "hints": [
-                    {"order_num": 1, "content": "POST to /profile/edit with an extra field: `role=admin`.", "cost": 0},
-                    {"order_num": 2, "content": "Once admin, visit /admin/secret to retrieve the flag.", "cost": 25},
+                    {"order_num": 1, "content": "Intercept the profile update request. Are there fields the server accepts that aren't in the HTML form?", "cost": 0},
+                    {"order_num": 2, "content": "Try including fields related to account standing or permissions in the POST body.", "cost": 50},
+                    {"order_num": 3, "content": "Including `role=admin` in the profile edit POST escalates your account. Then visit the admin secret endpoint.", "cost": 75},
                 ],
             },
             {
                 "slug": "sv-ssti-announce",
-                "title": "SSTI in Community Announcement",
-                "description": "The community announcement editor previews content via Flask's `render_template_string` — an unsandboxed Jinja2 environment. The POST endpoint only checks that the user is logged in, not that they are an admin. Exploit SSTI to read the server-side flag from Flask config.",
+                "title": "The Announcement",
+                "description": "Community moderators can preview announcements before publishing. The preview renders on the server — and the rendering context is more capable than a text formatter should be.",
                 "challenge_type": "flag",
                 "category": "web",
                 "difficulty": "hard",
                 "points": 450,
                 "tags": ["ssti", "jinja2", "broken-access-control"],
                 "hints": [
-                    {"order_num": 1, "content": "POST to /admin/community/<name>/announce with action=preview. You don't need to be admin for POST.", "cost": 0},
-                    {"order_num": 2, "content": "Payload: `{{ config.SSTI_FLAG }}` — Flask exposes the app config dict in templates.", "cost": 50},
+                    {"order_num": 1, "content": "Try submitting `{{ 7*7 }}` in the announcement preview. If the response shows 49, the server evaluates your input.", "cost": 0},
+                    {"order_num": 2, "content": "The preview endpoint checks login but not role. Any registered user can submit a preview.", "cost": 50},
+                    {"order_num": 3, "content": "The server exposes its application config in the template context. The flag is stored there.", "cost": 75},
                 ],
             },
             {
                 "slug": "sv-cmdi-preview-link",
-                "title": "Command Injection in Link Preview",
-                "description": "The link preview feature at `/post/preview-link` runs `curl` in a shell subprocess without sanitising the URL. Inject a shell command to read the flag file from the server.",
+                "title": "Preview Exploit",
+                "description": "When you share a link in a post, the site fetches a preview. Somewhere between your input and the network request, the URL is processed in a way that may allow more than fetching.",
                 "challenge_type": "flag",
                 "category": "web",
                 "difficulty": "medium",
                 "points": 350,
                 "tags": ["command-injection", "rce"],
                 "hints": [
-                    {"order_num": 1, "content": "The URL is embedded in `curl -s --max-time 5 '<URL>'`. Single-quote injection closes the argument.", "cost": 0},
-                    {"order_num": 2, "content": "Payload: `'; cat /flag_cmdi.txt; echo '` — the flag file is at /flag_cmdi.txt.", "cost": 25},
+                    {"order_num": 1, "content": "Try submitting a URL with shell metacharacters in it. What does the server return?", "cost": 0},
+                    {"order_num": 2, "content": "The URL is passed to a shell command. Characters that separate shell commands can break out of the URL argument.", "cost": 50},
+                    {"order_num": 3, "content": "The flag is in a file at the root of the server filesystem. Use a command to read it.", "cost": 75},
                 ],
             },
             {
                 "slug": "sv-xss-stored-bio",
-                "title": "Stored XSS via User Bio",
-                "description": "User bios are rendered with the `| safe` Jinja2 filter on the public profile page, meaning HTML/JavaScript is not escaped. The profile page also sets a non-HttpOnly session cookie. Inject XSS into your bio and steal the cookie.",
+                "title": "Bio Hazard",
+                "description": "User bios are displayed on public profile pages. The profile page also sets a session cookie. Is the bio display safe to include arbitrary text?",
                 "challenge_type": "flag",
                 "category": "xss",
                 "difficulty": "easy",
                 "points": 200,
                 "tags": ["stored", "cookie-theft"],
                 "hints": [
-                    {"order_num": 1, "content": "Edit your profile at /profile/edit and set bio to `<script>alert(document.cookie)</script>`.", "cost": 0},
-                    {"order_num": 2, "content": "The `sv_session` cookie is not HttpOnly — read it directly without XSS if you just want the flag.", "cost": 0},
+                    {"order_num": 1, "content": "Edit your profile bio. Try including some HTML. Does your profile page render it?", "cost": 0},
+                    {"order_num": 2, "content": "If HTML renders in the bio, JavaScript does too. The profile page sets a session cookie.", "cost": 50},
+                    {"order_num": 3, "content": "The session cookie on this page is not HttpOnly — JavaScript can read it with `document.cookie`.", "cost": 75},
                 ],
             },
         ],
