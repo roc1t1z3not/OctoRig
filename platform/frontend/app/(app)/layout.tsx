@@ -10,7 +10,7 @@ import { useUserStore } from "@/stores/user.store";
 import { useThemeStore } from "@/stores/theme.store";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { accessToken, _hasHydrated } = useUserStore();
+  const { accessToken, _hasHydrated, isRestoringToken } = useUserStore();
   const { theme } = useThemeStore();
   const router = useRouter();
 
@@ -19,13 +19,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   useEffect(() => {
-    if (_hasHydrated && !accessToken) router.replace("/login");
-  }, [_hasHydrated, accessToken, router]);
+    if (_hasHydrated && !isRestoringToken && !accessToken) router.replace("/login");
+  }, [_hasHydrated, isRestoringToken, accessToken, router]);
 
-  // Wait for Zustand to rehydrate from localStorage before rendering or redirecting.
-  // Without this guard, accessToken starts as null for one tick even when the user
-  // is logged in, causing unauthenticated API calls → 401 → redirect loop.
-  if (!_hasHydrated || !accessToken) return null;
+  // Wait for rehydration and any in-flight token restore before rendering or redirecting.
+  if (!_hasHydrated || isRestoringToken || !accessToken) return null;
 
   return (
     <>

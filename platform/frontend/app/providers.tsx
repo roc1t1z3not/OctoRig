@@ -18,11 +18,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // lives only in memory. On every page load, if we have user data but no token, hit
   // /auth/refresh — the browser sends the HttpOnly cookie automatically.
   useEffect(() => {
-    const { user, accessToken, setAccessToken, clearSession } = useUserStore.getState();
+    const { user, accessToken, setAccessToken, clearSession, setIsRestoringToken } =
+      useUserStore.getState();
     if (user && !accessToken) {
       refreshToken()
         .then(({ access_token }) => setAccessToken(access_token))
-        .catch(() => clearSession());
+        .catch(() => clearSession())
+        .finally(() => setIsRestoringToken(false));
     }
   }, []);
 
