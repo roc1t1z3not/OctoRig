@@ -8,6 +8,7 @@ import { Square, RotateCcw } from "lucide-react";
 import { getDeployments, stopDeployment, resetDeployment } from "@/lib/api/deployments";
 import { DeploymentStatusBadge } from "@/components/deployments/DeploymentStatusBadge";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { formatDateTime } from "@/lib/utils/date";
 
 export default function DeploymentsPage() {
   const qc = useQueryClient();
@@ -78,10 +79,10 @@ export default function DeploymentsPage() {
                   <td><DeploymentStatusBadge status={d.status} /></td>
                   <td className="text-secondary">{d.started_by_username}</td>
                   <td className="font-mono text-11 text-secondary">
-                    {d.started_at ? new Date(d.started_at).toLocaleString() : "—"}
+                    {formatDateTime(d.started_at)}
                   </td>
                   <td className="font-mono text-11 text-muted">
-                    {d.stopped_at ? new Date(d.stopped_at).toLocaleString() : "—"}
+                    {formatDateTime(d.stopped_at)}
                   </td>
                   <td onClick={(e) => e.stopPropagation()}>
                     <div className="flex gap-1">

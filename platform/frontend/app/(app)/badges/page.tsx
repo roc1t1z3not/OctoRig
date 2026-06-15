@@ -7,6 +7,7 @@ import { Award, CheckCircle2, RefreshCw } from "lucide-react";
 import { getBadges, evaluateAchievements, type Badge } from "@/lib/api/badges";
 import { getMyRank } from "@/lib/api/ranks";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { formatDate } from "@/lib/utils/date";
 
 const ICON_MAP: Record<string, string> = {
   flag:      "🚩",
@@ -47,7 +48,7 @@ function BadgeCard({ badge }: { badge: Badge }) {
           )}
           {badge.earned_at && (
             <span className="badge-date">
-              Earned {new Date(badge.earned_at).toLocaleDateString()}
+              Earned {formatDate(badge.earned_at)}
             </span>
           )}
         </div>

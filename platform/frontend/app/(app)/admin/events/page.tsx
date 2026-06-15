@@ -17,6 +17,7 @@ import { getChallenges } from "@/lib/api/challenges";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { useConfirmStore } from "@/stores/confirm.store";
 import { useUserStore } from "@/stores/user.store";
+import { formatDateTime } from "@/lib/utils/date";
 
 const STATUS_ORDER: EventStatus[] = ["draft", "published", "running", "ended", "archived"];
 const STATUS_COLORS: Record<EventStatus, string> = {
@@ -228,9 +229,9 @@ export default function AdminEventsPage() {
                     </td>
                     <td style={{ fontSize: "0.75rem", color: "var(--g-text-muted)" }}>{ev.scoring_mode}</td>
                     <td style={{ fontSize: "0.6875rem", color: "var(--g-text-muted)" }}>
-                      {ev.start_at ? new Date(ev.start_at).toLocaleDateString() : "—"}
+                      {formatDateTime(ev.start_at)}
                       {" / "}
-                      {ev.end_at ? new Date(ev.end_at).toLocaleDateString() : "—"}
+                      {formatDateTime(ev.end_at)}
                     </td>
                     <td>
                       <button

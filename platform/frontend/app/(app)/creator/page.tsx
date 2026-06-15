@@ -16,6 +16,7 @@ import {
   type HintInput,
 } from "@/lib/api/content";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { formatDate } from "@/lib/utils/date";
 
 const STATUS_STYLE: Record<ContentStatus, { bg: string; color: string }> = {
   draft:          { bg: "color-mix(in srgb, var(--g-text-muted) 15%, transparent)", color: "var(--g-text-muted)" },
@@ -417,7 +418,7 @@ function SubmissionRow({ sub }: { sub: ContentSubmission }) {
         </td>
         <td><StatusBadge status={sub.status} /></td>
         <td style={{ color: "var(--g-text-muted)", fontFamily: "var(--font-mono, monospace)", fontSize: "0.75rem" }}>
-          {new Date(sub.updated_at).toLocaleDateString()}
+          {formatDate(sub.updated_at)}
         </td>
         <td>
           <div style={{ display: "flex", gap: "0.5rem" }}>

@@ -25,6 +25,7 @@ import {
 } from "@/lib/api/challenges";
 import { createScheduledAction } from "@/lib/api/scheduler";
 import { DeploymentStatusBadge } from "@/components/deployments/DeploymentStatusBadge";
+import { formatDateTime } from "@/lib/utils/date";
 import { LabCategoryBadge } from "@/components/labs/LabCategoryBadge";
 import { LogViewer } from "@/components/deployments/LogViewer";
 import { useNotificationsStore } from "@/stores/notifications.store";
@@ -287,7 +288,7 @@ export default function DeploymentDetailPage() {
                 }}
               >{countdown}</div>
               <div className="dd-autodestroy-at">
-                {new Date(deployment.auto_destroy_at).toLocaleString()}
+                {formatDateTime(deployment.auto_destroy_at)}
               </div>
             </div>
           )}
@@ -304,12 +305,10 @@ export default function DeploymentDetailPage() {
               )}
               <MetaRow
                 label="Started"
-                value={deployment.started_at
-                  ? new Date(deployment.started_at).toLocaleString()
-                  : "—"}
+                value={formatDateTime(deployment.started_at)}
               />
               {deployment.stopped_at && (
-                <MetaRow label="Stopped" value={new Date(deployment.stopped_at).toLocaleString()} />
+                <MetaRow label="Stopped" value={formatDateTime(deployment.stopped_at)} />
               )}
               {lab && (
                 <>

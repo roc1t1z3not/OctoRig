@@ -13,6 +13,7 @@ import {
   type CreateEventPayload,
 } from "@/lib/api/events";
 import { useUserStore } from "@/stores/user.store";
+import { formatDateTime } from "@/lib/utils/date";
 import { useNotificationsStore } from "@/stores/notifications.store";
 
 const STATUS_TABS: { id: EventStatus | undefined; label: string }[] = [
@@ -35,14 +36,6 @@ const VIS_ICON: Record<string, React.ReactNode> = {
   private:  <Lock size={10} />,
   unlisted: <Eye size={10} />,
 };
-
-function fmt(iso: string | null): string {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleString(undefined, {
-    month: "short", day: "numeric", year: "numeric",
-    hour: "2-digit", minute: "2-digit",
-  });
-}
 
 function CountdownBadge({ end_at }: { end_at: string | null }) {
   if (!end_at) return null;
@@ -74,7 +67,7 @@ function EventCard({ ev }: { ev: CtfEvent }) {
       <div className="ev-meta">
         <span className="ev-meta-item">
           <Calendar size={11} />
-          {fmt(ev.start_at)}
+          {formatDateTime(ev.start_at)}
         </span>
         {ev.max_team_size && (
           <span className="ev-meta-item">

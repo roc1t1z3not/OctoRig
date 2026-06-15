@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search, Filter } from "lucide-react";
 import { getAdminAuditLogs, type AdminAuditLog } from "@/lib/api/admin";
+import { formatDateTime } from "@/lib/utils/date";
 
 const ACTION_GROUPS = [
   { label: "All", value: "" },
@@ -127,7 +128,7 @@ export default function AdminAuditPage() {
                 {data.map((entry) => (
                   <tr key={entry.id}>
                     <td className="font-mono text-11 text-muted nowrap">
-                      {new Date(entry.created_at).toLocaleString()}
+                      {formatDateTime(entry.created_at)}
                     </td>
                     <td>
                       <ActionBadge action={entry.action} />

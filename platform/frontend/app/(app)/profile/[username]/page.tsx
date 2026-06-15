@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { getUserProfile, type UserProfile } from "@/lib/api/profiles";
 import { getUserRank, type UserRank } from "@/lib/api/ranks";
+import { formatDate } from "@/lib/utils/date";
 import { useUserStore } from "@/stores/user.store";
 
 const ICON_MAP: Record<string, string> = {
@@ -122,7 +123,7 @@ function ProfileView({ profile, rankData }: { profile: UserProfile; rankData?: U
                   <span className="solve-pts">+{s.points_awarded} pts</span>
                   {s.is_first_blood && <span className="solve-fb">🩸 First Blood</span>}
                   <span className="solve-date">
-                    {new Date(s.submitted_at).toLocaleDateString()}
+                    {formatDate(s.submitted_at)}
                   </span>
                 </div>
               ))}

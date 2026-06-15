@@ -16,6 +16,7 @@ import {
 } from "@/lib/api/teams";
 import { useUserStore } from "@/stores/user.store";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { formatDate } from "@/lib/utils/date";
 
 const ROLE_ORDER: TeamRole[] = ["owner", "manager", "member", "viewer"];
 
@@ -186,7 +187,7 @@ export default function TeamDetailPage() {
                       )}
                     </td>
                     <td className="font-mono text-11 text-muted">
-                      {new Date(m.joined_at).toLocaleDateString()}
+                      {formatDate(m.joined_at)}
                     </td>
                     {canManage && (
                       <td>

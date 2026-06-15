@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { getAdminTeams, type AdminTeam } from "@/lib/api/admin";
+import { formatDateTime } from "@/lib/utils/date";
 
 export default function AdminTeamsPage() {
   const [search, setSearch] = useState("");
@@ -62,7 +63,7 @@ export default function AdminTeamsPage() {
                     )}
                   </td>
                   <td className="font-mono text-11 text-muted">
-                    {new Date(t.created_at).toLocaleDateString()}
+                    {formatDateTime(t.created_at)}
                   </td>
                 </tr>
               ))}

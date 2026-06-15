@@ -10,6 +10,7 @@ import { revokeAdminApiKey } from "@/lib/api/settings";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { useConfirmStore } from "@/stores/confirm.store";
 import { useUserStore } from "@/stores/user.store";
+import { formatDateTime } from "@/lib/utils/date";
 
 export default function AdminApiKeysPage() {
   const { push } = useNotificationsStore();
@@ -95,13 +96,13 @@ export default function AdminApiKeysPage() {
                   </td>
                   <td style={{ fontSize: "0.8125rem" }}>{k.username}</td>
                   <td style={{ fontSize: "0.75rem", color: "var(--g-text-muted)" }}>
-                    {new Date(k.created_at).toLocaleDateString()}
+                    {formatDateTime(k.created_at)}
                   </td>
                   <td style={{ fontSize: "0.75rem", color: "var(--g-text-muted)" }}>
-                    {k.last_used_at ? new Date(k.last_used_at).toLocaleDateString() : "Never"}
+                    {k.last_used_at ? formatDateTime(k.last_used_at) : "Never"}
                   </td>
                   <td style={{ fontSize: "0.75rem", color: "var(--g-text-muted)" }}>
-                    {k.expires_at ? new Date(k.expires_at).toLocaleDateString() : "Never"}
+                    {k.expires_at ? formatDateTime(k.expires_at) : "Never"}
                   </td>
                   <td>
                     <span style={{

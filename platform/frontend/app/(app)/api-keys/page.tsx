@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, Copy, Check, Eye, EyeOff } from "lucide-react";
 import { getApiKeys, createApiKey, revokeApiKey, type ApiKeyCreated } from "@/lib/api/apiKeys";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { formatDateTime } from "@/lib/utils/date";
 
 export default function ApiKeysPage() {
   const qc = useQueryClient();
@@ -175,17 +176,13 @@ export default function ApiKeysPage() {
                     </span>
                   </td>
                   <td className="text-11 text-muted">
-                    {key.last_used_at
-                      ? new Date(key.last_used_at).toLocaleString()
-                      : "Never"}
+                    {key.last_used_at ? formatDateTime(key.last_used_at) : "Never"}
                   </td>
                   <td className="text-11 text-muted">
-                    {key.expires_at
-                      ? new Date(key.expires_at).toLocaleDateString()
-                      : "Never"}
+                    {key.expires_at ? formatDateTime(key.expires_at) : "Never"}
                   </td>
                   <td className="font-mono text-11 text-muted">
-                    {new Date(key.created_at).toLocaleDateString()}
+                    {formatDateTime(key.created_at)}
                   </td>
                   <td>
                     {key.is_active && (

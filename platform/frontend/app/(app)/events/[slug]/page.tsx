@@ -11,6 +11,7 @@ import {
 import {
   getEvent, getEventChallenges, getEventScoreboard, type EventChallenge,
 } from "@/lib/api/events";
+import { formatDateTime } from "@/lib/utils/date";
 
 const DIFF_COLOR: Record<string, string> = {
   easy:   "var(--g-success)",
@@ -87,14 +88,6 @@ function Scoreboard({ slug }: { slug: string }) {
   );
 }
 
-function fmtDate(iso: string | null): string {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleString(undefined, {
-    month: "short", day: "numeric", year: "numeric",
-    hour: "2-digit", minute: "2-digit",
-  });
-}
-
 export default function EventDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const [tab, setTab] = useState<"challenges" | "scoreboard">("challenges");
@@ -143,7 +136,7 @@ export default function EventDetailPage() {
           {ev.start_at && (
             <span className="ev-stat">
               <Clock size={12} />
-              {fmtDate(ev.start_at)} → {fmtDate(ev.end_at)}
+              {formatDateTime(ev.start_at)} → {formatDateTime(ev.end_at)}
             </span>
           )}
           {ev.max_team_size && (

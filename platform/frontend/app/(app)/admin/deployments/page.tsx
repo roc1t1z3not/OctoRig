@@ -9,6 +9,7 @@ import { stopDeployment, resetDeployment } from "@/lib/api/deployments";
 import { DeploymentStatusBadge } from "@/components/deployments/DeploymentStatusBadge";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { useConfirmStore } from "@/stores/confirm.store";
+import { formatDateTime } from "@/lib/utils/date";
 
 const ACTIVE_STATUSES = new Set(["starting", "running", "error"]);
 
@@ -111,10 +112,10 @@ export default function AdminDeploymentsPage() {
                       <DeploymentStatusBadge status={d.status} />
                     </td>
                     <td className="font-mono text-11 text-muted">
-                      {d.started_at ? new Date(d.started_at).toLocaleString() : "—"}
+                      {formatDateTime(d.started_at)}
                     </td>
                     <td className="font-mono text-11 text-muted">
-                      {d.stopped_at ? new Date(d.stopped_at).toLocaleString() : "—"}
+                      {formatDateTime(d.stopped_at)}
                     </td>
                     <td>
                       {isActive && (
