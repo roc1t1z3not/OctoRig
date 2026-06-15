@@ -304,9 +304,9 @@ platform_action() {
     start)
       _platform_env_check
       check_docker
-      if [[ "$extra" == "dev" ]]; then
-        header "Starting platform (API + workers + frontend dev)..."
-        _dc --profile dev up -d --build
+      if [[ "$extra" == "ui" ]]; then
+        header "Starting platform (API + workers + UI)..."
+        _dc --profile ui up -d --build
       else
         header "Starting platform (API + workers)..."
         _dc up -d --build
@@ -319,7 +319,7 @@ platform_action() {
         if curl -sf http://localhost:8000/api/v1/system/health &>/dev/null; then
           break
         fi
-        sleep 2
+        sleep 1
       done
       echo ""
       good "Platform is up"
@@ -330,15 +330,15 @@ platform_action() {
       ;;
     stop)
       header "Stopping platform..."
-      _dc --profile dev down
+      _dc --profile ui down
       good "Platform stopped (data volumes preserved)"
       ;;
     restart)
       header "Restarting platform..."
-      _dc --profile dev down
+      _dc --profile ui down
       _platform_env_check
-      if [[ "$extra" == "dev" ]]; then
-        _dc --profile dev up -d --build
+      if [[ "$extra" == "ui" ]]; then
+        _dc --profile ui up -d --build
       else
         _dc up -d --build
       fi
@@ -352,7 +352,7 @@ platform_action() {
         return
       fi
       header "Wiping platform..."
-      _dc --profile dev down -v
+      _dc --profile ui down -v
       good "Platform stopped and volumes removed"
       ;;
     status)
@@ -377,7 +377,7 @@ platform_action() {
       echo ""
       echo -e "  ${BOLD}platform commands:${RESET}"
       echo -e "  ${GREEN}platform start${RESET}          — Start API + workers"
-      echo -e "  ${GREEN}platform start dev${RESET}      — Start API + workers + frontend dev server"
+      echo -e "  ${GREEN}platform start ui${RESET}       — Start API + workers + frontend UI"
       echo -e "  ${GREEN}platform stop${RESET}           — Stop all platform services"
       echo -e "  ${GREEN}platform restart${RESET}        — Rebuild and restart platform"
       echo -e "  ${GREEN}platform wipe${RESET}           — Stop and delete all data volumes"

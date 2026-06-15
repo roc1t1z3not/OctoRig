@@ -52,7 +52,7 @@ To also start the training platform (dashboard, API, CTF engine):
 
 ```bash
 ./octorig.sh platform start      # API + workers  →  http://localhost:8000/docs
-./octorig.sh platform start dev  # + frontend UI  →  http://localhost:3000
+./octorig.sh platform start ui   # + frontend UI  →  http://localhost:3000
 ./octorig.sh platform stop       # stop platform services
 ```
 

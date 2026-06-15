@@ -12,7 +12,6 @@ router = APIRouter(prefix="/system", tags=["system"])
 @router.get("/health")
 def health(
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
 ) -> dict:
     docker_ok = docker_service.ping()
 

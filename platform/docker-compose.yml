@@ -11,9 +11,9 @@ services:
       - platform-postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U octorig"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+      interval: 2s
+      timeout: 3s
+      retries: 20
     networks:
       - platform-internal
 
@@ -24,9 +24,9 @@ services:
     command: redis-server --save "" --appendonly no
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+      interval: 2s
+      timeout: 3s
+      retries: 20
     networks:
       - platform-internal
 
@@ -163,11 +163,11 @@ services:
     networks:
       - platform-internal
 
-  frontend-dev:
+  frontend-ui:
     image: node:22-alpine
     container_name: octorig-platform-ui
     working_dir: /app
-    command: sh -c "npm install && npm run dev"
+    command: sh -c "npm install --prefer-offline && npm run dev"
     environment:
       API_URL: "http://backend:8000"
       NEXT_PUBLIC_API_URL: "http://localhost:8000"
@@ -182,7 +182,7 @@ services:
     networks:
       - platform-internal
     profiles:
-      - dev
+      - ui
 
 volumes:
   platform-postgres-data:
