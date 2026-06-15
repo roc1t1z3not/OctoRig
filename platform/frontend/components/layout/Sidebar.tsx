@@ -47,6 +47,7 @@ export function Sidebar() {
   const { user, clearSession } = useUserStore();
   const isPrivileged = user?.is_admin || user?.is_superuser;
   const [menuOpen, setMenuOpen] = useState(false);
+  const [adminOpen, setAdminOpen] = useState(() => pathname.startsWith("/admin"));
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { data: profile } = useQuery({
@@ -145,38 +146,49 @@ export function Sidebar() {
 
       {/* Admin nav */}
       {isPrivileged && (
-        <div className="p-2 space-y-0.5 border-t shrink-0" style={{ borderColor: "var(--g-border)" }}>
-          <div
-            className="px-2 py-1 text-9px font-mono uppercase"
-            style={{ color: "var(--g-text-muted)", letterSpacing: "0.12em" }}
+        <div className="p-2 border-t shrink-0" style={{ borderColor: "var(--g-border)" }}>
+          <button
+            onClick={() => setAdminOpen((o) => !o)}
+            className="w-full flex items-center justify-between px-2 py-1 rounded hover:bg-[var(--g-accent-dim)] transition-colors"
           >
-            Admin
-          </div>
-          {NAV_ADMIN.map(({ href, icon: Icon, label }) => {
-            const active = isActive(href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={clsx("g-nav-item", active && "active")}
-                style={active ? {
-                  background: "var(--g-accent-dim)",
-                  color: "var(--g-text)",
-                  borderColor: "var(--g-border-hover)",
-                } : undefined}
-                title={label}
-              >
-                <Icon
-                  size={14}
-                  className="shrink-0"
-                  style={{ color: active ? "var(--g-accent)" : "var(--g-text-muted)" }}
-                />
-                <span style={{ color: active ? "var(--g-text)" : "var(--g-text-muted)" }}>
-                  {label}
-                </span>
-              </Link>
-            );
-          })}
+            <span className="text-9px font-mono uppercase" style={{ color: "var(--g-text-muted)", letterSpacing: "0.12em" }}>
+              Admin
+            </span>
+            <ChevronUp
+              size={11}
+              className="shrink-0 transition-transform duration-150"
+              style={{ color: "var(--g-text-muted)", transform: adminOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+            />
+          </button>
+          {adminOpen && (
+            <div className="space-y-0.5 mt-0.5">
+              {NAV_ADMIN.map(({ href, icon: Icon, label }) => {
+                const active = isActive(href);
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={clsx("g-nav-item", active && "active")}
+                    style={active ? {
+                      background: "var(--g-accent-dim)",
+                      color: "var(--g-text)",
+                      borderColor: "var(--g-border-hover)",
+                    } : undefined}
+                    title={label}
+                  >
+                    <Icon
+                      size={14}
+                      className="shrink-0"
+                      style={{ color: active ? "var(--g-accent)" : "var(--g-text-muted)" }}
+                    />
+                    <span style={{ color: active ? "var(--g-text)" : "var(--g-text-muted)" }}>
+                      {label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 

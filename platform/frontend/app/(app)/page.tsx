@@ -96,8 +96,26 @@ export default function Dashboard() {
           </span>
         </div>
         <div className="g-card stat-card">
+          <span className="text-muted text-11">Database</span>
+          <span className={`stat-value ${health?.database === "ok" ? "text-success" : "text-danger"}`}>
+            {health?.database === "ok" ? "Healthy" : "-"}
+          </span>
+        </div>
+        <div className="g-card stat-card">
+          <span className="text-muted text-11">Labs Available</span>
+          <span className="stat-value">{labs.length > 0 ? labs.length : "—"}</span>
+        </div>
+        <div className="g-card stat-card">
           <span className="text-muted text-11">My Solves</span>
           <span className="stat-value text-accent">{profile?.solve_count ?? "—"}</span>
+        </div>
+        <div className="g-card stat-card">
+          <span className="text-muted text-11">Total Points</span>
+          <span className="stat-value text-accent">{profile?.total_points ?? "—"}</span>
+        </div>
+        <div className="g-card stat-card">
+          <span className="text-muted text-11">First Bloods</span>
+          <span className="stat-value text-danger">{profile?.first_bloods ?? "—"}</span>
         </div>
       </div>
 
@@ -112,44 +130,46 @@ export default function Dashboard() {
             <Link href="/labs" className="g-btn g-btn-primary mt-2">Browse Lab Catalog</Link>
           </div>
         ) : (
-          <table className="g-table">
-            <thead>
-              <tr>
-                <th>Lab</th>
-                <th>Status</th>
-                <th>Started By</th>
-                <th>Started</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {activeDeployments.map((d) => (
-                <tr key={d.id}>
-                  <td>
-                    <Link href={`/deployments/${d.id}`} className="text-accent flex items-center gap-1">
-                      {d.lab_name}
-                      <ExternalLink size={12} />
-                    </Link>
-                  </td>
-                  <td><DeploymentStatusBadge status={d.status} /></td>
-                  <td className="text-secondary">{d.started_by_username}</td>
-                  <td className="text-muted font-mono" style={{ fontSize: "0.6875rem" }}>
-                    {d.started_at ? formatRelative(d.started_at) : "—"}
-                  </td>
-                  <td>
-                    <button
-                      className="g-btn g-btn-danger g-btn-icon"
-                      onClick={() => stopMutation.mutate(d.id)}
-                      disabled={d.status === "stopping" || stopMutation.isPending}
-                      title="Stop lab"
-                    >
-                      ■
-                    </button>
-                  </td>
+          <div className="g-panel">
+            <table className="g-table">
+              <thead>
+                <tr>
+                  <th>Lab</th>
+                  <th>Status</th>
+                  <th>Started By</th>
+                  <th>Started</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {activeDeployments.map((d) => (
+                  <tr key={d.id}>
+                    <td>
+                      <Link href={`/deployments/${d.id}`} className="text-accent flex items-center gap-1">
+                        {d.lab_name}
+                        <ExternalLink size={12} />
+                      </Link>
+                    </td>
+                    <td><DeploymentStatusBadge status={d.status} /></td>
+                    <td className="text-secondary">{d.started_by_username}</td>
+                    <td className="text-muted font-mono" style={{ fontSize: "0.6875rem" }}>
+                      {d.started_at ? formatRelative(d.started_at) : "—"}
+                    </td>
+                    <td>
+                      <button
+                        className="g-btn g-btn-danger g-btn-icon"
+                        onClick={() => stopMutation.mutate(d.id)}
+                        disabled={d.status === "stopping" || stopMutation.isPending}
+                        title="Stop lab"
+                      >
+                        ■
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
 
@@ -161,7 +181,7 @@ export default function Dashboard() {
             <span className="g-badge ml-2" style={{ color: "var(--g-warning)" }}>CLI</span>
           </h2>
           <div className="g-panel">
-            <p className="text-muted text-11 mb-2">Containers started via the CLI — read-only in this view.</p>
+            <p className="text-muted text-11 mb-3">Containers started via the CLI — read-only in this view.</p>
             <table className="g-table">
               <thead><tr><th>Container</th><th>Status</th><th>Access</th></tr></thead>
               <tbody>
