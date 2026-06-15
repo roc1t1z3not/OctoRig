@@ -1,14 +1,13 @@
 "use client";
 import "../deployment-detail.css";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, CheckCircle2, Clock, ExternalLink,
-  Flag, Globe, Lock, RotateCcw, Square, Target, Users,
+  RotateCcw, Square, Target,
 } from "lucide-react";
-import { CopyButton } from "@/components/ui/CopyButton";
 import Link from "next/link";
 import {
   getDeployment,
@@ -18,75 +17,24 @@ import {
   type Deployment,
 } from "@/lib/api/deployments";
 import { getLabs, type LabTemplate } from "@/lib/api/labs";
-import {
-  getChallenges,
-  type ChallengeListItem,
-  type ChallengeDifficulty,
-} from "@/lib/api/challenges";
+import { getChallenges, type ChallengeDifficulty } from "@/lib/api/challenges";
 import { createScheduledAction } from "@/lib/api/scheduler";
 import { DeploymentStatusBadge } from "@/components/deployments/DeploymentStatusBadge";
-import { formatDateTime } from "@/lib/utils/date";
+import { DeploymentSidebar } from "@/components/deployments/DeploymentSidebar";
+import { ScheduleDestroyModal } from "@/components/deployments/ScheduleDestroyModal";
 import { LabCategoryBadge } from "@/components/labs/LabCategoryBadge";
 import { LogViewer } from "@/components/deployments/LogViewer";
+import { useCountdown } from "@/hooks/useCountdown";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { PageSpinner } from "@/components/ui/Spinner";
+import { DIFF_COLOR } from "@/lib/utils/difficulty";
+import { addHours } from "@/lib/utils/date";
 
 type Visibility = "private" | "team" | "public";
 
-const VIS_ICON: Record<Visibility, React.ReactNode> = {
-  private: <Lock size={11} />,
-  team: <Users size={11} />,
-  public: <Globe size={11} />,
-};
-
-const PRESETS: { label: string; hours: number }[] = [
-  { label: "2 h", hours: 2 },
-  { label: "24 h", hours: 24 },
-  { label: "7 d", hours: 168 },
-];
-
-const DIFF_COLOR: Record<ChallengeDifficulty, string> = {
-  easy: "dd-diff-easy",
-  medium: "dd-diff-medium",
-  hard: "dd-diff-hard",
-  insane: "dd-diff-insane",
-};
-
-function addHours(h: number): string {
-  return new Date(Date.now() + h * 3_600_000).toISOString().slice(0, 16);
-}
-
-function useCountdown(isoTarget: string | null): { label: string; remainingMs: number } {
-  const [state, setState] = useState({ label: "", remainingMs: Infinity });
-  useEffect(() => {
-    if (!isoTarget) return;
-    const tick = () => {
-      const diff = new Date(isoTarget).getTime() - Date.now();
-      if (diff <= 0) { setState({ label: "Expired", remainingMs: 0 }); return; }
-      const h = Math.floor(diff / 3_600_000);
-      const m = Math.floor((diff % 3_600_000) / 60_000);
-      const s = Math.floor((diff % 60_000) / 1_000);
-      setState({ label: h > 0 ? `${h}h ${m}m` : `${m}m ${s}s`, remainingMs: diff });
-    };
-    tick();
-    const id = setInterval(tick, 1_000);
-    return () => clearInterval(id);
-  }, [isoTarget]);
-  return state;
-}
-
 function DiffBadge({ difficulty }: { difficulty: ChallengeDifficulty }) {
   return (
-    <span className={`dd-diff-badge ${DIFF_COLOR[difficulty]}`}>{difficulty}</span>
-  );
-}
-
-function MetaRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div className="dd-meta-row">
-      <span className="dd-meta-label">{label}</span>
-      <span className={`dd-meta-value${mono ? " font-mono" : ""}`}>{value}</span>
-    </div>
+    <span className="dd-diff-badge" style={{ color: DIFF_COLOR[difficulty] }}>{difficulty}</span>
   );
 }
 
@@ -182,7 +130,6 @@ export default function DeploymentDetailPage() {
         <ArrowLeft size={14} /> Deployments
       </Link>
 
-      {/* ── Header ── */}
       <div className="dd-header">
         <div className="dd-title-row">
           <h1 className="dd-title font-mono">{deployment.lab_name}</h1>
@@ -229,9 +176,7 @@ export default function DeploymentDetailPage() {
         </div>
       </div>
 
-      {/* ── Body: logs + sidebar ── */}
       <div className="dd-body">
-        {/* Log viewer */}
         <div className="dd-logs g-panel">
           <LogViewer
             deploymentId={deploymentId}
@@ -239,141 +184,18 @@ export default function DeploymentDetailPage() {
           />
         </div>
 
-        {/* Sidebar */}
-        <div className="dd-sidebar">
-          {/* Access info — only when running */}
-          {isActive && lab && lab.access_info.length > 0 && (
-            <div className="g-card dd-card">
-              <div className="dd-section-title">Access</div>
-              <div className="dd-access-rows">
-                {lab.access_info.map((row) => (
-                  <div key={row.key} className="dd-access-row">
-                    <span className="dd-access-key">{row.key}</span>
-                    <span className="dd-access-val font-mono">{row.value}</span>
-                    <CopyButton value={row.value} />
-                    {(row.key === "URL" || row.value.startsWith("http")) && (
-                      <a href={row.value} target="_blank" rel="noopener noreferrer" className="dd-access-link">
-                        <ExternalLink size={11} />
-                      </a>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Dynamic flag — challenge instance deployments */}
-          {deployment.dynamic_flag && (
-            <div className="g-card dd-card">
-              <div className="dd-section-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span><Flag size={11} /> Flag</span>
-                <CopyButton value={deployment.dynamic_flag!} />
-              </div>
-              <code className="dd-flag">{deployment.dynamic_flag}</code>
-            </div>
-          )}
-
-          {/* Auto-destroy countdown */}
-          {deployment.auto_destroy_at && countdown && (
-            <div className="g-card dd-card">
-              <div className="dd-section-title"><Clock size={11} /> Auto Destroy</div>
-              <div
-                className="dd-countdown"
-                style={{
-                  color: countdownMs <= 15 * 60_000
-                    ? "var(--g-danger)"
-                    : countdownMs <= 60 * 60_000
-                    ? "var(--g-warning)"
-                    : undefined,
-                }}
-              >{countdown}</div>
-              <div className="dd-autodestroy-at">
-                {formatDateTime(deployment.auto_destroy_at)}
-              </div>
-            </div>
-          )}
-
-          {/* Deployment metadata */}
-          <div className="g-card dd-card">
-            <div className="dd-section-title">Details</div>
-            <div className="dd-meta-rows">
-              <MetaRow label="Lab" value={deployment.lab_name} />
-              <MetaRow label="Category" value={deployment.lab_category} />
-              <MetaRow label="Started by" value={deployment.started_by_username} />
-              {deployment.team_name && (
-                <MetaRow label="Team" value={deployment.team_name} />
-              )}
-              <MetaRow
-                label="Started"
-                value={formatDateTime(deployment.started_at)}
-              />
-              {deployment.stopped_at && (
-                <MetaRow label="Stopped" value={formatDateTime(deployment.stopped_at)} />
-              )}
-              {lab && (
-                <>
-                  <MetaRow label="Subnet" value={lab.subnet} mono />
-                  <MetaRow label="App IP" value={lab.app_ip} mono />
-                </>
-              )}
-              <div className="dd-meta-row">
-                <span className="dd-meta-label">Containers</span>
-                <div className="dd-meta-chips">
-                  {deployment.container_names.map((c) => (
-                    <span key={c} className="g-tag text-10">
-                      {c.split("-").pop()}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              {lab && Object.keys(lab.exposed_ports).length > 0 && (
-                <div className="dd-meta-row">
-                  <span className="dd-meta-label">Ports</span>
-                  <div className="dd-meta-chips">
-                    {Object.entries(lab.exposed_ports).map(([name, port]) => (
-                      <span key={name} className="g-tag text-10">
-                        {name.toUpperCase()}:{port}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Visibility */}
-          <div className="g-card dd-card">
-            <div className="dd-section-title">Visibility</div>
-            <div className="dd-vis-pills">
-              {(["private", "team", "public"] as Visibility[]).map((v) => {
-                const disabled = v === "team" && !deployment.team_id;
-                return (
-                  <button
-                    key={v}
-                    className={`dd-vis-pill${vis === v ? " dd-vis-pill--active" : ""}`}
-                    onClick={() => !disabled && visMutation.mutate(v)}
-                    disabled={disabled || visMutation.isPending}
-                    title={disabled ? "Assign a team first" : undefined}
-                  >
-                    {VIS_ICON[v]}
-                    {v.charAt(0).toUpperCase() + v.slice(1)}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Error message */}
-          {deployment.error_message && (
-            <div className="g-card dd-card">
-              <div className="dd-section-title">Error</div>
-              <p className="dd-error-msg font-mono">{deployment.error_message}</p>
-            </div>
-          )}
-        </div>
+        <DeploymentSidebar
+          deployment={deployment}
+          lab={lab}
+          isActive={isActive}
+          vis={vis}
+          countdown={countdown}
+          countdownMs={countdownMs}
+          onVisibilityChange={(v) => visMutation.mutate(v)}
+          isChangingVisibility={visMutation.isPending}
+        />
       </div>
 
-      {/* ── Challenges (full-width below columns) ── */}
       {challenges.length > 0 && (
         <div className="g-card dd-challenges">
           <div className="dd-section-title">
@@ -417,55 +239,15 @@ export default function DeploymentDetailPage() {
         </div>
       )}
 
-      {/* ── Schedule destroy modal ── */}
       {showSchedule && (
-        <div className="g-backdrop" onClick={() => setShowSchedule(false)}>
-          <div className="g-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="g-modal-header">
-              <span className="font-mono text-sm">
-                Schedule Destroy — {deployment.lab_name}
-              </span>
-            </div>
-            <div className="g-modal-body">
-              <p className="text-muted text-11" style={{ marginBottom: "0.75rem" }}>
-                The lab will be automatically stopped at the specified time.
-              </p>
-              <div className="dd-preset-row">
-                {PRESETS.map((p) => (
-                  <button
-                    key={p.label}
-                    className="g-btn g-btn-ghost g-btn-sm"
-                    onClick={() => setScheduledAt(addHours(p.hours))}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                <label className="text-11 text-muted">Custom time</label>
-                <input
-                  type="datetime-local"
-                  className="g-input"
-                  value={scheduledAt}
-                  min={addHours(0)}
-                  onChange={(e) => setScheduledAt(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="g-modal-footer">
-              <button className="g-btn g-btn-ghost" onClick={() => setShowSchedule(false)}>
-                Cancel
-              </button>
-              <button
-                className="g-btn g-btn-danger"
-                onClick={() => scheduleMutation.mutate()}
-                disabled={scheduleMutation.isPending}
-              >
-                {scheduleMutation.isPending ? "Scheduling…" : "Schedule Destroy"}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ScheduleDestroyModal
+          labName={deployment.lab_name}
+          scheduledAt={scheduledAt}
+          onChangeScheduledAt={setScheduledAt}
+          onConfirm={() => scheduleMutation.mutate()}
+          onClose={() => setShowSchedule(false)}
+          isPending={scheduleMutation.isPending}
+        />
       )}
     </div>
   );

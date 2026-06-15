@@ -5,208 +5,22 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  ArrowLeft, CheckCircle2, XCircle, Eye, EyeOff,
-  Clock, Target, Zap, Lightbulb, Flag, Container, Trash2, Copy, FlaskConical, ExternalLink, Droplets,
+  ArrowLeft, CheckCircle2, XCircle,
+  Clock, Target, Zap, Flag, Container, FlaskConical, ExternalLink, Droplets,
 } from "lucide-react";
 import Link from "next/link";
 import {
-  getChallenge, submitFlag, unlockHint,
-  type ChallengeDifficulty, type HintSummary,
+  getChallenge, submitFlag,
+  type HintSummary,
 } from "@/lib/api/challenges";
 import { getMyProfile } from "@/lib/api/profiles";
-import { deployInstance, getMyInstance, stopDeployment, type Deployment } from "@/lib/api/deployments";
+import { deployInstance, getMyInstance, stopDeployment } from "@/lib/api/deployments";
 import { getLabs } from "@/lib/api/labs";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { PageSpinner } from "@/components/ui/Spinner";
-
-const DIFF_COLOR: Record<ChallengeDifficulty, string> = {
-  easy:   "var(--g-success)",
-  medium: "var(--g-warning)",
-  hard:   "var(--g-orange)",
-  insane: "var(--g-danger)",
-};
-
-function useCountdown(target: string | null): string {
-  const [label, setLabel] = useState("");
-  useEffect(() => {
-    if (!target) return;
-    function tick() {
-      const diff = Math.max(0, new Date(target!).getTime() - Date.now());
-      const h = Math.floor(diff / 3_600_000);
-      const m = Math.floor((diff % 3_600_000) / 60_000);
-      const s = Math.floor((diff % 60_000) / 1_000);
-      setLabel(diff === 0 ? "Expired" : `${h}h ${m.toString().padStart(2, "0")}m ${s.toString().padStart(2, "0")}s`);
-    }
-    tick();
-    const id = setInterval(tick, 1_000);
-    return () => clearInterval(id);
-  }, [target]);
-  return label;
-}
-
-function InstanceCard({
-  instance,
-  onStop,
-  isStopping,
-}: {
-  instance: Deployment;
-  onStop: () => void;
-  isStopping: boolean;
-}) {
-  const countdown = useCountdown(instance.auto_destroy_at);
-  const [copied, setCopied] = useState(false);
-
-  function copyFlag() {
-    if (!instance.dynamic_flag) return;
-    navigator.clipboard.writeText(instance.dynamic_flag).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    });
-  }
-
-  const isActive = instance.status === "running" || instance.status === "starting";
-
-  return (
-    <div
-      className="g-card"
-      style={{ borderColor: isActive ? "var(--g-accent)" : "var(--g-border)" }}
-    >
-      <div className="flex items-center justify-between gap-2 mb-3">
-        <div className="flex items-center gap-2">
-          <Container size={14} style={{ color: "var(--g-accent)" }} />
-          <span className="text-11 font-mono" style={{ color: "var(--g-text)" }}>
-            Instance #{instance.id}
-          </span>
-          <span
-            className="text-9px font-mono uppercase px-1.5 py-0.5 rounded"
-            style={{
-              background: isActive ? "color-mix(in srgb, var(--g-accent) 15%, transparent)" : "var(--g-surface)",
-              color: isActive ? "var(--g-accent)" : "var(--g-text-muted)",
-            }}
-          >
-            {instance.status}
-          </span>
-        </div>
-        <button
-          className="g-btn g-btn-danger g-btn-icon"
-          onClick={onStop}
-          disabled={isStopping || instance.status === "stopping"}
-          title="Destroy instance"
-        >
-          <Trash2 size={12} />
-        </button>
-      </div>
-
-      {instance.auto_destroy_at && (
-        <div className="flex items-center gap-1.5 mb-2 text-9px font-mono" style={{ color: "var(--g-warning)" }}>
-          <Clock size={10} />
-          Auto-destroys in {countdown}
-        </div>
-      )}
-
-      {instance.dynamic_flag && (
-        <div className="mt-2">
-          <div className="text-9px font-mono uppercase mb-1" style={{ color: "var(--g-text-muted)" }}>
-            Dynamic Flag
-          </div>
-          <div className="flex items-center gap-2">
-            <code
-              className="flex-1 text-11 font-mono px-2 py-1 rounded truncate"
-              style={{ background: "var(--g-surface)", color: "var(--g-success)", border: "1px solid var(--g-border)" }}
-            >
-              {instance.dynamic_flag}
-            </code>
-            <button
-              className="g-btn g-btn-ghost g-btn-icon"
-              onClick={copyFlag}
-              title="Copy flag"
-              style={{ flexShrink: 0 }}
-            >
-              <Copy size={12} style={{ color: copied ? "var(--g-success)" : undefined }} />
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function HintCard({
-  hint,
-  slug,
-  userPoints,
-  onUnlocked,
-}: {
-  hint: HintSummary;
-  slug: string;
-  userPoints: number;
-  onUnlocked: (hintId: number, content: string) => void;
-}) {
-  const [visible, setVisible] = useState(false);
-  const { push } = useNotificationsStore();
-  const canAfford = hint.cost === 0 || userPoints >= hint.cost;
-
-  const unlockMutation = useMutation({
-    mutationFn: () => unlockHint(slug, hint.id),
-    onSuccess: (res) => {
-      onUnlocked(res.hint_id, res.content);
-      setVisible(true);
-      if (res.cost > 0) push("info", `-${res.cost} pts spent to unlock hint`);
-    },
-    onError: (err: unknown) => {
-      const detail = (err as { response?: { data?: { detail?: string } } })
-        ?.response?.data?.detail;
-      push("error", detail ?? "Failed to unlock hint");
-    },
-  });
-
-  if (!hint.unlocked && hint.content === null) {
-    return (
-      <div className="hint-card hint-locked">
-        <div className="hint-header">
-          <Lightbulb size={13} className="hint-icon" />
-          <span className="hint-label">Hint {hint.order_num}</span>
-          {hint.cost > 0 && (
-            <span className="hint-cost" style={{ color: canAfford ? undefined : "var(--g-danger)" }}>
-              {hint.cost} pts
-            </span>
-          )}
-        </div>
-        <button
-          className="g-btn g-btn-ghost hint-unlock-btn"
-          onClick={() => unlockMutation.mutate()}
-          disabled={unlockMutation.isPending || !canAfford}
-          title={!canAfford ? `Not enough points (need ${hint.cost}, have ${userPoints})` : undefined}
-        >
-          {unlockMutation.isPending
-            ? "Unlocking…"
-            : !canAfford
-            ? `Not enough pts`
-            : `Unlock${hint.cost > 0 ? ` (−${hint.cost} pts)` : ""}`}
-        </button>
-      </div>
-    );
-  }
-
-  const content = hint.content!;
-  return (
-    <div className="hint-card hint-unlocked">
-      <div className="hint-header">
-        <Lightbulb size={13} className="hint-icon hint-icon--unlocked" />
-        <span className="hint-label">Hint {hint.order_num}</span>
-        {hint.cost > 0 && <span className="hint-cost hint-cost--paid">−{hint.cost} pts</span>}
-        <button
-          className="hint-toggle"
-          onClick={() => setVisible((v) => !v)}
-          aria-label={visible ? "Hide hint" : "Show hint"}
-        >
-          {visible ? <EyeOff size={12} /> : <Eye size={12} />}
-        </button>
-      </div>
-      {visible && <p className="hint-content">{content}</p>}
-    </div>
-  );
-}
+import { DIFF_COLOR } from "@/lib/utils/difficulty";
+import { InstanceCard } from "@/components/challenges/InstanceCard";
+import { HintCard } from "@/components/challenges/HintCard";
 
 export default function ChallengeDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -360,13 +174,11 @@ export default function ChallengeDetailPage() {
 
   return (
     <div className="page">
-      {/* Back navigation */}
       <Link href="/challenges" className="back-link">
         <ArrowLeft size={14} />
         <span>Challenges</span>
       </Link>
 
-      {/* Header */}
       <div className="ch-header">
         <div className="ch-meta-row">
           {ch.lab_name && (
@@ -430,10 +242,8 @@ export default function ChallengeDetailPage() {
       </div>
 
       <div className="ch-body">
-        {/* Description */}
         <section className="g-card ch-desc-card">
           <p className="ch-desc">{ch.description}</p>
-
           {ch.tags.length > 0 && (
             <div className="ch-tags">
               {ch.tags.map((t) => (
@@ -443,7 +253,6 @@ export default function ChallengeDetailPage() {
           )}
         </section>
 
-        {/* Code snippet for coding challenges */}
         {codeSnippet && (
           <section className="g-card">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
@@ -469,7 +278,6 @@ export default function ChallengeDetailPage() {
           </section>
         )}
 
-        {/* Hints */}
         {hints.length > 0 && (
           <section>
             <h2 className="section-title">Hints</h2>
@@ -487,7 +295,6 @@ export default function ChallengeDetailPage() {
           </section>
         )}
 
-        {/* Container instance */}
         {ch.challenge_type === "container" && (
           <section>
             <h2 className="section-title">Lab Instance</h2>
@@ -515,7 +322,6 @@ export default function ChallengeDetailPage() {
           </section>
         )}
 
-        {/* Flag submission */}
         <section className="g-card submit-card">
           <h2 className="section-title">{codeSnippet ? "Submit Answer" : "Submit Flag"}</h2>
 

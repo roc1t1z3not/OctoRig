@@ -23,3 +23,7 @@ export function formatDate(iso: string | null | undefined): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("en-GB", DATE_OPTS);
 }
+
+export function addHours(h: number): string {
+  return new Date(Date.now() + h * 3_600_000).toISOString().slice(0, 16);
+}
