@@ -1,8 +1,7 @@
 "use client";
 import "../admin.css";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Key, ShieldOff } from "lucide-react";
 import { getAdminApiKeys } from "@/lib/api/admin";
@@ -10,20 +9,18 @@ import { revokeAdminApiKey } from "@/lib/api/settings";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { useConfirmStore } from "@/stores/confirm.store";
 import { useUserStore } from "@/stores/user.store";
+import { useAdminGuard } from "@/hooks/useAdminGuard";
 import { formatDateTime } from "@/lib/utils/date";
 
 export default function AdminApiKeysPage() {
   const { push } = useNotificationsStore();
   const { confirm } = useConfirmStore();
   const { user } = useUserStore();
-  const router = useRouter();
   const qc = useQueryClient();
 
-  const [activeOnly, setActiveOnly] = useState(true);
+  useAdminGuard();
 
-  useEffect(() => {
-    if (user && !user.is_admin && !user.is_superuser) router.replace("/");
-  }, [user, router]);
+  const [activeOnly, setActiveOnly] = useState(true);
 
   const { data: keys = [], isLoading } = useQuery({
     queryKey: ["admin-api-keys", activeOnly],

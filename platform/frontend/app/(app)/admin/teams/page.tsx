@@ -4,8 +4,9 @@ import "./teams-admin.css";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { SearchBar } from "@/components/ui/SearchBar";
 import { getAdminTeams, type AdminTeam } from "@/lib/api/admin";
+import { LoadingCell, EmptyCell } from "@/components/ui/TableStates";
 import { formatDateTime } from "@/lib/utils/date";
 
 export default function AdminTeamsPage() {
@@ -20,22 +21,14 @@ export default function AdminTeamsPage() {
     <div className="page">
       <div className="page-header">
         <h1 className="page-title font-mono">Teams</h1>
-        <div className="search-wrap">
-          <Search size={13} className="search-icon text-muted" />
-          <input
-            className="g-input g-input-sm search-input"
-            placeholder="Search teams…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        <SearchBar value={search} onChange={setSearch} placeholder="Search teams…" />
       </div>
 
       <div className="g-panel">
         {isLoading ? (
-          <div className="loading-cell text-muted text-sm">Loading…</div>
+          <LoadingCell />
         ) : teams.length === 0 ? (
-          <div className="empty-cell text-muted text-sm">No teams found.</div>
+          <EmptyCell label="No teams found." />
         ) : (
           <table className="g-table">
             <thead>

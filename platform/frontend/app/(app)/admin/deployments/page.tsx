@@ -3,10 +3,12 @@ import "./admin-deployments.css";
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Search, Trash2, RefreshCw } from "lucide-react";
+import { Trash2, RefreshCw } from "lucide-react";
+import { SearchBar } from "@/components/ui/SearchBar";
 import { getAdminDeployments, type AdminDeployment } from "@/lib/api/admin";
 import { stopDeployment, resetDeployment } from "@/lib/api/deployments";
 import { DeploymentStatusBadge } from "@/components/deployments/DeploymentStatusBadge";
+import { LoadingCell, EmptyCell } from "@/components/ui/TableStates";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { useConfirmStore } from "@/stores/confirm.store";
 import { formatDateTime } from "@/lib/utils/date";
@@ -65,22 +67,14 @@ export default function AdminDeploymentsPage() {
     <div className="page">
       <div className="page-header">
         <h1 className="page-title font-mono">All Deployments</h1>
-        <div className="search-wrap">
-          <Search size={13} className="search-icon text-muted" />
-          <input
-            className="g-input g-input-sm search-input"
-            placeholder="Filter by user or lab…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        <SearchBar value={search} onChange={setSearch} placeholder="Filter by user or lab…" />
       </div>
 
       <div className="g-panel">
         {isLoading ? (
-          <div className="loading-cell text-muted text-sm">Loading…</div>
+          <LoadingCell />
         ) : deployments.length === 0 ? (
-          <div className="empty-cell text-muted text-sm">No deployments.</div>
+          <EmptyCell label="No deployments." />
         ) : (
           <table className="g-table">
             <thead>

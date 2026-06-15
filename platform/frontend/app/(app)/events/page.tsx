@@ -15,6 +15,7 @@ import {
 import { useUserStore } from "@/stores/user.store";
 import { formatDateTime } from "@/lib/utils/date";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { EVENT_STATUS_COLORS } from "@/lib/utils/status";
 
 const STATUS_TABS: { id: EventStatus | undefined; label: string }[] = [
   { id: undefined, label: "All" },
@@ -22,14 +23,6 @@ const STATUS_TABS: { id: EventStatus | undefined; label: string }[] = [
   { id: "running", label: "Live" },
   { id: "ended", label: "Past" },
 ];
-
-const STATUS_COLOR: Record<EventStatus, string> = {
-  draft:     "var(--g-text-muted)",
-  published: "var(--g-info)",
-  running:   "var(--g-success)",
-  ended:     "var(--g-text-muted)",
-  archived:  "var(--g-text-dim)",
-};
 
 const VIS_ICON: Record<string, React.ReactNode> = {
   public:   <Globe size={10} />,
@@ -57,7 +50,7 @@ function EventCard({ ev }: { ev: CtfEvent }) {
     <Link href={`/events/${ev.slug}`} className={`ev-card g-card ${isLive ? "ev-card--live" : ""}`}>
       <div className="ev-card-header">
         <span className="ev-vis">{VIS_ICON[ev.visibility]}</span>
-        <span className="ev-status" style={{ color: STATUS_COLOR[ev.status] }}>
+        <span className="ev-status" style={{ color: EVENT_STATUS_COLORS[ev.status] }}>
           {isLive ? "● LIVE" : ev.status}
         </span>
         {isLive && <CountdownBadge end_at={ev.end_at} />}

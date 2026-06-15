@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search, Filter } from "lucide-react";
 import { getAdminAuditLogs, type AdminAuditLog } from "@/lib/api/admin";
+import { LoadingCell, EmptyCell } from "@/components/ui/TableStates";
 import { formatDateTime } from "@/lib/utils/date";
 
 const ACTION_GROUPS = [
@@ -108,9 +109,9 @@ export default function AdminAuditPage() {
       {/* Log table */}
       <div className="g-panel log-panel">
         {isLoading ? (
-          <div className="loading-cell text-muted text-sm">Loading…</div>
+          <LoadingCell />
         ) : data.length === 0 ? (
-          <div className="empty-cell text-muted text-sm">No entries match your filters.</div>
+          <EmptyCell label="No entries match your filters." />
         ) : (
           <>
             <table className="g-table">

@@ -1,8 +1,7 @@
 "use client";
 import "../admin.css";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Plus, ChevronRight, X, Save, Calendar, Lock, Globe, Link2,
@@ -17,16 +16,11 @@ import { getChallenges } from "@/lib/api/challenges";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { useConfirmStore } from "@/stores/confirm.store";
 import { useUserStore } from "@/stores/user.store";
+import { useAdminGuard } from "@/hooks/useAdminGuard";
 import { formatDateTime } from "@/lib/utils/date";
+import { EVENT_STATUS_COLORS } from "@/lib/utils/status";
 
 const STATUS_ORDER: EventStatus[] = ["draft", "published", "running", "ended", "archived"];
-const STATUS_COLORS: Record<EventStatus, string> = {
-  draft: "var(--g-text-muted)",
-  published: "var(--g-accent)",
-  running: "var(--g-success)",
-  ended: "var(--g-warning)",
-  archived: "var(--g-text-muted)",
-};
 
 function nextStatus(s: EventStatus): EventStatus | null {
   const i = STATUS_ORDER.indexOf(s);
@@ -63,12 +57,9 @@ export default function AdminEventsPage() {
   const { push } = useNotificationsStore();
   const { confirm } = useConfirmStore();
   const { user } = useUserStore();
-  const router = useRouter();
   const qc = useQueryClient();
 
-  useEffect(() => {
-    if (user && !user.is_admin && !user.is_superuser) router.replace("/");
-  }, [user, router]);
+  useAdminGuard();
 
   const { data: events = [], isLoading } = useQuery({
     queryKey: ["admin-events"],
@@ -216,7 +207,7 @@ export default function AdminEventsPage() {
                     <td>
                       <span style={{
                         fontSize: "0.6875rem", fontWeight: 700, fontFamily: "monospace",
-                        textTransform: "uppercase", color: STATUS_COLORS[ev.status],
+                        textTransform: "uppercase", color: EVENT_STATUS_COLORS[ev.status],
                       }}>
                         {ev.status}
                       </span>
