@@ -9,14 +9,17 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user, get_db, require_admin
 from app.config import settings
 from app.core.exceptions import bad_request, not_found
-from app.models.challenge import ChallengeDifficulty, ChallengeType
+from app.models.challenge import ChallengeDifficulty, ChallengeSubmission, ChallengeType
 from app.models.user import User
 from app.services import audit_service
 from app.services.challenge_service import (
     get_challenge_by_slug_or_404, get_solve_count,
     get_unlocked_hint_ids, list_challenges, submit_flag, unlock_hint,
 )
-from app.services.scoring_service import ScoreTransactionSource, award_points, get_user_score
+from app.services.scoring_service import (
+    ScoreTransactionSource, award_points, compute_dynamic_points, get_user_score,
+)
+from app.services.settings_service import get_settings
 
 router = APIRouter(prefix="/challenges", tags=["challenges"])
 
@@ -103,6 +106,7 @@ class ChallengeDetail(BaseModel):
     files: list[dict[str, Any]]
     solve_count: int = 0
     solved_by_me: bool = False
+    first_blood_user: Optional[str] = None
     version: int
     lab_slug: Optional[str] = None
     lab_name: Optional[str] = None
@@ -207,6 +211,22 @@ def get_challenge_endpoint(
     ch = get_challenge_by_slug_or_404(db, slug)
     unlocked_ids = get_unlocked_hint_ids(db, current_user.id, ch.id)
     lab = ch.lab_template
+    site = get_settings(db)
+
+    first_blood_user: Optional[str] = None
+    if site.first_blood_enabled:
+        fb_sub = (
+            db.query(ChallengeSubmission)
+            .filter(
+                ChallengeSubmission.challenge_id == ch.id,
+                ChallengeSubmission.is_first_blood.is_(True),
+            )
+            .first()
+        )
+        if fb_sub:
+            fb_user = db.get(User, fb_sub.user_id)
+            first_blood_user = fb_user.username if fb_user else None
+
     return ChallengeDetail(
         id=ch.id,
         slug=ch.slug,
@@ -224,6 +244,7 @@ def get_challenge_endpoint(
         files=[{"id": f.id, "filename": f.filename, "size_bytes": f.size_bytes} for f in ch.files],
         solve_count=get_solve_count(db, ch.id),
         solved_by_me=check_already_solved(db, ch.id, current_user.id),
+        first_blood_user=first_blood_user,
         version=ch.version,
         lab_slug=lab.slug if lab else None,
         lab_name=lab.name if lab else None,
@@ -240,10 +261,32 @@ def submit_flag_endpoint(
     current_user: User = Depends(get_current_user),
 ) -> FlagSubmitResponse:
     ch = get_challenge_by_slug_or_404(db, slug)
+    site = get_settings(db)
+
+    # Max attempts enforcement (global default, applies outside events)
+    if site.max_flag_attempts is not None and body.event_id is None:
+        attempt_count = (
+            db.query(ChallengeSubmission)
+            .filter(
+                ChallengeSubmission.challenge_id == ch.id,
+                ChallengeSubmission.user_id == current_user.id,
+                ChallengeSubmission.is_correct.is_(False),
+            )
+            .count()
+        )
+        if attempt_count >= site.max_flag_attempts:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Max attempts reached ({site.max_flag_attempts}).",
+            )
+
     _check_submit_rate_limit(current_user.id, ch.id)
 
     ip = request.client.host if request.client else None
     team_id = _get_team_id(db, current_user)
+
+    # Count existing correct solves before submitting (for dynamic scoring)
+    solve_count_before = get_solve_count(db, ch.id)
 
     result = submit_flag(
         db,
@@ -270,10 +313,19 @@ def submit_flag_endpoint(
     )
 
     if result.correct:
+        # Dynamic scoring: override points if enabled (global scoreboard only, not per-event)
+        points = result.points_awarded
+        if site.dynamic_scoring_enabled and body.event_id is None:
+            floor = max(1, int(ch.points * site.dynamic_min_floor_pct / 100))
+            points = max(
+                compute_dynamic_points(ch.points, solve_count_before, site.dynamic_decay_factor),
+                floor,
+            )
+
         award_points(
             db,
             user_id=current_user.id,
-            points=result.points_awarded,
+            points=points,
             source_type=ScoreTransactionSource.CHALLENGE_SOLVE,
             source_id=ch.id,
             team_id=team_id,
@@ -287,16 +339,16 @@ def submit_flag_endpoint(
                 "challenge_id": ch.id,
                 "slug": ch.slug,
                 "first_blood": result.first_blood,
-                "points": result.points_awarded,
+                "points": points,
             },
             ip=ip,
         )
         msg = "First blood! " if result.first_blood else ""
-        msg += f"Correct! +{result.points_awarded} points."
+        msg += f"Correct! +{points} points."
         return FlagSubmitResponse(
             correct=True, already_solved=False,
             first_blood=result.first_blood,
-            points_awarded=result.points_awarded,
+            points_awarded=points,
             message=msg,
         )
 

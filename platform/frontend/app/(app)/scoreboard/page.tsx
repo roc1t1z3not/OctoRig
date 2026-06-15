@@ -4,7 +4,7 @@ import "./scoreboard.css";
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, Crosshair } from "lucide-react";
+import { Trophy, Crosshair, Snowflake } from "lucide-react";
 import { getGlobalScoreboard } from "@/lib/api/challenges";
 import { getEventScoreboard, getEvents } from "@/lib/api/events";
 import { getRanks } from "@/lib/api/ranks";
@@ -104,6 +104,7 @@ export default function ScoreboardPage() {
   }
 
   const myEntry = user ? entries.find((e) => e.username === user.username) : null;
+  const isFrozen = isGlobal && entries.length > 0 && entries[0].frozen === true;
 
   return (
     <div className="page">
@@ -114,7 +115,21 @@ export default function ScoreboardPage() {
             Scoreboard
           </h1>
           {!isLoading && (
-            <p className="page-sub">{entries.length} players ranked</p>
+            <p className="page-sub" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              {entries.length} players ranked
+              {isFrozen && (
+                <span style={{
+                  display: "inline-flex", alignItems: "center", gap: "0.25rem",
+                  fontSize: "0.6875rem", color: "var(--g-accent)",
+                  background: "color-mix(in srgb, var(--g-accent) 12%, transparent)",
+                  border: "1px solid color-mix(in srgb, var(--g-accent) 30%, transparent)",
+                  borderRadius: "4px", padding: "0.1rem 0.4rem",
+                }}>
+                  <Snowflake size={10} />
+                  Scoreboard frozen
+                </span>
+              )}
+            </p>
           )}
         </div>
 

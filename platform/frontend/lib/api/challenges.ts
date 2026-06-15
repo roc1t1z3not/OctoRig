@@ -37,6 +37,7 @@ export interface ChallengeDetail extends ChallengeListItem {
   content: Record<string, unknown>;
   hints: HintSummary[];
   files: Array<{ id: number; filename: string; size_bytes: number }>;
+  first_blood_user: string | null;
   version: number;
   lab_slug: string | null;
   lab_name: string | null;
@@ -66,6 +67,7 @@ export interface ScoreboardEntry {
   solve_count: number;
   badge_count: number;
   last_tx: string | null;
+  frozen?: boolean;
 }
 
 export async function getChallenges(params?: {

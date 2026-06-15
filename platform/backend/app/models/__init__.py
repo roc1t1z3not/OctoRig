@@ -16,6 +16,7 @@ from app.models.profile import PrivacyLevel, UserProfile
 from app.models.rank import Rank
 from app.models.scheduled_action import ScheduledAction, ScheduledActionStatus, ScheduledActionType
 from app.models.scoring import ScoreTransaction, ScoreTransactionSource
+from app.models.site_settings import SiteSettings
 from app.models.team import Team, TeamInvitation, TeamMember, TeamRole
 from app.models.user import User
 
@@ -41,4 +42,5 @@ __all__ = [
     "MarketplacePackage", "PackageInstallation", "PackageType",
     "RefreshToken",
     "Rank",
+    "SiteSettings",
 ]

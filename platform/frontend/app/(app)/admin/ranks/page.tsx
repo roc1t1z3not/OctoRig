@@ -91,14 +91,14 @@ export default function AdminRanksPage() {
     onError: () => push("error", "Failed to delete rank."),
   });
 
-  async function handleDelete(rank: Rank) {
-    const ok = await confirm({
+  function handleDelete(rank: Rank) {
+    confirm({
       title: "Delete rank",
-      message: `Delete "${rank.name}"? Users currently at this rank will drop to the one below.`,
+      body: `Delete "${rank.name}"? Users currently at this rank will drop to the one below.`,
       confirmLabel: "Delete",
-      danger: true,
+      dangerous: true,
+      onConfirm: () => deleteMutation.mutate(rank.id),
     });
-    if (ok) deleteMutation.mutate(rank.id);
   }
 
   const isEditing = selected !== null;

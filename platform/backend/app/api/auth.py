@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from app.api.deps import get_current_user, get_current_user_or_api_key
 from app.config import settings
-from app.core.exceptions import bad_request, credentials_exception
+from app.core.exceptions import bad_request, conflict, credentials_exception, forbidden_exception
 from app.core.limiter import limiter
 from app.core.security import (
     create_access_token,
@@ -19,9 +19,11 @@ from app.core.security import (
 from app.database import get_db
 from app.models.refresh_token import RefreshToken
 from app.models.user import User
+from app.schemas.admin import PublicSettingsResponse
 from app.schemas.auth import LoginRequest, TokenResponse, UserResponse
 from app.services import audit_service
 from app.services.audit_service import write_audit
+from app.services.settings_service import get_settings
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -180,3 +182,65 @@ def change_password(
     current_user.hashed_password = hash_password(payload.new_password)
     db.commit()
     write_audit(db, action="auth.password_changed", user_id=current_user.id)
+
+
+class RegisterRequest(BaseModel):
+    username: str
+    email: str
+    password: str
+
+
+@router.post("/register", response_model=TokenResponse, status_code=201)
+@limiter.limit("10/minute")
+def register(
+    payload: RegisterRequest,
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+) -> TokenResponse:
+    site = get_settings(db)
+    if not site.registration_open:
+        raise forbidden_exception
+
+    if len(payload.password) < 8:
+        raise bad_request("Password must be at least 8 characters")
+    if db.query(User).filter(User.username == payload.username).first():
+        raise conflict(f"Username '{payload.username}' is already taken")
+    if db.query(User).filter(User.email == payload.email).first():
+        raise conflict(f"Email '{payload.email}' is already registered")
+
+    user = User(
+        username=payload.username,
+        email=payload.email,
+        hashed_password=hash_password(payload.password),
+        is_active=True,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    from app.services.team_service import ensure_personal_team
+    ensure_personal_team(db, user)
+
+    ip = request.client.host if request.client else None
+    write_audit(db, action="auth.registered", user_id=user.id, ip=ip)
+
+    _purge_expired(db, user.id)
+    raw_refresh = _issue_refresh_token(db, user.id)
+    _set_refresh_cookie(response, raw_refresh)
+
+    return TokenResponse(
+        access_token=create_access_token(user.id),
+        expires_in=settings.access_token_expire_minutes * 60,
+    )
+
+
+@router.get("/settings/public", response_model=PublicSettingsResponse)
+def public_settings(db: Session = Depends(get_db)) -> PublicSettingsResponse:
+    row = get_settings(db)
+    return PublicSettingsResponse(
+        registration_open=row.registration_open,
+        maintenance_mode=row.maintenance_mode,
+        maintenance_message=row.maintenance_message,
+        first_blood_enabled=row.first_blood_enabled,
+    )

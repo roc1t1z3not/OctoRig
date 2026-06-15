@@ -83,6 +83,37 @@ export async function createEvent(payload: CreateEventPayload): Promise<CtfEvent
 }
 
 export async function transitionEvent(slug: string, status: EventStatus): Promise<CtfEvent> {
-  const { data } = await apiClient.post<CtfEvent>(`/events/${slug}/transition`, { status });
+  const { data } = await apiClient.post<CtfEvent>(`/events/${slug}/status`, { status });
   return data;
+}
+
+export interface UpdateEventPayload {
+  title?: string;
+  description?: string | null;
+  start_at?: string | null;
+  end_at?: string | null;
+  visibility?: EventVisibility;
+  scoring_mode?: EventScoringMode;
+  max_team_size?: number | null;
+  freeze_scoreboard_at?: string | null;
+}
+
+export async function updateEvent(slug: string, payload: UpdateEventPayload): Promise<CtfEvent> {
+  const { data } = await apiClient.patch<CtfEvent>(`/events/${slug}`, payload);
+  return data;
+}
+
+export async function addEventChallenge(
+  slug: string,
+  challengeId: number,
+  pointsOverride?: number | null
+): Promise<void> {
+  await apiClient.post(`/events/${slug}/challenges`, {
+    challenge_id: challengeId,
+    points_override: pointsOverride ?? null,
+  });
+}
+
+export async function removeEventChallenge(slug: string, challengeId: number): Promise<void> {
+  await apiClient.delete(`/events/${slug}/challenges/${challengeId}`);
 }

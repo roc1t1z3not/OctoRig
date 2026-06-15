@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, CheckCircle2, XCircle, Eye, EyeOff,
-  Clock, Target, Zap, Lightbulb, Flag, Container, Trash2, Copy, FlaskConical, ExternalLink,
+  Clock, Target, Zap, Lightbulb, Flag, Container, Trash2, Copy, FlaskConical, ExternalLink, Droplets,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -420,6 +420,12 @@ export default function ChallengeDetailPage() {
             <Target size={12} />
             {ch.solve_count} solve{ch.solve_count !== 1 ? "s" : ""}
           </span>
+          {ch.first_blood_user && (
+            <span className="ch-stat ch-stat--blood" title={`First blood: ${ch.first_blood_user}`}>
+              <Droplets size={12} />
+              {ch.first_blood_user}
+            </span>
+          )}
         </div>
       </div>
 

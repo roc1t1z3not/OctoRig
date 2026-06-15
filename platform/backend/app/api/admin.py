@@ -25,9 +25,12 @@ from app.schemas.admin import (
     AdminUserCreate,
     AdminUserResponse,
     AdminUserUpdate,
+    SiteSettingsResponse,
+    SiteSettingsUpdate,
     SystemStats,
 )
-from app.services import audit_service
+from app.services import api_key_service, audit_service
+from app.services.settings_service import get_settings
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -483,3 +486,54 @@ def delete_rank(
     db.delete(rank)
     db.commit()
     return {"deleted": True, "rank_id": rank_id}
+
+
+# ── Site settings ─────────────────────────────────────────────────────────────
+
+@router.get("/settings", response_model=SiteSettingsResponse)
+def get_site_settings(
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> SiteSettingsResponse:
+    return SiteSettingsResponse.model_validate(get_settings(db))
+
+
+@router.patch("/settings", response_model=SiteSettingsResponse)
+def update_site_settings(
+    body: SiteSettingsUpdate,
+    request: Request,
+    actor: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> SiteSettingsResponse:
+    row = get_settings(db)
+    changed: dict = {}
+    for field, value in body.model_dump(exclude_none=True).items():
+        if getattr(row, field) != value:
+            setattr(row, field, value)
+            changed[field] = value
+    if changed:
+        db.commit()
+        db.refresh(row)
+        audit_service.write_audit(
+            db, action="admin.settings_updated", user_id=actor.id,
+            detail=changed,
+            ip=request.client.host if request.client else None,
+        )
+    return SiteSettingsResponse.model_validate(row)
+
+
+# ── API Keys admin revoke ─────────────────────────────────────────────────────
+
+@router.delete("/api-keys/{key_id}", status_code=204)
+def admin_revoke_api_key(
+    key_id: int,
+    request: Request,
+    actor: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> None:
+    api_key_service.revoke_api_key(db, actor, key_id)
+    audit_service.write_audit(
+        db, action="admin.api_key_revoked", user_id=actor.id,
+        detail={"key_id": key_id},
+        ip=request.client.host if request.client else None,
+    )

@@ -35,6 +35,8 @@ const NAV_ADMIN = [
   { href: "/admin/deployments",  icon: Container,     label: "Deployments" },
   { href: "/admin/audit",        icon: ScrollText,    label: "Audit Log" },
   { href: "/admin/challenges",   icon: Trophy,        label: "Challenges" },
+  { href: "/admin/events",       icon: Flag,          label: "Events" },
+  { href: "/admin/api-keys",     icon: KeyRound,      label: "API Keys" },
   { href: "/admin/ranks",        icon: BarChart3,     label: "Ranks" },
   { href: "/admin/content",      icon: ClipboardList, label: "Content" },
   { href: "/admin/settings",     icon: Settings,      label: "Settings" },

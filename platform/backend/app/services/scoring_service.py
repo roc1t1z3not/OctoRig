@@ -1,5 +1,6 @@
 import json
 import math
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import redis as redis_lib
@@ -76,19 +77,29 @@ def get_user_score(db: Session, user_id: int, event_id: Optional[int] = None) ->
 
 
 def get_global_scoreboard(db: Session, limit: int = 100) -> list[dict[str, Any]]:
-    cache_key = f"scoreboard:global:{limit}"
+    from app.services.settings_service import get_settings
+    site = get_settings(db)
+    freeze_at = site.scoreboard_frozen_at
+    now = datetime.now(timezone.utc)
+    frozen = freeze_at is not None and freeze_at.replace(tzinfo=timezone.utc) <= now
+
+    cache_key = f"scoreboard:global:{limit}:{'frozen' if frozen else 'live'}"
     cached = _get_redis().get(cache_key)
     if cached:
         return json.loads(cached)
 
-    score_rows = (
+    q = (
         db.query(
             ScoreTransaction.user_id,
             func.sum(ScoreTransaction.points).label("total"),
             func.max(ScoreTransaction.created_at).label("last_tx"),
         )
         .filter(ScoreTransaction.event_id.is_(None))
-        .group_by(ScoreTransaction.user_id)
+    )
+    if frozen:
+        q = q.filter(ScoreTransaction.created_at <= freeze_at)
+    score_rows = (
+        q.group_by(ScoreTransaction.user_id)
         .order_by(
             func.sum(ScoreTransaction.points).desc(),
             func.max(ScoreTransaction.created_at).asc(),
@@ -136,6 +147,7 @@ def get_global_scoreboard(db: Session, limit: int = 100) -> list[dict[str, Any]]
             "solve_count": solve_counts.get(r.user_id, 0),
             "badge_count": badge_counts.get(r.user_id, 0),
             "last_tx": r.last_tx.isoformat() if r.last_tx else None,
+            "frozen": frozen,
         }
         for idx, r in enumerate(score_rows)
     ]
@@ -190,4 +202,5 @@ def _invalidate_scoreboard_cache(event_id: Optional[int]) -> None:
     if event_id is not None:
         r.delete(f"scoreboard:event:{event_id}")
     else:
-        r.delete("scoreboard:global")
+        for suffix in ("live", "frozen"):
+            r.delete(f"scoreboard:global:100:{suffix}")

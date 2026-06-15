@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.models.deployment import DeploymentStatus, DeploymentVisibility
 from app.models.scheduled_action import ScheduledActionStatus, ScheduledActionType
@@ -89,3 +89,37 @@ class AdminApiKeyResponse(BaseModel):
     last_used_at: Optional[datetime]
     is_active: bool
     created_at: datetime
+
+
+class SiteSettingsResponse(BaseModel):
+    registration_open: bool
+    maintenance_mode: bool
+    maintenance_message: Optional[str]
+    max_flag_attempts: Optional[int]
+    dynamic_scoring_enabled: bool
+    dynamic_decay_factor: float
+    dynamic_min_floor_pct: int
+    scoreboard_frozen_at: Optional[datetime]
+    first_blood_enabled: bool
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class SiteSettingsUpdate(BaseModel):
+    registration_open: Optional[bool] = None
+    maintenance_mode: Optional[bool] = None
+    maintenance_message: Optional[str] = None
+    max_flag_attempts: Optional[int] = Field(None, ge=1)
+    dynamic_scoring_enabled: Optional[bool] = None
+    dynamic_decay_factor: Optional[float] = Field(None, ge=0.0, le=1.0)
+    dynamic_min_floor_pct: Optional[int] = Field(None, ge=1, le=100)
+    scoreboard_frozen_at: Optional[datetime] = None
+    first_blood_enabled: Optional[bool] = None
+
+
+class PublicSettingsResponse(BaseModel):
+    registration_open: bool
+    maintenance_mode: bool
+    maintenance_message: Optional[str]
+    first_blood_enabled: bool
