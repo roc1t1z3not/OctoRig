@@ -4,11 +4,9 @@ import "../challenges.css";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowLeft, CheckCircle2, XCircle,
-  Clock, Target, Zap, Flag, Container, FlaskConical, ExternalLink, Droplets,
-} from "lucide-react";
+import { CheckCircle2, Container } from "lucide-react";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import {
   getChallenge, submitFlag,
   type HintSummary,
@@ -18,9 +16,10 @@ import { deployInstance, getMyInstance, stopDeployment } from "@/lib/api/deploym
 import { getLabs } from "@/lib/api/labs";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { PageSpinner } from "@/components/ui/Spinner";
-import { DIFF_COLOR } from "@/lib/utils/difficulty";
 import { InstanceCard } from "@/components/challenges/InstanceCard";
 import { HintCard } from "@/components/challenges/HintCard";
+import { ChallengeHeader } from "@/components/challenges/ChallengeHeader";
+import { SubmitForm } from "@/components/challenges/SubmitForm";
 
 export default function ChallengeDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -154,15 +153,9 @@ export default function ChallengeDetailPage() {
     submitMutation.mutate(flag.trim());
   }
 
-  if (isLoading) {
-    return <div className="page"><PageSpinner /></div>;
-  }
-  if (!ch) {
-    return <div className="page text-muted text-sm">Challenge not found.</div>;
-  }
+  if (isLoading) return <div className="page"><PageSpinner /></div>;
+  if (!ch) return <div className="page text-muted text-sm">Challenge not found.</div>;
 
-  const diffColor = DIFF_COLOR[ch.difficulty];
-  const solvedByMe = ch.solved_by_me;
   const codeSnippet = ch.challenge_type === "short_answer" ? (ch.content?.code_snippet as string | undefined) : undefined;
   const language = (ch.content?.language as string | undefined) ?? "text";
 
@@ -179,67 +172,12 @@ export default function ChallengeDetailPage() {
         <span>Challenges</span>
       </Link>
 
-      <div className="ch-header">
-        <div className="ch-meta-row">
-          {ch.lab_name && (
-            <span className="ch-lab-status-group">
-              <Link href="/labs" className="ch-lab-badge">
-                <FlaskConical size={10} />
-                {ch.lab_name}
-              </Link>
-              {labTemplate && (
-                <span
-                  className={`ch-lab-status-dot ${labIsLive ? "ch-lab-status-dot--live" : "ch-lab-status-dot--off"}`}
-                  title={labIsLive ? "Lab is running" : "Lab is offline"}
-                />
-              )}
-              {labIsLive && labUrl && (
-                <a
-                  href={labUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ch-lab-open-link"
-                  title={`Open ${ch.lab_name}`}
-                >
-                  <ExternalLink size={10} />
-                  Open Lab
-                </a>
-              )}
-            </span>
-          )}
-          <span className="ch-cat">{ch.category.replace(/-/g, " ")}</span>
-          <span className="ch-diff" style={{ color: diffColor }}>{ch.difficulty}</span>
-          {solvedByMe && (
-            <span className="ch-solved">
-              <CheckCircle2 size={12} />
-              Solved
-            </span>
-          )}
-        </div>
-        <h1 className="ch-title">{ch.title}</h1>
-        <div className="ch-stats">
-          <span className="ch-stat">
-            <Flag size={12} />
-            {ch.points} pts
-          </span>
-          {ch.estimated_minutes && (
-            <span className="ch-stat">
-              <Clock size={12} />
-              ~{ch.estimated_minutes}m
-            </span>
-          )}
-          <span className="ch-stat">
-            <Target size={12} />
-            {ch.solve_count} solve{ch.solve_count !== 1 ? "s" : ""}
-          </span>
-          {ch.first_blood_user && (
-            <span className="ch-stat ch-stat--blood" title={`First blood: ${ch.first_blood_user}`}>
-              <Droplets size={12} />
-              {ch.first_blood_user}
-            </span>
-          )}
-        </div>
-      </div>
+      <ChallengeHeader
+        challenge={ch}
+        solvedByMe={ch.solved_by_me}
+        labIsLive={labTemplate ? labIsLive : undefined}
+        labUrl={labUrl}
+      />
 
       <div className="ch-body">
         <section className="g-card ch-desc-card">
@@ -324,71 +262,21 @@ export default function ChallengeDetailPage() {
 
         <section className="g-card submit-card">
           <h2 className="section-title">{codeSnippet ? "Submit Answer" : "Submit Flag"}</h2>
-
-          {solvedByMe ? (
+          {ch.solved_by_me ? (
             <div className="submit-solved">
               <CheckCircle2 size={16} />
               You&apos;ve already solved this challenge.
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="submit-form">
-              <div className={codeSnippet ? undefined : "submit-row"}>
-                {codeSnippet ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    <textarea
-                      className="g-input font-mono"
-                      placeholder="Enter the expected output…"
-                      rows={3}
-                      value={flag}
-                      onChange={(e) => setFlag(e.target.value)}
-                      disabled={submitMutation.isPending}
-                      spellCheck={false}
-                      autoComplete="off"
-                      style={{ resize: "vertical" }}
-                    />
-                    <button
-                      type="submit"
-                      className="g-btn g-btn-primary"
-                      style={{ alignSelf: "flex-end" }}
-                      disabled={submitMutation.isPending || !flag.trim() || cooldownRemaining > 0}
-                    >
-                      {submitMutation.isPending ? "Checking…" : cooldownRemaining > 0 ? `Try again in ${cooldownRemaining}s` : "Submit"}
-                    </button>
-                  </div>
-                ) : (
-                  <input
-                    className="g-input submit-input font-mono"
-                    placeholder="FLAG{...}"
-                    value={flag}
-                    onChange={(e) => setFlag(e.target.value)}
-                    disabled={submitMutation.isPending || cooldownRemaining > 0}
-                    spellCheck={false}
-                    autoComplete="off"
-                  />
-                )}
-                {!codeSnippet && (
-                  <button
-                    type="submit"
-                    className="g-btn g-btn-primary"
-                    disabled={submitMutation.isPending || !flag.trim() || cooldownRemaining > 0}
-                  >
-                    {submitMutation.isPending ? "Checking…" : cooldownRemaining > 0 ? `Try again in ${cooldownRemaining}s` : "Submit"}
-                  </button>
-                )}
-              </div>
-
-              {submitResult && (
-                <div className={`submit-feedback ${submitResult.correct ? "fb-correct" : "fb-wrong"}`}>
-                  {submitResult.correct ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
-                  <span>{submitResult.message}</span>
-                  {submitResult.firstBlood && (
-                    <span className="fb-firstblood">
-                      <Zap size={12} /> First Blood
-                    </span>
-                  )}
-                </div>
-              )}
-            </form>
+            <SubmitForm
+              codeSnippet={codeSnippet}
+              flag={flag}
+              onFlagChange={setFlag}
+              onSubmit={handleSubmit}
+              isLoading={submitMutation.isPending}
+              submitResult={submitResult}
+              cooldownRemaining={cooldownRemaining}
+            />
           )}
         </section>
       </div>

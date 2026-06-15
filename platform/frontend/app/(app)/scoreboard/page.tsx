@@ -2,80 +2,19 @@
 import "./scoreboard.css";
 
 import { useRef, useState } from "react";
-import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, Crosshair, Snowflake } from "lucide-react";
+import { Trophy, Snowflake } from "lucide-react";
 import { getGlobalScoreboard } from "@/lib/api/challenges";
 import { getEventScoreboard, getEvents } from "@/lib/api/events";
 import { getRanks } from "@/lib/api/ranks";
 import { useUserStore } from "@/stores/user.store";
-import type { ScoreboardEntry } from "@/lib/api/challenges";
-import type { Rank } from "@/lib/api/ranks";
-
-const LIMITS = [25, 50, 100] as const;
-type Limit = typeof LIMITS[number];
-
-function rankForPoints(ranks: Rank[], points: number): Rank | null {
-  const eligible = ranks.filter((r) => r.is_active && r.min_points <= points);
-  if (eligible.length === 0) return null;
-  return eligible.reduce((a, b) => (b.min_points > a.min_points ? b : a));
-}
-
-function RankChip({ rank }: { rank: Rank | null }) {
-  if (!rank) return null;
-  return (
-    <span
-      className="sb-rank-chip"
-      style={{ color: rank.color ?? "var(--g-text-muted)", borderColor: rank.color ?? "var(--g-border)" }}
-    >
-      {rank.name}
-    </span>
-  );
-}
-
-function RankNum({ n }: { n: number }) {
-  if (n === 1) return <span className="sb-rank-num sb-rank-num--gold"><span className="sb-medal">🥇</span>1</span>;
-  if (n === 2) return <span className="sb-rank-num sb-rank-num--silver"><span className="sb-medal">🥈</span>2</span>;
-  if (n === 3) return <span className="sb-rank-num sb-rank-num--bronze"><span className="sb-medal">🥉</span>3</span>;
-  return <span className="sb-rank-num">{n}</span>;
-}
-
-function ScoreRow({
-  entry,
-  ranks,
-  isMe,
-  rowRef,
-}: {
-  entry: ScoreboardEntry;
-  ranks: Rank[];
-  isMe: boolean;
-  rowRef?: React.Ref<HTMLTableRowElement>;
-}) {
-  const rank = rankForPoints(ranks, entry.total);
-  return (
-    <tr className={isMe ? "sb-row--me" : ""} ref={rowRef}>
-      <td><RankNum n={entry.rank} /></td>
-      <td>
-        {entry.username ? (
-          <Link href={`/profile/${entry.username}`} className="sb-username">
-            {entry.username}
-          </Link>
-        ) : (
-          <span className="sb-username" style={{ color: "var(--g-text-muted)" }}>Unknown</span>
-        )}
-      </td>
-      <td><RankChip rank={rank} /></td>
-      <td className="sb-pts">{entry.total.toLocaleString()}</td>
-      <td className="sb-meta">{entry.solve_count}</td>
-      <td className="sb-meta">{entry.badge_count}</td>
-    </tr>
-  );
-}
+import { ScoreRow } from "@/components/scoreboard/ScoreRow";
+import { ScoreboardFilters, SCOREBOARD_LIMITS } from "@/components/scoreboard/ScoreboardFilters";
 
 export default function ScoreboardPage() {
   const { user } = useUserStore();
-  const [limit, setLimit] = useState<Limit>(50);
-  const [eventSlug, setEventSlug] = useState<string>("");
+  const [limit, setLimit] = useState(50);
+  const [eventSlug, setEventSlug] = useState("");
   const myRowRef = useRef<HTMLTableRowElement>(null);
 
   const { data: events = [] } = useQuery({
@@ -133,37 +72,15 @@ export default function ScoreboardPage() {
           )}
         </div>
 
-        <div className="sb-filters">
-          <select
-            className="sb-select"
-            value={eventSlug}
-            onChange={(e) => setEventSlug(e.target.value)}
-          >
-            <option value="">Global</option>
-            {events
-              .filter((ev) => ev.status !== "draft")
-              .map((ev) => (
-                <option key={ev.slug} value={ev.slug}>{ev.title}</option>
-              ))}
-          </select>
-
-          <select
-            className="sb-select"
-            value={limit}
-            onChange={(e) => setLimit(Number(e.target.value) as Limit)}
-          >
-            {LIMITS.map((l) => (
-              <option key={l} value={l}>Top {l}</option>
-            ))}
-          </select>
-
-          {myEntry && (
-            <button className="g-btn g-btn-ghost sb-highlight-btn" onClick={scrollToMe}>
-              <Crosshair size={12} />
-              My Rank #{myEntry.rank}
-            </button>
-          )}
-        </div>
+        <ScoreboardFilters
+          events={events}
+          eventSlug={eventSlug}
+          limit={limit}
+          myEntry={myEntry}
+          onEventChange={setEventSlug}
+          onLimitChange={setLimit}
+          onScrollToMe={scrollToMe}
+        />
       </div>
 
       {isLoading ? (

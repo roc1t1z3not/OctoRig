@@ -2,9 +2,8 @@
 import "./users-admin.css";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, UserPlus, ShieldCheck, ShieldOff, RotateCcw } from "lucide-react";
+import { Search, UserPlus } from "lucide-react";
 import {
   getAdminUsers,
   createAdminUser,
@@ -15,18 +14,10 @@ import {
 } from "@/lib/api/admin";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { useConfirmStore } from "@/stores/confirm.store";
+import { UsersTable } from "@/components/admin/users/UsersTable";
+import { CreateUserForm } from "@/components/admin/users/CreateUserForm";
 
 type Tab = "list" | "create";
-
-function RolePill({ label, active }: { label: string; active: boolean }) {
-  return (
-    <span
-      className={`role-pill ${active ? "role-pill--on" : "role-pill--off"}`}
-    >
-      {label}
-    </span>
-  );
-}
 
 export default function AdminUsersPage() {
   const qc = useQueryClient();
@@ -35,14 +26,6 @@ export default function AdminUsersPage() {
   const [tab, setTab] = useState<Tab>("list");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<AdminUser | null>(null);
-
-  // create form
-  const [newUsername, setNewUsername] = useState("");
-  const [newEmail, setNewEmail] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [newIsAdmin, setNewIsAdmin] = useState(false);
-
-  // reset password form
   const [showReset, setShowReset] = useState(false);
   const [newPw, setNewPw] = useState("");
 
@@ -52,21 +35,12 @@ export default function AdminUsersPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: () =>
-      createAdminUser({
-        username: newUsername,
-        email: newEmail,
-        password: newPassword,
-        is_admin: newIsAdmin,
-      }),
-    onSuccess: () => {
+    mutationFn: (payload: { username: string; email: string; password: string; is_admin: boolean }) =>
+      createAdminUser(payload),
+    onSuccess: (_, { username }) => {
       qc.invalidateQueries({ queryKey: ["admin-users"] });
-      push("success", `User ${newUsername} created`);
+      push("success", `User ${username} created`);
       setTab("list");
-      setNewUsername("");
-      setNewEmail("");
-      setNewPassword("");
-      setNewIsAdmin(false);
     },
     onError: (err: any) => push("error", err?.response?.data?.detail ?? "Failed to create user"),
   });
@@ -95,7 +69,7 @@ export default function AdminUsersPage() {
 
   const resetPointsMutation = useMutation({
     mutationFn: (id: number) => resetUserPoints(id),
-    onSuccess: (_, id) => {
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-users"] });
       push("success", "Points reset — all submissions and scores cleared");
     },
@@ -126,141 +100,33 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* Create form */}
       {tab === "create" && (
-        <div className="g-panel create-panel">
-          <div className="g-panel-header">
-            <span className="font-mono text-sm">New User</span>
-          </div>
-          <div className="create-body">
-            <div className="form-row">
-              <div className="field">
-                <label className="text-11 text-muted">Username</label>
-                <input className="g-input" value={newUsername} onChange={(e) => setNewUsername(e.target.value)} placeholder="username" />
-              </div>
-              <div className="field">
-                <label className="text-11 text-muted">Email</label>
-                <input className="g-input" type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="user@example.com" />
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="field">
-                <label className="text-11 text-muted">Password</label>
-                <input className="g-input" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Initial password" />
-              </div>
-              <div className="field checkbox-field">
-                <label className="text-11 text-muted">Admin</label>
-                <label className="checkbox-label">
-                  <input type="checkbox" checked={newIsAdmin} onChange={(e) => setNewIsAdmin(e.target.checked)} />
-                  <span className="text-sm">Grant admin access</span>
-                </label>
-              </div>
-            </div>
-            <div className="form-actions">
-              <button
-                className="g-btn g-btn-primary"
-                onClick={() => createMutation.mutate()}
-                disabled={!newUsername || !newEmail || !newPassword || createMutation.isPending}
-              >
-                {createMutation.isPending ? "Creating…" : "Create User"}
-              </button>
-            </div>
-          </div>
-        </div>
+        <CreateUserForm
+          onSubmit={(username, email, password, is_admin) =>
+            createMutation.mutate({ username, email, password, is_admin })
+          }
+          isPending={createMutation.isPending}
+        />
       )}
 
-      {/* User table */}
       <div className="table-wrap g-panel">
-        {isLoading ? (
-          <div className="loading-cell text-muted text-sm">Loading…</div>
-        ) : (
-          <table className="g-table">
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Roles</th>
-                <th>Teams</th>
-                <th>Deployments</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id} className={!u.is_active ? "row-inactive" : ""}>
-                  <td className="font-mono text-sm">
-                    <Link href={`/profile/${u.username}`} style={{ color: "var(--g-accent)" }}>
-                      {u.username}
-                    </Link>
-                  </td>
-                  <td className="text-11 text-muted">{u.email}</td>
-                  <td>
-                    <div className="role-pills">
-                      {u.is_superuser && <RolePill label="Super" active />}
-                      {u.is_admin && <RolePill label="Admin" active />}
-                      {!u.is_superuser && !u.is_admin && <RolePill label="User" active={false} />}
-                    </div>
-                  </td>
-                  <td className="text-11 text-muted">{u.team_count}</td>
-                  <td className="text-11 text-muted">{u.deployment_count}</td>
-                  <td>
-                    <span className={`status-dot ${u.is_active ? "status-dot--active" : "status-dot--inactive"}`}>
-                      {u.is_active ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="row-actions">
-                      <button
-                        className="g-btn g-btn-ghost g-btn-icon"
-                        title={u.is_active ? "Deactivate" : "Activate"}
-                        onClick={() =>
-                          updateMutation.mutate({ id: u.id, patch: { is_active: !u.is_active } })
-                        }
-                      >
-                        {u.is_active ? <ShieldOff size={13} /> : <ShieldCheck size={13} />}
-                      </button>
-                      <button
-                        className={`g-btn g-btn-ghost g-btn-icon ${u.is_admin ? "role-on" : ""}`}
-                        title={u.is_admin ? "Remove admin" : "Grant admin"}
-                        onClick={() =>
-                          updateMutation.mutate({ id: u.id, patch: { is_admin: !u.is_admin } })
-                        }
-                      >
-                        <ShieldCheck size={13} />
-                      </button>
-                      <button
-                        className="g-btn g-btn-ghost g-btn-sm"
-                        title="Reset password"
-                        onClick={() => { setSelected(u); setShowReset(true); }}
-                      >
-                        Reset PW
-                      </button>
-                      <button
-                        className="g-btn g-btn-ghost g-btn-sm"
-                        title="Reset points &amp; submissions"
-                        disabled={resetPointsMutation.isPending}
-                        onClick={() => confirm({
-                          title: `Reset points for ${u.username}?`,
-                          body: "This will delete all their challenge submissions, scores, and hint unlocks. This cannot be undone.",
-                          confirmLabel: "Reset Points",
-                          dangerous: true,
-                          onConfirm: () => resetPointsMutation.mutate(u.id),
-                        })}
-                      >
-                        <RotateCcw size={12} />
-                        Pts
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <UsersTable
+          users={users}
+          isLoading={isLoading}
+          onActivate={(u) => updateMutation.mutate({ id: u.id, patch: { is_active: !u.is_active } })}
+          onGrantAdmin={(u) => updateMutation.mutate({ id: u.id, patch: { is_admin: !u.is_admin } })}
+          onResetPassword={(u) => { setSelected(u); setShowReset(true); }}
+          onResetPoints={(u) => confirm({
+            title: `Reset points for ${u.username}?`,
+            body: "This will delete all their challenge submissions, scores, and hint unlocks. This cannot be undone.",
+            confirmLabel: "Reset Points",
+            dangerous: true,
+            onConfirm: () => resetPointsMutation.mutate(u.id),
+          })}
+          isPending={resetPointsMutation.isPending}
+        />
       </div>
 
-      {/* Reset password modal */}
       {showReset && selected && (
         <div className="g-backdrop" onClick={() => setShowReset(false)}>
           <div className="g-modal reset-modal" onClick={(e) => e.stopPropagation()}>

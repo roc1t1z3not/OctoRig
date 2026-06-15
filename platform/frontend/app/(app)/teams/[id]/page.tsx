@@ -4,7 +4,7 @@ import "../teams.css";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, UserPlus, Trash2, Crown, MoreHorizontal } from "lucide-react";
+import { ArrowLeft, UserPlus } from "lucide-react";
 import Link from "next/link";
 import {
   getTeam,
@@ -16,21 +16,17 @@ import {
 } from "@/lib/api/teams";
 import { useUserStore } from "@/stores/user.store";
 import { useNotificationsStore } from "@/stores/notifications.store";
-import { formatDate } from "@/lib/utils/date";
-
-const ROLE_ORDER: TeamRole[] = ["owner", "manager", "member", "viewer"];
+import { InviteForm } from "@/components/teams/InviteForm";
+import { MembersTable } from "@/components/teams/MembersTable";
 
 export default function TeamDetailPage() {
   const { id } = useParams<{ id: string }>();
   const teamId = Number(id);
-  const router = useRouter();
   const qc = useQueryClient();
   const { user } = useUserStore();
   const { push } = useNotificationsStore();
 
   const [showInvite, setShowInvite] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<TeamRole>("member");
 
   const { data: team, isLoading: teamLoading } = useQuery({
     queryKey: ["team", teamId],
@@ -43,10 +39,10 @@ export default function TeamDetailPage() {
   });
 
   const inviteMutation = useMutation({
-    mutationFn: () => inviteMember(teamId, { email: inviteEmail, role: inviteRole }),
-    onSuccess: () => {
-      push("success", `Invitation sent to ${inviteEmail}`);
-      setInviteEmail("");
+    mutationFn: ({ email, role }: { email: string; role: TeamRole }) =>
+      inviteMember(teamId, { email, role }),
+    onSuccess: (_, { email }) => {
+      push("success", `Invitation sent to ${email}`);
       setShowInvite(false);
     },
     onError: (err: any) => push("error", err?.response?.data?.detail ?? "Failed to send invitation"),
@@ -114,100 +110,24 @@ export default function TeamDetailPage() {
         </div>
 
         {showInvite && (
-          <div className="invite-form">
-            <input
-              className="g-input g-input-sm"
-              placeholder="email@example.com"
-              type="email"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              autoFocus
-            />
-            <select
-              className="g-select g-select-sm"
-              value={inviteRole}
-              onChange={(e) => setInviteRole(e.target.value as TeamRole)}
-            >
-              {ROLE_ORDER.filter(r => r !== "owner").map(r => (
-                <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
-              ))}
-            </select>
-            <button
-              className="g-btn g-btn-primary g-btn-sm"
-              onClick={() => inviteMutation.mutate()}
-              disabled={!inviteEmail || inviteMutation.isPending}
-            >
-              {inviteMutation.isPending ? "Sending…" : "Send"}
-            </button>
-            <button
-              className="g-btn g-btn-ghost g-btn-sm"
-              onClick={() => setShowInvite(false)}
-            >
-              Cancel
-            </button>
-          </div>
+          <InviteForm
+            onSubmit={(email, role) => inviteMutation.mutate({ email, role })}
+            isPending={inviteMutation.isPending}
+            onCancel={() => setShowInvite(false)}
+          />
         )}
 
         {membersLoading ? (
           <div className="members-loading text-muted text-11">Loading members…</div>
         ) : (
-          <table className="g-table">
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Role</th>
-                <th>Joined</th>
-                {canManage && <th>Actions</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {members.map((m) => {
-                const isSelf = m.user_id === user?.id;
-                return (
-                  <tr key={m.id}>
-                    <td>
-                      <span className="font-mono text-sm">{m.username}</span>
-                      <span className="text-muted text-11 ml-1">{m.email}</span>
-                    </td>
-                    <td>
-                      {canManage && !isSelf ? (
-                        <select
-                          className="g-select g-select-sm"
-                          value={m.role}
-                          onChange={(e) =>
-                            roleMutation.mutate({ userId: m.user_id, role: e.target.value as TeamRole })
-                          }
-                        >
-                          {ROLE_ORDER.map(r => (
-                            <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span className={`role-badge role-badge--${m.role}`}>{m.role}</span>
-                      )}
-                    </td>
-                    <td className="font-mono text-11 text-muted">
-                      {formatDate(m.joined_at)}
-                    </td>
-                    {canManage && (
-                      <td>
-                        {!isSelf && (
-                          <button
-                            className="g-btn g-btn-danger g-btn-icon"
-                            onClick={() => removeMutation.mutate(m.user_id)}
-                            disabled={removeMutation.isPending}
-                            title="Remove member"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        )}
-                      </td>
-                    )}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <MembersTable
+            members={members}
+            canManage={!!canManage}
+            currentUserId={user?.id ?? -1}
+            onRemove={(userId) => removeMutation.mutate(userId)}
+            onChangeRole={(userId, role) => roleMutation.mutate({ userId, role })}
+            isPending={removeMutation.isPending || roleMutation.isPending}
+          />
         )}
       </div>
     </div>

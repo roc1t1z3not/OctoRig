@@ -3,59 +3,17 @@ import "./badges.css";
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Award, CheckCircle2, RefreshCw } from "lucide-react";
-import { getBadges, evaluateAchievements, type Badge } from "@/lib/api/badges";
+import { Award, RefreshCw } from "lucide-react";
+import { getBadges, evaluateAchievements } from "@/lib/api/badges";
 import { getMyRank } from "@/lib/api/ranks";
 import { useNotificationsStore } from "@/stores/notifications.store";
-import { formatDate } from "@/lib/utils/date";
-
-const ICON_MAP: Record<string, string> = {
-  flag:      "🚩",
-  hash:      "#",
-  zap:       "⚡",
-  droplets:  "🩸",
-  database:  "🗄️",
-  code:      "</>",
-  lock:      "🔒",
-  star:      "⭐",
-  crown:     "👑",
-  shield:    "🛡️",
-  target:    "🎯",
-  trophy:    "🏆",
-  skull:     "💀",
-  eye:       "👁️",
-  globe:     "🌐",
-  flame:     "🔥",
-};
+import { BadgeCard } from "@/components/badges/BadgeCard";
+import { RankProgressCard } from "@/components/badges/RankProgressCard";
+import { FilterPills } from "@/components/ui/FilterPills";
 
 const CATEGORIES = ["all", "milestone", "competition", "skill"] as const;
 type CategoryFilter = typeof CATEGORIES[number];
 type StatusFilter = "all" | "earned" | "locked";
-
-function BadgeCard({ badge }: { badge: Badge }) {
-  return (
-    <div className={`badge-card g-card ${badge.earned ? "badge-earned" : "badge-locked"}`}>
-      <div className="badge-icon">{ICON_MAP[badge.icon] ?? "🏅"}</div>
-      <div className="badge-info">
-        <div className="badge-name">
-          {badge.name}
-          {badge.earned && <CheckCircle2 size={12} className="badge-check" />}
-        </div>
-        <p className="badge-desc">{badge.description}</p>
-        <div className="badge-meta">
-          {badge.points_value > 0 && (
-            <span className="badge-pts">+{badge.points_value} pts</span>
-          )}
-          {badge.earned_at && (
-            <span className="badge-date">
-              Earned {formatDate(badge.earned_at)}
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function BadgesPage() {
   const qc = useQueryClient();
@@ -97,7 +55,7 @@ export default function BadgesPage() {
     return true;
   });
 
-  const byCategory = filtered.reduce<Record<string, Badge[]>>((acc, b) => {
+  const byCategory = filtered.reduce<Record<string, typeof filtered>>((acc, b) => {
     const cat = b.category ?? "other";
     (acc[cat] ??= []).push(b);
     return acc;
@@ -111,9 +69,7 @@ export default function BadgesPage() {
             <Award size={18} style={{ display: "inline", marginRight: "0.5rem", verticalAlign: "middle" }} />
             Badges
           </h1>
-          {!isLoading && (
-            <p className="page-sub">{earned}/{total} earned</p>
-          )}
+          {!isLoading && <p className="page-sub">{earned}/{total} earned</p>}
         </div>
         <button
           className="g-btn g-btn-ghost"
@@ -125,63 +81,23 @@ export default function BadgesPage() {
         </button>
       </div>
 
-      {myRank?.rank && (
-        <div className="g-card rank-progress-card" style={{ marginBottom: "1rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-            <span
-              className="font-mono"
-              style={{ fontSize: "0.8rem", fontWeight: 600, color: myRank.rank.color ?? "var(--g-text)" }}
-            >
-              {myRank.rank.name}
-            </span>
-            {myRank.next_rank ? (
-              <span className="font-mono" style={{ fontSize: "0.7rem", color: "var(--g-text-muted)" }}>
-                {myRank.points.toLocaleString()} / {myRank.next_rank.min_points.toLocaleString()} pts → {myRank.next_rank.name}
-              </span>
-            ) : (
-              <span className="font-mono" style={{ fontSize: "0.7rem", color: "var(--g-text-muted)" }}>
-                {myRank.points.toLocaleString()} pts — Max rank achieved
-              </span>
-            )}
-          </div>
-          <div style={{ height: 6, borderRadius: 99, background: "var(--g-border)", overflow: "hidden" }}>
-            <div
-              style={{
-                height: "100%",
-                borderRadius: 99,
-                background: myRank.rank.color ?? "var(--g-accent)",
-                width: `${Math.min(myRank.progress_pct, 100)}%`,
-                transition: "width 0.4s ease",
-              }}
-            />
-          </div>
-        </div>
-      )}
+      {myRank && <RankProgressCard myRank={myRank} />}
 
-      <div className="filter-bar">
-        <div className="filter-group">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              className={`filter-pill ${catFilter === cat ? "active" : ""}`}
-              onClick={() => setCatFilter(cat)}
-            >
-              {cat === "all" ? "All" : cat.charAt(0).toUpperCase() + cat.slice(1)}
-            </button>
-          ))}
-        </div>
-        <div className="filter-group">
-          {(["all", "earned", "locked"] as StatusFilter[]).map((s) => (
-            <button
-              key={s}
-              className={`filter-pill ${statusFilter === s ? "active" : ""}`}
-              onClick={() => setStatusFilter(s)}
-            >
-              {s.charAt(0).toUpperCase() + s.slice(1)}
-            </button>
-          ))}
-        </div>
-      </div>
+      <FilterPills
+        groups={[
+          {
+            options: [...CATEGORIES],
+            value: catFilter,
+            onChange: (v) => setCatFilter(v as CategoryFilter),
+            label: (v) => v === "all" ? "All" : v.charAt(0).toUpperCase() + v.slice(1),
+          },
+          {
+            options: ["all", "earned", "locked"],
+            value: statusFilter,
+            onChange: (v) => setStatusFilter(v as StatusFilter),
+          },
+        ]}
+      />
 
       {isLoading ? (
         <div className="text-muted text-sm">Loading badges…</div>
