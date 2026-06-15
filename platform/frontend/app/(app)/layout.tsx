@@ -29,7 +29,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { data: publicSettings } = useQuery({
     queryKey: ["public-settings"],
     queryFn: getPublicSettings,
-    staleTime: 30_000,
+    staleTime: 300_000,
     enabled: !!accessToken,
   });
 
