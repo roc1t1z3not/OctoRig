@@ -47,7 +47,7 @@ case "$1" in
     fi
 
     info "Building VaultGate image..."
-    if docker build -q -t octorig-vaultgate:latest "$APP_DIR" &>/dev/null; then
+    if docker build -q -t octorig-vaultgate:latest "$APP_DIR" >/dev/null; then
       good "Image built"
     else
       bad "Image build failed — check Dockerfile in labs/vaultgate/"

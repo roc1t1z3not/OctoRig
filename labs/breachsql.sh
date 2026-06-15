@@ -80,7 +80,7 @@ case "$1" in
 
     # --- build Flask image ---
     info "Building Fire Range image..."
-    if docker build -q -t octorig-breachsql:latest "$FIRERANGE_DIR" &>/dev/null; then
+    if docker build -q -t octorig-breachsql:latest "$FIRERANGE_DIR" >/dev/null; then
       good "Image built"
     else
       bad "Image build failed — check Dockerfile in labs/firerange/"

@@ -43,9 +43,10 @@ def _check_submit_rate_limit(user_id: int, challenge_id: int) -> None:
     if count == 1:
         r.expire(key, _RATE_WINDOW)
     if count > _RATE_LIMIT:
+        ttl = max(r.ttl(key), 0)
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"Too many attempts. Try again in {r.ttl(key)} seconds.",
+            detail=f"Too many attempts. Try again in {ttl} seconds.",
         )
 
 

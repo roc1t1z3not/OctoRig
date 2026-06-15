@@ -49,9 +49,9 @@ def deduct_hint_cost(
     hint_id: int,
     team_id: Optional[int] = None,
     event_id: Optional[int] = None,
-) -> ScoreTransaction:
+) -> Optional[ScoreTransaction]:
     if cost <= 0:
-        return None  # type: ignore[return-value]
+        return None
     return award_points(
         db,
         user_id=user_id,

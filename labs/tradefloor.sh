@@ -26,7 +26,7 @@ case "$1" in
     ensure_container_gone "$CONTAINER_NAME"
 
     info "Building TradeFloor image (this may take ~60s for apt packages)..."
-    if docker build -q -t octorig-tradefloor:latest "$APP_DIR" &>/dev/null; then
+    if docker build -q -t octorig-tradefloor:latest "$APP_DIR" >/dev/null; then
       good "Image built"
     else
       bad "Image build failed — check labs/tradefloor/"

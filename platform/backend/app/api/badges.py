@@ -34,6 +34,22 @@ class ManualAwardRequest(BaseModel):
     note: Optional[str] = None
 
 
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _from_user_badge(ub: UserBadge) -> BadgeSummary:
+    return BadgeSummary(
+        id=ub.badge.id,
+        slug=ub.badge.slug,
+        name=ub.badge.name,
+        description=ub.badge.description,
+        icon=ub.badge.icon,
+        category=ub.badge.category,
+        points_value=ub.badge.points_value,
+        earned=True,
+        earned_at=ub.awarded_at,
+    )
+
+
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.get("/", response_model=list[BadgeSummary])
@@ -78,20 +94,7 @@ def my_badges(
         .order_by(UserBadge.awarded_at.desc())
         .all()
     )
-    return [
-        BadgeSummary(
-            id=ub.badge.id,
-            slug=ub.badge.slug,
-            name=ub.badge.name,
-            description=ub.badge.description,
-            icon=ub.badge.icon,
-            category=ub.badge.category,
-            points_value=ub.badge.points_value,
-            earned=True,
-            earned_at=ub.awarded_at,
-        )
-        for ub in user_badges
-    ]
+    return [_from_user_badge(ub) for ub in user_badges]
 
 
 @router.get("/users/{user_id}", response_model=list[BadgeSummary])
@@ -106,20 +109,7 @@ def user_badges_endpoint(
         .order_by(UserBadge.awarded_at.desc())
         .all()
     )
-    return [
-        BadgeSummary(
-            id=ub.badge.id,
-            slug=ub.badge.slug,
-            name=ub.badge.name,
-            description=ub.badge.description,
-            icon=ub.badge.icon,
-            category=ub.badge.category,
-            points_value=ub.badge.points_value,
-            earned=True,
-            earned_at=ub.awarded_at,
-        )
-        for ub in user_badges
-    ]
+    return [_from_user_badge(ub) for ub in user_badges]
 
 
 @router.post("/evaluate", response_model=list[str])

@@ -37,6 +37,7 @@ CONTAINER_NAME="octorig-vaultriprange"
 LAB_NET="octorig-vaultriprange-net"
 LAB_SUBNET="172.28.11.0/24"
 LAB_IP="172.28.11.2"
+SSH_PORT=22
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LAB_DIR="${SCRIPT_DIR}/vaultriprange"
@@ -52,7 +53,7 @@ case "$1" in
     ensure_container_gone "$CONTAINER_NAME"
 
     info "Building VaultRip Range image..."
-    if docker build -q -t octorig-vaultriprange:latest "$LAB_DIR" &>/dev/null; then
+    if docker build -q -t octorig-vaultriprange:latest "$LAB_DIR" >/dev/null; then
       good "Image built"
     else
       bad "Image build failed — check Dockerfile in labs/vaultriprange/"

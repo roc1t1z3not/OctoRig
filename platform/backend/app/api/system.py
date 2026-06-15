@@ -1,4 +1,7 @@
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
@@ -9,16 +12,23 @@ from app.services.docker_runtime import docker_service
 router = APIRouter(prefix="/system", tags=["system"])
 
 
-@router.get("/health")
+class HealthOut(BaseModel):
+    docker: str
+    database: str
+    running_labs: int
+    total_containers: int
+
+
+@router.get("/health", response_model=HealthOut)
 def health(
     db: Session = Depends(get_db),
-) -> dict:
+) -> HealthOut:
     docker_ok = docker_service.ping()
 
     try:
-        db.execute(__import__("sqlalchemy").text("SELECT 1"))
+        db.execute(text("SELECT 1"))
         db_ok = True
-    except Exception:
+    except SQLAlchemyError:
         db_ok = False
 
     running_labs = (
@@ -29,12 +39,12 @@ def health(
 
     all_containers = docker_service.get_all_octorig_containers()
 
-    return {
-        "docker": "ok" if docker_ok else "error",
-        "database": "ok" if db_ok else "error",
-        "running_labs": running_labs,
-        "total_containers": len(all_containers),
-    }
+    return HealthOut(
+        docker="ok" if docker_ok else "error",
+        database="ok" if db_ok else "error",
+        running_labs=running_labs,
+        total_containers=len(all_containers),
+    )
 
 
 @router.get("/containers")

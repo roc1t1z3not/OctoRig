@@ -45,6 +45,18 @@ class PreferencesUpdateRequest(BaseModel):
     event_filter: Optional[dict[str, Any]] = None
 
 
+class UnreadCountOut(BaseModel):
+    count: int
+
+
+class ReadResultOut(BaseModel):
+    ok: bool
+
+
+class MarkedCountOut(BaseModel):
+    marked: int
+
+
 @router.get("/", response_model=list[NotificationOut])
 def list_notifications_endpoint(
     unread_only: bool = Query(False),
@@ -55,31 +67,31 @@ def list_notifications_endpoint(
     return list_notifications(db, current_user.id, unread_only=unread_only, limit=limit)
 
 
-@router.get("/unread-count", response_model=dict[str, int])
+@router.get("/unread-count", response_model=UnreadCountOut)
 def get_unread_count(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> dict[str, int]:
-    return {"count": unread_count(db, current_user.id)}
+) -> UnreadCountOut:
+    return UnreadCountOut(count=unread_count(db, current_user.id))
 
 
-@router.post("/{notification_id}/read", response_model=dict[str, bool])
+@router.post("/{notification_id}/read", response_model=ReadResultOut)
 def mark_notification_read(
     notification_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> dict[str, bool]:
+) -> ReadResultOut:
     result = mark_read(db, current_user.id, notification_id)
-    return {"ok": result is not None}
+    return ReadResultOut(ok=result is not None)
 
 
-@router.post("/read-all", response_model=dict[str, int])
+@router.post("/read-all", response_model=MarkedCountOut)
 def mark_all_read_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> dict[str, int]:
+) -> MarkedCountOut:
     count = mark_all_read(db, current_user.id)
-    return {"marked": count}
+    return MarkedCountOut(marked=count)
 
 
 @router.get("/preferences", response_model=PreferencesOut)

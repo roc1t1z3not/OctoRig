@@ -152,7 +152,7 @@ def sync_registry(db: Session) -> None:
                     challenge_id=ch.id,
                     value=f["value"],
                     flag_type=f.get("flag_type", "static"),
-                    case_sensitive=f.get("case_sensitive", True),
+                    case_sensitive=f.get("case_sensitive", False),  # CTF default: case-insensitive
                 ))
             for h in ch_def.get("hints", []):
                 db.add(ChallengeHint(

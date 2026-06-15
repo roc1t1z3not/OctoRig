@@ -22,11 +22,11 @@ require_action "${1:-}"
 
 case "$1" in
   start)
-    header "Starting ${LAB_NAME}..."
+    header "Starting..."
     ensure_container_gone "$CONTAINER_NAME"
 
     info "Building SubVerse image (this may take ~60s for apt packages)..."
-    if docker build -q -t octorig-subverse:latest "$APP_DIR" &>/dev/null; then
+    if docker build -q -t octorig-subverse:latest "$APP_DIR" >/dev/null; then
       good "Image built"
     else
       bad "Image build failed — check labs/subverse/"
