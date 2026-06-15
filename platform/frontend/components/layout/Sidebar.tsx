@@ -123,6 +123,7 @@ export function Sidebar() {
           return (
             <Link
               href="/creator"
+              prefetch={false}
               className={clsx("g-nav-item", active && "active")}
               style={active ? {
                 background: "var(--g-accent-dim)",
