@@ -17,6 +17,7 @@ import {
 } from "@/lib/api/content";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { formatDate } from "@/lib/utils/date";
+import { MarkdownEditor } from "@/components/ui/MarkdownEditor";
 
 const STATUS_STYLE: Record<ContentStatus, { bg: string; color: string }> = {
   draft:          { bg: "color-mix(in srgb, var(--g-text-muted) 15%, transparent)", color: "var(--g-text-muted)" },
@@ -178,13 +179,11 @@ function ChallengeBodyEditor({ sub }: { sub: ContentSubmission }) {
       {/* Core */}
       <div style={fieldStyle}>
         <label style={labelStyle}>Description *</label>
-        <textarea
-          className="g-input"
-          rows={4}
-          placeholder="Describe the challenge scenario without revealing the technique…"
+        <MarkdownEditor
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          style={{ resize: "vertical" }}
+          onChange={setDescription}
+          placeholder="Describe the challenge scenario without revealing the technique…"
+          minHeight={140}
         />
       </div>
 

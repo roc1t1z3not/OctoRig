@@ -19,6 +19,7 @@ import { useUserStore } from "@/stores/user.store";
 import { useAdminGuard } from "@/hooks/useAdminGuard";
 import { formatDateTime } from "@/lib/utils/date";
 import { EVENT_STATUS_COLORS } from "@/lib/utils/status";
+import { MarkdownEditor } from "@/components/ui/MarkdownEditor";
 
 const STATUS_ORDER: EventStatus[] = ["draft", "published", "running", "ended", "archived"];
 
@@ -370,16 +371,15 @@ export default function AdminEventsPage() {
                 </label>
               )}
 
-              <label className="ev-field">
+              <div className="ev-field">
                 <span className="ev-label">Description</span>
-                <textarea
-                  className="g-input"
-                  rows={3}
-                  style={{ resize: "vertical" }}
+                <MarkdownEditor
                   value={form.description}
-                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                  onChange={(v) => setForm((f) => ({ ...f, description: v }))}
+                  placeholder="Event description (markdown supported)…"
+                  minHeight={120}
                 />
-              </label>
+              </div>
 
               <div className="ev-field-row">
                 <label className="ev-field">
