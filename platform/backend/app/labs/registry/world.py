@@ -240,6 +240,31 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 3, "content": "Use flask-unsign: --sign --cookie '{\"user_id\": 1}' --secret '<key>'", "cost": 100},
                 ],
             },
+            {
+                "slug": "rw-py-sqli-script",
+                "title": "Script the Injector",
+                "description": (
+                    "Clicking through a web form is slow. The same input that surprises the "
+                    "database can be sent programmatically — faster, quieter, and repeatable. "
+                    "Craft a Python script that talks directly to the server and pulls back "
+                    "something the UI was never meant to show you.\n\n"
+                    "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "python",
+                "tags": ["python", "scripting", "sql-injection", "automation"],
+                "skills": ["requests", "HTTP parameter injection", "response parsing"],
+                "points": 200,
+                "flags": [
+                    {"value": "FLAG{rw_python_sqli_automated}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "A script that loops and changes one parameter per request can cover ground no human can match.", "cost": 0},
+                    {"order_num": 2, "content": "The browse page accepts a filter parameter in the query string. Send your requests there.", "cost": 50},
+                    {"order_num": 3, "content": "Try appending to the filter value and watch what the response body contains.", "cost": 100},
+                ],
+            },
         ],
     },
     {
@@ -456,6 +481,30 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 3, "content": "Set alg to 'none', drop the signature, add role: admin to the payload. Call GET /api/admin/report as Bearer.", "cost": 100},
                 ],
             },
+            {
+                "slug": "tf-py-idor-sweep",
+                "title": "Portfolio Sweep",
+                "description": (
+                    "Profiles are numbered. Each number belongs to someone — or it should. "
+                    "Write a Python script that walks the sequence and notices when a record "
+                    "surfaces that the current session has no business seeing.\n\n"
+                    "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "python",
+                "tags": ["python", "scripting", "idor", "automation", "api"],
+                "skills": ["requests", "session handling", "sequential enumeration"],
+                "points": 200,
+                "flags": [
+                    {"value": "FLAG{tf_python_idor_swept}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "A loop over sequential numbers can reveal what manual clicking cannot.", "cost": 0},
+                    {"order_num": 2, "content": "The portfolio endpoint is under /api/. Authenticated requests return different data than anonymous ones.", "cost": 50},
+                    {"order_num": 3, "content": "Log in first with requests.Session(), then iterate /api/portfolio/<id> and inspect each response.", "cost": 100},
+                ],
+            },
         ],
     },
     {
@@ -635,6 +684,31 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "hints": [
                     {"order_num": 1, "content": "Redeem a valid promo code. Now try redeeming it again with the same account.", "cost": 0},
                     {"order_num": 2, "content": "The system tracks total redemptions across all users, but not per-user redemptions.", "cost": 50},
+                ],
+            },
+            {
+                "slug": "ga-py-logic-abuse",
+                "title": "House Edge",
+                "description": (
+                    "The house always wins — unless you move faster than the rules allow. "
+                    "There's a sequence of calls that can leave your balance in a state the "
+                    "server didn't intend. A Python script can issue them in the right order, "
+                    "at the right speed.\n\n"
+                    "**Target:** `http://172.28.3.2` (start Lab 3 — GoldenAce)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "python",
+                "tags": ["python", "scripting", "business-logic", "race-condition"],
+                "skills": ["requests", "session handling", "concurrency", "state manipulation"],
+                "points": 200,
+                "flags": [
+                    {"value": "FLAG{ga_python_logic_edge}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Two actions that should be mutually exclusive can both succeed if they arrive close enough together.", "cost": 0},
+                    {"order_num": 2, "content": "Look at the bet and withdraw endpoints. What happens if both fire before the balance updates?", "cost": 50},
+                    {"order_num": 3, "content": "Use threading.Thread or concurrent.futures to send requests in parallel within the same session.", "cost": 100},
                 ],
             },
         ],
@@ -887,6 +961,30 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 1, "content": "Try submitting HTML in a ticket body. Does the admin panel render it?", "cost": 0},
                     {"order_num": 2, "content": "The admin ticket view renders content without escaping. JavaScript submitted in a ticket runs when an admin views it.", "cost": 50},
                     {"order_num": 3, "content": "Log in as admin (hint: the login form has its own flaw) and visit the ticket list. `document.cookie` will have the flag.", "cost": 100},
+                ],
+            },
+            {
+                "slug": "hb-py-sqli-dump",
+                "title": "Account Drain",
+                "description": (
+                    "The bank's data doesn't stay locked when the query is written carelessly. "
+                    "A Python script can do in seconds what a proxy intercept does one request "
+                    "at a time — chain the steps together and the vault opens itself.\n\n"
+                    "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "python",
+                "tags": ["python", "scripting", "sql-injection", "automation", "credential-dump"],
+                "skills": ["requests", "session handling", "SQLi chaining", "response parsing"],
+                "points": 225,
+                "flags": [
+                    {"value": "FLAG{hb_python_sqli_chained}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "One endpoint lets you in without the right password. Another leaks more than it should once you're authenticated.", "cost": 0},
+                    {"order_num": 2, "content": "The account search endpoint accepts user input that reaches the query directly.", "cost": 50},
+                    {"order_num": 3, "content": "Use a single requests.Session() — first post to /login with the bypass, then query /accounts/search with your payload.", "cost": 100},
                 ],
             },
         ],
@@ -1144,6 +1242,30 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 3, "content": "Including `doctor_id` or `patient_id` in the PUT body triggers the flag in the JSON response.", "cost": 75},
                 ],
             },
+            {
+                "slug": "mh-py-idor-enum",
+                "title": "Record Scraper",
+                "description": (
+                    "Patient records are fetched by ID. The IDs are sequential. "
+                    "Not every ID belongs to you — but the server doesn't always check. "
+                    "Script a sweep and see whose records surface.\n\n"
+                    "**Target:** `http://172.28.5.2` (start Lab 5 — MediHuman)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "python",
+                "tags": ["python", "scripting", "idor", "automation", "healthcare"],
+                "skills": ["requests", "session handling", "sequential enumeration", "JSON parsing"],
+                "points": 200,
+                "flags": [
+                    {"value": "FLAG{mh_python_idor_scraped}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "An authenticated user can only view their own records — in theory.", "cost": 0},
+                    {"order_num": 2, "content": "The lab results endpoint accepts a record ID in the URL path. Try a range of IDs.", "cost": 50},
+                    {"order_num": 3, "content": "GET /api/records/<id> with your session cookie. The flag appears in the JSON body of a record that isn't yours.", "cost": 100},
+                ],
+            },
         ],
     },
     {
@@ -1315,6 +1437,31 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 1, "content": "Try entering some HTML in the search. Does the page render it?", "cost": 0},
                     {"order_num": 2, "content": "If HTML renders, JavaScript does too. The page sets a cookie that JavaScript can read.", "cost": 50},
                     {"order_num": 3, "content": "Read `document.cookie` from your script. The cookie value is the flag.", "cost": 75},
+                ],
+            },
+            {
+                "slug": "np-py-ssti",
+                "title": "Template Tap",
+                "description": (
+                    "A portal feature lets operators compose messages with dynamic placeholders. "
+                    "The engine that fills those placeholders in is more powerful than the "
+                    "interface suggests. A well-placed expression can reach well beyond the "
+                    "intended output.\n\n"
+                    "**Target:** `http://172.28.6.2` (start Lab 6 — NetPulse)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "python",
+                "tags": ["python", "scripting", "ssti", "jinja2", "automation"],
+                "skills": ["requests", "SSTI", "template expression crafting"],
+                "points": 250,
+                "flags": [
+                    {"value": "FLAG{np_python_ssti_tapped}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Template engines have a syntax for expressions. Some let expressions do more than format strings.", "cost": 0},
+                    {"order_num": 2, "content": "The diagnostics notification preview endpoint passes your input into a render call. Try an arithmetic expression first to confirm.", "cost": 50},
+                    {"order_num": 3, "content": "POST your expression as the template_body field to /api/admin/notify/preview and inspect the rendered output.", "cost": 100},
                 ],
             },
         ],
@@ -1512,6 +1659,30 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 1, "content": "robots.txt lists several disallowed paths. One of them needs no credentials at all.", "cost": 0},
                 ],
             },
+            {
+                "slug": "ll-py-bulk-book",
+                "title": "Bulk Booker",
+                "description": (
+                    "Seats are finite. The booking logic enforces that limit — but only if "
+                    "requests arrive one at a time. A Python script can send many at once. "
+                    "What happens to the seat count when the server can't keep up?\n\n"
+                    "**Target:** `http://172.28.7.2` (start Lab 7 — Limelight)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "hard",
+                "category": "python",
+                "tags": ["python", "scripting", "race-condition", "business-logic", "concurrency"],
+                "skills": ["requests", "threading", "session handling", "race condition exploitation"],
+                "points": 300,
+                "flags": [
+                    {"value": "FLAG{ll_python_race_booked}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "The seat limit is checked at read time. What if two writes land before either check completes?", "cost": 0},
+                    {"order_num": 2, "content": "The booking endpoint is POST /api/bookings. The seat_count check happens in the request handler, not a transaction.", "cost": 50},
+                    {"order_num": 3, "content": "Fire 10+ booking requests for the same fully-booked show in parallel threads sharing one session. Inspect the responses — one may carry the flag.", "cost": 100},
+                ],
+            },
         ],
     },
     {
@@ -1685,6 +1856,31 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 1, "content": "Edit your profile bio. Try including some HTML. Does your profile page render it?", "cost": 0},
                     {"order_num": 2, "content": "If HTML renders in the bio, JavaScript does too. The profile page sets a session cookie.", "cost": 50},
                     {"order_num": 3, "content": "The session cookie on this page is not HttpOnly — JavaScript can read it with `document.cookie`.", "cost": 75},
+                ],
+            },
+            {
+                "slug": "sv-py-cmdi",
+                "title": "Command Drone",
+                "description": (
+                    "Somewhere in this forum a field passes its value straight into an OS-level "
+                    "call. A browser makes that awkward to exploit — a Python script does not. "
+                    "Construct the right payload, send it programmatically, and read what the "
+                    "server hands back.\n\n"
+                    "**Target:** `http://172.28.18.2` (start Lab 8 — SubVerse)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "hard",
+                "category": "python",
+                "tags": ["python", "scripting", "command-injection", "rce", "automation"],
+                "skills": ["requests", "session handling", "command injection", "shell metacharacters"],
+                "points": 300,
+                "flags": [
+                    {"value": "FLAG{sv_python_cmdi_droned}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Find a feature that sends data off-server on your behalf. The value you supply may reach a shell.", "cost": 0},
+                    {"order_num": 2, "content": "The link-preview endpoint passes your URL into a system call. Shell separators can append a second command.", "cost": 50},
+                    {"order_num": 3, "content": "POST to /api/posts with a crafted url field. Add a separator and a read command. The flag lives at /flag.txt on the host.", "cost": 100},
                 ],
             },
         ],

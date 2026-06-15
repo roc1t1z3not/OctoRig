@@ -7,7 +7,7 @@ SQLI_BADGES = [
         "description": "Solved your first SQL injection challenge.",
         "icon": "database",
         "category": "skill",
-        "points_value": 0,
+        "points_value": 10,
         "rule_type": AchievementRuleType.SOLVE_COUNT,
         "rule_config": {"threshold": 1, "category": "sqli"},
     },

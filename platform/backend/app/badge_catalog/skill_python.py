@@ -7,7 +7,7 @@ PYTHON_BADGES = [
         "description": "Wrote your first exploit in Python.",
         "icon": "terminal",
         "category": "skill",
-        "points_value": 0,
+        "points_value": 10,
         "rule_type": AchievementRuleType.SOLVE_COUNT,
         "rule_config": {"threshold": 1, "category": "python"},
     },

@@ -7,7 +7,7 @@ IDOR_BADGES = [
         "description": "Solved your first IDOR challenge.",
         "icon": "lock",
         "category": "skill",
-        "points_value": 0,
+        "points_value": 10,
         "rule_type": AchievementRuleType.SOLVE_COUNT,
         "rule_config": {"threshold": 1, "category": "idor"},
     },

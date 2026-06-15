@@ -155,4 +155,202 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
             {"order_num": 1, "content": "zip() pairs each key with the value at the same position.", "cost": 0},
         ],
     },
+    {
+        "slug": "py-b64-decode",
+        "title": "Encoded Cargo",
+        "description": (
+            "A familiar encoding scheme wraps the contents — no encryption, no key, "
+            "just a different way of writing the same bytes. What does it say?\n\n"
+            "```python\nimport base64\ndata = b'T2N0b1JpZw=='\nprint(base64.b64decode(data).decode())\n```"
+        ),
+        "challenge_type": "short_answer",
+        "difficulty": "easy",
+        "category": "python",
+        "tags": ["python", "encoding"],
+        "skills": [],
+        "points": 75,
+        "content": {
+            "code_snippet": "import base64\ndata = b'T2N0b1JpZw=='\nprint(base64.b64decode(data).decode())",
+            "language": "python",
+        },
+        "flags": [{"value": "OctoRig", "flag_type": "static", "case_sensitive": True}],
+        "hints": [
+            {"order_num": 1, "content": "The standard library has a module built for exactly this encoding scheme.", "cost": 0},
+            {"order_num": 2, "content": "The result is a bytes object — decode it to a plain string.", "cost": 25},
+        ],
+    },
+    {
+        "slug": "py-hex-parse",
+        "title": "Hex Dump",
+        "description": (
+            "The message arrived as a string of hex digits. Each pair is one byte. "
+            "Reassemble it.\n\n"
+            "```python\nraw = '4f637461'\nprint(bytes.fromhex(raw).decode())\n```"
+        ),
+        "challenge_type": "short_answer",
+        "difficulty": "easy",
+        "category": "python",
+        "tags": ["python", "encoding", "bytes"],
+        "skills": [],
+        "points": 75,
+        "content": {
+            "code_snippet": "raw = '4f637461'\nprint(bytes.fromhex(raw).decode())",
+            "language": "python",
+        },
+        "flags": [{"value": "Octa", "flag_type": "static", "case_sensitive": True}],
+        "hints": [
+            {"order_num": 1, "content": "Two hex digits map to one ASCII character.", "cost": 0},
+            {"order_num": 2, "content": "bytes has a class method that parses hex strings directly.", "cost": 25},
+        ],
+    },
+    {
+        "slug": "py-caesar-crack",
+        "title": "Rotary Dial",
+        "description": (
+            "Every letter has been shifted by the same fixed amount. "
+            "The shift is somewhere between 1 and 25 — only one produces "
+            "a recognisable word. What is the plaintext?\n\n"
+            "```python\nciphertext = 'Clguba'\n```"
+        ),
+        "challenge_type": "short_answer",
+        "difficulty": "medium",
+        "category": "python",
+        "tags": ["python", "crypto", "brute-force"],
+        "skills": [],
+        "points": 100,
+        "content": {
+            "code_snippet": "ciphertext = 'Clguba'",
+            "language": "python",
+        },
+        "flags": [{"value": "Python", "flag_type": "static", "case_sensitive": False}],
+        "hints": [
+            {"order_num": 1, "content": "Try every shift value in a loop and print each candidate.", "cost": 0},
+            {"order_num": 2, "content": "chr() and ord() let you shift individual characters; preserve case.", "cost": 25},
+            {"order_num": 3, "content": "There are 25 possible shifts. One of them is particularly well-known.", "cost": 50},
+        ],
+    },
+    {
+        "slug": "py-regex-hunt",
+        "title": "Pattern Match",
+        "description": (
+            "A blob of noisy text hides tokens that follow a specific structure. "
+            "Something in the code isolates them — run it and report what surfaces.\n\n"
+            "```python\nimport re\ntext = 'err [ALPHA] ok [BRAVO] skip abc [CHARLIE] end'\nmatches = re.findall(r'\\[[A-Z]{5,7}\\]', text)\nprint(matches)\n```"
+        ),
+        "challenge_type": "short_answer",
+        "difficulty": "medium",
+        "category": "python",
+        "tags": ["python", "regex"],
+        "skills": [],
+        "points": 100,
+        "content": {
+            "code_snippet": (
+                "import re\n"
+                "text = 'err [ALPHA] ok [BRAVO] skip abc [CHARLIE] end'\n"
+                "matches = re.findall(r'\\[[A-Z]{5,7}\\]', text)\n"
+                "print(matches)"
+            ),
+            "language": "python",
+        },
+        "flags": [{"value": "['[ALPHA]', '[BRAVO]', '[CHARLIE]']", "flag_type": "static", "case_sensitive": True}],
+        "hints": [
+            {"order_num": 1, "content": "re.findall returns all non-overlapping matches as a list.", "cost": 0},
+            {"order_num": 2, "content": "The pattern requires uppercase only; {5,7} sets the length range.", "cost": 25},
+        ],
+    },
+    {
+        "slug": "py-exception-flow",
+        "title": "Caught in the Act",
+        "description": (
+            "Control flow through error handlers can be tricky. "
+            "Trace what gets printed when this snippet runs — "
+            "every branch matters.\n\n"
+            "```python\ntry:\n    x = int('abc')\nexcept ValueError:\n    print('caught')\nelse:\n    print('clean')\nfinally:\n    print('done')\n```"
+        ),
+        "challenge_type": "short_answer",
+        "difficulty": "medium",
+        "category": "python",
+        "tags": ["python", "exceptions"],
+        "skills": [],
+        "points": 125,
+        "content": {
+            "code_snippet": (
+                "try:\n"
+                "    x = int('abc')\n"
+                "except ValueError:\n"
+                "    print('caught')\n"
+                "else:\n"
+                "    print('clean')\n"
+                "finally:\n"
+                "    print('done')"
+            ),
+            "language": "python",
+        },
+        "flags": [{"value": "caught\ndone", "flag_type": "static", "case_sensitive": True}],
+        "hints": [
+            {"order_num": 1, "content": "The else branch only runs when no exception was raised.", "cost": 0},
+            {"order_num": 2, "content": "finally always runs — whether or not an exception occurred.", "cost": 25},
+        ],
+    },
+    {
+        "slug": "py-generator-sum",
+        "title": "Lazy Accumulator",
+        "description": (
+            "A generator filters and transforms a range before summing it. "
+            "What is the total?\n\n"
+            "```python\nresult = sum(x * 2 for x in range(10) if x % 3 == 0)\nprint(result)\n```"
+        ),
+        "challenge_type": "short_answer",
+        "difficulty": "medium",
+        "category": "python",
+        "tags": ["python", "generators", "comprehensions"],
+        "skills": [],
+        "points": 125,
+        "content": {
+            "code_snippet": "result = sum(x * 2 for x in range(10) if x % 3 == 0)\nprint(result)",
+            "language": "python",
+        },
+        "flags": [{"value": "36", "flag_type": "static", "case_sensitive": False}],
+        "hints": [
+            {"order_num": 1, "content": "Identify which values in range(10) satisfy the condition first.", "cost": 0},
+            {"order_num": 2, "content": "The qualifying values are 0, 3, 6, 9 — each doubled before summing.", "cost": 25},
+        ],
+    },
+    {
+        "slug": "py-class-mro",
+        "title": "Method Order",
+        "description": (
+            "Python resolves method calls through a specific linearisation of the "
+            "class hierarchy. Follow it and determine what this prints.\n\n"
+            "```python\nclass A:\n    def greet(self):\n        print('A')\n\nclass B(A):\n    def greet(self):\n        super().greet()\n        print('B')\n\nclass C(B):\n    def greet(self):\n        super().greet()\n        print('C')\n\nC().greet()\n```"
+        ),
+        "challenge_type": "short_answer",
+        "difficulty": "hard",
+        "category": "python",
+        "tags": ["python", "oop", "mro"],
+        "skills": [],
+        "points": 150,
+        "content": {
+            "code_snippet": (
+                "class A:\n"
+                "    def greet(self):\n"
+                "        print('A')\n\n"
+                "class B(A):\n"
+                "    def greet(self):\n"
+                "        super().greet()\n"
+                "        print('B')\n\n"
+                "class C(B):\n"
+                "    def greet(self):\n"
+                "        super().greet()\n"
+                "        print('C')\n\n"
+                "C().greet()"
+            ),
+            "language": "python",
+        },
+        "flags": [{"value": "A\nB\nC", "flag_type": "static", "case_sensitive": True}],
+        "hints": [
+            {"order_num": 1, "content": "super() follows the MRO — C → B → A. Each call completes before the print below it runs.", "cost": 0},
+            {"order_num": 2, "content": "Think of it as a call stack: C's super() enters B, B's super() enters A, then A prints, then B prints, then C prints.", "cost": 25},
+        ],
+    },
 ]
