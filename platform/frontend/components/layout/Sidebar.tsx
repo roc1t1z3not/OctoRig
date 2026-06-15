@@ -8,30 +8,34 @@ import {
   LayoutDashboard, FlaskConical, Rocket, Settings, LogOut, Users,
   KeyRound, ShieldCheck, UserCog, FolderGit2, Container, ScrollText,
   Swords, Flag, Award, ChevronUp, Zap, PenTool, User, ClipboardList, Trophy,
+  BarChart3,
 } from "lucide-react";
+import { getMyRank } from "@/lib/api/ranks";
 import { clsx } from "clsx";
 import { useUserStore } from "@/stores/user.store";
 import { logout } from "@/lib/api/auth";
 import { getMyProfile } from "@/lib/api/profiles";
 
 const NAV_MAIN = [
-  { href: "/",            icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/challenges",  icon: Swords,          label: "Challenges" },
-  { href: "/events",      icon: Flag,            label: "Events" },
-  { href: "/badges",      icon: Award,           label: "Badges" },
-  { href: "/labs",        icon: FlaskConical,    label: "Labs" },
-  { href: "/deployments", icon: Rocket,          label: "Deployments" },
-  { href: "/teams",       icon: Users,           label: "Teams" },
-  { href: "/api-keys",    icon: KeyRound,        label: "API Keys" },
+  { href: "/",             icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/challenges",   icon: Swords,          label: "Challenges" },
+  { href: "/events",       icon: Flag,            label: "Events" },
+  { href: "/scoreboard",   icon: Trophy,          label: "Scoreboard" },
+  { href: "/badges",       icon: Award,           label: "Badges" },
+  { href: "/labs",         icon: FlaskConical,    label: "Labs" },
+  { href: "/deployments",  icon: Rocket,          label: "Deployments" },
+  { href: "/teams",        icon: Users,           label: "Teams" },
+  { href: "/api-keys",     icon: KeyRound,        label: "API Keys" },
 ];
 
 const NAV_ADMIN = [
-  { href: "/admin",              icon: ShieldCheck, label: "Overview" },
-  { href: "/admin/users",        icon: UserCog,     label: "Users" },
-  { href: "/admin/teams",        icon: FolderGit2,  label: "Teams" },
-  { href: "/admin/deployments",  icon: Container,   label: "Deployments" },
+  { href: "/admin",              icon: ShieldCheck,   label: "Overview" },
+  { href: "/admin/users",        icon: UserCog,       label: "Users" },
+  { href: "/admin/teams",        icon: FolderGit2,    label: "Teams" },
+  { href: "/admin/deployments",  icon: Container,     label: "Deployments" },
   { href: "/admin/audit",        icon: ScrollText,    label: "Audit Log" },
-  { href: "/admin/challenges",    icon: Trophy,        label: "Challenges" },
+  { href: "/admin/challenges",   icon: Trophy,        label: "Challenges" },
+  { href: "/admin/ranks",        icon: BarChart3,     label: "Ranks" },
   { href: "/admin/content",      icon: ClipboardList, label: "Content" },
   { href: "/admin/settings",     icon: Settings,      label: "Settings" },
 ];
@@ -47,6 +51,13 @@ export function Sidebar() {
     queryKey: ["profile", "me"],
     queryFn: getMyProfile,
     staleTime: 60_000,
+  });
+
+  const { data: myRank } = useQuery({
+    queryKey: ["rank", "me"],
+    queryFn: getMyRank,
+    staleTime: 60_000,
+    enabled: !!user,
   });
 
   useEffect(() => {
@@ -229,6 +240,16 @@ export function Sidebar() {
                 </span>
               )}
             </div>
+            {myRank?.rank && (
+              <div className="flex items-center gap-1 mt-0.5">
+                <span
+                  className="text-9px font-mono font-semibold"
+                  style={{ color: myRank.rank.color ?? "var(--g-text-muted)" }}
+                >
+                  {myRank.rank.name}
+                </span>
+              </div>
+            )}
           </div>
           <ChevronUp
             size={12}

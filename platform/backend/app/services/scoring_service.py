@@ -7,7 +7,10 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.config import settings
+from app.models.badge import UserBadge
+from app.models.challenge import ChallengeSubmission
 from app.models.scoring import ScoreTransaction, ScoreTransactionSource
+from app.models.user import User
 
 _redis: Optional[redis_lib.Redis] = None
 
@@ -73,16 +76,15 @@ def get_user_score(db: Session, user_id: int, event_id: Optional[int] = None) ->
 
 
 def get_global_scoreboard(db: Session, limit: int = 100) -> list[dict[str, Any]]:
-    cache_key = "scoreboard:global"
+    cache_key = f"scoreboard:global:{limit}"
     cached = _get_redis().get(cache_key)
     if cached:
         return json.loads(cached)
 
-    rows = (
+    score_rows = (
         db.query(
             ScoreTransaction.user_id,
             func.sum(ScoreTransaction.points).label("total"),
-            func.count(ScoreTransaction.id).label("transactions"),
             func.max(ScoreTransaction.created_at).label("last_tx"),
         )
         .filter(ScoreTransaction.event_id.is_(None))
@@ -94,14 +96,48 @@ def get_global_scoreboard(db: Session, limit: int = 100) -> list[dict[str, Any]]
         .limit(limit)
         .all()
     )
+
+    user_ids = [r.user_id for r in score_rows]
+
+    usernames: dict[int, str] = {
+        u.id: u.username
+        for u in db.query(User).filter(User.id.in_(user_ids)).all()
+    }
+    solve_counts: dict[int, int] = {
+        row[0]: int(row[1])
+        for row in db.query(
+            ChallengeSubmission.user_id,
+            func.count(ChallengeSubmission.id),
+        )
+        .filter(
+            ChallengeSubmission.user_id.in_(user_ids),
+            ChallengeSubmission.is_correct.is_(True),
+        )
+        .group_by(ChallengeSubmission.user_id)
+        .all()
+    }
+    badge_counts: dict[int, int] = {
+        row[0]: int(row[1])
+        for row in db.query(
+            UserBadge.user_id,
+            func.count(UserBadge.id),
+        )
+        .filter(UserBadge.user_id.in_(user_ids))
+        .group_by(UserBadge.user_id)
+        .all()
+    }
+
     result = [
         {
             "rank": idx + 1,
             "user_id": r.user_id,
+            "username": usernames.get(r.user_id),
             "total": int(r.total or 0),
+            "solve_count": solve_counts.get(r.user_id, 0),
+            "badge_count": badge_counts.get(r.user_id, 0),
             "last_tx": r.last_tx.isoformat() if r.last_tx else None,
         }
-        for idx, r in enumerate(rows)
+        for idx, r in enumerate(score_rows)
     ]
     _get_redis().setex(cache_key, 5, json.dumps(result))
     return result

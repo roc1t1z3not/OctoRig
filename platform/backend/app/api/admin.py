@@ -1,6 +1,7 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, Request
+from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -11,6 +12,7 @@ from app.models.api_key import ApiKey
 from app.models.audit_log import AuditLog
 from app.models.challenge import ChallengeSubmission, HintUnlock
 from app.models.deployment import Deployment, DeploymentStatus
+from app.models.rank import Rank
 from app.models.scheduled_action import ScheduledAction, ScheduledActionStatus
 from app.models.scoring import ScoreTransaction
 from app.models.team import Team, TeamMember
@@ -375,3 +377,109 @@ def list_all_api_keys(
             )
         )
     return result
+
+
+# ── Ranks ─────────────────────────────────────────────────────────────────────
+
+class AdminRankResponse(BaseModel):
+    id: int
+    name: str
+    min_points: int
+    icon: Optional[str]
+    color: Optional[str]
+    is_active: bool
+
+    model_config = {"from_attributes": True}
+
+
+class AdminRankCreate(BaseModel):
+    name: str
+    min_points: int
+    icon: Optional[str] = None
+    color: Optional[str] = None
+
+
+class AdminRankUpdate(BaseModel):
+    name: Optional[str] = None
+    min_points: Optional[int] = None
+    icon: Optional[str] = None
+    color: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+@router.get("/ranks/", response_model=list[AdminRankResponse])
+def list_ranks(
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> list[AdminRankResponse]:
+    ranks = db.query(Rank).order_by(Rank.min_points.asc()).all()
+    return [AdminRankResponse.model_validate(r) for r in ranks]
+
+
+@router.post("/ranks/", response_model=AdminRankResponse)
+def create_rank(
+    body: AdminRankCreate,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> AdminRankResponse:
+    if db.query(Rank).filter(Rank.name == body.name).first():
+        raise conflict("A rank with that name already exists")
+    if db.query(Rank).filter(Rank.min_points == body.min_points).first():
+        raise conflict("A rank with that min_points value already exists")
+    rank = Rank(
+        name=body.name,
+        min_points=body.min_points,
+        icon=body.icon,
+        color=body.color,
+    )
+    db.add(rank)
+    db.commit()
+    db.refresh(rank)
+    return AdminRankResponse.model_validate(rank)
+
+
+@router.patch("/ranks/{rank_id}", response_model=AdminRankResponse)
+def update_rank(
+    rank_id: int,
+    body: AdminRankUpdate,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> AdminRankResponse:
+    rank = db.get(Rank, rank_id)
+    if rank is None:
+        raise not_found("Rank")
+    if body.name is not None:
+        existing = db.query(Rank).filter(Rank.name == body.name, Rank.id != rank_id).first()
+        if existing:
+            raise conflict("A rank with that name already exists")
+        rank.name = body.name
+    if body.min_points is not None:
+        existing = db.query(Rank).filter(
+            Rank.min_points == body.min_points, Rank.id != rank_id
+        ).first()
+        if existing:
+            raise conflict("A rank with that min_points value already exists")
+        rank.min_points = body.min_points
+    if body.icon is not None:
+        rank.icon = body.icon
+    if body.color is not None:
+        rank.color = body.color
+    if body.is_active is not None:
+        rank.is_active = body.is_active
+    db.commit()
+    db.refresh(rank)
+    return AdminRankResponse.model_validate(rank)
+
+
+@router.delete("/ranks/{rank_id}", response_model=dict)
+def delete_rank(
+    rank_id: int,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> dict:
+    rank = db.get(Rank, rank_id)
+    if rank is None:
+        raise not_found("Rank")
+    db.delete(rank)
+    db.commit()
+    return {"deleted": True, "rank_id": rank_id}

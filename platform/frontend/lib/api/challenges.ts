@@ -60,8 +60,11 @@ export interface HintUnlockResult {
 export interface ScoreboardEntry {
   rank: number;
   user_id: number | null;
+  username: string | null;
   team_id: number | null;
   total: number;
+  solve_count: number;
+  badge_count: number;
   last_tx: string | null;
 }
 

@@ -9,6 +9,7 @@ import {
   Trophy, Target, Droplets, Users, Pencil,
 } from "lucide-react";
 import { getUserProfile, type UserProfile } from "@/lib/api/profiles";
+import { getUserRank, type UserRank } from "@/lib/api/ranks";
 import { useUserStore } from "@/stores/user.store";
 
 const ICON_MAP: Record<string, string> = {
@@ -27,7 +28,7 @@ function StatBlock({ icon, label, value }: { icon: React.ReactNode; label: strin
   );
 }
 
-function ProfileView({ profile }: { profile: UserProfile }) {
+function ProfileView({ profile, rankData }: { profile: UserProfile; rankData?: UserRank }) {
   const initials = profile.username.slice(0, 2).toUpperCase();
 
   return (
@@ -41,6 +42,24 @@ function ProfileView({ profile }: { profile: UserProfile }) {
           }
         </div>
         <h1 className="profile-username">{profile.username}</h1>
+        {rankData?.rank && (
+          <div style={{ marginBottom: "0.5rem" }}>
+            <span
+              style={{
+                display: "inline-block",
+                padding: "0.15rem 0.6rem",
+                borderRadius: 99,
+                fontSize: "0.65rem",
+                fontFamily: "var(--font-mono, monospace)",
+                fontWeight: 600,
+                border: `1px solid ${rankData.rank.color ?? "var(--g-border)"}`,
+                color: rankData.rank.color ?? "var(--g-text-muted)",
+              }}
+            >
+              {rankData.rank.name}
+            </span>
+          </div>
+        )}
         {profile.bio && <p className="profile-bio">{profile.bio}</p>}
 
         <div className="profile-links">
@@ -125,6 +144,13 @@ export default function UserProfilePage() {
     queryFn: () => getUserProfile(username),
   });
 
+  const { data: rankData } = useQuery({
+    queryKey: ["rank", "user", profile?.user_id],
+    queryFn: () => getUserRank(profile!.user_id),
+    enabled: !!profile,
+    staleTime: 60_000,
+  });
+
   return (
     <div className="page">
       <div className="page-header">
@@ -142,7 +168,7 @@ export default function UserProfilePage() {
 
       {isLoading && <div className="text-muted text-sm">Loading profile…</div>}
       {isError && <div className="text-muted text-sm">Profile not found.</div>}
-      {profile && <ProfileView profile={profile} />}
+      {profile && <ProfileView profile={profile} rankData={rankData} />}
     </div>
   );
 }

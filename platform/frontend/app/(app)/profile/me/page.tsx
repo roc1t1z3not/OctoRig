@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { User } from "lucide-react";
 import { getMyProfile, updateMyProfile, type ProfileUpdatePayload } from "@/lib/api/profiles";
+import { getMyRank } from "@/lib/api/ranks";
 import { useNotificationsStore } from "@/stores/notifications.store";
 
 export default function MyProfilePage() {
@@ -14,6 +15,12 @@ export default function MyProfilePage() {
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", "me"],
     queryFn: getMyProfile,
+  });
+
+  const { data: myRank } = useQuery({
+    queryKey: ["rank", "me"],
+    queryFn: getMyRank,
+    staleTime: 60_000,
   });
 
   const [form, setForm] = useState<ProfileUpdatePayload>({});
@@ -54,6 +61,22 @@ export default function MyProfilePage() {
           <User size={18} style={{ display: "inline", marginRight: "0.5rem", verticalAlign: "middle" }} />
           My Profile
         </h1>
+        {myRank?.rank && (
+          <span
+            style={{
+              display: "inline-block",
+              padding: "0.15rem 0.6rem",
+              borderRadius: 99,
+              fontSize: "0.7rem",
+              fontFamily: "var(--font-mono, monospace)",
+              fontWeight: 600,
+              border: `1px solid ${myRank.rank.color ?? "var(--g-border)"}`,
+              color: myRank.rank.color ?? "var(--g-text-muted)",
+            }}
+          >
+            {myRank.rank.name}
+          </span>
+        )}
       </div>
 
       <form

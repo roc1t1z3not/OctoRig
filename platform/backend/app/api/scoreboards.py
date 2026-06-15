@@ -16,8 +16,11 @@ router = APIRouter(prefix="/scoreboards", tags=["scoreboards"])
 class ScoreboardEntry(BaseModel):
     rank: int
     user_id: Optional[int] = None
+    username: Optional[str] = None
     team_id: Optional[int] = None
     total: int
+    solve_count: int = 0
+    badge_count: int = 0
     last_tx: Optional[str] = None
 
 

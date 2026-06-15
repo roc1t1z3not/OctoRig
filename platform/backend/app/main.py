@@ -36,6 +36,7 @@ async def lifespan(app: FastAPI):
     # Do NOT call alembic here — it races in multi-replica deployments.
     _seed_admin()
     _seed_badges()
+    _seed_ranks()
     _sync_labs()      # upserts lab templates + any inline challenges
     _load_plugins(app)
     yield
@@ -56,6 +57,17 @@ def _seed_badges() -> None:
     db = SessionLocal()
     try:
         seed_badge_catalog(db)
+    finally:
+        db.close()
+
+
+def _seed_ranks() -> None:
+    from app.database import SessionLocal
+    from app.services.rank_service import seed_ranks
+
+    db = SessionLocal()
+    try:
+        seed_ranks(db)
     finally:
         db.close()
 
@@ -137,6 +149,7 @@ def create_app() -> FastAPI:
     from app.api.events import router as events_router
     from app.api.labs import router as labs_router
     from app.api.scheduler import router as scheduler_router
+    from app.api.ranks import router as ranks_router
     from app.api.scoreboards import router as scoreboards_router
     from app.api.system import router as system_router
     from app.api.teams import invitations_router, router as teams_router
@@ -153,6 +166,7 @@ def create_app() -> FastAPI:
     app.include_router(scheduler_router, prefix=prefix)
     app.include_router(admin_router, prefix=prefix)
     app.include_router(challenges_router, prefix=prefix)
+    app.include_router(ranks_router, prefix=prefix)
     app.include_router(scoreboards_router, prefix=prefix)
     app.include_router(events_router, prefix=prefix)
     app.include_router(badges_router, prefix=prefix)
