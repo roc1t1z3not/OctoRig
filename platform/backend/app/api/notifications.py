@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
 from app.models.user import User
+from app.models.notification import Notification
 from app.services.notification_service import (
     get_preferences, list_notifications, mark_all_read, mark_read,
     unread_count, update_preferences,
@@ -73,6 +74,18 @@ def get_unread_count(
     current_user: User = Depends(get_current_user),
 ) -> UnreadCountOut:
     return UnreadCountOut(count=unread_count(db, current_user.id))
+
+
+@router.delete("/{notification_id}", status_code=204)
+def delete_notification(
+    notification_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> None:
+    n = db.get(Notification, notification_id)
+    if n is not None and n.user_id == current_user.id:
+        db.delete(n)
+        db.commit()
 
 
 @router.post("/{notification_id}/read", response_model=ReadResultOut)

@@ -12,13 +12,7 @@ import {
   type ChallengeDifficulty,
 } from "@/lib/api/challenges";
 import { useNotificationsStore } from "@/stores/notifications.store";
-
-const DIFF_COLOR: Record<ChallengeDifficulty, string> = {
-  easy:   "var(--g-success)",
-  medium: "var(--g-warning)",
-  hard:   "var(--g-orange)",
-  insane: "var(--g-danger)",
-};
+import { DIFF_COLOR } from "@/lib/utils/difficulty";
 
 function ChallengeRow({ ch }: { ch: ChallengeListItem }) {
   const qc = useQueryClient();

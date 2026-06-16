@@ -1,0 +1,18 @@
+export const ICON_MAP: Record<string, string> = {
+  flag:      "🚩",
+  hash:      "#",
+  zap:       "⚡",
+  droplets:  "🩸",
+  database:  "🗄️",
+  code:      "</>",
+  lock:      "🔒",
+  star:      "⭐",
+  crown:     "👑",
+  shield:    "🛡️",
+  target:    "🎯",
+  trophy:    "🏆",
+  skull:     "💀",
+  eye:       "👁️",
+  globe:     "🌐",
+  flame:     "🔥",
+};

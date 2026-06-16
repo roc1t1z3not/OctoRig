@@ -17,7 +17,7 @@ from app.core.permissions import (
     can_transfer_ownership,
 )
 from app.database import get_db
-from app.models.team import Team, TeamMember, TeamRole
+from app.models.team import Team, TeamInvitation, TeamMember, TeamRole
 from app.models.user import User
 from app.schemas.team import (
     ChangeMemberRoleRequest,
@@ -168,10 +168,10 @@ def invite_member(
     ).first()
     if not can_invite_members(current_user, membership):
         raise forbidden_exception
-    inv = team_service.invite_member(db, current_user, team, payload.email, payload.role)
+    inv = team_service.invite_member(db, current_user, team, payload.username, payload.role)
     audit_service.write_audit(
         db, action="team.member_invited", user_id=current_user.id, team_id=team.id,
-        detail={"email": payload.email, "role": payload.role.value},
+        detail={"username": payload.username, "role": payload.role.value},
         ip=request.client.host if request.client else None,
     )
     return InvitationResponse.model_validate(inv)
@@ -265,6 +265,20 @@ def get_invitation(token: str, db: Session = Depends(get_db)) -> InvitationDetai
         invited_by_username=inviter.username if inviter else "",
         expires_at=inv.expires_at,
     )
+
+
+@invitations_router.post("/{token}/decline", status_code=204)
+def decline_invitation(
+    token: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> None:
+    from datetime import datetime, timezone
+    inv = db.query(TeamInvitation).filter(TeamInvitation.token == token).first()
+    if inv is None or inv.accepted_at is not None:
+        return
+    db.delete(inv)
+    db.commit()
 
 
 @invitations_router.post("/{token}/accept", response_model=MemberResponse, status_code=201)

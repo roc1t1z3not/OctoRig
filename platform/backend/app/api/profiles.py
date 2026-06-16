@@ -1,6 +1,6 @@
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, HttpUrl
 from sqlalchemy.orm import Session
 
@@ -49,6 +49,32 @@ def update_my_profile(
         show_activity=body.show_activity,
     )
     return get_profile(db, current_user.username, viewer_id=current_user.id)
+
+
+class UserSearchResult(BaseModel):
+    id: int
+    username: str
+
+
+@router.get("/search", response_model=list[UserSearchResult])
+def search_users(
+    q: str = Query("", min_length=1),
+    limit: int = Query(10, ge=1, le=30),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[UserSearchResult]:
+    results = (
+        db.query(User)
+        .filter(
+            User.username.ilike(f"%{q}%"),
+            User.is_active.is_(True),
+            User.id != current_user.id,
+        )
+        .order_by(User.username)
+        .limit(limit)
+        .all()
+    )
+    return [UserSearchResult(id=u.id, username=u.username) for u in results]
 
 
 @router.get("/{username}", response_model=dict[str, Any])

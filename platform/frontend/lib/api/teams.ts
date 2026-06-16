@@ -2,6 +2,9 @@ import { apiClient } from "./client";
 
 export type TeamRole = "owner" | "manager" | "member" | "viewer";
 
+export const TEAM_ROLES: TeamRole[] = ["owner", "manager", "member", "viewer"];
+export const ASSIGNABLE_ROLES: TeamRole[] = ["manager", "member", "viewer"];
+
 export interface Team {
   id: number;
   name: string;
@@ -82,12 +85,23 @@ export async function getTeamMembers(teamId: number): Promise<TeamMember[]> {
   return data;
 }
 
+export async function searchUsers(q: string): Promise<{ id: number; username: string }[]> {
+  const { data } = await apiClient.get<{ id: number; username: string }[]>("/profiles/search", {
+    params: { q },
+  });
+  return data;
+}
+
 export async function inviteMember(
   teamId: number,
-  payload: { email: string; role: TeamRole }
+  payload: { username: string; role: TeamRole }
 ): Promise<TeamInvitation> {
   const { data } = await apiClient.post<TeamInvitation>(`/teams/${teamId}/invite`, payload);
   return data;
+}
+
+export async function declineInvitation(token: string): Promise<void> {
+  await apiClient.post(`/invitations/${token}/decline`);
 }
 
 export async function removeMember(teamId: number, userId: number): Promise<void> {

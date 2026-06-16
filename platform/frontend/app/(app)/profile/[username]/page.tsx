@@ -12,12 +12,7 @@ import { getUserProfile, type UserProfile } from "@/lib/api/profiles";
 import { getUserRank, type UserRank } from "@/lib/api/ranks";
 import { formatDate } from "@/lib/utils/date";
 import { useUserStore } from "@/stores/user.store";
-
-const ICON_MAP: Record<string, string> = {
-  flag: "🚩", hash: "#", zap: "⚡", droplets: "🩸",
-  database: "🗄️", code: "</>", lock: "🔒", star: "⭐", crown: "👑", shield: "🛡️",
-  target: "🎯", trophy: "🏆", skull: "💀", eye: "👁️", globe: "🌐", flame: "🔥",
-};
+import { ICON_MAP } from "@/lib/utils/badge-icons";
 
 function StatBlock({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
   return (

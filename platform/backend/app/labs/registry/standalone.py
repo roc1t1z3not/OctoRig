@@ -160,8 +160,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "title": "Encoded Cargo",
         "description": (
             "A familiar encoding scheme wraps the contents — no encryption, no key, "
-            "just a different way of writing the same bytes. What does it say?\n\n"
-            "```python\nimport base64\ndata = b'T2N0b1JpZw=='\nprint(base64.b64decode(data).decode())\n```"
+            "just a different way of writing the same bytes. What does it say?"
         ),
         "challenge_type": "short_answer",
         "difficulty": "easy",
@@ -184,8 +183,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "title": "Hex Dump",
         "description": (
             "The message arrived as a string of hex digits. Each pair is one byte. "
-            "Reassemble it.\n\n"
-            "```python\nraw = '4f637461'\nprint(bytes.fromhex(raw).decode())\n```"
+            "Reassemble it."
         ),
         "challenge_type": "short_answer",
         "difficulty": "easy",
@@ -209,8 +207,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "description": (
             "Every letter has been shifted by the same fixed amount. "
             "The shift is somewhere between 1 and 25 — only one produces "
-            "a recognisable word. What is the plaintext?\n\n"
-            "```python\nciphertext = 'Clguba'\n```"
+            "a recognisable word. What is the plaintext?"
         ),
         "challenge_type": "short_answer",
         "difficulty": "medium",
@@ -234,8 +231,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "title": "Pattern Match",
         "description": (
             "A blob of noisy text hides tokens that follow a specific structure. "
-            "Something in the code isolates them — run it and report what surfaces.\n\n"
-            "```python\nimport re\ntext = 'err [ALPHA] ok [BRAVO] skip abc [CHARLIE] end'\nmatches = re.findall(r'\\[[A-Z]{5,7}\\]', text)\nprint(matches)\n```"
+            "Something in the code isolates them — run it and report what surfaces."
         ),
         "challenge_type": "short_answer",
         "difficulty": "medium",
@@ -264,8 +260,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "description": (
             "Control flow through error handlers can be tricky. "
             "Trace what gets printed when this snippet runs — "
-            "every branch matters.\n\n"
-            "```python\ntry:\n    x = int('abc')\nexcept ValueError:\n    print('caught')\nelse:\n    print('clean')\nfinally:\n    print('done')\n```"
+            "every branch matters."
         ),
         "challenge_type": "short_answer",
         "difficulty": "medium",
@@ -297,8 +292,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "title": "Lazy Accumulator",
         "description": (
             "A generator filters and transforms a range before summing it. "
-            "What is the total?\n\n"
-            "```python\nresult = sum(x * 2 for x in range(10) if x % 3 == 0)\nprint(result)\n```"
+            "What is the total?"
         ),
         "challenge_type": "short_answer",
         "difficulty": "medium",
@@ -321,8 +315,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "title": "Method Order",
         "description": (
             "Python resolves method calls through a specific linearisation of the "
-            "class hierarchy. Follow it and determine what this prints.\n\n"
-            "```python\nclass A:\n    def greet(self):\n        print('A')\n\nclass B(A):\n    def greet(self):\n        super().greet()\n        print('B')\n\nclass C(B):\n    def greet(self):\n        super().greet()\n        print('C')\n\nC().greet()\n```"
+            "class hierarchy. Follow it and determine what this prints."
         ),
         "challenge_type": "short_answer",
         "difficulty": "hard",

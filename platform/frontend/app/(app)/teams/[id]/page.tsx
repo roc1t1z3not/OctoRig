@@ -2,16 +2,12 @@
 import "../teams.css";
 
 import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, UserPlus } from "lucide-react";
+import { ArrowLeft, UserPlus, Pencil, Check, X } from "lucide-react";
 import Link from "next/link";
 import {
-  getTeam,
-  getTeamMembers,
-  inviteMember,
-  removeMember,
-  changeMemberRole,
+  getTeam, getTeamMembers, inviteMember, removeMember, changeMemberRole, updateTeam,
   type TeamRole,
 } from "@/lib/api/teams";
 import { useUserStore } from "@/stores/user.store";
@@ -27,6 +23,9 @@ export default function TeamDetailPage() {
   const { push } = useNotificationsStore();
 
   const [showInvite, setShowInvite] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editDesc, setEditDesc] = useState("");
 
   const { data: team, isLoading: teamLoading } = useQuery({
     queryKey: ["team", teamId],
@@ -39,10 +38,10 @@ export default function TeamDetailPage() {
   });
 
   const inviteMutation = useMutation({
-    mutationFn: ({ email, role }: { email: string; role: TeamRole }) =>
-      inviteMember(teamId, { email, role }),
-    onSuccess: (_, { email }) => {
-      push("success", `Invitation sent to ${email}`);
+    mutationFn: ({ username, role }: { username: string; role: TeamRole }) =>
+      inviteMember(teamId, { username, role }),
+    onSuccess: (_, { username }) => {
+      push("success", `Invitation sent to ${username}`);
       setShowInvite(false);
     },
     onError: (err: any) => push("error", err?.response?.data?.detail ?? "Failed to send invitation"),
@@ -67,6 +66,22 @@ export default function TeamDetailPage() {
     onError: (err: any) => push("error", err?.response?.data?.detail ?? "Failed to update role"),
   });
 
+  const editMutation = useMutation({
+    mutationFn: () => updateTeam(teamId, { name: editName.trim(), description: editDesc.trim() || undefined }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["team", teamId] });
+      push("success", "Team updated");
+      setEditing(false);
+    },
+    onError: (err: any) => push("error", err?.response?.data?.detail ?? "Failed to update team"),
+  });
+
+  function startEdit() {
+    setEditName(team?.name ?? "");
+    setEditDesc(team?.description ?? "");
+    setEditing(true);
+  }
+
   const canManage =
     team?.my_role === "owner" || team?.my_role === "manager" ||
     user?.is_admin || user?.is_superuser;
@@ -85,13 +100,54 @@ export default function TeamDetailPage() {
 
       <div className="team-header g-panel">
         <div className="g-panel-header">
-          <div>
-            <h1 className="font-mono" style={{ fontSize: "1rem" }}>{team.name}</h1>
-            {team.description && (
-              <p className="text-muted text-11 mt-1">{team.description}</p>
-            )}
-          </div>
-          <span className={`role-badge role-badge--${team.my_role}`}>{team.my_role}</span>
+          {editing ? (
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              <input
+                className="g-input g-input-sm font-mono"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Team name"
+                autoFocus
+              />
+              <input
+                className="g-input g-input-sm"
+                value={editDesc}
+                onChange={(e) => setEditDesc(e.target.value)}
+                placeholder="Description (optional)"
+              />
+              <div style={{ display: "flex", gap: "0.4rem" }}>
+                <button
+                  className="g-btn g-btn-primary g-btn-sm"
+                  onClick={() => editMutation.mutate()}
+                  disabled={!editName.trim() || editMutation.isPending}
+                >
+                  <Check size={12} />
+                  {editMutation.isPending ? "Saving…" : "Save"}
+                </button>
+                <button className="g-btn g-btn-ghost g-btn-sm" onClick={() => setEditing(false)}>
+                  <X size={12} />
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div>
+                <h1 className="font-mono" style={{ fontSize: "1rem" }}>{team.name}</h1>
+                {team.description && (
+                  <p className="text-muted text-11 mt-1">{team.description}</p>
+                )}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <span className={`role-badge role-badge--${team.my_role}`}>{team.my_role}</span>
+                {canManage && (
+                  <button className="g-btn g-btn-ghost g-btn-icon" onClick={startEdit} title="Edit team">
+                    <Pencil size={13} />
+                  </button>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -111,7 +167,7 @@ export default function TeamDetailPage() {
 
         {showInvite && (
           <InviteForm
-            onSubmit={(email, role) => inviteMutation.mutate({ email, role })}
+            onSubmit={(username, role) => inviteMutation.mutate({ username, role })}
             isPending={inviteMutation.isPending}
             onCancel={() => setShowInvite(false)}
           />

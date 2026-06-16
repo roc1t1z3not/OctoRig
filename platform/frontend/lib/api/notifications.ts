@@ -39,6 +39,10 @@ export async function markAllRead(): Promise<number> {
   return data.marked;
 }
 
+export async function deleteNotification(id: number): Promise<void> {
+  await apiClient.delete(`/notifications/${id}`);
+}
+
 export async function getNotificationPreferences(): Promise<NotificationPreferences> {
   const { data } = await apiClient.get<NotificationPreferences>("/notifications/preferences");
   return data;

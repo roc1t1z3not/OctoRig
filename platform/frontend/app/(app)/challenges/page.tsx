@@ -8,6 +8,7 @@ import { Search, CheckCircle2, Clock, Target } from "lucide-react";
 import { getChallenges, type ChallengeListItem, type ChallengeDifficulty } from "@/lib/api/challenges";
 import { getLabs, type LabTemplate } from "@/lib/api/labs";
 import { PageSpinner } from "@/components/ui/Spinner";
+import { DIFF_CLASS } from "@/lib/utils/difficulty";
 
 const CATEGORIES = [
   { id: undefined, label: "All" },
@@ -31,16 +32,9 @@ const DIFF_ORDER: Record<ChallengeDifficulty, number> = {
   easy: 0, medium: 1, hard: 2, insane: 3,
 };
 
-const DIFF_COLOR: Record<ChallengeDifficulty, string> = {
-  easy:   "diff-easy",
-  medium: "diff-medium",
-  hard:   "diff-hard",
-  insane: "diff-insane",
-};
-
 function DiffBadge({ difficulty }: { difficulty: ChallengeDifficulty }) {
   return (
-    <span className={`diff-badge ${DIFF_COLOR[difficulty]}`}>
+    <span className={`diff-badge ${DIFF_CLASS[difficulty]}`}>
       {difficulty}
     </span>
   );

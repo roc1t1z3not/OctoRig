@@ -1,8 +1,7 @@
 import { Trash2 } from "lucide-react";
 import type { TeamMember, TeamRole } from "@/lib/api/teams";
+import { TEAM_ROLES } from "@/lib/api/teams";
 import { formatDate } from "@/lib/utils/date";
-
-const ALL_ROLES: TeamRole[] = ["owner", "manager", "member", "viewer"];
 
 export function MembersTable({
   members,
@@ -45,7 +44,7 @@ export function MembersTable({
                     value={m.role}
                     onChange={(e) => onChangeRole(m.user_id, e.target.value as TeamRole)}
                   >
-                    {ALL_ROLES.map((r) => (
+                    {TEAM_ROLES.map((r) => (
                       <option key={r} value={r}>
                         {r.charAt(0).toUpperCase() + r.slice(1)}
                       </option>

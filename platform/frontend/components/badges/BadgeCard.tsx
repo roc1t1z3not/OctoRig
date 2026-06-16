@@ -1,25 +1,7 @@
 import { CheckCircle2 } from "lucide-react";
 import type { Badge } from "@/lib/api/badges";
 import { formatDate } from "@/lib/utils/date";
-
-const ICON_MAP: Record<string, string> = {
-  flag:      "🚩",
-  hash:      "#",
-  zap:       "⚡",
-  droplets:  "🩸",
-  database:  "🗄️",
-  code:      "</>",
-  lock:      "🔒",
-  star:      "⭐",
-  crown:     "👑",
-  shield:    "🛡️",
-  target:    "🎯",
-  trophy:    "🏆",
-  skull:     "💀",
-  eye:       "👁️",
-  globe:     "🌐",
-  flame:     "🔥",
-};
+import { ICON_MAP } from "@/lib/utils/badge-icons";
 
 export function BadgeCard({ badge }: { badge: Badge }) {
   return (

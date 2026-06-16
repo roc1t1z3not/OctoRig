@@ -12,13 +12,7 @@ import {
   getEvent, getEventChallenges, getEventScoreboard, type EventChallenge,
 } from "@/lib/api/events";
 import { formatDateTime } from "@/lib/utils/date";
-
-const DIFF_COLOR: Record<string, string> = {
-  easy:   "var(--g-success)",
-  medium: "var(--g-warning)",
-  hard:   "var(--g-orange)",
-  insane: "var(--g-danger)",
-};
+import { DIFF_COLOR } from "@/lib/utils/difficulty";
 
 function ChallengeGrid({ challenges }: { challenges: EventChallenge[] }) {
   const byCategory = challenges.reduce<Record<string, EventChallenge[]>>((acc, ch) => {

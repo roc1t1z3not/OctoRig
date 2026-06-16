@@ -6,3 +6,10 @@ export const DIFF_COLOR: Record<ChallengeDifficulty, string> = {
   hard:   "var(--g-orange)",
   insane: "var(--g-danger)",
 };
+
+export const DIFF_CLASS: Record<ChallengeDifficulty, string> = {
+  easy:   "diff-easy",
+  medium: "diff-medium",
+  hard:   "diff-hard",
+  insane: "diff-insane",
+};

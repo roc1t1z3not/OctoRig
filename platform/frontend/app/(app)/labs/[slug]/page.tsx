@@ -19,17 +19,11 @@ import { StartLabDialog } from "@/components/deployments/StartLabDialog";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { PageSpinner } from "@/components/ui/Spinner";
 import { CopyButton } from "@/components/ui/CopyButton";
-
-const DIFF_COLOR: Record<ChallengeDifficulty, string> = {
-  easy:   "diff-easy",
-  medium: "diff-medium",
-  hard:   "diff-hard",
-  insane: "diff-insane",
-};
+import { DIFF_CLASS } from "@/lib/utils/difficulty";
 
 function DiffBadge({ difficulty }: { difficulty: ChallengeDifficulty }) {
   return (
-    <span className={`diff-badge ${DIFF_COLOR[difficulty]}`}>{difficulty}</span>
+    <span className={`diff-badge ${DIFF_CLASS[difficulty]}`}>{difficulty}</span>
   );
 }
 

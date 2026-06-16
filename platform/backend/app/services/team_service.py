@@ -144,41 +144,62 @@ def delete_team(db: Session, team: Team, db_session: Session) -> None:
 
 
 def invite_member(
-    db: Session, inviter: User, team: Team, email: str, role: TeamRole
+    db: Session, inviter: User, team: Team, username: str, role: TeamRole
 ) -> TeamInvitation:
-    existing_user = db.query(User).filter(User.email == email).first()
-    if existing_user:
-        already_member = (
-            db.query(TeamMember)
-            .filter(TeamMember.team_id == team.id, TeamMember.user_id == existing_user.id)
-            .first()
-        )
-        if already_member:
-            raise conflict(f"User with email '{email}' is already a member of this team")
+    from app.services.notification_service import create_notification
+
+    target = db.query(User).filter(User.username == username).first()
+    if target is None:
+        raise not_found(f"User '{username}'")
+
+    already_member = (
+        db.query(TeamMember)
+        .filter(TeamMember.team_id == team.id, TeamMember.user_id == target.id)
+        .first()
+    )
+    if already_member:
+        raise conflict(f"'{username}' is already a member of this team")
 
     pending = (
         db.query(TeamInvitation)
         .filter(
             TeamInvitation.team_id == team.id,
-            TeamInvitation.email == email,
+            TeamInvitation.email == target.email,
             TeamInvitation.accepted_at.is_(None),
             TeamInvitation.expires_at > datetime.now(timezone.utc),
         )
         .first()
     )
     if pending:
-        raise conflict(f"An active invitation for '{email}' already exists")
+        raise conflict(f"An active invitation for '{username}' already exists")
 
     token = secrets.token_urlsafe(32)
     invitation = TeamInvitation(
         team_id=team.id,
-        email=email,
+        email=target.email,
         token=token,
         role=role,
         invited_by_id=inviter.id,
         expires_at=datetime.now(timezone.utc) + timedelta(hours=72),
     )
     db.add(invitation)
+    db.flush()
+
+    create_notification(
+        db,
+        user_id=target.id,
+        type="team_invite",
+        title=f"You've been invited to join {team.name}",
+        body=f"{inviter.username} invited you as {role.value}",
+        data={
+            "invitation_token": token,
+            "team_id": team.id,
+            "team_name": team.name,
+            "inviter_username": inviter.username,
+            "role": role.value,
+        },
+    )
+
     db.commit()
     db.refresh(invitation)
     return invitation

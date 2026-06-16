@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import type { ScoreboardEntry } from "./challenges";
+import type { ScoreboardEntry, ChallengeDifficulty } from "./challenges";
 
 export type EventStatus = "draft" | "published" | "running" | "ended" | "archived";
 export type EventVisibility = "public" | "private" | "unlisted";
@@ -26,7 +26,7 @@ export interface EventChallenge {
   slug: string;
   title: string;
   category: string;
-  difficulty: string;
+  difficulty: ChallengeDifficulty;
   points: number;
   tags: string[];
   solve_count: number;

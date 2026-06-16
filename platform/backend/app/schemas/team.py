@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, field_validator
 
 from app.models.team import TeamRole
 
@@ -55,7 +55,7 @@ class MemberResponse(BaseModel):
 
 
 class InviteRequest(BaseModel):
-    email: EmailStr
+    username: str
     role: TeamRole = TeamRole.MEMBER
 
 
