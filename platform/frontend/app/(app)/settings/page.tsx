@@ -5,18 +5,20 @@ import "./settings.css";
 
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Palette, User, Shield } from "lucide-react";
+import { Palette, User, Shield, FlaskConical } from "lucide-react";
 import { changePassword, getMe } from "@/lib/api/auth";
 import { useThemeStore } from "@/stores/theme.store";
 import { useUserStore } from "@/stores/user.store";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { useDemoStore } from "@/stores/demo.store";
 import { THEMES } from "@/lib/themes";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useThemeStore();
   const { user } = useUserStore();
   const { push } = useNotificationsStore();
-  const [section, setSection] = useState<"appearance" | "account">("appearance");
+  const { isDemoMode, toggle: toggleDemo } = useDemoStore();
+  const [section, setSection] = useState<"appearance" | "account" | "demo">("appearance");
 
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: getMe });
 
@@ -29,6 +31,7 @@ export default function SettingsPage() {
           {([
             { id: "appearance", label: "Appearance", icon: <Palette size={15} /> },
             { id: "account",    label: "Account",    icon: <User size={15} /> },
+            { id: "demo",       label: "Demo",       icon: <FlaskConical size={15} /> },
           ] as const).map((item) => (
             <button
               key={item.id}
@@ -64,6 +67,68 @@ export default function SettingsPage() {
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {section === "demo" && (
+            <div className="settings-section">
+              <h2 className="settings-section-title font-mono">Demo Mode</h2>
+              <p className="text-muted text-sm mb-3">
+                Populate the platform with synthetic data for screenshots and demos.
+                Real challenges and labs are kept; activity data (scores, events, teams, notifications) is faked.
+              </p>
+
+              {isDemoMode && (
+                <div className="admin-notice mb-3" style={{ borderColor: "var(--g-accent)", color: "var(--g-accent)" }}>
+                  <FlaskConical size={13} />
+                  <span className="text-11">Demo mode is ON — all activity data is synthetic</span>
+                </div>
+              )}
+
+              <div className="meta-rows">
+                <div className="meta-row" style={{ alignItems: "center" }}>
+                  <span className="text-muted text-11">Demo mode</span>
+                  <label className="demo-toggle" style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={isDemoMode}
+                      onChange={() => {
+                        toggleDemo();
+                        setTimeout(() => window.location.reload(), 150);
+                      }}
+                      style={{ display: "none" }}
+                    />
+                    <span
+                      className="demo-toggle-track"
+                      style={{
+                        display: "inline-flex",
+                        width: "2.2rem",
+                        height: "1.2rem",
+                        borderRadius: 99,
+                        background: isDemoMode ? "var(--g-accent)" : "var(--g-border)",
+                        position: "relative",
+                        transition: "background 0.15s",
+                      }}
+                    >
+                      <span style={{
+                        position: "absolute",
+                        top: "0.15rem",
+                        left: isDemoMode ? "calc(100% - 1.05rem)" : "0.15rem",
+                        width: "0.9rem",
+                        height: "0.9rem",
+                        borderRadius: 99,
+                        background: "white",
+                        transition: "left 0.15s",
+                      }} />
+                    </span>
+                    <span className="text-sm">{isDemoMode ? "On" : "Off"}</span>
+                  </label>
+                </div>
+              </div>
+
+              <p className="text-muted" style={{ fontSize: "0.68rem", marginTop: "1rem" }}>
+                Toggling will reload the page. Disable to return to live data.
+              </p>
             </div>
           )}
 

@@ -2,6 +2,7 @@
 // Copyright (c) 2026 CommonHuman-Lab
 import axios from "axios";
 import { useUserStore } from "@/stores/user.store";
+import { installDemoInterceptor } from "@/lib/demo/interceptor";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -64,3 +65,5 @@ apiClient.interceptors.response.use(
     }
   }
 );
+
+installDemoInterceptor(apiClient);
