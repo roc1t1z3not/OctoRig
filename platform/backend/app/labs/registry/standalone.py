@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 CommonHuman-Lab
 from ._types import ChallengeDef
 
 STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]

@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* Copyright (c) 2026 CommonHuman-Lab */
 /* ────────────────────────────────────────────────────────────────────────────
    Shared page-layout classes used across all (app) pages.
    Imported once in the root layout so every page has access.

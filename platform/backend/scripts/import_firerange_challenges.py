@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 CommonHuman-Lab
 """
 Import BreachSQL, StingXSS, and VaultGate challenge registries into the
 platform challenge engine.

@@ -1,4 +1,6 @@
 "use client";
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
 import { useState } from "react";
 import { Lightbulb, Eye, EyeOff } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";

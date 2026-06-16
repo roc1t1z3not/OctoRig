@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
 import { Crosshair } from "lucide-react";
 import type { ScoreboardEntry } from "@/lib/api/challenges";
 

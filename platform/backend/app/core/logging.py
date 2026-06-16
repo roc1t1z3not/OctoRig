@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 CommonHuman-Lab
 """Structured JSON logging configuration.
 
 Call configure_logging() once at process startup (main.py, celery_app.py).

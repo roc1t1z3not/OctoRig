@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* Copyright (c) 2026 CommonHuman-Lab */
 /* page.tsx */
 
 .ch-card { display: flex; flex-direction: column; gap: 0.5rem; cursor: pointer; text-decoration: none; color: inherit; }

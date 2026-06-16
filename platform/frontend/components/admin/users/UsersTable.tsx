@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
 import Link from "next/link";
 import { ShieldCheck, ShieldOff, RotateCcw } from "lucide-react";
 import type { AdminUser } from "@/lib/api/admin";

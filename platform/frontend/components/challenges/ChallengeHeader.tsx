@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
 import Link from "next/link";
 import { CheckCircle2, Clock, Target, Flag, Droplets, FlaskConical, ExternalLink } from "lucide-react";
 import type { ChallengeDetail } from "@/lib/api/challenges";

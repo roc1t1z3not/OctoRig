@@ -1,4 +1,6 @@
 "use client";
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
 import { Calendar, Save, X } from "lucide-react";
 import {
   type CtfEvent, type EventVisibility, type EventScoringMode,

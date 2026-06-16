@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
 import { clsx } from "clsx";
 
 type Status = "starting" | "running" | "stopping" | "stopped" | "error";

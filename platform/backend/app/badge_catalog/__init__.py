@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 CommonHuman-Lab
 from .competition import COMPETITION_BADGES
 from .milestone import MILESTONE_BADGES
 from .skill_idor import IDOR_BADGES

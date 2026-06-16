@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 CommonHuman-Lab
 """Add site_settings singleton table for platform-wide configuration.
 
 Revision ID: add_site_settings

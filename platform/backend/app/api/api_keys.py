@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 CommonHuman-Lab
 from fastapi import APIRouter, Depends, Request
 
 from app.api.deps import get_current_user_or_api_key

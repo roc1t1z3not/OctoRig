@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
 import { Trash2 } from "lucide-react";
 import type { TeamMember, TeamRole } from "@/lib/api/teams";
 import { TEAM_ROLES } from "@/lib/api/teams";

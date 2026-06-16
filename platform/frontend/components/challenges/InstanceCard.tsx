@@ -1,4 +1,6 @@
 "use client";
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
 import { useState } from "react";
 import { Container, Clock, Trash2, Copy } from "lucide-react";
 import { type Deployment } from "@/lib/api/deployments";

@@ -1,4 +1,6 @@
 "use client";
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
 import { Clock, ExternalLink, Flag, Globe, Lock, Users } from "lucide-react";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { type Deployment } from "@/lib/api/deployments";

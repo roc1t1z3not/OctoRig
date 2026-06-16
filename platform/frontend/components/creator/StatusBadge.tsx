@@ -1,4 +1,6 @@
 "use client";
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
 import type { ContentStatus } from "@/lib/api/content";
 
 const STATUS_STYLE: Record<ContentStatus, { bg: string; color: string }> = {

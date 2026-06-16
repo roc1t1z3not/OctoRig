@@ -1,4 +1,6 @@
 "use client";
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
 import { useState } from "react";
 import { Edit3, FileText } from "lucide-react";
 import type { ContentSubmission } from "@/lib/api/content";

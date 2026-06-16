@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
 const DT_OPTS: Intl.DateTimeFormatOptions = {
   year: "numeric",
   month: "2-digit",

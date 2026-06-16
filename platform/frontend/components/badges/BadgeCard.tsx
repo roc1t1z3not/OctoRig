@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
 import { CheckCircle2 } from "lucide-react";
 import type { Badge } from "@/lib/api/badges";
 import { formatDate } from "@/lib/utils/date";

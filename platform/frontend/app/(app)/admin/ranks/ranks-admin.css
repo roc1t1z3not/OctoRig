@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* Copyright (c) 2026 CommonHuman-Lab */
 .ranks-grid {
   display: grid;
   grid-template-columns: 1fr 340px;

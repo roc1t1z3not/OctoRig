@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
 import Link from "next/link";
 import type { ScoreboardEntry } from "@/lib/api/challenges";
 import type { Rank } from "@/lib/api/ranks";

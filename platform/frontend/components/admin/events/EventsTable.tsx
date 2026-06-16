@@ -1,4 +1,6 @@
 "use client";
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
 import { ChevronRight, Globe, Link2, Lock } from "lucide-react";
 import {
   type CtfEvent, type EventStatus, type EventVisibility,

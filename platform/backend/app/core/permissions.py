@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 CommonHuman-Lab
 """
 RBAC permission constants and checking functions.
 All functions are pure (no DB calls) — call sites must resolve memberships first.

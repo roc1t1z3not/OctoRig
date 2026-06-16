@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 CommonHuman-Lab
 """
 Complete database schema initialization with all tables, enums, indexes, and constraints needed for the application.
 """

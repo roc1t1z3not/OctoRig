@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 CommonHuman-Lab
 """Add refresh_tokens table for persistent sessions.
 
 Revision ID: add_refresh_tokens

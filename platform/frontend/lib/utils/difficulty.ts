@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
 import type { ChallengeDifficulty } from "@/lib/api/challenges";
 
 export const DIFF_COLOR: Record<ChallengeDifficulty, string> = {

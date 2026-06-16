@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 CommonHuman-Lab
 """Add lab_template_id to challenges
 
 Revision ID: add_challenge_lab_tmpl

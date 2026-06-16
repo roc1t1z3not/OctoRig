@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 CommonHuman-Lab
 from app.models.api_key import ApiKey
 from app.models.audit_log import AuditLog
 from app.models.badge import AchievementRule, AchievementRuleType, BadgeDefinition, UserBadge
