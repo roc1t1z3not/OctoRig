@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<h2>Operator Roster</h2>
+<table class="data">
+  <thead><tr><th>ID</th><th>Username</th><th>Role</th><th>Zone</th><th>API token</th><th>Notes</th></tr></thead>
+  <tbody>
+  {% for o in operators %}
+    <tr>
+      <td>{{ o.id }}</td>
+      <td>{{ o.username }}</td>
+      <td>{{ o.role }}</td>
+      <td>{{ o.zone_id }}</td>
+      <td><code>{{ o.api_token }}</code></td>
+      <td>{{ o.notes }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

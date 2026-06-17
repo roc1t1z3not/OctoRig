@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}Devices{% endblock %}
+{% block content %}
+<h2>Field Devices</h2>
+<p class="muted">Poll a device's status endpoint, push config, or reboot from its detail page.</p>
+
+<div class="toolbox">
+  <h3>Device Status Poller</h3>
+  <p class="muted">Fetches a device status URL server-side and shows the response.</p>
+  <form method="post" action="{{ url_for('device_poll') }}" class="inline-form">
+    <input type="text" name="url" placeholder="http://10.20.1.10/status" size="48">
+    <button class="btn btn-sm" type="submit">Poll</button>
+  </form>
+</div>
+
+<table class="data">
+  <thead><tr><th>ID</th><th>Device</th><th>Zone</th><th>Type</th><th>Mgmt IP</th><th>State</th></tr></thead>
+  <tbody>
+  {% for d in devices %}
+    <tr>
+      <td>{{ d.id }}</td>
+      <td><a href="{{ url_for('device_detail', device_id=d.id) }}">{{ d.name }}</a></td>
+      <td>{{ d.zone_id }}</td>
+      <td>{{ d.dtype }}</td>
+      <td><code>{{ d.mgmt_ip }}</code></td>
+      <td><span class="badge badge-{{ d.state }}">{{ d.state }}</span></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

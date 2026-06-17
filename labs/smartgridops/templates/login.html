@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}Operator Login{% endblock %}
+{% block content %}
+<section class="narrow">
+  <h2>Operator Login</h2>
+  {% if error %}<div class="alert alert-bad">{{ error }}</div>{% endif %}
+  <form method="post" action="{{ url_for('login') }}">
+    <input type="hidden" name="next" value="{{ next }}">
+    <label>Operator ID
+      <input type="text" name="username" autofocus autocomplete="off">
+    </label>
+    <label>Passphrase
+      <input type="password" name="password" autocomplete="off">
+    </label>
+    <button class="btn" type="submit">Connect to SCADA</button>
+  </form>
+  <p class="muted">Demo operator: <code>demo</code> / <code>demo</code></p>
+</section>
+{% endblock %}

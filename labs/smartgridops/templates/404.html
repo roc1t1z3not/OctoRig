@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}404{% endblock %}
+{% block content %}
+<section class="narrow center">
+  <h2>404 — Not Found</h2>
+  <p class="muted">No such record on the grid.</p>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-sm">Back to dashboard</a>
+</section>
+{% endblock %}

@@ -1,0 +1,206 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later
+   Copyright (c) 2026 CommonHuman-Lab
+   Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not
+   SmartGridOps — SCADA grid-control theme (dark, neon green/amber) */
+
+:root {
+  --bg: #0a0f0d;
+  --panel: #101814;
+  --panel-2: #16211c;
+  --line: #1f3329;
+  --green: #39ff7a;
+  --green-dim: #2bbf5d;
+  --amber: #ffd166;
+  --red: #ff5c5c;
+  --text: #d6e6dd;
+  --muted: #6b8f7f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+a { color: var(--green); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { color: var(--amber); font-family: "Consolas", "Menlo", monospace; }
+.amber { color: var(--amber); }
+.muted { color: var(--muted); }
+.center { text-align: center; }
+
+.ticker-bar {
+  background: #060a08;
+  color: var(--green-dim);
+  font-family: monospace;
+  font-size: 13px;
+  border-bottom: 1px solid var(--line);
+  padding: 4px 0;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  padding: 0.8rem 1.4rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+nav a { color: var(--text); font-size: 14px; }
+nav a:hover { color: var(--green); text-decoration: none; }
+.nav-logo {
+  font-weight: 800;
+  letter-spacing: 1px;
+  font-size: 18px;
+  color: var(--green);
+}
+.nav-logo span { color: var(--amber); }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 0.9rem; }
+.op-name { color: var(--muted); font-size: 13px; }
+.status-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  display: inline-block;
+}
+
+main { max-width: 1000px; margin: 1.8rem auto; padding: 0 1.4rem; }
+
+h1 { font-size: 2rem; margin: 0 0 0.6rem; }
+h2 { font-size: 1.5rem; border-bottom: 1px solid var(--line); padding-bottom: 0.4rem; }
+h3 { font-size: 1.15rem; color: var(--green-dim); margin-top: 1.6rem; }
+
+.hero { padding: 2rem 0 1rem; }
+.lede { color: var(--muted); max-width: 640px; }
+.hero-actions { margin-top: 1.2rem; }
+
+.btn {
+  display: inline-block;
+  background: var(--green);
+  color: #04130a;
+  font-weight: 700;
+  padding: 0.55rem 1.1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.btn:hover { background: #57ff90; text-decoration: none; }
+.btn-sm { padding: 0.32rem 0.7rem; font-size: 13px; }
+.btn-amber { background: var(--amber); color: #1a1404; }
+.btn-amber:hover { background: #ffdd85; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1.1rem;
+}
+.card h3 { margin-top: 0; }
+
+.toolbox {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--green);
+  border-radius: 5px;
+  padding: 1rem 1.1rem;
+  margin: 1rem 0;
+}
+
+.stat-row { display: flex; gap: 1rem; margin: 1.2rem 0; flex-wrap: wrap; }
+.stat {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.9rem 1.3rem;
+  min-width: 120px;
+  text-align: center;
+}
+.stat-num { display: block; font-size: 1.7rem; font-weight: 800; color: var(--green); }
+.stat-label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+
+table.data { width: 100%; border-collapse: collapse; margin: 0.8rem 0; }
+table.data th, table.data td {
+  text-align: left;
+  padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+table.data th { color: var(--green-dim); text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+table.data tr:hover td { background: var(--panel); }
+
+table.kv { border-collapse: collapse; margin: 0.8rem 0; }
+table.kv th, table.kv td { text-align: left; padding: 0.4rem 1rem 0.4rem 0; vertical-align: top; }
+table.kv th { color: var(--muted); font-weight: 600; white-space: nowrap; }
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid var(--line);
+}
+.badge-nominal, .badge-online { color: var(--green); border-color: var(--green-dim); }
+.badge-elevated { color: var(--amber); border-color: var(--amber); }
+.badge-critical, .badge-offline { color: var(--red); border-color: var(--red); }
+
+.inline-form { display: flex; gap: 0.6rem; align-items: flex-end; flex-wrap: wrap; }
+label { display: block; font-size: 13px; color: var(--muted); }
+input, select {
+  background: #0c1410;
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 0.45rem 0.6rem;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-top: 0.2rem;
+}
+input:focus, select:focus { outline: none; border-color: var(--green); }
+.narrow { max-width: 440px; margin: 1.5rem auto; }
+.narrow form label { margin-bottom: 0.8rem; }
+.narrow form input { width: 100%; }
+.narrow button { margin-top: 0.5rem; }
+
+.console {
+  background: #060a08;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.9rem;
+  color: var(--green);
+  font-family: monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+}
+.meta-row { display: flex; gap: 1.5rem; color: var(--muted); font-size: 13px; margin: 0.6rem 0; }
+
+.alert {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--green);
+  padding: 0.7rem 1rem;
+  border-radius: 4px;
+  margin: 1rem 0;
+}
+.alert-bad { border-left-color: var(--red); color: #ffb3b3; }
+.alert-flag { border-left-color: var(--amber); color: var(--amber); font-family: monospace; }
+
+footer {
+  margin-top: 3rem;
+  padding: 1.4rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  border-top: 1px solid var(--line);
+}

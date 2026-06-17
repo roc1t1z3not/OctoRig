@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}{{ zone.name }}{% endblock %}
+{% block content %}
+<h2>{{ zone.name }} <span class="badge badge-{{ zone.status }}">{{ zone.status }}</span></h2>
+<table class="kv">
+  <tr><th>Region</th><td>{{ zone.region }}</td></tr>
+  <tr><th>Assigned operator</th><td>{{ operator.full_name if operator else '—' }} ({{ operator.username if operator else '?' }})</td></tr>
+  <tr><th>Load</th><td>{{ '%.1f'|format(zone.load_mw) }} MW</td></tr>
+  <tr><th>Capacity</th><td>{{ '%.1f'|format(zone.capacity_mw) }} MW</td></tr>
+  {% if zone.secret_note %}
+  <tr><th>Restricted note</th><td class="amber">{{ zone.secret_note }}</td></tr>
+  {% endif %}
+</table>
+
+<h3>Devices in this zone</h3>
+<table class="data">
+  <thead><tr><th>ID</th><th>Device</th><th>Type</th><th>Mgmt IP</th><th>State</th></tr></thead>
+  <tbody>
+  {% for d in devices %}
+    <tr>
+      <td>{{ d.id }}</td>
+      <td><a href="{{ url_for('device_detail', device_id=d.id) }}">{{ d.name }}</a></td>
+      <td>{{ d.dtype }}</td>
+      <td><code>{{ d.mgmt_ip }}</code></td>
+      <td><span class="badge badge-{{ d.state }}">{{ d.state }}</span></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<p><a href="{{ url_for('zones') }}">&larr; All zones</a></p>
+{% endblock %}

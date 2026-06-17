@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}{{ device.name }}{% endblock %}
+{% block content %}
+<h2>{{ device.name }}</h2>
+<table class="kv">
+  <tr><th>Device ID</th><td>{{ device.id }}</td></tr>
+  <tr><th>Type</th><td>{{ device.dtype }}</td></tr>
+  <tr><th>Zone</th><td>{{ device.zone_id }}</td></tr>
+  <tr><th>Mgmt IP</th><td><code>{{ device.mgmt_ip }}</code></td></tr>
+  <tr><th>Status URL</th><td><code>{{ device.status_url }}</code></td></tr>
+  <tr><th>Firmware</th><td>{{ device.firmware }}</td></tr>
+  <tr><th>State</th><td><span class="badge badge-{{ device.state }}">{{ device.state }}</span></td></tr>
+</table>
+
+<div class="grid-2">
+  <div class="toolbox">
+    <h3>Reboot Device</h3>
+    <p class="muted">Pings the management target before queuing a reboot signal.</p>
+    <form method="post" action="{{ url_for('device_reboot', device_id=device.id) }}" class="inline-form">
+      <input type="text" name="target" value="{{ device.mgmt_ip }}" size="28">
+      <button class="btn btn-sm btn-amber" type="submit">Ping &amp; Reboot</button>
+    </form>
+  </div>
+  <div class="toolbox">
+    <h3>Config Push</h3>
+    <form method="post" action="{{ url_for('device_config_push', device_id=device.id) }}" class="inline-form">
+      <input type="text" name="key" value="setpoint" size="14">
+      <input type="text" name="value" placeholder="value" size="14">
+      <button class="btn btn-sm" type="submit">Push</button>
+    </form>
+  </div>
+</div>
+
+{% if error %}<div class="alert alert-bad">{{ error }}</div>{% endif %}
+{% if output is not none %}
+  <h3>{{ 'Reboot' if result == 'reboot' else 'Config Push' }} Output</h3>
+  <pre class="console">{{ output }}</pre>
+{% endif %}
+
+<p><a href="{{ url_for('devices') }}">&larr; All devices</a></p>
+{% endblock %}

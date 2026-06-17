@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}MQTT Console{% endblock %}
+{% block content %}
+<h2>MQTT Command Dispatch</h2>
+<p class="muted">Your zone command topic: <code>{{ own_topic }}</code></p>
+
+<div class="toolbox">
+  <form method="post" action="{{ url_for('mqtt_console') }}" class="inline-form">
+    <label>Topic
+      <input type="text" name="topic" value="{{ own_topic }}" size="34">
+    </label>
+    <label>Payload
+      <input type="text" name="payload" placeholder='{"cmd":"status"}' size="28">
+    </label>
+    <button class="btn btn-sm" type="submit">Publish</button>
+  </form>
+</div>
+
+{% if result %}<div class="alert">Published to <code>{{ result.topic }}</code>: {{ result.payload }}</div>{% endif %}
+{% if flag %}<div class="alert alert-flag">Broker ACL audit tripped (cross-zone / wildcard publish) — {{ flag }}</div>{% endif %}
+
+<h3>Broker Log</h3>
+<table class="data">
+  <thead><tr><th>#</th><th>Topic</th><th>Payload</th><th>By</th><th>When</th></tr></thead>
+  <tbody>
+  {% for m in log %}
+    <tr><td>{{ m.id }}</td><td><code>{{ m.topic }}</code></td><td>{{ m.payload }}</td><td>{{ m.published_by }}</td><td>{{ m.created_at }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

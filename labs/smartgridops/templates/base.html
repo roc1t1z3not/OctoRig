@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!-- Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SmartGridOps{% endblock %} — Grid Control</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="ticker-bar">
+  <marquee>:: SMARTGRIDOPS SCADA :: City load 702 MW / 940 MW capacity :: Zone 4 (Harbor) CRITICAL :: Demand-response window open :: MQTT ingest nominal :: Frequency 49.98 Hz :: Author: roc1t1z3not ::</marquee>
+</div>
+<nav>
+  <a class="nav-logo" href="{{ url_for('index') }}">SMART<span>GRID</span>OPS</a>
+  {% set u = current_user() %}
+  {% if u %}
+  <a href="{{ url_for('dashboard') }}">Dashboard</a>
+  <a href="{{ url_for('zones') }}">Zones</a>
+  <a href="{{ url_for('devices') }}">Devices</a>
+  <a href="{{ url_for('meters') }}">Meters</a>
+  <a href="{{ url_for('credits') }}">Credits</a>
+  <a href="{{ url_for('mqtt_console') }}">MQTT</a>
+  {% endif %}
+  <div class="nav-right">
+    {% if u %}
+      <span class="status-dot"></span>
+      <span class="op-name">{{ (u.full_name if u.full_name else u.username) | safe }}</span>
+      {% if u.is_admin %}<a href="{{ url_for('admin_index') }}" class="amber">Admin</a>{% endif %}
+      <a href="{{ url_for('logout') }}" class="btn btn-sm btn-amber">Sign out</a>
+    {% else %}
+      <a href="{{ url_for('login') }}" class="btn btn-sm">Operator Login</a>
+    {% endif %}
+  </div>
+</nav>
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer>
+  <p>SmartGridOps &mdash; Smart City Power Grid Control Platform</p>
+  <p style="margin-top:0.3rem;">Lab author: <a href="https://github.com/roc1t1z3not" target="_blank">roc1t1z3not</a> &middot; Made with <a href="https://github.com/CommonHuman-Lab" target="_blank">CommonHuman-Lab</a></p>
+</footer>
+<!--
+     ___
+    /   \     CommonHuman-Lab
+   | o_o |    Security Training Labs
+    \___/     Lab: SmartGridOps
+   /|   |\    Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not
+  (_)   (_)
+-->
+<script>console.log('%c\u{1F419} OctoRig | Lab: SmartGridOps | Author: roc1t1z3not | Happy hacking!','color:#39ff7a;font-size:14px;font-weight:bold;');</script>
+</body>
+</html>

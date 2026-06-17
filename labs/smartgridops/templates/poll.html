@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}Device Poller{% endblock %}
+{% block content %}
+<h2>Device Status Poller</h2>
+<form method="post" action="{{ url_for('device_poll') }}" class="inline-form">
+  <input type="text" name="url" value="{{ url }}" placeholder="http://10.20.1.10/status" size="56">
+  <button class="btn" type="submit">Poll</button>
+</form>
+
+{% if error %}<div class="alert alert-bad">{{ error }}</div>{% endif %}
+{% if result %}
+  <div class="meta-row">
+    <span>HTTP {{ result.status }}</span>
+    <span>{{ result.size }} bytes</span>
+  </div>
+  <h3>Response</h3>
+  <pre class="console">{{ result.preview }}</pre>
+{% endif %}
+
+<p><a href="{{ url_for('devices') }}">&larr; Devices</a></p>
+{% endblock %}
