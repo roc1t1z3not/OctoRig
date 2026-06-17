@@ -87,7 +87,36 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <TopBar />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-y-auto" style={{ paddingBottom: 28 }}>{children}</main>
+      </div>
+      <div
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: "13rem",
+          right: 0,
+          height: 28,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 10,
+        }}
+      >
+        <a
+          href="https://github.com/CommonHuman-Lab"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            fontSize: "0.5625rem",
+            fontFamily: "var(--font-mono, monospace)",
+            letterSpacing: "0.06em",
+            color: "var(--g-text-muted)",
+            textDecoration: "none",
+            opacity: 0.55,
+          }}
+        >
+          By CommonHuman
+        </a>
       </div>
       <Notifications />
       <ConfirmModal />

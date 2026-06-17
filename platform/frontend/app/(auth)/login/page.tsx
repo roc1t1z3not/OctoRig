@@ -26,7 +26,6 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const token = await login(username, password);
-      // Temporarily set token so getMe() can use the interceptor
       useUserStore.getState().setAccessToken(token.access_token);
       const user = await getMe();
       setSession(user, token.access_token);
@@ -71,6 +70,26 @@ export default function LoginPage() {
           </button>
         </form>
       </div>
+
+      <a
+        href="https://github.com/CommonHuman-Lab"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          position: "fixed",
+          bottom: 16,
+          left: "50%",
+          transform: "translateX(-50%)",
+          fontSize: "0.5625rem",
+          fontFamily: "var(--font-mono, monospace)",
+          letterSpacing: "0.06em",
+          color: "var(--g-text-muted)",
+          textDecoration: "none",
+          opacity: 0.55,
+        }}
+      >
+        By CommonHuman
+      </a>
     </div>
   );
 }
