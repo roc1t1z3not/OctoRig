@@ -11,10 +11,15 @@ from app.api.deps import get_db, require_admin
 from app.core.exceptions import bad_request, conflict, not_found
 from app.core.security import hash_password
 from app.models.api_key import ApiKey
+from app.models.assessment import AssessmentInvite, AssessmentReport
 from app.models.audit_log import AuditLog
+from app.models.badge import UserBadge
 from app.models.challenge import ChallengeSubmission, HintUnlock
+from app.models.ctf_event import EventRegistration
 from app.models.deployment import Deployment, DeploymentStatus
+from app.models.notification import Notification
 from app.models.rank import Rank
+from app.models.refresh_token import RefreshToken
 from app.models.scheduled_action import ScheduledAction, ScheduledActionStatus
 from app.models.scoring import ScoreTransaction
 from app.models.team import Team, TeamMember
@@ -222,13 +227,20 @@ def reset_database(
     actor: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ) -> None:
-    """Wipe all user-generated data, keeping accounts, teams, labs and challenges."""
-    db.query(ScoreTransaction).delete()
+    """Wipe all user-generated activity, keeping accounts, teams, labs, challenges and assessment config."""
+    # Child tables first (FK constraints)
+    db.query(AssessmentReport).delete()
+    db.query(AssessmentInvite).delete()
     db.query(ChallengeSubmission).delete()
     db.query(HintUnlock).delete()
-    db.query(AuditLog).delete()
+    db.query(ScoreTransaction).delete()
+    db.query(UserBadge).delete()
+    db.query(EventRegistration).delete()
+    db.query(Notification).delete()
     db.query(Deployment).delete()
     db.query(ScheduledAction).delete()
+    db.query(RefreshToken).delete()
+    db.query(AuditLog).delete()
     db.commit()
     audit_service.write_audit(
         db, action="admin.reset_db", user_id=actor.id,

@@ -29,7 +29,7 @@ export function BrandingSection({
         control={
           <input
             className="g-input g-input-sm"
-            style={{ minWidth: 240 }}
+            style={{ width: 220 }}
             placeholder="e.g. Acme Security"
             value={branding.company_name ?? ""}
             onChange={(e) => onChange({ company_name: e.target.value || null })}
@@ -43,7 +43,7 @@ export function BrandingSection({
         control={
           <input
             className="g-input g-input-sm"
-            style={{ minWidth: 240 }}
+            style={{ width: 220 }}
             placeholder="https://example.com/logo.png"
             value={branding.company_logo_url ?? ""}
             onChange={(e) => onChange({ company_logo_url: e.target.value || null })}

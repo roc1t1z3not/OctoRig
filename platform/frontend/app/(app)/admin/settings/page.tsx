@@ -87,7 +87,7 @@ export default function AdminSettingsPage() {
   function handleResetDb() {
     confirm({
       title: "Reset entire database?",
-      body: "This will permanently delete ALL challenge submissions, scores, hint unlocks, deployments, and audit logs for every user. Lab templates, challenges, and accounts are kept. This cannot be undone.",
+      body: "This will permanently delete ALL submissions, scores, hint unlocks, badges, event registrations, assessment invites & reports, deployments, notifications, sessions, and audit logs. Accounts, teams, labs, challenges, events, and assessment configs are kept. This cannot be undone.",
       confirmLabel: "Reset Database",
       dangerous: true,
       onConfirm: () => resetDbMutation.mutate(),
