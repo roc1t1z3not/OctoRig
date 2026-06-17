@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}Energy Credits{% endblock %}
+{% block content %}
+<h2>Demand-Response Energy Credits</h2>
+
+<div class="stat-row">
+  <div class="stat"><span class="stat-num">{{ '%.2f'|format(balance) }}</span><span class="stat-label">your credit balance</span></div>
+</div>
+
+{% if message %}<div class="alert">{{ message }}</div>{% endif %}
+{% if flag %}<div class="alert alert-flag">Reconciliation alarm: balance exceeds {{ threshold }} — {{ flag }}</div>{% endif %}
+
+<div class="toolbox">
+  <h3>Transfer Credits</h3>
+  <p class="muted">Move demand-response credits to another operator.</p>
+  <form method="post" action="{{ url_for('credits') }}" class="inline-form">
+    <label>To operator
+      <select name="to_operator">
+        {% for o in operators %}
+          <option value="{{ o.id }}">{{ o.id }} — {{ o.full_name or o.username }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Amount
+      <input type="text" name="amount" placeholder="100">
+    </label>
+    <button class="btn btn-sm" type="submit">Transfer</button>
+  </form>
+</div>
+
+<h3>Recent Ledger</h3>
+<table class="data">
+  <thead><tr><th>#</th><th>Delta</th><th>Reason</th><th>When</th></tr></thead>
+  <tbody>
+  {% for l in ledger %}
+    <tr><td>{{ l.id }}</td><td>{{ '%.2f'|format(l.delta) }}</td><td>{{ l.reason }}</td><td>{{ l.created_at }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

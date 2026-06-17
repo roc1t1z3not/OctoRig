@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}403{% endblock %}
+{% block content %}
+<section class="narrow center">
+  <h2>403 — Forbidden</h2>
+  <p class="muted">Admin clearance required for the operator roster.</p>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-sm">Back to dashboard</a>
+</section>
+{% endblock %}

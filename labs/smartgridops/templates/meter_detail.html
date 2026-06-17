@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}{{ meter.serial }}{% endblock %}
+{% block content %}
+<h2>Meter {{ meter.serial }}</h2>
+<table class="kv">
+  <tr><th>Meter ID</th><td>{{ meter.id }}</td></tr>
+  <tr><th>Zone</th><td>{{ meter.zone_id }}</td></tr>
+  <tr><th>Customer</th><td>{{ meter.customer }}</td></tr>
+  <tr><th>Service address</th><td>{{ meter.address }}</td></tr>
+  <tr><th>Tariff</th><td>{{ meter.tariff }}</td></tr>
+  <tr><th>Reading</th><td>{{ '%.1f'|format(meter.reading_kwh) }} kWh</td></tr>
+  <tr><th>Last seen</th><td>{{ meter.last_seen }}</td></tr>
+</table>
+<p><a href="{{ url_for('meters') }}">&larr; Meters</a></p>
+{% endblock %}

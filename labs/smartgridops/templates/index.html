@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}SmartGridOps — Control Room{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="eyebrow">// Smart City Grid Operations Center</div>
+  <h1>SmartGridOps <span class="amber">Control Room</span></h1>
+  <p class="lede">Unified SCADA console for smart-city energy distribution — live zone telemetry, field-device management, smart-meter data, demand-response credits, and MQTT command dispatch across the city grid.</p>
+  <div class="hero-actions">
+    <a href="{{ url_for('login') }}" class="btn">Operator Login &rarr;</a>
+  </div>
+</section>
+
+<section class="grid-3">
+  <div class="card">
+    <h3>Grid Zones</h3>
+    <p class="muted">Live load, capacity, and alarm status across every distribution zone in the city.</p>
+  </div>
+  <div class="card">
+    <h3>Field Devices</h3>
+    <p class="muted">Transformers, reclosers, EV charger banks and inverters. Poll status, push config, reboot.</p>
+  </div>
+  <div class="card">
+    <h3>MQTT Dispatch</h3>
+    <p class="muted">Publish control commands to zone topics over the grid message bus in real time.</p>
+  </div>
+</section>
+
+<p class="muted center" style="font-family:var(--font-mono);font-size:12px;letter-spacing:1px;">OPERATIONS CONSOLE v3.2 &middot; AUTHORISED GRID OPERATORS ONLY</p>
+{% endblock %}

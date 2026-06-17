@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<!-- Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SmartGridOps{% endblock %} — Grid Command</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="scanlines"></div>
+{% set u = current_user() %}
+{% set ep = request.endpoint %}
+
+<header class="topbar">
+  <a class="brand" href="{{ url_for('index') }}">
+    <span class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+    </span>
+    <span class="name">SMART<span>GRID</span>OPS</span>
+    <span class="ver">v3.2 SCADA</span>
+  </a>
+
+  <div class="telemetry">
+    <span class="tele">GRID FREQ<b>49.98 Hz</b></span>
+    <span class="tele">SYS LOAD<b>702 MW</b></span>
+    <span class="tele warn">RESERVE<b>23%</b></span>
+    <span class="tele crit">ALARMS<b>Z4 CRIT</b></span>
+  </div>
+
+  <div class="session">
+    {% if u %}
+      <span class="status-dot" title="link active"></span>
+      <span class="op-name">{{ (u.full_name if u.full_name else u.username) | safe }}</span>
+      <span class="role-pill">{{ u.role }}</span>
+      <a href="{{ url_for('logout') }}" class="btn btn-sm btn-amber">Sign out</a>
+    {% else %}
+      <span class="status-dot" style="background:var(--muted);animation:none" title="offline"></span>
+      <a href="{{ url_for('login') }}" class="btn btn-sm">Operator Login</a>
+    {% endif %}
+  </div>
+</header>
+
+<div class="shell {{ '' if u else 'no-side' }}">
+  {% if u %}
+  <aside class="sidebar">
+    <div class="side-label">Operations</div>
+    <a class="side-link {{ 'active' if ep == 'dashboard' else '' }}" href="{{ url_for('dashboard') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      Dashboard
+    </a>
+    <a class="side-link {{ 'active' if ep in ['zones','zone_detail'] else '' }}" href="{{ url_for('zones') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8 12 14 2 8 12 2"/><polyline points="2 16 12 22 22 16"/></svg>
+      Zones
+    </a>
+    <a class="side-link {{ 'active' if ep in ['devices','device_detail','device_poll','device_reboot','device_config_push'] else '' }}" href="{{ url_for('devices') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="1"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/></svg>
+      Devices
+    </a>
+    <a class="side-link {{ 'active' if ep in ['meters','meter_detail'] else '' }}" href="{{ url_for('meters') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 18 0"/><path d="M3 12h18"/><path d="m12 12 5-3"/></svg>
+      Meters
+    </a>
+    <div class="side-label">Markets &amp; Bus</div>
+    <a class="side-link {{ 'active' if ep == 'credits' else '' }}" href="{{ url_for('credits') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+      Energy Credits
+    </a>
+    <a class="side-link {{ 'active' if ep == 'mqtt_console' else '' }}" href="{{ url_for('mqtt_console') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8a6 6 0 0 1 0 8.4M7.8 16.2a6 6 0 0 1 0-8.4M19 5a10 10 0 0 1 0 14M5 19A10 10 0 0 1 5 5"/></svg>
+      MQTT Dispatch
+    </a>
+    {% if u.is_admin %}
+    <div class="side-label">Admin</div>
+    <a class="side-link {{ 'active' if ep == 'admin_index' else '' }}" href="{{ url_for('admin_index') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4z"/></svg>
+      Operator Roster
+    </a>
+    {% endif %}
+    <div class="side-foot">
+      CommonHuman-Lab<br>
+      Lab author:<br><a href="https://github.com/roc1t1z3not" target="_blank">roc1t1z3not</a>
+    </div>
+  </aside>
+  {% endif %}
+
+  <main>
+    {% if u %}
+    <div class="ticker">
+      <marquee>:: SMARTGRIDOPS SCADA :: City load 702 MW / 940 MW :: Zone 4 (Harbor) CRITICAL :: Demand-response window OPEN :: MQTT ingest nominal :: Frequency 49.98 Hz :: Reserve margin 23% :: Lab author: roc1t1z3not ::</marquee>
+    </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+<footer>
+  SmartGridOps — Smart City Power Grid Control Platform &middot;
+  Lab author: <a href="https://github.com/roc1t1z3not" target="_blank">roc1t1z3not</a> &middot;
+  Made with <a href="https://github.com/CommonHuman-Lab" target="_blank">CommonHuman-Lab</a>
+</footer>
+<!--
+     ___
+    /   \     CommonHuman-Lab
+   | o_o |    Security Training Labs
+    \___/     Lab: SmartGridOps
+   /|   |\    Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not
+  (_)   (_)
+-->
+<script>console.log('%c\u{1F419} OctoRig | Lab: SmartGridOps | Author: roc1t1z3not | Happy hacking!','color:#2dff9e;font-size:14px;font-weight:bold;');</script>
+</body>
+</html>

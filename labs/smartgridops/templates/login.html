@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}Operator Login{% endblock %}
+{% block content %}
+<section class="narrow">
+  <div class="card auth-card">
+    <div class="auth-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+    </div>
+    <h2 style="justify-content:center">Operator Login</h2>
+    <p class="muted center" style="margin-top:-.4rem">Authenticate to the SCADA control plane</p>
+    {% if error %}<div class="alert alert-bad">{{ error }}</div>{% endif %}
+    <form method="post" action="{{ url_for('login') }}">
+      <input type="hidden" name="next" value="{{ next }}">
+      <label>Operator ID
+        <input type="text" name="username" autofocus autocomplete="off" placeholder="operator">
+      </label>
+      <label>Passphrase
+        <input type="password" name="password" autocomplete="off" placeholder="••••••••">
+      </label>
+      <button class="btn" type="submit">Connect to SCADA</button>
+    </form>
+    <p class="muted center" style="margin-top:1rem;font-size:12px">Demo operator: <code>demo</code> / <code>demo</code></p>
+  </div>
+</section>
+{% endblock %}
