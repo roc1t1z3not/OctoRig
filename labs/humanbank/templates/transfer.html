@@ -4,13 +4,19 @@
 <div class="container" style="max-width:640px;">
   <div class="page-header">
     <h1>TRANSFER FUNDS</h1>
-    <p>Move money between accounts</p>
+    <p>Move money between accounts &mdash; <a href="{{ url_for('transfer_limit') }}" style="color:var(--accent);font-size:0.82rem;">Limit settings</a></p>
   </div>
+
+  <div class="panel" style="margin-bottom:1rem;font-size:0.82rem;color:var(--muted);display:flex;justify-content:space-between;">
+    <span>Daily limit: <strong style="color:var(--text);">${{ "%.2f" | format(daily_limit) }}</strong></span>
+    <span>Spent today: <strong style="color:var(--text);">${{ "%.2f" | format(today_spent) }}</strong></span>
+    <span>Remaining: <strong style="color:var(--accent);">${{ "%.2f" | format([daily_limit - today_spent, 0] | max) }}</strong></span>
+  </div>
+
+  <div id="error-box" class="alert alert-danger" style="display:none;"></div>
+
   <div class="panel">
-    {% if error %}
-    <div class="alert alert-danger">{{ error }}</div>
-    {% endif %}
-    <form method="post">
+    <form id="transfer-form">
       <div class="form-group">
         <label>From Account</label>
         <select name="from_account_id" required>
@@ -21,19 +27,81 @@
         </select>
       </div>
       <div class="form-group">
-        <label>To Account Number</label>
-        <input type="text" name="to_account_number" placeholder="HB-0001" class="mono" required>
+        <label>To Account / IBAN</label>
+        <input type="text" name="to_account_number" placeholder="HB-0001 or GB…HUMB…" class="mono" required>
       </div>
       <div class="form-group">
         <label>Amount ($)</label>
-        <input type="number" name="amount" step="0.01" placeholder="0.00" required>
+        <input type="number" name="amount" step="0.01" min="0.01" placeholder="0.00" required>
       </div>
       <div class="form-group">
         <label>Memo <span style="color:var(--muted);font-weight:normal;">(optional)</span></label>
         <input type="text" name="memo" placeholder="Payment for…">
       </div>
-      <button type="submit" class="btn btn-primary" style="width:100%;padding:0.65rem;">Transfer</button>
+
+      <div class="panel" style="background:var(--bg);border-color:var(--gold);margin-bottom:1.2rem;">
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.6rem;">
+          Transaction security check — consult your TAN sheet
+        </p>
+        <p style="font-size:0.95rem;margin-bottom:0.6rem;">
+          Enter PIN for TAN position <strong style="color:var(--accent);font-size:1.1rem;">{{ tan_challenge }}</strong>
+        </p>
+        <input type="text" name="tan_pin" maxlength="4" placeholder="••" class="mono"
+               style="width:120px;letter-spacing:0.15em;text-align:center;" required autocomplete="off">
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%;padding:0.65rem;">
+        Confirm Transfer
+      </button>
     </form>
   </div>
 </div>
+
+<!-- KYC lock modal -->
+<div id="kyc-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:var(--panel);border:1px solid var(--danger);border-radius:10px;padding:2rem;max-width:420px;width:90%;text-align:center;">
+    <div style="font-size:2rem;margin-bottom:0.8rem;">&#128274;</div>
+    <h2 style="color:var(--danger);margin-bottom:0.6rem;">Account Restricted</h2>
+    <p style="color:var(--muted);font-size:0.88rem;line-height:1.5;">
+      Unusual spending activity has been detected on your account. For your security,
+      further transactions have been temporarily suspended. Please contact HumanBank
+      support to verify your identity and restore access.
+    </p>
+    <p style="margin-top:1rem;font-size:0.78rem;color:var(--muted);">Reference: KYC-{{ range(10000,99999)|random }}</p>
+  </div>
+</div>
+
+<script>
+document.getElementById('transfer-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const errBox = document.getElementById('error-box');
+  errBox.style.display = 'none';
+
+  const body = new FormData(this);
+  let res;
+  try {
+    res = await fetch('/transfer', { method: 'POST', body });
+  } catch (_) {
+    errBox.textContent = 'Network error. Please try again.';
+    errBox.style.display = '';
+    return;
+  }
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    errBox.textContent = data.error || 'Transfer failed.';
+    errBox.style.display = '';
+    return;
+  }
+
+  if (data.kyc_dirty) {
+    const modal = document.getElementById('kyc-modal');
+    modal.style.display = 'flex';
+    return;
+  }
+
+  window.location = '/dashboard';
+});
+</script>
 {% endblock %}

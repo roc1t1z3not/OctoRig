@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Payment Request #{{ req.id }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:540px;">
+  <div class="page-header">
+    <h1>PAYMENT REQUEST</h1>
+    <p>Review and approve this payment request</p>
+  </div>
+
+  {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+
+  <div class="panel" style="margin-bottom:1.5rem;">
+    <div class="section-title">REQUEST DETAILS</div>
+    <table style="width:100%;font-size:0.88rem;">
+      <tr><td style="color:var(--muted);padding:0.3rem 0;width:130px;">Request ID</td><td class="mono">#{{ req.id }}</td></tr>
+      <tr><td style="color:var(--muted);padding:0.3rem 0;">Requested by</td><td>{{ req.requester_fullname or req.requester_name }}</td></tr>
+      <tr><td style="color:var(--muted);padding:0.3rem 0;">Payable by</td><td>{{ req.target_name }}</td></tr>
+      <tr><td style="color:var(--muted);padding:0.3rem 0;">Debit account</td><td class="mono">{{ req.from_acc_num }}<br><span style="font-size:0.75rem;color:var(--muted);">{{ req.from_iban|iban }}</span></td></tr>
+      <tr><td style="color:var(--muted);padding:0.3rem 0;">Credit account</td><td class="mono">{{ req.to_acc_num }}<br><span style="font-size:0.75rem;color:var(--muted);">{{ req.to_iban|iban }}</span></td></tr>
+      <tr><td style="color:var(--muted);padding:0.3rem 0;">Amount</td><td style="font-size:1.1rem;font-weight:700;color:var(--accent);">${{ "%.2f" | format(req.amount) }}</td></tr>
+      <tr><td style="color:var(--muted);padding:0.3rem 0;">Memo</td><td>{{ req.memo or '—' }}</td></tr>
+      <tr><td style="color:var(--muted);padding:0.3rem 0;">Status</td>
+        <td><span style="text-transform:uppercase;font-size:0.78rem;
+          color:{{ '#50c878' if req.status == 'approved' else ('var(--danger)' if req.status == 'rejected' else 'var(--gold)') }};">
+          {{ req.status }}</span></td>
+      </tr>
+    </table>
+  </div>
+
+  {% if req.status == 'pending' %}
+  <div class="panel">
+    <div class="section-title">APPROVE PAYMENT</div>
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem;">
+      Enter TAN code at position <strong class="mono">{{ req.pin }}</strong> from your TAN sheet to authorise this transfer.
+    </p>
+    <!-- VULN: uid param is not verified against session — IDOR allows approving on behalf of any user -->
+    <form method="post" action="{{ url_for('approve_payment_request', req_id=req.id) }}">
+      <input type="hidden" name="uid" value="{{ req.target_id }}">
+      <div class="form-group">
+        <label>TAN Code (position {{ req.pin }})</label>
+        <input type="text" name="tan" maxlength="4" placeholder="••" class="mono"
+               style="width:140px;letter-spacing:0.2em;text-align:center;" required autocomplete="off">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Approve &amp; Pay</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <div style="margin-top:1rem;text-align:center;">
+    <a href="{{ url_for('notifications') }}" style="color:var(--muted);font-size:0.82rem;">&larr; Back to Notifications</a>
+  </div>
+</div>
+{% endblock %}

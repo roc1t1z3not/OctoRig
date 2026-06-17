@@ -1,4 +1,5 @@
 import os
+import random
 import sqlite3
 from flask import g
 
@@ -21,6 +22,7 @@ CREATE TABLE IF NOT EXISTS accounts (
     id             INTEGER PRIMARY KEY,
     user_id        INTEGER NOT NULL,
     account_number TEXT UNIQUE NOT NULL,
+    iban           TEXT UNIQUE DEFAULT '',
     account_type   TEXT NOT NULL,
     balance        REAL DEFAULT 0.0,
     opened_date    TEXT NOT NULL
@@ -73,6 +75,46 @@ CREATE TABLE IF NOT EXISTS reset_tokens (
     used       INTEGER DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS tan_codes (
+    id       INTEGER PRIMARY KEY,
+    user_id  INTEGER NOT NULL,
+    position INTEGER NOT NULL,
+    pin      TEXT    NOT NULL,
+    used     INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS transfer_limits (
+    id          INTEGER PRIMARY KEY,
+    user_id     INTEGER NOT NULL UNIQUE,
+    daily_limit REAL    DEFAULT 1000.0,
+    limit_start TEXT,
+    limit_end   TEXT
+);
+
+CREATE TABLE IF NOT EXISTS payment_requests (
+    id           INTEGER PRIMARY KEY,
+    requester_id INTEGER NOT NULL,
+    target_id    INTEGER NOT NULL,
+    from_account INTEGER NOT NULL,
+    to_account   INTEGER NOT NULL,
+    amount       REAL    NOT NULL,
+    memo         TEXT    DEFAULT '',
+    pin          TEXT    NOT NULL,
+    status       TEXT    DEFAULT 'pending',
+    created_at   TEXT    NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+    id         INTEGER PRIMARY KEY,
+    user_id    INTEGER NOT NULL,
+    type       TEXT    NOT NULL,
+    title      TEXT    NOT NULL,
+    message    TEXT    NOT NULL,
+    link       TEXT    DEFAULT '',
+    read       INTEGER DEFAULT 0,
+    created_at TEXT    NOT NULL
+);
+
 INSERT OR IGNORE INTO users VALUES
   (1,'admin','commonhuman-lab','admin@humanbank.local','HumanBank Admin',1,'FLAG{hb_bac_admin_detail_exposed}','555-0100','FLAG{hb_sqli_login_bypassed}'),
   (2,'alice.wang','sunshine1','alice@example.com','Alice Wang',0,'Passionate about personal finance and travel.','+1 503 555 0201','14 Cedar Ave, Portland OR'),
@@ -84,19 +126,19 @@ INSERT OR IGNORE INTO users VALUES
   (8,'c.human','commonhuman-lab','accounts@commonhuman.local','CommonHuman Labs',0,'Categorisation not possible.','','Unknown');
 
 INSERT OR IGNORE INTO accounts VALUES
-  (1, 2,'HB-0001','checking', 4823.50,'2024-01-15'),
-  (2, 2,'HB-0002','savings', 12400.00,'2024-01-15'),
-  (3, 3,'HB-0003','checking',   875.25,'2024-03-02'),
-  (4, 3,'HB-0004','savings',  3200.00,'2024-03-02'),
-  (5, 4,'HB-0005','checking',  2100.00,'2024-06-18'),
-  (6, 4,'HB-0006','savings',   8500.00,'2024-06-18'),
-  (7, 5,'HB-0007','checking',   560.00,'2025-01-10'),
-  (8, 5,'HB-0008','savings',   1200.00,'2025-01-10'),
-  (9, 6,'HB-0009','checking',  9345.80,'2023-11-05'),
-  (10,6,'HB-0010','savings',  24000.00,'2023-11-05'),
-  (11,7,'HB-0011','checking',  1870.00,'2025-04-22'),
-  (12,7,'HB-0012','savings',   5000.00,'2025-04-22'),
-  (13,8,'HB-CMNH','checking',1337000.00,'2026-01-01');
+  (1, 2,'HB-0001','','checking', 4823.50,'2024-01-15'),
+  (2, 2,'HB-0002','','savings', 12400.00,'2024-01-15'),
+  (3, 3,'HB-0003','','checking',   875.25,'2024-03-02'),
+  (4, 3,'HB-0004','','savings',  3200.00,'2024-03-02'),
+  (5, 4,'HB-0005','','checking',  2100.00,'2024-06-18'),
+  (6, 4,'HB-0006','','savings',   8500.00,'2024-06-18'),
+  (7, 5,'HB-0007','','checking',   560.00,'2025-01-10'),
+  (8, 5,'HB-0008','','savings',   1200.00,'2025-01-10'),
+  (9, 6,'HB-0009','','checking',  9345.80,'2023-11-05'),
+  (10,6,'HB-0010','','savings',  24000.00,'2023-11-05'),
+  (11,7,'HB-0011','','checking',  1870.00,'2025-04-22'),
+  (12,7,'HB-0012','','savings',   5000.00,'2025-04-22'),
+  (13,8,'HB-CMNH','','checking',1337000.00,'2026-01-01');
 
 INSERT OR IGNORE INTO transactions VALUES
   (1, 1,'credit',3200.00,'Payroll — April 2026','ACME Corp','2026-04-30'),
@@ -198,106 +240,106 @@ INSERT OR IGNORE INTO users VALUES
   (58,'diane.morris',     'b696aef7776367787253dc2acdd10279','diane.morris@example.com',     'Diane Morris',     0,'Veterinarian. Loves animals, hates spreadsheets.','+1 651 555 0411','77 Lakeview Drive, St Paul MN');
 
 INSERT OR IGNORE INTO accounts VALUES
-  (14, 9,'HB-0014','checking',  3450.00,'2022-03-15'),
-  (15, 9,'HB-0015','savings',   8200.00,'2022-03-15'),
-  (16,10,'HB-0016','checking',  1875.50,'2022-07-22'),
-  (17,10,'HB-0017','savings',   4100.00,'2022-07-22'),
-  (18,11,'HB-0018','checking',  6240.00,'2022-09-10'),
-  (19,11,'HB-0019','savings',  15800.00,'2022-09-10'),
-  (20,12,'HB-0020','checking',   924.75,'2022-11-30'),
-  (21,12,'HB-0021','savings',   2300.00,'2022-11-30'),
-  (22,13,'HB-0022','checking',  5120.00,'2022-12-05'),
-  (23,13,'HB-0023','savings',  18500.00,'2022-12-05'),
-  (24,14,'HB-0024','checking',  2380.00,'2023-01-18'),
-  (25,14,'HB-0025','savings',   6750.00,'2023-01-18'),
-  (26,15,'HB-0026','checking',  4915.25,'2023-02-14'),
-  (27,15,'HB-0027','savings',  11000.00,'2023-02-14'),
-  (28,16,'HB-0028','checking',   738.50,'2023-04-08'),
-  (29,16,'HB-0029','savings',   1800.00,'2023-04-08'),
-  (30,17,'HB-0030','checking',  3600.00,'2023-05-20'),
-  (31,17,'HB-0031','savings',   9400.00,'2023-05-20'),
-  (32,18,'HB-0032','checking',  8250.00,'2023-06-11'),
-  (33,18,'HB-0033','savings',  22000.00,'2023-06-11'),
-  (34,19,'HB-0034','checking',  1140.00,'2023-07-29'),
-  (35,19,'HB-0035','savings',   3000.00,'2023-07-29'),
-  (36,20,'HB-0036','checking',  2890.50,'2023-08-15'),
-  (37,20,'HB-0037','savings',   7600.00,'2023-08-15'),
-  (38,21,'HB-0038','checking',   512.00,'2023-09-03'),
-  (39,21,'HB-0039','savings',   1200.00,'2023-09-03'),
-  (40,22,'HB-0040','checking',  4380.00,'2023-10-17'),
-  (41,22,'HB-0041','savings',  12000.00,'2023-10-17'),
-  (42,23,'HB-0042','checking',  2060.00,'2023-11-22'),
-  (43,23,'HB-0043','savings',   5300.00,'2023-11-22'),
-  (44,24,'HB-0044','checking',  7800.00,'2023-12-01'),
-  (45,24,'HB-0045','savings',  19500.00,'2023-12-01'),
-  (46,25,'HB-0046','checking',  3215.00,'2024-01-09'),
-  (47,25,'HB-0047','savings',   8800.00,'2024-01-09'),
-  (48,26,'HB-0048','checking',   950.00,'2024-02-14'),
-  (49,26,'HB-0049','savings',   2100.00,'2024-02-14'),
-  (50,27,'HB-0050','checking',  1680.50,'2024-03-28'),
-  (51,27,'HB-0051','savings',   4000.00,'2024-03-28'),
-  (52,28,'HB-0052','checking',  5500.00,'2024-04-11'),
-  (53,28,'HB-0053','savings',  14200.00,'2024-04-11'),
-  (54,29,'HB-0054','checking',  2340.00,'2024-05-07'),
-  (55,29,'HB-0055','savings',   6500.00,'2024-05-07'),
-  (56,30,'HB-0056','checking',   875.00,'2024-06-19'),
-  (57,30,'HB-0057','savings',   2000.00,'2024-06-19'),
-  (58,31,'HB-0058','checking',  3900.00,'2024-07-03'),
-  (59,31,'HB-0059','savings',  10200.00,'2024-07-03'),
-  (60,32,'HB-0060','checking',  1425.75,'2024-08-21'),
-  (61,32,'HB-0061','savings',   3700.00,'2024-08-21'),
-  (62,33,'HB-0062','checking',  6800.00,'2024-09-14'),
-  (63,33,'HB-0063','savings',  17000.00,'2024-09-14'),
-  (64,34,'HB-0064','checking',  2175.00,'2024-10-02'),
-  (65,34,'HB-0065','savings',   5800.00,'2024-10-02'),
-  (66,35,'HB-0066','checking',  4620.50,'2024-10-30'),
-  (67,35,'HB-0067','savings',  13400.00,'2024-10-30'),
-  (68,36,'HB-0068','checking',  1050.00,'2024-11-15'),
-  (69,36,'HB-0069','savings',   2500.00,'2024-11-15'),
-  (70,37,'HB-0070','checking',  3280.00,'2024-12-04'),
-  (71,37,'HB-0071','savings',   8100.00,'2024-12-04'),
-  (72,38,'HB-0072','checking',  9100.00,'2025-01-13'),
-  (73,38,'HB-0073','savings',  24500.00,'2025-01-13'),
-  (74,39,'HB-0074','checking',  2740.00,'2025-02-08'),
-  (75,39,'HB-0075','savings',   7200.00,'2025-02-08'),
-  (76,40,'HB-0076','checking',  1380.50,'2025-03-22'),
-  (77,40,'HB-0077','savings',   3400.00,'2025-03-22'),
-  (78,41,'HB-0078','checking',  5040.00,'2025-04-05'),
-  (79,41,'HB-0079','savings',  14800.00,'2025-04-05'),
-  (80,42,'HB-0080','checking',  2915.00,'2025-04-30'),
-  (81,42,'HB-0081','savings',   7500.00,'2025-04-30'),
-  (82,43,'HB-0082','checking',   865.00,'2025-05-18'),
-  (83,43,'HB-0083','savings',   1950.00,'2025-05-18'),
-  (84,44,'HB-0084','checking',  3730.00,'2025-06-11'),
-  (85,44,'HB-0085','savings',   9600.00,'2025-06-11'),
-  (86,45,'HB-0086','checking',  1200.00,'2025-07-07'),
-  (87,45,'HB-0087','savings',   2800.00,'2025-07-07'),
-  (88,46,'HB-0088','checking',  7450.00,'2025-07-29'),
-  (89,46,'HB-0089','savings',  20000.00,'2025-07-29'),
-  (90,47,'HB-0090','checking',  2560.00,'2025-08-14'),
-  (91,47,'HB-0091','savings',   6300.00,'2025-08-14'),
-  (92,48,'HB-0092','checking',  4180.00,'2025-09-03'),
-  (93,48,'HB-0093','savings',  11500.00,'2025-09-03'),
-  (94,49,'HB-0094','checking',  1835.50,'2025-10-16'),
-  (95,49,'HB-0095','savings',   4400.00,'2025-10-16'),
-  (96,50,'HB-0096','checking',  3420.00,'2025-11-08'),
-  (97,50,'HB-0097','savings',   8700.00,'2025-11-08'),
-  (98,51,'HB-0098','checking',   940.00,'2025-12-01'),
-  (99,51,'HB-0099','savings',   2250.00,'2025-12-01'),
-  (100,52,'HB-0100','checking', 5870.00,'2025-12-20'),
-  (101,52,'HB-0101','savings', 15200.00,'2025-12-20'),
-  (102,53,'HB-0102','checking', 2290.50,'2026-01-07'),
-  (103,53,'HB-0103','savings',  6100.00,'2026-01-07'),
-  (104,54,'HB-0104','checking', 4660.00,'2026-01-28'),
-  (105,54,'HB-0105','savings', 12500.00,'2026-01-28'),
-  (106,55,'HB-0106','checking', 1750.00,'2026-02-11'),
-  (107,55,'HB-0107','savings',  4300.00,'2026-02-11'),
-  (108,56,'HB-0108','checking', 8320.00,'2026-03-04'),
-  (109,56,'HB-0109','savings', 21000.00,'2026-03-04'),
-  (110,57,'HB-0110','checking', 2110.00,'2026-03-25'),
-  (111,57,'HB-0111','savings',  5400.00,'2026-03-25'),
-  (112,58,'HB-0112','checking', 6090.50,'2026-04-09'),
-  (113,58,'HB-0113','savings', 16300.00,'2026-04-09');
+  (14, 9,'HB-0014','','checking',  3450.00,'2022-03-15'),
+  (15, 9,'HB-0015','','savings',   8200.00,'2022-03-15'),
+  (16,10,'HB-0016','','checking',  1875.50,'2022-07-22'),
+  (17,10,'HB-0017','','savings',   4100.00,'2022-07-22'),
+  (18,11,'HB-0018','','checking',  6240.00,'2022-09-10'),
+  (19,11,'HB-0019','','savings',  15800.00,'2022-09-10'),
+  (20,12,'HB-0020','','checking',   924.75,'2022-11-30'),
+  (21,12,'HB-0021','','savings',   2300.00,'2022-11-30'),
+  (22,13,'HB-0022','','checking',  5120.00,'2022-12-05'),
+  (23,13,'HB-0023','','savings',  18500.00,'2022-12-05'),
+  (24,14,'HB-0024','','checking',  2380.00,'2023-01-18'),
+  (25,14,'HB-0025','','savings',   6750.00,'2023-01-18'),
+  (26,15,'HB-0026','','checking',  4915.25,'2023-02-14'),
+  (27,15,'HB-0027','','savings',  11000.00,'2023-02-14'),
+  (28,16,'HB-0028','','checking',   738.50,'2023-04-08'),
+  (29,16,'HB-0029','','savings',   1800.00,'2023-04-08'),
+  (30,17,'HB-0030','','checking',  3600.00,'2023-05-20'),
+  (31,17,'HB-0031','','savings',   9400.00,'2023-05-20'),
+  (32,18,'HB-0032','','checking',  8250.00,'2023-06-11'),
+  (33,18,'HB-0033','','savings',  22000.00,'2023-06-11'),
+  (34,19,'HB-0034','','checking',  1140.00,'2023-07-29'),
+  (35,19,'HB-0035','','savings',   3000.00,'2023-07-29'),
+  (36,20,'HB-0036','','checking',  2890.50,'2023-08-15'),
+  (37,20,'HB-0037','','savings',   7600.00,'2023-08-15'),
+  (38,21,'HB-0038','','checking',   512.00,'2023-09-03'),
+  (39,21,'HB-0039','','savings',   1200.00,'2023-09-03'),
+  (40,22,'HB-0040','','checking',  4380.00,'2023-10-17'),
+  (41,22,'HB-0041','','savings',  12000.00,'2023-10-17'),
+  (42,23,'HB-0042','','checking',  2060.00,'2023-11-22'),
+  (43,23,'HB-0043','','savings',   5300.00,'2023-11-22'),
+  (44,24,'HB-0044','','checking',  7800.00,'2023-12-01'),
+  (45,24,'HB-0045','','savings',  19500.00,'2023-12-01'),
+  (46,25,'HB-0046','','checking',  3215.00,'2024-01-09'),
+  (47,25,'HB-0047','','savings',   8800.00,'2024-01-09'),
+  (48,26,'HB-0048','','checking',   950.00,'2024-02-14'),
+  (49,26,'HB-0049','','savings',   2100.00,'2024-02-14'),
+  (50,27,'HB-0050','','checking',  1680.50,'2024-03-28'),
+  (51,27,'HB-0051','','savings',   4000.00,'2024-03-28'),
+  (52,28,'HB-0052','','checking',  5500.00,'2024-04-11'),
+  (53,28,'HB-0053','','savings',  14200.00,'2024-04-11'),
+  (54,29,'HB-0054','','checking',  2340.00,'2024-05-07'),
+  (55,29,'HB-0055','','savings',   6500.00,'2024-05-07'),
+  (56,30,'HB-0056','','checking',   875.00,'2024-06-19'),
+  (57,30,'HB-0057','','savings',   2000.00,'2024-06-19'),
+  (58,31,'HB-0058','','checking',  3900.00,'2024-07-03'),
+  (59,31,'HB-0059','','savings',  10200.00,'2024-07-03'),
+  (60,32,'HB-0060','','checking',  1425.75,'2024-08-21'),
+  (61,32,'HB-0061','','savings',   3700.00,'2024-08-21'),
+  (62,33,'HB-0062','','checking',  6800.00,'2024-09-14'),
+  (63,33,'HB-0063','','savings',  17000.00,'2024-09-14'),
+  (64,34,'HB-0064','','checking',  2175.00,'2024-10-02'),
+  (65,34,'HB-0065','','savings',   5800.00,'2024-10-02'),
+  (66,35,'HB-0066','','checking',  4620.50,'2024-10-30'),
+  (67,35,'HB-0067','','savings',  13400.00,'2024-10-30'),
+  (68,36,'HB-0068','','checking',  1050.00,'2024-11-15'),
+  (69,36,'HB-0069','','savings',   2500.00,'2024-11-15'),
+  (70,37,'HB-0070','','checking',  3280.00,'2024-12-04'),
+  (71,37,'HB-0071','','savings',   8100.00,'2024-12-04'),
+  (72,38,'HB-0072','','checking',  9100.00,'2025-01-13'),
+  (73,38,'HB-0073','','savings',  24500.00,'2025-01-13'),
+  (74,39,'HB-0074','','checking',  2740.00,'2025-02-08'),
+  (75,39,'HB-0075','','savings',   7200.00,'2025-02-08'),
+  (76,40,'HB-0076','','checking',  1380.50,'2025-03-22'),
+  (77,40,'HB-0077','','savings',   3400.00,'2025-03-22'),
+  (78,41,'HB-0078','','checking',  5040.00,'2025-04-05'),
+  (79,41,'HB-0079','','savings',  14800.00,'2025-04-05'),
+  (80,42,'HB-0080','','checking',  2915.00,'2025-04-30'),
+  (81,42,'HB-0081','','savings',   7500.00,'2025-04-30'),
+  (82,43,'HB-0082','','checking',   865.00,'2025-05-18'),
+  (83,43,'HB-0083','','savings',   1950.00,'2025-05-18'),
+  (84,44,'HB-0084','','checking',  3730.00,'2025-06-11'),
+  (85,44,'HB-0085','','savings',   9600.00,'2025-06-11'),
+  (86,45,'HB-0086','','checking',  1200.00,'2025-07-07'),
+  (87,45,'HB-0087','','savings',   2800.00,'2025-07-07'),
+  (88,46,'HB-0088','','checking',  7450.00,'2025-07-29'),
+  (89,46,'HB-0089','','savings',  20000.00,'2025-07-29'),
+  (90,47,'HB-0090','','checking',  2560.00,'2025-08-14'),
+  (91,47,'HB-0091','','savings',   6300.00,'2025-08-14'),
+  (92,48,'HB-0092','','checking',  4180.00,'2025-09-03'),
+  (93,48,'HB-0093','','savings',  11500.00,'2025-09-03'),
+  (94,49,'HB-0094','','checking',  1835.50,'2025-10-16'),
+  (95,49,'HB-0095','','savings',   4400.00,'2025-10-16'),
+  (96,50,'HB-0096','','checking',  3420.00,'2025-11-08'),
+  (97,50,'HB-0097','','savings',   8700.00,'2025-11-08'),
+  (98,51,'HB-0098','','checking',   940.00,'2025-12-01'),
+  (99,51,'HB-0099','','savings',   2250.00,'2025-12-01'),
+  (100,52,'HB-0100','','checking', 5870.00,'2025-12-20'),
+  (101,52,'HB-0101','','savings', 15200.00,'2025-12-20'),
+  (102,53,'HB-0102','','checking', 2290.50,'2026-01-07'),
+  (103,53,'HB-0103','','savings',  6100.00,'2026-01-07'),
+  (104,54,'HB-0104','','checking', 4660.00,'2026-01-28'),
+  (105,54,'HB-0105','','savings', 12500.00,'2026-01-28'),
+  (106,55,'HB-0106','','checking', 1750.00,'2026-02-11'),
+  (107,55,'HB-0107','','savings',  4300.00,'2026-02-11'),
+  (108,56,'HB-0108','','checking', 8320.00,'2026-03-04'),
+  (109,56,'HB-0109','','savings', 21000.00,'2026-03-04'),
+  (110,57,'HB-0110','','checking', 2110.00,'2026-03-25'),
+  (111,57,'HB-0111','','savings',  5400.00,'2026-03-25'),
+  (112,58,'HB-0112','','checking', 6090.50,'2026-04-09'),
+  (113,58,'HB-0113','','savings', 16300.00,'2026-04-09');
 
 INSERT OR IGNORE INTO transactions VALUES
   (27, 14,'credit',3200.00,'Payroll — May 2026',        'Rainier Software LLC',         '2026-05-30'),
@@ -380,7 +422,7 @@ INSERT OR IGNORE INTO transactions VALUES
   (104,90,'debit', 1750.00,'Rent — June 2026',           'Brentwood Apartments',         '2026-06-01'),
   (105,92,'credit',3000.00,'Payroll — May 2026',         'Music City Enterprises',       '2026-05-31'),
   (106,92,'debit', 1100.00,'Rent — June 2026',           'Nashville Midtown Lofts',      '2026-06-01'),
-  (107,94,'credit',7100.00,'Salary — May 2026',          'Camelback School District',    '2026-05-30'),
+  (107,94,'credit',7500.00,'Salary — May 2026',          'Camelback School District',    '2026-05-30'),
   (108,94,'debit', 2000.00,'Mortgage — June 2026',       'Phoenix Federal Credit Union', '2026-06-01'),
   (109,96,'credit',2700.00,'Payroll — May 2026',         'Lone Star Border Co',          '2026-05-31'),
   (110,96,'debit',  980.00,'Rent — June 2026',           'Rio Grande Apartments',        '2026-06-01'),
@@ -413,20 +455,16 @@ INSERT OR IGNORE INTO support_tickets VALUES
   (16,42,'Unexpected monthly fee','I noticed a $12 maintenance fee on my checking statement. I was not informed of this charge when I opened the account. Please refund and waive this fee.','closed','2026-05-14'),
   (17,50,'Update mailing address','I have moved and need to update my address to: 83 Eastside Ave, Seattle WA 98101. Please also direct future statements there.','open','2026-05-22');
 
--- Challenge flags reachable via SQLi UNION injection
 INSERT OR IGNORE INTO _flags VALUES
   ('sqli-search', 'FLAG{hb_sqli_search_union}'),
   ('sqli-txn',    'FLAG{hb_sqli_txn_dump}');
 
--- Recon flag: visible unauthenticated at /audit-log (transaction memo)
 INSERT OR IGNORE INTO transactions VALUES
   (127,13,'credit',0.01,'FLAG{hb_recon_audit_exposed}','INTERNAL AUDIT','2026-01-01');
 
--- IDOR flag: visible on CommonHuman account transaction list (account_id=13)
 INSERT OR IGNORE INTO transactions VALUES
   (128,13,'debit',0.01,'FLAG{hb_idor_cmnh_exposed}','INTERNAL AUDIT','2026-01-02');
 
--- IDOR ticket flag: ticket owned by admin, readable by any user at /tickets/18
 INSERT OR IGNORE INTO support_tickets VALUES
   (18,1,'Internal Security Audit Note','Quarterly penetration test complete. Auditors confirmed critical IDOR on ticket endpoint. FLAG{hb_idor_ticket_read}','closed','2026-05-01');
 
@@ -451,6 +489,23 @@ INSERT OR IGNORE INTO documents VALUES
 """
 
 
+def _iban_for(account_id):
+    # OC = fictional OctoBank country code, OCTO = bank identifier, 0001 = branch
+    bban = f'OCTO0001{account_id:08d}'
+    numeric = ''
+    for c in (bban + 'OC00'):
+        numeric += str(ord(c) - 55) if c.isalpha() else c
+    check = 98 - (int(numeric) % 97)
+    return f'OC{check:02d}{bban}'
+
+
+def gen_tan_codes(user_id):
+    rng = random.Random(user_id * 7919 + 13)
+    pool = list(range(10, 100))
+    rng.shuffle(pool)
+    return [(user_id, pos, str(pool[pos - 1]), 0) for pos in range(1, 77)]
+
+
 def get_db():
     db = getattr(g, '_db', None)
     if db is None:
@@ -469,6 +524,28 @@ def init_db():
     os.makedirs('/data', exist_ok=True)
     os.makedirs('/data/uploads', exist_ok=True)
     conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
     conn.executescript(SCHEMA)
+
+    # Populate IBANs for all seeded accounts
+    rows = conn.execute("SELECT id FROM accounts WHERE iban = '' OR iban IS NULL").fetchall()
+    for r in rows:
+        conn.execute("UPDATE accounts SET iban = ? WHERE id = ?", (_iban_for(r['id']), r['id']))
+
+    # Generate TAN codes for all seeded users (ids 1–58)
+    for uid in range(1, 59):
+        for code in gen_tan_codes(uid):
+            conn.execute(
+                "INSERT OR IGNORE INTO tan_codes (user_id, position, pin, used) VALUES (?, ?, ?, ?)",
+                code
+            )
+
+    # Default transfer limits for all seeded users
+    for uid in range(1, 59):
+        conn.execute(
+            "INSERT OR IGNORE INTO transfer_limits (user_id, daily_limit) VALUES (?, 1000.0)",
+            (uid,)
+        )
+
     conn.commit()
     conn.close()

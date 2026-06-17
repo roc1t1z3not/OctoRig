@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Transfer Limit Settings{% endblock %}
+{% block content %}
+<div class="container" style="max-width:520px;">
+  <div class="page-header">
+    <h1>TRANSFER LIMIT</h1>
+    <p>Manage your daily outgoing transfer cap</p>
+  </div>
+
+  {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+  {% if success %}<div class="alert" style="background:rgba(80,200,120,0.1);border-color:#50c878;color:#50c878;">{{ success }}</div>{% endif %}
+
+  <div class="panel" style="margin-bottom:1.5rem;">
+    <div class="section-title">CURRENT LIMIT</div>
+    <table style="width:100%;font-size:0.88rem;">
+      <tr>
+        <td style="color:var(--muted);padding:0.3rem 0;width:120px;">Daily limit</td>
+        <td class="mono">${{ "%.2f" | format(limit.daily_limit if limit else 1000) }}</td>
+      </tr>
+      {% if limit and limit.limit_start %}
+      <tr>
+        <td style="color:var(--muted);padding:0.3rem 0;">Active from</td>
+        <td class="mono">{{ limit.limit_start }}</td>
+      </tr>
+      <tr>
+        <td style="color:var(--muted);padding:0.3rem 0;">Active until</td>
+        <td class="mono">{{ limit.limit_end or '—' }}</td>
+      </tr>
+      {% endif %}
+    </table>
+  </div>
+
+  <div class="panel">
+    <div class="section-title">REQUEST LIMIT CHANGE</div>
+    <form method="post">
+      <div class="form-group">
+        <label>New Daily Limit ($)</label>
+        <!-- VULN: max="10000" is client-side only; server stores any submitted value -->
+        <input type="number" name="new_limit" step="0.01" min="1" max="10000"
+               value="{{ limit.daily_limit if limit else 1000 }}" required>
+        <small style="color:var(--muted);">Maximum $10,000.00 per day</small>
+      </div>
+      <div class="form-group">
+        <label>Effective From</label>
+        <input type="date" name="limit_start" value="{{ limit.limit_start or '' }}">
+        <small style="color:var(--muted);">Leave blank to apply immediately</small>
+      </div>
+      <div class="form-group">
+        <label>Effective Until</label>
+        <input type="date" name="limit_end" value="{{ limit.limit_end or '' }}">
+        <small style="color:var(--muted);">Reverts to $1,000/day after this date</small>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Update Limit</button>
+    </form>
+  </div>
+  <div style="margin-top:1rem;text-align:center;">
+    <a href="{{ url_for('transfer') }}" style="color:var(--muted);font-size:0.82rem;">&larr; Back to Transfer</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,12 +1,17 @@
 from flask import Flask, Response, render_template_string
 from db import init_db, close_db
-from helpers import current_user
-import routes.auth, routes.banking, routes.support, routes.admin, routes.docs, routes.api, routes.expanded
+from helpers import current_user, get_unread_count
+import routes.auth, routes.banking, routes.support, routes.admin, routes.docs, routes.api, routes.expanded, routes.payments
 
 app = Flask(__name__)
 app.secret_key = 'humanbank-2026-xQ8nRv4'
 app.teardown_appcontext(close_db)
-app.jinja_env.globals.update(current_user=current_user)
+app.jinja_env.globals.update(current_user=current_user, get_unread_count=get_unread_count)
+
+@app.template_filter('iban')
+def iban_display(value):
+    raw = (value or '').replace(' ', '')
+    return ' '.join(raw[i:i+4] for i in range(0, len(raw), 4))
 
 routes.auth.init(app)
 routes.banking.init(app)
@@ -15,6 +20,7 @@ routes.admin.init(app)
 routes.docs.init(app)
 routes.api.init(app)
 routes.expanded.init(app)
+routes.payments.init(app)
 
 @app.route('/robots.txt')
 def robots_txt():

@@ -3,7 +3,7 @@ import sqlite3
 import time
 from datetime import datetime, timedelta
 from flask import request, render_template, session, redirect, url_for
-from db import get_db
+from db import get_db, gen_tan_codes, _iban_for
 
 
 def init(app):
@@ -58,11 +58,67 @@ def init(app):
                     user = db.execute(
                         "SELECT * FROM users WHERE username = ?", (username,)
                     ).fetchone()
-                    session['user_id'] = user['id']
-                    return redirect(url_for('dashboard'))
+                    uid = user['id']
+                    session['user_id'] = uid
+
+                    # Create a checking account with starting balance
+                    from datetime import date
+                    acc_num = f'HB-{uid:04d}' if uid > 13 else f'HB-U{uid:03d}'
+                    # Ensure uniqueness if slot already taken
+                    existing = db.execute(
+                        "SELECT id FROM accounts WHERE account_number = ?", (acc_num,)
+                    ).fetchone()
+                    if existing:
+                        acc_num = f'HB-N{uid:04d}'
+                    db.execute(
+                        "INSERT INTO accounts (user_id, account_number, iban, account_type, balance, opened_date) "
+                        "VALUES (?, ?, ?, 'checking', 5000.00, ?)",
+                        (uid, acc_num, '', str(date.today()))
+                    )
+                    db.commit()
+                    # Set the IBAN now that we have the account id
+                    acc = db.execute(
+                        "SELECT id FROM accounts WHERE account_number = ?", (acc_num,)
+                    ).fetchone()
+                    db.execute(
+                        "UPDATE accounts SET iban = ? WHERE id = ?",
+                        (_iban_for(acc['id']), acc['id'])
+                    )
+
+                    # Generate TAN codes
+                    for code in gen_tan_codes(uid):
+                        db.execute(
+                            "INSERT INTO tan_codes (user_id, position, pin, used) VALUES (?, ?, ?, ?)",
+                            code
+                        )
+
+                    # Default transfer limit
+                    db.execute(
+                        "INSERT OR IGNORE INTO transfer_limits (user_id, daily_limit) VALUES (?, 1000.0)",
+                        (uid,)
+                    )
+                    db.commit()
+
+                    # Signal that the TAN sheet should be shown once
+                    session['show_tan_sheet'] = True
+                    return redirect(url_for('tan_sheet'))
                 except sqlite3.IntegrityError:
                     error = 'Username already taken.'
         return render_template('register.html', error=error)
+
+    @app.route('/tan-sheet')
+    def tan_sheet():
+        if not session.get('user_id'):
+            return redirect(url_for('login'))
+        if not session.pop('show_tan_sheet', False):
+            return redirect(url_for('dashboard'))
+        uid  = session['user_id']
+        db   = get_db()
+        codes = db.execute(
+            "SELECT position, pin FROM tan_codes WHERE user_id = ? ORDER BY position",
+            (uid,)
+        ).fetchall()
+        return render_template('tan_sheet.html', codes=codes)
 
     @app.route('/logout')
     def logout():

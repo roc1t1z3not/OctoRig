@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Your TAN Code Sheet{% endblock %}
+{% block content %}
+<div class="container" style="max-width:680px;">
+  <div class="page-header">
+    <h1>TAN CODE SHEET</h1>
+    <p>Keep this sheet safe — you will need these codes to authorise transfers.</p>
+  </div>
+
+  <div class="panel" style="border-color:var(--gold);">
+    <div class="alert" style="background:rgba(212,168,83,0.1);border:1px solid var(--gold);color:var(--gold);margin-bottom:1.5rem;font-size:0.85rem;">
+      This page is shown <strong>once only</strong>. Print or save your TAN codes now.
+      You will not be able to view them again.
+    </div>
+
+    <div style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem;">
+      HumanBank TAN Sheet &mdash; Account holder: {{ current_user().full_name or current_user().username }}
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;">
+      {% for c in codes %}
+      <div style="display:flex;align-items:center;gap:0.5rem;padding:0.35rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:4px;font-size:0.82rem;">
+        <span style="color:var(--muted);min-width:2rem;text-align:right;">{{ c.position }}.</span>
+        <span class="mono" style="font-weight:600;letter-spacing:0.1em;">{{ c.pin }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div style="margin-top:1.5rem;text-align:center;">
+      <a href="{{ url_for('dashboard') }}" class="btn btn-primary">I have saved my codes &rarr;</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

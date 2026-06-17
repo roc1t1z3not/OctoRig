@@ -14,12 +14,17 @@
   <a href="{{ url_for('dashboard') }}">Dashboard</a>
   <a href="{{ url_for('accounts') }}">Accounts</a>
   <a href="{{ url_for('transfer') }}">Transfer</a>
+  <a href="{{ url_for('request_money') }}">Request</a>
   <a href="{{ url_for('search') }}">Search</a>
   <a href="{{ url_for('tickets') }}">Support</a>
   <a href="{{ url_for('docs') }}">Documents</a>
   {% endif %}
   <div class="nav-right">
     {% if u %}
+      {% set _unread = get_unread_count() %}
+      <a href="{{ url_for('notifications') }}" style="position:relative;display:inline-flex;align-items:center;" title="Notifications">
+        &#128276;{% if _unread > 0 %}<span class="notif-badge">{{ _unread }}</span>{% endif %}
+      </a>
       <a href="{{ url_for('profile') }}">{{ (u.full_name if u.full_name else u.username) | safe }}</a>
       {% if u.is_admin %}<a href="{{ url_for('admin_tickets') }}" style="color:var(--gold);">Admin</a>{% endif %}
       <a href="{{ url_for('logout') }}" class="btn btn-sm">Sign out</a>

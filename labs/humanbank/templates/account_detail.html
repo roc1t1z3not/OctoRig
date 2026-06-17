@@ -9,6 +9,7 @@
       <div class="acc-type">{{ account.account_type | upper }} ACCOUNT</div>
       <div class="acc-bal">${{ "%.2f" | format(account.balance) }}</div>
       <div class="acc-num mono" style="margin-top:0.8rem;">{{ account.account_number }}</div>
+      <div class="mono" style="margin-top:0.35rem;font-size:0.72rem;color:var(--accent);letter-spacing:0.04em;">{{ account.iban|iban }}</div>
       <div style="margin-top:0.5rem;font-size:0.78rem;color:var(--muted);">Opened {{ account.opened_date }}</div>
     </div>
     <div class="panel">

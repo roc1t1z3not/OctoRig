@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+<div class="container" style="max-width:700px;">
+  <div class="page-header">
+    <h1>NOTIFICATIONS</h1>
+    <p>Your inbox</p>
+  </div>
+
+  {% if notifications %}
+  <div class="panel" style="padding:0;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:180px;">Date</th>
+          <th>Title</th>
+          <th style="width:100px;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for n in notifications %}
+        <tr style="{{ '' if n.read else 'background:rgba(212,168,83,0.05);' }}">
+          <td class="muted mono" style="font-size:0.78rem;">{{ n.created_at }}</td>
+          <td>
+            <a href="{{ url_for('notification_detail', notif_id=n.id) }}"
+               style="color:{{ 'var(--text)' if n.read else 'var(--accent)' }};">
+              {% if not n.read %}<strong>{% endif %}{{ n.title }}{% if not n.read %}</strong>{% endif %}
+            </a>
+          </td>
+          <td style="font-size:0.78rem;text-transform:uppercase;color:{{ 'var(--muted)' if n.read else 'var(--gold)' }};">
+            {{ 'Read' if n.read else 'New' }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="panel"><p class="empty">No notifications yet.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

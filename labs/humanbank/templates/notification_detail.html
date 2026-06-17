@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}{{ notif.title }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:580px;">
+  <div style="margin-bottom:1rem;"><a href="{{ url_for('notifications') }}" style="color:var(--muted);font-size:0.82rem;">&larr; All Notifications</a></div>
+
+  <div class="panel">
+    <div class="section-title">{{ notif.type | upper | replace('_', ' ') }}</div>
+    <h2 style="font-size:1.1rem;margin-bottom:0.8rem;">{{ notif.title }}</h2>
+    <p style="font-size:0.9rem;line-height:1.6;color:var(--text);white-space:pre-wrap;">{{ notif.message }}</p>
+    <div style="margin-top:1.2rem;font-size:0.78rem;color:var(--muted);">{{ notif.created_at }}</div>
+
+    {% if notif.link %}
+    <div style="margin-top:1.5rem;">
+      <a href="{{ notif.link }}" class="btn btn-primary">View &amp; Approve &rarr;</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
