@@ -3,24 +3,35 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <h2>Grid Overview</h2>
+
 <div class="stat-row">
-  <div class="stat"><span class="stat-num">{{ '%.1f'|format(total_load) }}</span><span class="stat-label">MW load</span></div>
-  <div class="stat"><span class="stat-num">{{ '%.1f'|format(total_cap) }}</span><span class="stat-label">MW capacity</span></div>
-  <div class="stat"><span class="stat-num">{{ zones|length }}</span><span class="stat-label">zones</span></div>
-  <div class="stat"><span class="stat-num">{{ devices|length }}</span><span class="stat-label">devices</span></div>
+  <div class="stat">
+    <span class="stat-num">{{ '%.0f'|format(total_load) }}</span>
+    <span class="stat-label">MW load</span>
+    {% set pct = (total_load / total_cap * 100) if total_cap else 0 %}
+    <div class="gauge"><div class="gauge-fill {{ 'crit' if pct >= 90 else 'warn' if pct >= 75 else '' }}" style="width:{{ pct|round(0) }}%"></div></div>
+  </div>
+  <div class="stat"><span class="stat-num">{{ '%.0f'|format(total_cap) }}</span><span class="stat-label">MW capacity</span></div>
+  <div class="stat"><span class="stat-num">{{ zones|length }}</span><span class="stat-label">zones online</span></div>
+  <div class="stat"><span class="stat-num">{{ devices|length }}</span><span class="stat-label">field devices</span></div>
 </div>
 
-<h3>Zones</h3>
+<h3>Distribution Zones</h3>
 <table class="data">
-  <thead><tr><th>ID</th><th>Zone</th><th>Region</th><th>Load (MW)</th><th>Capacity</th><th>Status</th></tr></thead>
+  <thead><tr><th>ID</th><th>Zone</th><th>Region</th><th style="width:200px">Load / Capacity</th><th>Status</th></tr></thead>
   <tbody>
   {% for z in zones %}
+    {% set zp = (z.load_mw / z.capacity_mw * 100) if z.capacity_mw else 0 %}
     <tr>
-      <td>{{ z.id }}</td>
+      <td><code>{{ '%02d'|format(z.id) }}</code></td>
       <td><a href="{{ url_for('zone_detail', zone_id=z.id) }}">{{ z.name }}</a></td>
-      <td>{{ z.region }}</td>
-      <td>{{ '%.1f'|format(z.load_mw) }}</td>
-      <td>{{ '%.1f'|format(z.capacity_mw) }}</td>
+      <td class="muted">{{ z.region }}</td>
+      <td>
+        <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px;color:var(--muted)">
+          <span>{{ '%.0f'|format(z.load_mw) }}</span><span>{{ '%.0f'|format(z.capacity_mw) }} MW</span>
+        </div>
+        <div class="gauge"><div class="gauge-fill {{ 'crit' if z.status=='critical' else 'warn' if z.status=='elevated' else '' }}" style="width:{{ zp|round(0) }}%"></div></div>
+      </td>
       <td><span class="badge badge-{{ z.status }}">{{ z.status }}</span></td>
     </tr>
   {% endfor %}
@@ -33,11 +44,11 @@
   <tbody>
   {% for d in devices %}
     <tr>
-      <td>{{ d.id }}</td>
+      <td><code>{{ '%02d'|format(d.id) }}</code></td>
       <td><a href="{{ url_for('device_detail', device_id=d.id) }}">{{ d.name }}</a></td>
-      <td>{{ d.dtype }}</td>
+      <td class="muted">{{ d.dtype }}</td>
       <td><code>{{ d.mgmt_ip }}</code></td>
-      <td>{{ d.firmware }}</td>
+      <td class="muted">{{ d.firmware }}</td>
       <td><span class="badge badge-{{ d.state }}">{{ d.state }}</span></td>
     </tr>
   {% endfor %}
