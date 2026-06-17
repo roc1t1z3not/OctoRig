@@ -12,6 +12,7 @@ export interface SiteSettings {
   dynamic_min_floor_pct: number;
   scoreboard_frozen_at: string | null;
   first_blood_enabled: boolean;
+  python_editor_enabled: boolean;
   updated_at: string;
 }
 
@@ -20,6 +21,7 @@ export interface PublicSettings {
   maintenance_mode: boolean;
   maintenance_message: string | null;
   first_blood_enabled: boolean;
+  python_editor_enabled: boolean;
 }
 
 export type SiteSettingsPatch = Partial<Omit<SiteSettings, "updated_at">>;

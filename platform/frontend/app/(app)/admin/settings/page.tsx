@@ -14,6 +14,7 @@ import { useConfirmStore } from "@/stores/confirm.store";
 import { useUserStore } from "@/stores/user.store";
 import { PlatformSection } from "@/components/admin/settings/PlatformSection";
 import { ScoringSection } from "@/components/admin/settings/ScoringSection";
+import { FeaturesSection } from "@/components/admin/settings/FeaturesSection";
 import { DangerZone } from "@/components/admin/settings/DangerZone";
 
 export default function AdminSettingsPage() {
@@ -35,6 +36,7 @@ export default function AdminSettingsPage() {
 
   const [platform, setPlatform] = useState<Partial<SiteSettings>>({});
   const [scoring, setScoring] = useState<Partial<SiteSettings>>({});
+  const [features, setFeatures] = useState<Partial<SiteSettings>>({});
 
   useEffect(() => {
     if (!settings) return;
@@ -50,6 +52,9 @@ export default function AdminSettingsPage() {
       dynamic_min_floor_pct: settings.dynamic_min_floor_pct,
       scoreboard_frozen_at: settings.scoreboard_frozen_at,
       first_blood_enabled: settings.first_blood_enabled,
+    });
+    setFeatures({
+      python_editor_enabled: settings.python_editor_enabled,
     });
   }, [settings]);
 
@@ -104,6 +109,13 @@ export default function AdminSettingsPage() {
         scoring={scoring}
         onChange={(patch) => setScoring((s) => ({ ...s, ...patch }))}
         onSave={() => saveMutation.mutate(scoring)}
+        isPending={saveMutation.isPending}
+      />
+
+      <FeaturesSection
+        features={features}
+        onChange={(patch) => setFeatures((f) => ({ ...f, ...patch }))}
+        onSave={() => saveMutation.mutate(features)}
         isPending={saveMutation.isPending}
       />
 

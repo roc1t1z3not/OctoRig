@@ -204,8 +204,10 @@ INSERT OR IGNORE INTO mqtt_log VALUES
   (10,'grid/zone/14/cmd','{"cmd":"curtail","pct":30}',14,'2026-06-15 22:41:07');
 
 INSERT OR IGNORE INTO _flags VALUES
-  ('biz-credits', 'FLAG{sgo_business_logic_credit_overflow}'),
-  ('mqtt-inject', 'FLAG{sgo_mqtt_topic_injection}');
+  ('biz-credits',  'FLAG{sgo_business_logic_credit_overflow}'),
+  ('mqtt-inject',  'FLAG{sgo_mqtt_topic_injection}'),
+  ('sqli-login',   'FLAG{sgo_sqli_login_bypassed}'),
+  ('ssrf-poll',    'FLAG{sgo_ssrf_internal_fetch}');
 """
 
 
@@ -231,3 +233,5 @@ def init_db():
     conn.close()
     with open('/flag_cmdi.txt', 'w') as f:
         f.write('FLAG{sgo_cmdi_device_reboot_rce}\n')
+    with open('/flag_py_cmdi.txt', 'w') as f:
+        f.write('FLAG{sgo_python_cmdi_automated}\n')

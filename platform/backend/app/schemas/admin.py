@@ -103,6 +103,7 @@ class SiteSettingsResponse(BaseModel):
     dynamic_min_floor_pct: int
     scoreboard_frozen_at: Optional[datetime]
     first_blood_enabled: bool
+    python_editor_enabled: bool
     updated_at: datetime
 
     model_config = {"from_attributes": True}
@@ -118,6 +119,7 @@ class SiteSettingsUpdate(BaseModel):
     dynamic_min_floor_pct: Optional[int] = Field(None, ge=1, le=100)
     scoreboard_frozen_at: Optional[datetime] = None
     first_blood_enabled: Optional[bool] = None
+    python_editor_enabled: Optional[bool] = None
 
 
 class PublicSettingsResponse(BaseModel):
@@ -125,3 +127,4 @@ class PublicSettingsResponse(BaseModel):
     maintenance_mode: bool
     maintenance_message: Optional[str]
     first_blood_enabled: bool
+    python_editor_enabled: bool

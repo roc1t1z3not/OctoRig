@@ -59,9 +59,18 @@
         .ch-stat { display: flex; align-items: center; gap: 0.3rem; font-size: 0.6875rem; color: var(--g-text-secondary); }
         .ch-stat--blood { color: #e05252; }
 
-        .ch-body { display: flex; flex-direction: column; gap: 1rem; }
-        .ch-desc-card { }
-        .ch-desc { font-size: 0.8125rem; color: var(--g-text-secondary); line-height: 1.6; margin-bottom: 0.75rem; white-space: pre-wrap; }
+        .ch-body { display: flex; flex-direction: column; gap: 1.25rem; }
+        .ch-desc-card { padding: 1.25rem 1.5rem; }
+        .ch-desc { font-size: 0.875rem; color: var(--g-text-secondary); line-height: 1.7; }
+        .ch-desc p { margin: 0 0 0.75rem; }
+        .ch-desc p:last-child { margin-bottom: 0; }
+        .ch-desc strong { color: var(--g-text); font-weight: 600; }
+        .ch-desc em { font-style: italic; }
+        .ch-desc code { font-family: var(--font-mono, monospace); font-size: 0.8125rem; background: var(--g-surface-2); padding: 0.15rem 0.4rem; border-radius: 3px; color: var(--g-text); }
+        .ch-desc a { color: var(--g-accent); text-decoration: none; }
+        .ch-desc a:hover { text-decoration: underline; }
+        .ch-desc ul, .ch-desc ol { padding-left: 1.5rem; margin: 0.5rem 0 0.75rem; }
+        .ch-desc li { margin-bottom: 0.3rem; }
         .ch-tags { display: flex; flex-wrap: wrap; gap: 0.25rem; }
         .ch-tag { font-size: 0.5625rem; padding: 0.1rem 0.375rem; background: var(--g-accent-dim); color: var(--g-accent); border-radius: 0.25rem; }
 
@@ -94,3 +103,28 @@
         .text-muted { color: var(--g-text-muted); }
         .text-sm { font-size: 0.75rem; }
         .font-mono { font-family: var(--font-mono, monospace); }
+
+/* Python editor split layout */
+        .ch-split {
+          display: grid;
+          grid-template-columns: 1fr 420px;
+          gap: 1rem;
+          align-items: start;
+        }
+        .ch-content {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+        .ch-editor-panel {
+          position: sticky;
+          top: 1.5rem;
+          max-height: calc(100vh - 3rem);
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
+        @media (max-width: 1100px) {
+          .ch-split { grid-template-columns: 1fr; }
+          .ch-editor-panel { position: static; max-height: none; }
+        }

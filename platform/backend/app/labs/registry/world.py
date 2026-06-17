@@ -7,7 +7,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "id": 1,
         "slug": "rewindrange",
         "name": "Rewind",
-        "description": "Retro video and games store. SQLi, XSS, IDOR, weak SSH/FTP credentials.",
+        "description": "A retro video and games store with sticky nav menus and stickier database queries. Some things here aren't for sale — but they might still be accessible.",
         "category": "world",
         "container_names": ["octorig-rewindrange"],
         "images": {"app": "octorig-rewindrange:latest"},
@@ -52,18 +52,18 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             },
             {
                 "slug": "rw-sqli-browse-union",
-                "title": "Browse & Conquer",
+                "title": "Back Room Access",
                 "description": (
-                    "The browsing experience on Rewind Range is built on a query that "
-                    "trusts user input a little too much. One of the filter parameters "
-                    "deserves a closer look — what you find there may reach further than "
-                    "the product catalogue.\n\n"
+                    "The Rewind Range catalogue runs on a browse filter that accepts "
+                    "user input and passes it straight to the back end. "
+                    "The back room holds more than product listings — "
+                    "the right input might bring some of it to the surface.\n\n"
                     "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
                 "category": "sqli",
-                "tags": ["sql-injection", "union", "sqlite", "data-extraction"],
+                "tags": ["sql-injection", "sqlite"],
                 "skills": ["UNION SELECT", "SQLite schema enumeration", "column-count detection"],
                 "points": 300,
                 "flags": [
@@ -100,18 +100,19 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             },
             {
                 "slug": "rw-sqli-cred-dump",
-                "title": "Dump the Membership List",
+                "title": "The Member Files",
                 "description": (
-                    "Rewind Range keeps a membership list. Once you've found your way "
-                    "into the database, there's more to collect than product data — "
-                    "the users table holds secrets its customers never intended to share.\n\n"
+                    "Rewind Range keeps a full member registry — accounts, passwords, "
+                    "the kind of data customers assume stays locked away. "
+                    "The database knows more than what's on the shelves, "
+                    "and the admin's credentials are somewhere in there.\n\n"
                     "Find the admin's password and wrap it in `FLAG{}`.\n\n"
                     "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
                 "category": "sqli",
-                "tags": ["sql-injection", "union", "sqlite", "credential-dump"],
+                "tags": ["sql-injection", "sqlite"],
                 "skills": ["UNION SELECT", "credential extraction"],
                 "points": 250,
                 "flags": [
@@ -150,13 +151,16 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "slug": "rw-xss-stored-feedback",
                 "title": "Leave Your Mark",
                 "description": (
-                    "Happy customers leave feedback. \n\n"
+                    "Satisfied customers leave feedback. Feedback gets read — "
+                    "or something that acts like reading happens. "
+                    "The question is who's on the other end, and what their browser does "
+                    "when your submission arrives.\n\n"
                     "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
                 "category": "xss",
-                "tags": ["xss", "stored", "session-hijacking", "javascript"],
+                "tags": ["xss", "stored", "javascript"],
                 "skills": ["stored XSS", "cookie exfiltration", "session hijacking"],
                 "points": 350,
                 "flags": [
@@ -230,7 +234,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "difficulty": "hard",
                 "category": "web",
-                "tags": ["session", "flask", "cookie-forgery", "crypto"],
+                "tags": ["session", "flask", "crypto"],
                 "skills": ["Flask session internals", "itsdangerous", "cookie signing"],
                 "points": 500,
                 "flags": [
@@ -273,7 +277,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "id": 2,
         "slug": "tradefloor",
         "name": "TradeFloor",
-        "description": "Stock trading portal. SQLi, IDOR, race conditions, weak SSH/FTP credentials.",
+        "description": "A real-time stock trading platform where data moves fast and trust is extended a little too freely. Not every position that's accessible here should be.",
         "category": "world",
         "container_names": ["octorig-tradefloor"],
         "images": {"app": "octorig-tradefloor:latest"},
@@ -320,15 +324,15 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "slug": "tf-sqli-market-union",
                 "title": "Inside the Order Book",
                 "description": (
-                    "The market search feature accepts a ticker query. Try entering "
-                    "something the search wasn't designed to handle — some inputs "
-                    "travel further than just the product catalogue.\n\n"
+                    "The order book search takes a ticker symbol and surfaces market data. "
+                    "The database running behind it holds more than trade history — "
+                    "and the search field may accept more than just ticker symbols.\n\n"
                     "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
                 "category": "sqli",
-                "tags": ["sql-injection", "union", "sqlite", "data-extraction"],
+                "tags": ["sql-injection", "sqlite"],
                 "skills": ["UNION SELECT", "SQLite schema enumeration", "column-count detection"],
                 "points": 300,
                 "flags": [
@@ -353,7 +357,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "difficulty": "easy",
                 "category": "sqli",
-                "tags": ["sql-injection", "authentication-bypass", "api", "jwt"],
+                "tags": ["sql-injection", "authentication-bypass", "api"],
                 "skills": ["SQLi auth bypass", "JWT", "API testing"],
                 "points": 100,
                 "flags": [
@@ -369,14 +373,15 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "slug": "tf-sqli-cred-dump",
                 "title": "Membership Leaked",
                 "description": (
-                    "You've found a way into the database. There's more stored there "
-                    "than market data — and not everything is encrypted.\n\n"
+                    "TradeFloor stores more than tickers and prices. "
+                    "Somewhere in that database is a user registry — accounts, credentials, "
+                    "the kind of data that was never meant to be readable from the outside.\n\n"
                     "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
                 "category": "sqli",
-                "tags": ["sql-injection", "union", "sqlite", "credential-dump"],
+                "tags": ["sql-injection", "sqlite"],
                 "skills": ["UNION SELECT", "credential extraction"],
                 "points": 200,
                 "flags": [
@@ -471,7 +476,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "difficulty": "hard",
                 "category": "web",
-                "tags": ["jwt", "alg-none", "authentication", "api"],
+                "tags": ["jwt", "authentication", "api"],
                 "skills": ["JWT internals", "algorithm confusion", "API testing"],
                 "points": 450,
                 "flags": [
@@ -513,7 +518,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "id": 3,
         "slug": "goldenace",
         "name": "GoldenAce",
-        "description": "Online casino. SQLi, XSS, privilege escalation, FTP backdoor, weak SSH.",
+        "description": "The house sets the rules, and the house trusts its own systems. See how far a registered player can reach before anyone notices.",
         "category": "world",
         "container_names": ["octorig-goldenace"],
         "images": {"app": "octorig-goldenace:latest"},
@@ -552,13 +557,13 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ga-sqli-promo",
                 "title": "Free Chips",
-                "description": "The promo redemption desk accepts codes. Some codes may do more than redeem credits — try entering something the field wasn't designed for.",
+                "description": "The promo desk is how the casino hands out credits. You enter a code, the system checks it, and something happens. The question is whether that check is as airtight as the house assumes.",
                 "difficulty": "medium",
                 "category": "sqli",
                 "points": 200,
                 "challenge_type": "flag",
                 "estimated_minutes": 20,
-                "tags": ["sqli", "union", "sqlite"],
+                "tags": ["sqli", "sqlite"],
                 "skills": [],
                 "flags": [],
                 "hints": [
@@ -570,13 +575,13 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ga-sqli-leaderboard",
                 "title": "Rigged Rankings",
-                "description": "The leaderboard has a search. Your input ends up in more than one place — try something you wouldn't normally type as a player name.",
+                "description": "The leaderboard keeps score. The search helps you find your ranking. What you type into that field and what the database does with it may not be the same thing.",
                 "difficulty": "medium",
                 "category": "sqli",
                 "points": 150,
                 "challenge_type": "flag",
                 "estimated_minutes": 15,
-                "tags": ["sqli", "union", "reflected-xss"],
+                "tags": ["sqli", "sqlite"],
                 "skills": [],
                 "flags": [],
                 "hints": [
@@ -606,7 +611,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ga-idor-suite",
                 "title": "Wrong Room",
-                "description": "Player suites display a full game history. The room number is in the URL — is it verified against your session?",
+                "description": "Every high-roller gets a suite: their own room, their own history. The suite number lives in the URL. Whether the hotel actually checks your key card is another question.",
                 "difficulty": "easy",
                 "category": "idor",
                 "points": 100,
@@ -640,7 +645,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ga-bac-admin",
                 "title": "Staff Only",
-                "description": "The admin panel is behind a door marked staff only. As a registered player, try walking through it.",
+                "description": "The casino's administrative area isn't linked from the player dashboard. But the route exists, the server responds to it, and the guest list may not be as exclusive as the signage implies.",
                 "difficulty": "easy",
                 "category": "web",
                 "points": 150,
@@ -657,7 +662,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ga-bac-high-rollers",
                 "title": "VIP Lounge",
-                "description": "Somewhere on this site there's a restricted area for high-rollers. The path is hinted at in a familiar file. Being registered might be enough to get in.",
+                "description": "Every casino keeps a back room for its best clients. This one's not advertised, but it's there — and the velvet rope may be less strict than the signage implies.",
                 "difficulty": "easy",
                 "category": "web",
                 "points": 100,
@@ -719,7 +724,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "id": 4,
         "slug": "humanbank",
         "name": "HumanBank",
-        "description": "Banking portal. SQLi, IDOR, auth bypass, Redis cache, SSH private keys.",
+        "description": "A retail banking portal that knows your balance and your transaction history. It may also know things about other customers.",
         "category": "world",
         "container_names": ["octorig-humanbank"],
         "images": {"app": "octorig-humanbank:latest"},
@@ -801,7 +806,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "difficulty": "medium",
                 "category": "sqli",
-                "tags": ["sqli", "union", "sqlite", "search"],
+                "tags": ["sqli", "sqlite"],
                 "skills": ["UNION SELECT", "SQLite schema enumeration"],
                 "points": 250,
                 "estimated_minutes": 25,
@@ -816,18 +821,18 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             },
             {
                 "slug": "hb-sqli-txn-memo",
-                "title": "Filter Bypass",
+                "title": "Between the Lines",
                 "description": (
-                    "The transaction list accepts filter fields — memo, type, date range. "
-                    "Each one goes straight into the query logic. "
-                    "The database knows more than transaction history.\n\n"
+                    "The transaction list accepts filters — search by memo, type, date range. "
+                    "Each field shapes how the underlying query is built. "
+                    "The database knows more than just transaction history.\n\n"
                     "**Target:** `http://172.28.4.2/accounts/1/transactions` "
                     "(start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
                 "category": "sqli",
-                "tags": ["sqli", "union", "sqlite", "filter"],
+                "tags": ["sqli", "sqlite"],
                 "skills": ["UNION SELECT", "filter parameter injection"],
                 "points": 200,
                 "estimated_minutes": 20,
@@ -916,12 +921,13 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             },
             {
                 "slug": "hb-bac-user-detail",
-                "title": "Admin Panel Without the Admin",
+                "title": "Open Door Policy",
                 "description": (
                     "The admin area has a page that shows detailed user profiles. "
-                    "It checks that you're logged in — but not who you're logged in as.\n\n"
-                    "Any registered customer can walk straight in. "
-                    "The first user account has something stored in a field that should never be public.\n\n"
+                    "The gate on the way in checks whether you have a session — "
+                    "not whose session it is.\n\n"
+                    "The first account in the system has something stored that "
+                    "was never meant to be customer-facing.\n\n"
                     "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
@@ -941,18 +947,19 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             },
             {
                 "slug": "hb-xss-stored-ticket",
-                "title": "Support Ticket Hijack",
+                "title": "Your Complaint Has Been Received",
                 "description": (
-                    "The bank's support ticket system stores everything customers submit "
-                    "and displays it to staff in the admin panel. "
-                    "What gets stored, gets rendered — and the admin panel isn't as safe as it looks.\n\n"
-                    "Leave something in a ticket that will run when the admin reads it.\n\n"
+                    "The bank's support system stores everything customers submit "
+                    "and surfaces it for staff review in the admin panel. "
+                    "When an admin reads your ticket, their browser does the rendering — "
+                    "and rendering decisions have consequences.\n\n"
+                    "Leave something in a ticket that persists.\n\n"
                     "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "hard",
                 "category": "xss",
-                "tags": ["xss", "stored-xss", "cookie-theft", "admin-panel"],
+                "tags": ["xss", "stored", "admin-panel"],
                 "skills": ["stored XSS", "cookie exfiltration", "session hijacking"],
                 "points": 300,
                 "estimated_minutes": 30,
@@ -977,7 +984,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "difficulty": "medium",
                 "category": "python",
-                "tags": ["python", "scripting", "sql-injection", "automation", "credential-dump"],
+                "tags": ["python", "scripting", "sql-injection", "automation"],
                 "skills": ["requests", "session handling", "SQLi chaining", "response parsing"],
                 "points": 225,
                 "flags": [
@@ -995,7 +1002,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "id": 5,
         "slug": "medihuman",
         "name": "MediHuman",
-        "description": "Healthcare portal. SQLi, IDOR, auth bypass, weak SSH/FTP credentials.",
+        "description": "A patient-facing healthcare portal where privacy isn't just best practice — it's the law. Explore how far a logged-in patient can actually reach.",
         "category": "world",
         "container_names": ["octorig-medihuman"],
         "images": {"app": "octorig-medihuman:latest"},
@@ -1076,7 +1083,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "difficulty": "medium",
                 "category": "sqli",
-                "tags": ["sqli", "union", "sqlite", "phi", "healthcare"],
+                "tags": ["sqli", "sqlite", "phi", "healthcare"],
                 "skills": ["UNION SELECT", "SQLite schema enumeration"],
                 "points": 250,
                 "estimated_minutes": 25,
@@ -1203,7 +1210,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "difficulty": "medium",
                 "category": "xss",
-                "tags": ["xss", "reflected-xss", "cookie-theft", "search"],
+                "tags": ["xss", "reflected", "search"],
                 "skills": ["reflected XSS", "cookie exfiltration", "Jinja2 | safe"],
                 "points": 150,
                 "estimated_minutes": 20,
@@ -1274,7 +1281,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "id": 6,
         "slug": "netpulse",
         "name": "NetPulse",
-        "description": "ISP management portal. SQLi, IDOR, server-side template flaws, SSH/FTP.",
+        "description": "Your ISP's self-service portal: billing, support tickets, network diagnostics. Some features were built for operators. Not all of them were locked down properly.",
         "category": "world",
         "container_names": ["octorig-netpulse"],
         "images": {"app": "octorig-netpulse:latest"},
@@ -1294,8 +1301,8 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "challenges": [
             {
                 "slug": "np-recon-billing-db",
-                "title": "Off the Books",
-                "description": "An internal endpoint was left exposed during a rushed deployment. It requires no login and speaks freely to anyone who requests it. Internal invoices are there for the taking.",
+                "title": "Internal Memo",
+                "description": "An endpoint that was never meant to be public is still reachable. The billing data it serves has no gate in front of it — only the assumption that nobody would think to look.",
                 "challenge_type": "flag",
                 "category": "recon",
                 "difficulty": "easy",
@@ -1311,12 +1318,12 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "np-sqli-login",
                 "title": "Ghost Credentials",
-                "description": "The login form accepts a username and password. The check that validates them might be easier to sidestep than it appears — especially if you phrase your username carefully.",
+                "description": "The admin panel sits behind a login. The form expects a username and a password — but the decision it makes may depend more on the username than you'd think.",
                 "challenge_type": "flag",
                 "category": "sqli",
                 "difficulty": "easy",
                 "points": 100,
-                "tags": ["authentication", "boolean-based"],
+                "tags": ["authentication", "sqli"],
                 "skills": [],
                 "flags": [],
                 "hints": [
@@ -1333,7 +1340,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "category": "sqli",
                 "difficulty": "medium",
                 "points": 250,
-                "tags": ["union-based", "sqlite"],
+                "tags": ["sqli", "sqlite"],
                 "skills": [],
                 "flags": [],
                 "hints": [
@@ -1377,7 +1384,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "np-bac-admin-config",
                 "title": "Backdoor Config",
-                "description": "The admin area has a configuration endpoint. The path is listed in a file you should check early. Getting in may be easier than you'd expect.",
+                "description": "There's an administrative configuration endpoint that the operators never restricted. The path exists, the server responds, and the check that should gate access may not be there.",
                 "challenge_type": "flag",
                 "category": "web",
                 "difficulty": "easy",
@@ -1398,7 +1405,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "category": "web",
                 "difficulty": "hard",
                 "points": 450,
-                "tags": ["ssti", "jinja2", "broken-access-control"],
+                "tags": ["ssti", "broken-access-control"],
                 "skills": [],
                 "flags": [],
                 "hints": [
@@ -1432,7 +1439,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "category": "xss",
                 "difficulty": "easy",
                 "points": 150,
-                "tags": ["reflected", "cookie-theft"],
+                "tags": ["xss", "reflected"],
                 "skills": [],
                 "flags": [],
                 "hints": [
@@ -1454,7 +1461,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "challenge_type": "flag",
                 "difficulty": "medium",
                 "category": "python",
-                "tags": ["python", "scripting", "ssti", "jinja2", "automation"],
+                "tags": ["python", "scripting", "ssti", "automation"],
                 "skills": ["requests", "SSTI", "template expression crafting"],
                 "points": 250,
                 "flags": [
@@ -1472,7 +1479,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "id": 7,
         "slug": "limelight",
         "name": "Limelight",
-        "description": "Cinema booking system. SQLi, IDOR, logic flaws, AWS creds in SSH home.",
+        "description": "Book a seat. Check your confirmation. Start to wonder whether the seat next to yours is yours to look at too.",
         "category": "world",
         "container_names": ["octorig-limelight"],
         "images": {"app": "octorig-limelight:latest"},
@@ -1510,14 +1517,14 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             },
             {
                 "slug": "ll-sqli-search",
-                "title": "Search and Destroy",
-                "description": "The film catalogue search takes your query and asks the database. What it returns depends on how you phrase the question.",
+                "title": "Director's Cut",
+                "description": "The film catalogue search is how you find what's playing. The database has more in it than the current programme — and what comes back may depend on more than the title you type.",
                 "difficulty": "medium",
                 "category": "sqli",
                 "points": 200,
                 "challenge_type": "flag",
                 "estimated_minutes": 20,
-                "tags": ["sqli", "union", "sqlite"],
+                "tags": ["sqli", "sqlite"],
                 "skills": [],
                 "flags": [],
                 "hints": [
@@ -1529,13 +1536,13 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ll-sqli-gift",
                 "title": "Redeem Yourself",
-                "description": "Gift cards are validated by code. The redemption form accepts your code and checks it against the database. What if the code contained more than a card number?",
+                "description": "Gift cards are validated by code. The redemption form takes your input, checks it against the database, and tells you whether you're in credit. What the database does with that input is worth examining.",
                 "difficulty": "medium",
                 "category": "sqli",
                 "points": 250,
                 "challenge_type": "flag",
                 "estimated_minutes": 25,
-                "tags": ["sqli", "union", "sqlite"],
+                "tags": ["sqli", "sqlite"],
                 "skills": [],
                 "flags": [],
                 "hints": [
@@ -1553,7 +1560,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "points": 200,
                 "challenge_type": "flag",
                 "estimated_minutes": 20,
-                "tags": ["sqli", "api", "path-injection"],
+                "tags": ["sqli", "api"],
                 "skills": [],
                 "flags": [],
                 "hints": [
@@ -1570,7 +1577,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "points": 150,
                 "challenge_type": "flag",
                 "estimated_minutes": 15,
-                "tags": ["xss", "stored", "cookies"],
+                "tags": ["xss", "stored"],
                 "skills": [],
                 "flags": [],
                 "hints": [
@@ -1581,7 +1588,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ll-idor-booking",
                 "title": "Not Your Seat",
-                "description": "Booking confirmation pages verify only that you are logged in — not that the booking is yours. Sequential integers, no access control.",
+                "description": "You booked a seat. So did everyone else. Booking IDs are assigned when a reservation is made — whether the cinema enforces whose reservation you can view is worth testing.",
                 "difficulty": "easy",
                 "category": "idor",
                 "points": 100,
@@ -1620,7 +1627,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "points": 450,
                 "challenge_type": "flag",
                 "estimated_minutes": 35,
-                "tags": ["ssti", "jinja2", "flask"],
+                "tags": ["ssti", "web"],
                 "skills": [],
                 "flags": [],
                 "hints": [
@@ -1691,7 +1698,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "id": 8,
         "slug": "subverse",
         "name": "SubVerse",
-        "description": "Reddit-like community forum. SQLi, XSS, IDOR, CSRF, SSTI, command injection, mass assignment, file upload, SSH/FTP.",
+        "description": "An open community platform where anyone can post, comment, and share. The content moderation isn't the only thing that's porous.",
         "category": "world",
         "container_names": ["octorig-subverse"],
         "images": {"app": "octorig-subverse:latest"},
@@ -1728,13 +1735,13 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             },
             {
                 "slug": "sv-sqli-login",
-                "title": "Ghost Credentials",
-                "description": "The login form asks for a username and password. There may be a way to make the password check irrelevant — depending on how you craft the username.",
+                "title": "Skeleton Key",
+                "description": "The login form takes a username and a password. Whether both of them actually matter is worth investigating.",
                 "challenge_type": "flag",
                 "category": "sqli",
                 "difficulty": "easy",
                 "points": 100,
-                "tags": ["authentication", "boolean-based"],
+                "tags": ["authentication", "sqli"],
                 "skills": [],
                 "flags": [],
                 "hints": [
@@ -1751,7 +1758,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "category": "sqli",
                 "difficulty": "medium",
                 "points": 250,
-                "tags": ["union-based", "sqlite"],
+                "tags": ["sqli", "sqlite"],
                 "skills": [],
                 "flags": [],
                 "hints": [
@@ -1763,7 +1770,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "sv-idor-message",
                 "title": "Someone's DM",
-                "description": "Direct messages are stored by ID. The endpoint retrieves them by that ID. It verifies you're logged in — but whose message it is, it does not check.",
+                "description": "Private messages are meant to stay private. Every message has an ID, and the API has an endpoint that retrieves by that ID. Try pulling up a conversation you were never part of.",
                 "challenge_type": "flag",
                 "category": "idor",
                 "difficulty": "easy",
@@ -1795,7 +1802,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "sv-mass-assign-escalate",
                 "title": "Power Up",
-                "description": "The profile editor lets you update your display name and bio. The server processes whatever fields you send — not just the ones shown in the form.",
+                "description": "The profile editor shows you a few fields: display name, bio, the basics. The server that handles your update may be listening for a few more than that.",
                 "challenge_type": "flag",
                 "category": "web",
                 "difficulty": "medium",
@@ -1817,7 +1824,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "category": "web",
                 "difficulty": "hard",
                 "points": 450,
-                "tags": ["ssti", "jinja2", "broken-access-control"],
+                "tags": ["ssti", "broken-access-control"],
                 "skills": [],
                 "flags": [],
                 "hints": [
@@ -1851,7 +1858,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "category": "xss",
                 "difficulty": "easy",
                 "points": 200,
-                "tags": ["stored", "cookie-theft"],
+                "tags": ["xss", "stored"],
                 "skills": [],
                 "flags": [],
                 "hints": [
@@ -1883,6 +1890,259 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     {"order_num": 1, "content": "Find a feature that sends data off-server on your behalf. The value you supply may reach a shell.", "cost": 0},
                     {"order_num": 2, "content": "The link-preview endpoint passes your URL into a system call. Shell separators can append a second command.", "cost": 50},
                     {"order_num": 3, "content": "POST to /api/posts with a crafted url field. Add a separator and a read command. The flag lives at /flag.txt on the host.", "cost": 100},
+                ],
+            },
+        ],
+    },
+    {
+        "id": 18,
+        "slug": "smartgridops",
+        "name": "SmartGridOps",
+        "description": "A SCADA control room for a municipal power grid. Operators log in to manage zone load, issue device commands, and dispatch energy credits. Not every operator is supposed to reach every zone.",
+        "category": "world",
+        "container_names": ["octorig-smartgridops"],
+        "images": {"app": "octorig-smartgridops:latest"},
+        "build_contexts": {"app": "labs/smartgridops"},
+        "start_order": ["app"],
+        "network_name": "octorig-smartgridops-net",
+        "subnet": "172.28.16.0/24",
+        "app_ip": "172.28.16.2",
+        "exposed_ports": {"http": 80, "ssh": 22, "ftp": 21},
+        "access_info": [
+            {"key": "URL", "value": "http://172.28.16.2"},
+            {"key": "SSH", "value": "ssh admin@172.28.16.2 (password: grid-master-2023)"},
+            {"key": "FTP", "value": "ftp 172.28.16.2 (anonymous)"},
+        ],
+        "volume_names": [],
+        "env_vars": {},
+        "requires_privileged": False,
+        "challenges": [
+            {
+                "slug": "sgo-recon-ftp",
+                "title": "Configuration Drop",
+                "description": (
+                    "SmartGridOps runs an FTP service for distributing firmware and "
+                    "field device configurations to the operator fleet. "
+                    "The server accepts anonymous connections. "
+                    "Not everything in the config directory was meant for the public internet.\n\n"
+                    "**Target:** `http://172.28.16.2` (start Lab 18 — SmartGridOps)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "easy",
+                "category": "recon",
+                "tags": ["recon", "ftp", "information-disclosure"],
+                "skills": ["anonymous FTP", "config harvesting"],
+                "points": 50,
+                "flags": [
+                    {"value": "FLAG{sgo_recon_ftp_config_leak}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "The FTP service is on port 21. Try connecting anonymously — no credentials required.", "cost": 0},
+                    {"order_num": 2, "content": "Browse the pub/ directory. There is more than firmware in there.", "cost": 25},
+                    {"order_num": 3, "content": "Download scada_config.txt. Read it carefully — all the way to the end.", "cost": 50},
+                ],
+            },
+            {
+                "slug": "sgo-sqli-login",
+                "title": "Control Room Access",
+                "description": (
+                    "The operator login submits your credentials against the database. "
+                    "The query that does the check is built with the username inline — "
+                    "a crafted username might make the password less relevant than "
+                    "the form implies.\n\n"
+                    "Once inside the admin panel, check the HTTP response headers.\n\n"
+                    "**Target:** `http://172.28.16.2/login` (start Lab 18 — SmartGridOps)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "easy",
+                "category": "sqli",
+                "tags": ["sqli", "authentication-bypass", "sqlite"],
+                "skills": ["SQL injection", "auth bypass"],
+                "points": 100,
+                "flags": [
+                    {"value": "FLAG{sgo_sqli_login_bypassed}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Try a special character in the username field. Does the server behave differently?", "cost": 0},
+                    {"order_num": 2, "content": "A single quote breaks the query. A comment character after the username silences the password check.", "cost": 50},
+                    {"order_num": 3, "content": "Username: admin'-- with any password. After logging in, inspect the response headers on /admin.", "cost": 75},
+                ],
+            },
+            {
+                "slug": "sgo-idor-zone",
+                "title": "Restricted Zone",
+                "description": (
+                    "Every grid zone has a detail page showing load figures, capacity, "
+                    "and a restricted notes field used by senior operators for "
+                    "operational procedures. Your account is assigned to a specific zone. "
+                    "The endpoint that serves zone details doesn't enforce that assignment.\n\n"
+                    "Zone 4 carries something that should be restricted to its operator.\n\n"
+                    "**Target:** `http://172.28.16.2` (start Lab 18 — SmartGridOps)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "easy",
+                "category": "idor",
+                "tags": ["idor", "bola", "access-control"],
+                "skills": ["IDOR", "object-level access control"],
+                "points": 100,
+                "flags": [
+                    {"value": "FLAG{sgo_idor_zone_secret_note}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Log in as any operator. Navigate to the Zones section and look at the URL structure.", "cost": 0},
+                    {"order_num": 2, "content": "Zone IDs are sequential integers. Your account's zone may not be zone 4.", "cost": 25},
+                    {"order_num": 3, "content": "Browse to /zones/4. The restricted notes field contains the flag.", "cost": 50},
+                ],
+            },
+            {
+                "slug": "sgo-api-admin",
+                "title": "Fleet Token",
+                "description": (
+                    "The device API is gated by a static token shared across the entire "
+                    "field hardware fleet. The FTP config file hints at where to find it. "
+                    "Once you have the admin token, a privileged endpoint hands back "
+                    "the full operator roster — and whatever the admin keeps in their notes field.\n\n"
+                    "**Target:** `http://172.28.16.2` (start Lab 18 — SmartGridOps)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "web",
+                "tags": ["api", "hardcoded-token", "information-disclosure"],
+                "skills": ["API token reuse", "operator enumeration"],
+                "points": 200,
+                "flags": [
+                    {"value": "FLAG{sgo_idor_operator_token_exposed}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "The FTP config file contains two API tokens. One is for field devices, one is for admin.", "cost": 0},
+                    {"order_num": 2, "content": "The admin API endpoint is /api/admin/operators. It requires an X-Device-Token header or ?token= query param.", "cost": 50},
+                    {"order_num": 3, "content": "Call GET /api/admin/operators?token=<admin_token>. Look at the notes field of operator ID 1.", "cost": 75},
+                ],
+            },
+            {
+                "slug": "sgo-ssrf-poll",
+                "title": "Reach Inside",
+                "description": (
+                    "The device status poller is a diagnostic tool: provide a URL, "
+                    "the server fetches it and reflects the response back. "
+                    "The server-side fetch can reach addresses that aren't reachable from "
+                    "your browser — including endpoints that only respond to local requests.\n\n"
+                    "**Target:** `http://172.28.16.2/devices/poll` (start Lab 18 — SmartGridOps)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "web",
+                "tags": ["ssrf", "api", "information-disclosure"],
+                "skills": ["SSRF", "internal endpoint discovery"],
+                "points": 250,
+                "flags": [
+                    {"value": "FLAG{sgo_ssrf_internal_fetch}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "The poller at /devices/poll accepts any URL and fetches it server-side. Try pointing it at http://127.0.0.1/.", "cost": 0},
+                    {"order_num": 2, "content": "There is an internal-only endpoint under /api/internal/ that refuses connections from outside.", "cost": 75},
+                    {"order_num": 3, "content": "Fetch http://127.0.0.1/api/internal/ssrf-flag via the poller. The JSON response contains the flag.", "cost": 100},
+                ],
+            },
+            {
+                "slug": "sgo-cmdi-reboot",
+                "title": "Remote Reboot",
+                "description": (
+                    "Issuing a reboot signal to a field device first pings the management IP "
+                    "to confirm the device is reachable. An operator can override the "
+                    "management target address before the ping fires. "
+                    "The override goes directly into a shell call, unsanitised.\n\n"
+                    "**Target:** `http://172.28.16.2` (start Lab 18 — SmartGridOps)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "hard",
+                "category": "web",
+                "tags": ["command-injection", "rce"],
+                "skills": ["command injection", "shell metacharacters"],
+                "points": 350,
+                "flags": [
+                    {"value": "FLAG{sgo_cmdi_device_reboot_rce}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Open any device detail page. The Reboot form has a target address field. Try adding shell separator characters.", "cost": 0},
+                    {"order_num": 2, "content": "The target is passed to: ping -c 1 -W 1 <target> && echo ... — you can chain commands after the ping.", "cost": 75},
+                    {"order_num": 3, "content": "Set target to: 127.0.0.1; cat /flag_cmdi.txt — the command output appears in the response.", "cost": 100},
+                ],
+            },
+            {
+                "slug": "sgo-biz-credits",
+                "title": "Demand Response",
+                "description": (
+                    "Operators accumulate energy credits through demand-response programmes "
+                    "and can forward them to colleagues. The credit transfer form accepts "
+                    "a recipient ID and an amount. "
+                    "The system does not check the sign of that amount before applying it.\n\n"
+                    "**Target:** `http://172.28.16.2/credits` (start Lab 18 — SmartGridOps)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "web",
+                "tags": ["business-logic", "parameter-tampering"],
+                "skills": ["business logic abuse", "negative value injection"],
+                "points": 200,
+                "flags": [
+                    {"value": "FLAG{sgo_business_logic_credit_overflow}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Log in and go to /credits. Try transferring credits to another operator. Now think about the amount field.", "cost": 0},
+                    {"order_num": 2, "content": "The amount is a floating-point number. Explore both ends of its range.", "cost": 50},
+                    {"order_num": 3, "content": "Transfer a large negative amount to any operator. Your balance grows. Once it exceeds 1,000,000 the flag appears.", "cost": 75},
+                ],
+            },
+            {
+                "slug": "sgo-mqtt-inject",
+                "title": "Zone Override",
+                "description": (
+                    "The MQTT console pre-fills the publish topic with your assigned zone's "
+                    "command channel. Grid commands are supposed to stay within an operator's "
+                    "own zone. The topic field is editable — what happens when you publish "
+                    "to a zone you don't control?\n\n"
+                    "**Target:** `http://172.28.16.2/mqtt` (start Lab 18 — SmartGridOps)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "web",
+                "tags": ["iot", "mqtt", "access-control"],
+                "skills": ["IoT command injection", "MQTT topic manipulation"],
+                "points": 150,
+                "flags": [
+                    {"value": "FLAG{sgo_mqtt_topic_injection}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Log in and go to /mqtt. The topic field is pre-filled with your zone. Try changing it.", "cost": 0},
+                    {"order_num": 2, "content": "Publishing to another zone's command topic trips the broker ACL audit. Wildcards do the same.", "cost": 25},
+                    {"order_num": 3, "content": "Change the topic to grid/zone/1/cmd (if you're not zone 1) and publish any payload. The flag appears on submission.", "cost": 50},
+                ],
+            },
+            {
+                "slug": "sgo-py-cmdi",
+                "title": "Automated Override",
+                "description": (
+                    "The device reboot endpoint passes an operator-supplied management "
+                    "target through a shell call without sanitisation. "
+                    "A browser makes injection awkward — a Python script makes it precise. "
+                    "Authenticate, target the reboot endpoint, and read the flag from "
+                    "the host filesystem.\n\n"
+                    "**Target:** `http://172.28.16.2` (start Lab 18 — SmartGridOps)"
+                ),
+                "challenge_type": "flag",
+                "difficulty": "medium",
+                "category": "python",
+                "tags": ["python", "scripting", "command-injection", "automation"],
+                "skills": ["requests", "session handling", "command injection", "shell metacharacters"],
+                "points": 250,
+                "flags": [
+                    {"value": "FLAG{sgo_python_cmdi_automated}", "flag_type": "static", "case_sensitive": False}
+                ],
+                "hints": [
+                    {"order_num": 1, "content": "Log in via POST /login with requests.Session(). Then POST to /devices/<id>/reboot with a crafted target field.", "cost": 0},
+                    {"order_num": 2, "content": "The target field is inserted into a shell ping command. A semicolon lets you append a second command.", "cost": 50},
+                    {"order_num": 3, "content": "Set target to '127.0.0.1; cat /flag_py_cmdi.txt' in your POST body. The output appears in the rendered page.", "cost": 100},
                 ],
             },
         ],

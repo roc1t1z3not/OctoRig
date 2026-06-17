@@ -14,6 +14,10 @@ import {
   type HintSummary,
 } from "@/lib/api/challenges";
 import { getMyProfile } from "@/lib/api/profiles";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { getPublicSettings } from "@/lib/api/settings";
+import { PyodideEditor } from "@/components/challenges/PyodideEditor";
 import { deployInstance, getMyInstance, stopDeployment } from "@/lib/api/deployments";
 import { getLabs } from "@/lib/api/labs";
 import { useNotificationsStore } from "@/stores/notifications.store";
@@ -68,6 +72,12 @@ export default function ChallengeDetailPage() {
     queryFn: () => getLabs(),
     staleTime: 30_000,
     enabled: !!ch?.lab_slug,
+  });
+
+  const { data: publicSettings } = useQuery({
+    queryKey: ["public-settings"],
+    queryFn: getPublicSettings,
+    staleTime: 300_000,
   });
 
   const labTemplate = ch?.lab_slug
@@ -160,6 +170,9 @@ export default function ChallengeDetailPage() {
 
   const codeSnippet = ch.challenge_type === "short_answer" ? (ch.content?.code_snippet as string | undefined) : undefined;
   const language = (ch.content?.language as string | undefined) ?? "text";
+  const isPythonChallenge = ch.challenge_type === "short_answer" && language === "python";
+  const showEditor = isPythonChallenge && (publicSettings?.python_editor_enabled ?? true);
+  const starterCode = (ch.content?.starter_code as string | undefined) ?? (showEditor ? codeSnippet : undefined);
 
   const hints: HintSummary[] = ch.hints.map((h) => ({
     ...h,
@@ -181,106 +194,116 @@ export default function ChallengeDetailPage() {
         labUrl={labUrl}
       />
 
-      <div className="ch-body">
-        <section className="g-card ch-desc-card">
-          <p className="ch-desc">{ch.description}</p>
-          {ch.tags.length > 0 && (
-            <div className="ch-tags">
-              {ch.tags.map((t) => (
-                <span key={t} className="ch-tag">{t}</span>
-              ))}
+      <div className={showEditor ? "ch-split" : "ch-body"}>
+        <div className={showEditor ? "ch-content" : "ch-body"}>
+          <section className="g-card ch-desc-card">
+            <div className="ch-desc">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{ch.description}</ReactMarkdown>
             </div>
-          )}
-        </section>
-
-        {codeSnippet && (
-          <section className="g-card">
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-              <h2 className="section-title" style={{ margin: 0 }}>Code</h2>
-              <span style={{
-                fontSize: "0.625rem", fontFamily: "var(--font-mono, monospace)",
-                textTransform: "uppercase", letterSpacing: "0.08em",
-                color: "var(--g-text-muted)", background: "var(--g-surface-2)",
-                padding: "0.15rem 0.4rem", borderRadius: "3px",
-              }}>
-                {language}
-              </span>
-            </div>
-            <pre style={{
-              margin: 0, padding: "1rem",
-              background: "var(--g-surface-2)", border: "1px solid var(--g-border)",
-              borderRadius: "6px", fontSize: "0.8125rem", lineHeight: 1.6,
-              color: "var(--g-text)", whiteSpace: "pre", overflowX: "auto",
-              fontFamily: "var(--font-mono, monospace)",
-            }}>
-              <code>{codeSnippet}</code>
-            </pre>
-          </section>
-        )}
-
-        {hints.length > 0 && (
-          <section>
-            <h2 className="section-title">Hints</h2>
-            <div className="hints-list">
-              {hints.map((h) => (
-                <HintCard
-                  key={h.id}
-                  hint={h}
-                  slug={slug}
-                  userPoints={userPoints}
-                  onUnlocked={handleHintUnlocked}
-                />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {ch.challenge_type === "container" && (
-          <section>
-            <h2 className="section-title">Lab Instance</h2>
-            {instance && (instance.status === "running" || instance.status === "starting" || instance.status === "stopping") ? (
-              <InstanceCard
-                instance={instance}
-                onStop={() => stopMutation.mutate()}
-                isStopping={stopMutation.isPending}
-              />
-            ) : (
-              <div className="g-card" style={{ borderStyle: "dashed" }}>
-                <p className="text-11 text-muted mb-3">
-                  This challenge requires a personal lab instance. Instances auto-destroy after 2 hours.
-                </p>
-                <button
-                  className="g-btn g-btn-primary"
-                  onClick={() => deployMutation.mutate()}
-                  disabled={deployMutation.isPending}
-                >
-                  <Container size={13} />
-                  {deployMutation.isPending ? "Deploying…" : "Deploy Instance"}
-                </button>
+            {ch.tags.length > 0 && (
+              <div className="ch-tags" style={{ marginTop: "1rem" }}>
+                {ch.tags.map((t) => (
+                  <span key={t} className="ch-tag">{t}</span>
+                ))}
               </div>
             )}
           </section>
-        )}
 
-        <section className="g-card submit-card">
-          <h2 className="section-title">{codeSnippet ? "Submit Answer" : "Submit Flag"}</h2>
-          {ch.solved_by_me ? (
-            <div className="submit-solved">
-              <CheckCircle2 size={16} />
-              You&apos;ve already solved this challenge.
-            </div>
-          ) : (
-            <SubmitForm
-              codeSnippet={codeSnippet}
-              flag={flag}
-              onFlagChange={setFlag}
-              onSubmit={handleSubmit}
-              isLoading={submitMutation.isPending}
-              submitResult={submitResult}
-              cooldownRemaining={cooldownRemaining}
-            />
+          {codeSnippet && !showEditor && (
+            <section className="g-card">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+                <h2 className="section-title" style={{ margin: 0 }}>Code</h2>
+                <span style={{
+                  fontSize: "0.625rem", fontFamily: "var(--font-mono, monospace)",
+                  textTransform: "uppercase", letterSpacing: "0.08em",
+                  color: "var(--g-text-muted)", background: "var(--g-surface-2)",
+                  padding: "0.15rem 0.4rem", borderRadius: "3px",
+                }}>
+                  {language}
+                </span>
+              </div>
+              <pre style={{
+                margin: 0, padding: "1rem",
+                background: "var(--g-surface-2)", border: "1px solid var(--g-border)",
+                borderRadius: "6px", fontSize: "0.8125rem", lineHeight: 1.6,
+                color: "var(--g-text)", whiteSpace: "pre", overflowX: "auto",
+                fontFamily: "var(--font-mono, monospace)",
+              }}>
+                <code>{codeSnippet}</code>
+              </pre>
+            </section>
           )}
-        </section>
+
+          {hints.length > 0 && (
+            <section>
+              <h2 className="section-title">Hints</h2>
+              <div className="hints-list">
+                {hints.map((h) => (
+                  <HintCard
+                    key={h.id}
+                    hint={h}
+                    slug={slug}
+                    userPoints={userPoints}
+                    onUnlocked={handleHintUnlocked}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {ch.challenge_type === "container" && (
+            <section>
+              <h2 className="section-title">Lab Instance</h2>
+              {instance && (instance.status === "running" || instance.status === "starting" || instance.status === "stopping") ? (
+                <InstanceCard
+                  instance={instance}
+                  onStop={() => stopMutation.mutate()}
+                  isStopping={stopMutation.isPending}
+                />
+              ) : (
+                <div className="g-card" style={{ borderStyle: "dashed" }}>
+                  <p className="text-11 text-muted mb-3">
+                    This challenge requires a personal lab instance. Instances auto-destroy after 2 hours.
+                  </p>
+                  <button
+                    className="g-btn g-btn-primary"
+                    onClick={() => deployMutation.mutate()}
+                    disabled={deployMutation.isPending}
+                  >
+                    <Container size={13} />
+                    {deployMutation.isPending ? "Deploying…" : "Deploy Instance"}
+                  </button>
+                </div>
+              )}
+            </section>
+          )}
+
+          <section className="g-card submit-card">
+            <h2 className="section-title">{codeSnippet ? "Submit Answer" : "Submit Flag"}</h2>
+            {ch.solved_by_me ? (
+              <div className="submit-solved">
+                <CheckCircle2 size={16} />
+                You&apos;ve already solved this challenge.
+              </div>
+            ) : (
+              <SubmitForm
+                codeSnippet={codeSnippet}
+                flag={flag}
+                onFlagChange={setFlag}
+                onSubmit={handleSubmit}
+                isLoading={submitMutation.isPending}
+                submitResult={submitResult}
+                cooldownRemaining={cooldownRemaining}
+              />
+            )}
+          </section>
+        </div>
+
+        {showEditor && (
+          <div className="ch-editor-panel">
+            <PyodideEditor starterCode={starterCode} />
+          </div>
+        )}
       </div>
     </div>
   );

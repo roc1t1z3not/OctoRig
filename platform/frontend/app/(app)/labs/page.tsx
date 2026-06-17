@@ -22,6 +22,7 @@ const CATEGORIES = [
 export default function LabsPage() {
   const [category, setCategory] = useState<string | undefined>(undefined);
   const [search, setSearch] = useState("");
+  const [onlyRunning, setOnlyRunning] = useState(false);
   const qc = useQueryClient();
   const { push } = useNotificationsStore();
 
@@ -42,9 +43,18 @@ export default function LabsPage() {
     onError: () => push("error", "Failed to reset lab"),
   });
 
-  const filtered = labs.filter((l) =>
-    search === "" || l.name.toLowerCase().includes(search.toLowerCase()) || l.description.toLowerCase().includes(search.toLowerCase())
-  );
+  const CATEGORY_ORDER: Record<string, number> = { world: 0, firerange: 1, thirdparty: 2 };
+
+  const filtered = labs
+    .filter((l) =>
+      (search === "" || l.name.toLowerCase().includes(search.toLowerCase()) || l.description.toLowerCase().includes(search.toLowerCase())) &&
+      (!onlyRunning || l.current_deployment?.status === "running")
+    )
+    .sort((a, b) => {
+      const catDiff = (CATEGORY_ORDER[a.category] ?? 9) - (CATEGORY_ORDER[b.category] ?? 9);
+      if (catDiff !== 0) return catDiff;
+      return a.name.localeCompare(b.name);
+    });
 
   return (
     <div className="page">
@@ -72,6 +82,18 @@ export default function LabsPage() {
             </button>
           ))}
         </div>
+        <button
+          className={`g-btn ${onlyRunning ? "g-btn-primary" : "g-btn-ghost"}`}
+          onClick={() => setOnlyRunning((v) => !v)}
+          style={{ marginLeft: "auto" }}
+        >
+          <span style={{
+            display: "inline-block", width: 7, height: 7, borderRadius: "50%",
+            background: onlyRunning ? "var(--g-success)" : "var(--g-text-muted)",
+            marginRight: "0.4rem", verticalAlign: "middle",
+          }} />
+          Running
+        </button>
       </div>
 
       {isLoading ? (

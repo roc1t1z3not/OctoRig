@@ -61,6 +61,16 @@ def init(app):
             'status': 'queued',
         })
 
+    # Internal-only endpoint for SSRF challenge — flag is only served to localhost.
+    @app.route('/api/internal/ssrf-flag')
+    def api_internal_ssrf_flag():
+        if request.remote_addr != '127.0.0.1':
+            return jsonify({'error': 'internal only'}), 403
+        row = get_db().execute(
+            "SELECT value FROM _flags WHERE name = 'ssrf-poll'"
+        ).fetchone()
+        return jsonify({'flag': row['value'] if row else None})
+
     # Admin token dumps the full operator roster (including tokens / notes).
     @app.route('/api/admin/operators')
     def api_admin_operators():

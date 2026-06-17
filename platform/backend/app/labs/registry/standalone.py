@@ -14,7 +14,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "skills": [],
         "points": 50,
         "content": {
-            "code_snippet": 'text = "OctoRig"\nprint(text[::-1])',
+            "code_snippet": 'text = "OctoRig"',
             "language": "python",
         },
         "flags": [{"value": "giRotoO", "flag_type": "static", "case_sensitive": True}],
@@ -33,7 +33,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "skills": [],
         "points": 50,
         "content": {
-            "code_snippet": "result = sum(x**2 for x in range(1, 4))\nprint(result)",
+            "code_snippet": "result = sum(x**2 for x in range(1, 4))",
             "language": "python",
         },
         "flags": [{"value": "14", "flag_type": "static", "case_sensitive": False}],
@@ -52,7 +52,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "skills": [],
         "points": 75,
         "content": {
-            "code_snippet": "x = 0b1010\ny = 0b1100\nprint(x & y)",
+            "code_snippet": "x = 0b1010\ny = 0b1100",
             "language": "python",
         },
         "flags": [{"value": "8", "flag_type": "static", "case_sensitive": False}],
@@ -72,7 +72,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "skills": [],
         "points": 50,
         "content": {
-            "code_snippet": "nums = [i * 3 for i in range(1, 6)]\nprint(nums[-1])",
+            "code_snippet": "nums = [i * 3 for i in range(1, 6)]",
             "language": "python",
         },
         "flags": [{"value": "15", "flag_type": "static", "case_sensitive": False}],
@@ -91,7 +91,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "skills": [],
         "points": 50,
         "content": {
-            "code_snippet": 's = "  hello world  "\nprint(s.strip().replace(" ", "_"))',
+            "code_snippet": 's = "  hello world  "',
             "language": "python",
         },
         "flags": [{"value": "hello_world", "flag_type": "static", "case_sensitive": True}],
@@ -110,7 +110,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "skills": [],
         "points": 50,
         "content": {
-            "code_snippet": 'word = "mississippi"\nprint(word.count("s"))',
+            "code_snippet": 'word = "mississippi"',
             "language": "python",
         },
         "flags": [{"value": "4", "flag_type": "static", "case_sensitive": False}],
@@ -129,7 +129,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "skills": [],
         "points": 75,
         "content": {
-            "code_snippet": "nums = [3, 1, 4, 1, 5, 9, 2, 6]\nprint(sorted(set(nums))[2])",
+            "code_snippet": "nums = [3, 1, 4, 1, 5, 9, 2, 6]",
             "language": "python",
         },
         "flags": [{"value": "3", "flag_type": "static", "case_sensitive": False}],
@@ -149,7 +149,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "skills": [],
         "points": 50,
         "content": {
-            "code_snippet": 'keys = ["alpha", "beta", "gamma"]\nvals = [10, 20, 30]\nd = dict(zip(keys, vals))\nprint(d["beta"])',
+            "code_snippet": 'keys = ["alpha", "beta", "gamma"]\nvals = [10, 20, 30]\nd = dict(zip(keys, vals))',
             "language": "python",
         },
         "flags": [{"value": "20", "flag_type": "static", "case_sensitive": False}],
@@ -171,7 +171,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "skills": [],
         "points": 75,
         "content": {
-            "code_snippet": "import base64\ndata = b'T2N0b1JpZw=='\nprint(base64.b64decode(data).decode())",
+            "code_snippet": "import base64\ndata = b'T2N0b1JpZw=='",
             "language": "python",
         },
         "flags": [{"value": "OctoRig", "flag_type": "static", "case_sensitive": True}],
@@ -194,7 +194,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "skills": [],
         "points": 75,
         "content": {
-            "code_snippet": "raw = '4f637461'\nprint(bytes.fromhex(raw).decode())",
+            "code_snippet": "raw = '4f637461'",
             "language": "python",
         },
         "flags": [{"value": "Octa", "flag_type": "static", "case_sensitive": True}],
@@ -245,8 +245,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
             "code_snippet": (
                 "import re\n"
                 "text = 'err [ALPHA] ok [BRAVO] skip abc [CHARLIE] end'\n"
-                "matches = re.findall(r'\\[[A-Z]{5,7}\\]', text)\n"
-                "print(matches)"
+                "matches = re.findall(r'\\[[A-Z]{5,7}\\]', text)"
             ),
             "language": "python",
         },
@@ -303,7 +302,7 @@ STANDALONE_CHALLENGES: list[ChallengeDef] = [  # type: ignore[assignment]
         "skills": [],
         "points": 125,
         "content": {
-            "code_snippet": "result = sum(x * 2 for x in range(10) if x % 3 == 0)\nprint(result)",
+            "code_snippet": "result = sum(x * 2 for x in range(10) if x % 3 == 0)",
             "language": "python",
         },
         "flags": [{"value": "36", "flag_type": "static", "case_sensitive": False}],

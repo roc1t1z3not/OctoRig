@@ -10,6 +10,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Notifications } from "@/components/ui/Notifications";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { LabPoller } from "@/components/deployments/LabPoller";
 import { useUserStore } from "@/stores/user.store";
 import { useThemeStore } from "@/stores/theme.store";
 import { getPublicSettings } from "@/lib/api/settings";
@@ -86,6 +87,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
       <Notifications />
       <ConfirmModal />
+      <LabPoller />
     </>
   );
 }

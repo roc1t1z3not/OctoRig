@@ -9,7 +9,7 @@ that maps 1-to-1 to the LabTemplate SQLAlchemy model so sync_registry() can
 upsert them directly.
 
 Sub-modules:
-  world       — realistic scenario labs (IDs 1–8)
+  world       — realistic scenario labs (IDs 1–8, 18)
   firerange   — scanner fire-range targets (IDs 9–12)
   thirdparty  — pulled from Docker Hub (IDs 13–17)
   standalone  — standalone challenges with no Docker lab (Python coding challenges)

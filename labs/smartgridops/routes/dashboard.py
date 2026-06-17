@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2026 CommonHuman-Lab
 # Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not
-from flask import render_template, session, redirect, url_for
+from flask import render_template, session, redirect, url_for, make_response
 from db import get_db
 
 
@@ -41,4 +41,10 @@ def init(app):
         if not user or not user['is_admin']:
             return render_template('403.html'), 403
         operators = get_db().execute("SELECT * FROM operators ORDER BY id").fetchall()
-        return render_template('admin.html', operators=operators)
+        resp = make_response(render_template('admin.html', operators=operators))
+        flag_row = get_db().execute(
+            "SELECT value FROM _flags WHERE name = 'sqli-login'"
+        ).fetchone()
+        if flag_row:
+            resp.headers['X-Flag'] = flag_row['value']
+        return resp

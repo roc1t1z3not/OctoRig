@@ -15,6 +15,8 @@ export interface Notification {
 interface NotificationsState {
   items: Notification[];
   push: (kind: NotificationKind, message: string) => void;
+  pushPersistent: (kind: NotificationKind, message: string) => string;
+  update: (id: string, kind: NotificationKind, message: string) => void;
   dismiss: (id: string) => void;
 }
 
@@ -23,6 +25,15 @@ export const useNotificationsStore = create<NotificationsState>((set) => ({
   push: (kind, message) => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     set((s) => ({ items: [...s.items, { id, kind, message }] }));
+    setTimeout(() => set((s) => ({ items: s.items.filter((n) => n.id !== id) })), 5000);
+  },
+  pushPersistent: (kind, message) => {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    set((s) => ({ items: [...s.items, { id, kind, message }] }));
+    return id;
+  },
+  update: (id, kind, message) => {
+    set((s) => ({ items: s.items.map((n) => n.id === id ? { ...n, kind, message } : n) }));
     setTimeout(() => set((s) => ({ items: s.items.filter((n) => n.id !== id) })), 5000);
   },
   dismiss: (id) => set((s) => ({ items: s.items.filter((n) => n.id !== id) })),
