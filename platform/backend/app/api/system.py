@@ -6,7 +6,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user, get_db, require_admin
 from app.models.deployment import Deployment, DeploymentStatus
 from app.models.user import User
 from app.services.docker_runtime import docker_service
@@ -50,7 +50,7 @@ def health(
 
 
 @router.get("/containers")
-def containers(_: User = Depends(get_current_user)) -> list[dict]:
+def containers(_: User = Depends(require_admin)) -> list[dict]:
     """
     All octorig-* containers visible to Docker daemon — includes those
     started by the CLI that have no Deployment row in the database.
@@ -59,6 +59,6 @@ def containers(_: User = Depends(get_current_user)) -> list[dict]:
 
 
 @router.get("/plugins")
-def list_plugins(_: User = Depends(get_current_user)) -> list[dict]:
+def list_plugins(_: User = Depends(require_admin)) -> list[dict]:
     from app.plugins.registry import list_plugins as _list
     return _list()

@@ -5,9 +5,9 @@ import "./admin-deployments.css";
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Trash2, RefreshCw } from "lucide-react";
+import { Trash2, RefreshCw, StopCircle } from "lucide-react";
 import { SearchBar } from "@/components/ui/SearchBar";
-import { getAdminDeployments, type AdminDeployment } from "@/lib/api/admin";
+import { getAdminDeployments, stopAllDeployments, type AdminDeployment } from "@/lib/api/admin";
 import { stopDeployment, resetDeployment } from "@/lib/api/deployments";
 import { DeploymentStatusBadge } from "@/components/deployments/DeploymentStatusBadge";
 import { LoadingCell, EmptyCell } from "@/components/ui/TableStates";
@@ -65,11 +65,41 @@ export default function AdminDeploymentsPage() {
     });
   }
 
+  const stopAllMutation = useMutation({
+    mutationFn: stopAllDeployments,
+    onSuccess: () => {
+      push("success", "All labs are being stopped");
+      qc.invalidateQueries({ queryKey: ["admin-deployments"] });
+    },
+    onError: () => push("error", "Failed to stop all deployments"),
+  });
+
+  function handleStopAll() {
+    const activeCount = deployments.filter((d) => ACTIVE_STATUSES.has(d.status)).length;
+    confirm({
+      title: "Stop all labs?",
+      body: `This will stop all ${activeCount} running or starting deployment${activeCount !== 1 ? "s" : ""} across every user. This cannot be undone.`,
+      confirmLabel: "Stop All",
+      dangerous: true,
+      onConfirm: () => stopAllMutation.mutate(),
+    });
+  }
+
   return (
     <div className="page">
       <div className="page-header">
         <h1 className="page-title font-mono">All Deployments</h1>
         <SearchBar value={search} onChange={setSearch} placeholder="Filter by user or lab…" />
+        {deployments.some((d) => ACTIVE_STATUSES.has(d.status)) && (
+          <button
+            className="g-btn g-btn-danger g-btn-sm"
+            disabled={stopAllMutation.isPending}
+            onClick={handleStopAll}
+          >
+            <StopCircle size={14} />
+            {stopAllMutation.isPending ? "Stopping…" : "Stop All"}
+          </button>
+        )}
       </div>
 
       <div className="g-panel">

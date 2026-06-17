@@ -2,7 +2,7 @@
 # Copyright (c) 2026 CommonHuman-Lab
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, Request
 from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -36,7 +36,7 @@ from app.schemas.admin import (
     SiteSettingsUpdate,
     SystemStats,
 )
-from app.services import api_key_service, audit_service
+from app.services import api_key_service, audit_service, lab_service
 from app.services.settings_service import get_settings
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -307,6 +307,32 @@ def list_all_deployments(
         q = q.filter(Deployment.team_id == team_id)
     deployments = q.order_by(Deployment.created_at.desc()).offset(offset).limit(limit).all()
     return [_to_response(d, db).model_dump() for d in deployments]
+
+
+@router.post("/deployments/stop-all", status_code=204)
+def stop_all_deployments(
+    request: Request,
+    background_tasks: BackgroundTasks,
+    actor: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> None:
+    """Stop every running or starting deployment across all users."""
+    active = db.query(Deployment).filter(
+        Deployment.status.in_([DeploymentStatus.RUNNING, DeploymentStatus.STARTING])
+    ).all()
+
+    for d in active:
+        d.status = DeploymentStatus.STOPPING
+    db.commit()
+
+    for d in active:
+        background_tasks.add_task(lab_service.stop_lab, d.id, actor.id)
+
+    audit_service.write_audit(
+        db, action="admin.stop_all_deployments", user_id=actor.id,
+        detail={"count": len(active), "triggered_by": actor.username},
+        ip=request.client.host if request.client else None,
+    )
 
 
 # ── Audit logs ───────────────────────────────────────────────────────────────

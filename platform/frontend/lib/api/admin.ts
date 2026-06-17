@@ -170,3 +170,7 @@ export async function resetUserPoints(userId: number): Promise<void> {
 export async function resetDatabase(): Promise<void> {
   await apiClient.post("/admin/reset-db");
 }
+
+export async function stopAllDeployments(): Promise<void> {
+  await apiClient.post("/admin/deployments/stop-all");
+}
