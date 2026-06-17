@@ -24,6 +24,7 @@ class UserResponse(BaseModel):
     is_active: bool
     is_superuser: bool
     is_admin: bool
+    is_candidate: bool
     created_at: datetime
     last_login_at: Optional[datetime]
 

@@ -104,6 +104,8 @@ class SiteSettingsResponse(BaseModel):
     scoreboard_frozen_at: Optional[datetime]
     first_blood_enabled: bool
     python_editor_enabled: bool
+    company_name: Optional[str]
+    company_logo_url: Optional[str]
     updated_at: datetime
 
     model_config = {"from_attributes": True}
@@ -120,6 +122,8 @@ class SiteSettingsUpdate(BaseModel):
     scoreboard_frozen_at: Optional[datetime] = None
     first_blood_enabled: Optional[bool] = None
     python_editor_enabled: Optional[bool] = None
+    company_name: Optional[str] = None
+    company_logo_url: Optional[str] = None
 
 
 class PublicSettingsResponse(BaseModel):
@@ -128,3 +132,5 @@ class PublicSettingsResponse(BaseModel):
     maintenance_message: Optional[str]
     first_blood_enabled: bool
     python_editor_enabled: bool
+    company_name: Optional[str]
+    company_logo_url: Optional[str]

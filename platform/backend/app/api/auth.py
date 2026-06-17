@@ -246,4 +246,6 @@ def public_settings(db: Session = Depends(get_db)) -> PublicSettingsResponse:
         maintenance_message=row.maintenance_message,
         first_blood_enabled=row.first_blood_enabled,
         python_editor_enabled=row.python_editor_enabled,
+        company_name=row.company_name,
+        company_logo_url=row.company_logo_url,
     )

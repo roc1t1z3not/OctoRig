@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, Float, Integer, Text, func
+from sqlalchemy import Boolean, DateTime, Float, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -31,6 +31,10 @@ class SiteSettings(Base):
 
     # Features
     python_editor_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+    # Branding
+    company_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    company_logo_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()

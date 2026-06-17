@@ -10,6 +10,7 @@ from app.database import Base
 
 if TYPE_CHECKING:
     from app.models.api_key import ApiKey
+    from app.models.assessment import AssessmentInvite
     from app.models.audit_log import AuditLog
     from app.models.badge import UserBadge
     from app.models.challenge import Challenge, ChallengeSubmission
@@ -31,6 +32,7 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_candidate: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     platform_roles: Mapped[list[Any]] = mapped_column(JSON, nullable=False, default=list)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     last_login_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -56,4 +58,7 @@ class User(Base):
     profile: Mapped[Optional["UserProfile"]] = relationship(back_populates="user")
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
+    )
+    assessment_invite: Mapped[Optional["AssessmentInvite"]] = relationship(
+        foreign_keys="AssessmentInvite.user_id", back_populates="user", uselist=False
     )

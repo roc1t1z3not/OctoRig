@@ -13,6 +13,8 @@ export interface SiteSettings {
   scoreboard_frozen_at: string | null;
   first_blood_enabled: boolean;
   python_editor_enabled: boolean;
+  company_name: string | null;
+  company_logo_url: string | null;
   updated_at: string;
 }
 
@@ -22,6 +24,8 @@ export interface PublicSettings {
   maintenance_message: string | null;
   first_blood_enabled: boolean;
   python_editor_enabled: boolean;
+  company_name: string | null;
+  company_logo_url: string | null;
 }
 
 export type SiteSettingsPatch = Partial<Omit<SiteSettings, "updated_at">>;

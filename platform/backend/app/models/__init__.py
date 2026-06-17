@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2026 CommonHuman-Lab
 from app.models.api_key import ApiKey
+from app.models.assessment import Assessment, AssessmentInvite, AssessmentReport
 from app.models.audit_log import AuditLog
 from app.models.badge import AchievementRule, AchievementRuleType, BadgeDefinition, UserBadge
 from app.models.challenge import (
@@ -23,6 +24,7 @@ from app.models.team import Team, TeamInvitation, TeamMember, TeamRole
 from app.models.user import User
 
 __all__ = [
+    "Assessment", "AssessmentInvite", "AssessmentReport",
     "User",
     "Team", "TeamMember", "TeamInvitation", "TeamRole",
     "LabTemplate",

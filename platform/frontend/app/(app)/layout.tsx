@@ -27,7 +27,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (_hasHydrated && !isRestoringToken && !accessToken) router.replace("/login");
-  }, [_hasHydrated, isRestoringToken, accessToken, router]);
+    // Candidate users have a restricted workspace — redirect them out of the main app
+    if (_hasHydrated && !isRestoringToken && accessToken && user?.is_candidate) {
+      router.replace("/assessment");
+    }
+  }, [_hasHydrated, isRestoringToken, accessToken, user, router]);
 
   const { data: publicSettings } = useQuery({
     queryKey: ["public-settings"],

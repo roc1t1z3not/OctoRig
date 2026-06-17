@@ -5,7 +5,7 @@ import "./admin.css";
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { Users, FolderGit2, Container, KeyRound, Activity } from "lucide-react";
+import { Users, FolderGit2, Container, KeyRound, Activity, ClipboardList } from "lucide-react";
 import { getStats, type SystemStats } from "@/lib/api/admin";
 import { getPlugins } from "@/lib/api/system";
 import { useUserStore } from "@/stores/user.store";
@@ -99,6 +99,12 @@ export default function AdminDashboard() {
             value={stats?.api_key_count}
             href="/admin/users"
           />
+          <StatCard
+            icon={<ClipboardList size={20} />}
+            label="Assessments"
+            value={undefined}
+            href="/admin/assessments"
+          />
         </div>
       )}
 
@@ -109,6 +115,7 @@ export default function AdminDashboard() {
           <Link href="/admin/teams" className="g-btn g-btn-ghost g-btn-sm">Teams</Link>
           <Link href="/admin/deployments" className="g-btn g-btn-ghost g-btn-sm">Deployments</Link>
           <Link href="/admin/audit" className="g-btn g-btn-ghost g-btn-sm">Audit Log</Link>
+          <Link href="/admin/assessments" className="g-btn g-btn-ghost g-btn-sm">Assessments</Link>
         </div>
       </div>
 

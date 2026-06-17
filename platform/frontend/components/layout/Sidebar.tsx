@@ -40,6 +40,7 @@ const NAV_ADMIN = [
   { href: "/admin/events",       icon: Flag,          label: "Events" },
   { href: "/admin/api-keys",     icon: KeyRound,      label: "API Keys" },
   { href: "/admin/ranks",        icon: BarChart3,     label: "Ranks" },
+  { href: "/admin/assessments",  icon: Zap,           label: "Assessments" },
   { href: "/admin/content",      icon: ClipboardList, label: "Content" },
   { href: "/admin/settings",     icon: Settings,      label: "Settings" },
 ];

@@ -15,6 +15,7 @@ import { useUserStore } from "@/stores/user.store";
 import { PlatformSection } from "@/components/admin/settings/PlatformSection";
 import { ScoringSection } from "@/components/admin/settings/ScoringSection";
 import { FeaturesSection } from "@/components/admin/settings/FeaturesSection";
+import { BrandingSection } from "@/components/admin/settings/BrandingSection";
 import { DangerZone } from "@/components/admin/settings/DangerZone";
 
 export default function AdminSettingsPage() {
@@ -37,6 +38,7 @@ export default function AdminSettingsPage() {
   const [platform, setPlatform] = useState<Partial<SiteSettings>>({});
   const [scoring, setScoring] = useState<Partial<SiteSettings>>({});
   const [features, setFeatures] = useState<Partial<SiteSettings>>({});
+  const [branding, setBranding] = useState<Partial<SiteSettings>>({});
 
   useEffect(() => {
     if (!settings) return;
@@ -55,6 +57,10 @@ export default function AdminSettingsPage() {
     });
     setFeatures({
       python_editor_enabled: settings.python_editor_enabled,
+    });
+    setBranding({
+      company_name: settings.company_name,
+      company_logo_url: settings.company_logo_url,
     });
   }, [settings]);
 
@@ -116,6 +122,13 @@ export default function AdminSettingsPage() {
         features={features}
         onChange={(patch) => setFeatures((f) => ({ ...f, ...patch }))}
         onSave={() => saveMutation.mutate(features)}
+        isPending={saveMutation.isPending}
+      />
+
+      <BrandingSection
+        branding={branding}
+        onChange={(patch) => setBranding((b) => ({ ...b, ...patch }))}
+        onSave={() => saveMutation.mutate(branding)}
         isPending={saveMutation.isPending}
       />
 

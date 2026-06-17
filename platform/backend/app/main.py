@@ -137,6 +137,8 @@ def create_app() -> FastAPI:
         max_age=600,
     )
 
+    from app.api.assessments import admin_router as assessments_admin_router
+    from app.api.assessments import candidate_router as assessments_candidate_router
     from app.api.events_ws import router as ws_router
     from app.api.admin import router as admin_router
     from app.api.api_keys import router as api_keys_router
@@ -176,6 +178,8 @@ def create_app() -> FastAPI:
     app.include_router(notifications_router, prefix=prefix)
     app.include_router(content_router, prefix=prefix)
     app.include_router(marketplace_router, prefix=prefix)
+    app.include_router(assessments_admin_router, prefix=prefix)
+    app.include_router(assessments_candidate_router, prefix=prefix)
 
     return app
 

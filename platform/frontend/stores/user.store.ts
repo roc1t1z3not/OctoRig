@@ -11,6 +11,7 @@ export interface AuthUser {
   email: string;
   is_superuser: boolean;
   is_admin: boolean;
+  is_candidate: boolean;
   platform_roles?: string[];
 }
 
