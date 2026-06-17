@@ -52,6 +52,8 @@ The app starts on **http://172.28.16.2**.
 | Admin | `admin` | `grid-master-2023` |
 | Demo operator | `demo` | `demo` |
 
+15 operator accounts are seeded (1 admin + 14 operators across 15 zones). Passwords are stored as **unsalted MD5** hashes (intentionally weak / crackable); the app MD5s the submitted password before comparison, but the username is still interpolated unsanitised, so the login SQLi stands. Other seeded operator creds include `r.fischer:summer2024`, `a.kowalski:password123`, `n.popova:qwerty2024`, `y.nakamura:feeder123`.
+
 ---
 
 ## Key Endpoints
