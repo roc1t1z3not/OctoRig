@@ -15,6 +15,7 @@ import {
 import { getMyRank } from "@/lib/api/ranks";
 import { clsx } from "clsx";
 import { useUserStore } from "@/stores/user.store";
+import { useThemeStore } from "@/stores/theme.store";
 import { logout } from "@/lib/api/auth";
 import { getMyProfile } from "@/lib/api/profiles";
 
@@ -48,6 +49,7 @@ const NAV_ADMIN = [
 export function Sidebar() {
   const pathname = usePathname();
   const { user, clearSession } = useUserStore();
+  const { resetExplicit } = useThemeStore();
   const isPrivileged = user?.is_admin || user?.is_superuser;
   const [menuOpen, setMenuOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(() => pathname.startsWith("/admin"));
@@ -78,6 +80,7 @@ export function Sidebar() {
 
   async function handleLogout() {
     try { await logout(); } catch {}
+    resetExplicit();
     clearSession();
     window.location.href = "/login";
   }

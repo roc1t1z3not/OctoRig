@@ -14,10 +14,11 @@ import { LabPoller } from "@/components/deployments/LabPoller";
 import { useUserStore } from "@/stores/user.store";
 import { useThemeStore } from "@/stores/theme.store";
 import { getPublicSettings } from "@/lib/api/settings";
+import { getMyProfile } from "@/lib/api/profiles";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { accessToken, _hasHydrated, isRestoringToken, user } = useUserStore();
-  const { theme } = useThemeStore();
+  const { theme, applyPlatformDefault, applyProfileTheme } = useThemeStore();
   const router = useRouter();
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
@@ -40,8 +41,25 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     enabled: !!accessToken,
   });
 
+  const { data: myProfile } = useQuery({
+    queryKey: ["profile", "me"],
+    queryFn: getMyProfile,
+    staleTime: 60_000,
+    enabled: !!accessToken,
+  });
+
+  useEffect(() => {
+    applyPlatformDefault(publicSettings?.default_theme);
+  }, [publicSettings, applyPlatformDefault]);
+
+  useEffect(() => {
+    applyProfileTheme(myProfile?.theme);
+  }, [myProfile, applyProfileTheme]);
+
   // Wait for rehydration and any in-flight token restore before rendering or redirecting.
   if (!_hasHydrated || isRestoringToken || !accessToken) return null;
+  // Candidate users get redirected to /assessment — suppress the platform shell while the redirect fires.
+  if (user?.is_candidate) return null;
 
   const isAdmin = user?.is_admin || user?.is_superuser;
   const inMaintenance = publicSettings?.maintenance_mode ?? false;

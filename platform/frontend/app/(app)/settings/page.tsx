@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Palette, User, Shield, FlaskConical } from "lucide-react";
 import { changePassword, getMe } from "@/lib/api/auth";
+import { updateMyProfile } from "@/lib/api/profiles";
 import { useThemeStore } from "@/stores/theme.store";
 import { useUserStore } from "@/stores/user.store";
 import { useNotificationsStore } from "@/stores/notifications.store";
@@ -21,6 +22,11 @@ export default function SettingsPage() {
   const [section, setSection] = useState<"appearance" | "account" | "demo">("appearance");
 
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: getMe });
+
+  const themeMutation = useMutation({
+    mutationFn: (themeId: string) => updateMyProfile({ theme: themeId }),
+    onError: () => push("error", "Failed to save theme preference"),
+  });
 
   return (
     <div className="page">
@@ -54,7 +60,7 @@ export default function SettingsPage() {
                   <button
                     key={t.id}
                     className={`theme-card ${theme === t.id ? "active" : ""}`}
-                    onClick={() => setTheme(t.id)}
+                    onClick={() => { setTheme(t.id); themeMutation.mutate(t.id); }}
                     aria-pressed={theme === t.id}
                   >
                     <div className="theme-swatches">

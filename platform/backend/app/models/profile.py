@@ -2,7 +2,7 @@
 # Copyright (c) 2026 CommonHuman-Lab
 import enum
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, func
 from app.core.db_types import EnumCol as SQLEnum
@@ -34,6 +34,7 @@ class UserProfile(Base):
         SQLEnum(PrivacyLevel), nullable=False, default=PrivacyLevel.PUBLIC
     )
     show_activity: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    theme: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

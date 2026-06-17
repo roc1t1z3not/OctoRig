@@ -7,18 +7,22 @@ import "../../settings/settings.css";
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Copy, Check, Plus, ChevronDown, ChevronRight, Shield } from "lucide-react";
+import { ArrowLeft, Copy, Check, Plus, ChevronDown, ChevronRight, Shield, Pencil } from "lucide-react";
 import Link from "next/link";
 import {
   getAssessment,
   listInvites,
   createInvite,
   revokeInvite,
+  updateAssessment,
   getCandidateProgress,
+  type CreateAssessmentPayload,
   type AssessmentInvite,
   type AssessmentInviteWithProgress,
   type InviteStatus,
 } from "@/lib/api/assessments";
+import { getLabs, type LabTemplate } from "@/lib/api/labs";
+import { AssessmentFormSheet } from "@/components/admin/assessments/AssessmentFormSheet";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { useConfirmStore } from "@/stores/confirm.store";
 
@@ -194,6 +198,7 @@ export default function AssessmentDetailPage() {
   const { push } = useNotificationsStore();
   const qc = useQueryClient();
 
+  const [editSheetOpen, setEditSheetOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
 
@@ -205,6 +210,24 @@ export default function AssessmentDetailPage() {
   const { data: invites = [], isLoading: invitesLoading } = useQuery({
     queryKey: ["assessment-invites", assessmentId],
     queryFn: () => listInvites(assessmentId),
+  });
+
+  const { data: labs = [], isLoading: labsLoading } = useQuery<LabTemplate[]>({
+    queryKey: ["labs", "world"],
+    queryFn: () => getLabs("world"),
+    staleTime: 60_000,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (payload: CreateAssessmentPayload) => updateAssessment(assessmentId, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-assessment", assessmentId] });
+      qc.invalidateQueries({ queryKey: ["admin-assessments"] });
+      push("success", "Assessment updated");
+      setEditSheetOpen(false);
+    },
+    onError: (err: any) =>
+      push("error", err?.response?.data?.detail ?? "Failed to update assessment"),
   });
 
   const inviteMutation = useMutation({
@@ -247,11 +270,16 @@ export default function AssessmentDetailPage() {
           <ArrowLeft size={14} /> Back
         </Link>
         <h1 className="page-title font-mono">{assessment.name}</h1>
-        <span
-          className={`role-pill ${assessment.is_active ? "role-pill--on" : "role-pill--off"}`}
-        >
+        <span className={`role-pill ${assessment.is_active ? "role-pill--on" : "role-pill--off"}`}>
           {assessment.is_active ? "active" : "inactive"}
         </span>
+        <button
+          className="g-btn g-btn-ghost g-btn-sm"
+          style={{ marginLeft: "auto" }}
+          onClick={() => setEditSheetOpen(true)}
+        >
+          <Pencil size={13} /> Edit
+        </button>
       </div>
 
       {/* Assessment summary */}
@@ -355,6 +383,15 @@ export default function AssessmentDetailPage() {
           </table>
         )}
       </section>
+
+      <AssessmentFormSheet
+        open={editSheetOpen}
+        labs={labs}
+        labsLoading={labsLoading}
+        saveMutation={updateMutation}
+        onClose={() => setEditSheetOpen(false)}
+        initialValues={assessment}
+      />
     </div>
   );
 }

@@ -248,4 +248,5 @@ def public_settings(db: Session = Depends(get_db)) -> PublicSettingsResponse:
         python_editor_enabled=row.python_editor_enabled,
         company_name=row.company_name,
         company_logo_url=row.company_logo_url,
+        default_theme=row.default_theme,
     )

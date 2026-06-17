@@ -15,6 +15,7 @@ export interface SiteSettings {
   python_editor_enabled: boolean;
   company_name: string | null;
   company_logo_url: string | null;
+  default_theme: string | null;
   updated_at: string;
 }
 
@@ -26,6 +27,7 @@ export interface PublicSettings {
   python_editor_enabled: boolean;
   company_name: string | null;
   company_logo_url: string | null;
+  default_theme: string | null;
 }
 
 export type SiteSettingsPatch = Partial<Omit<SiteSettings, "updated_at">>;

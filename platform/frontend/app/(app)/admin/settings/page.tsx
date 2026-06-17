@@ -16,6 +16,7 @@ import { PlatformSection } from "@/components/admin/settings/PlatformSection";
 import { ScoringSection } from "@/components/admin/settings/ScoringSection";
 import { FeaturesSection } from "@/components/admin/settings/FeaturesSection";
 import { BrandingSection } from "@/components/admin/settings/BrandingSection";
+import { AppearanceSection } from "@/components/admin/settings/AppearanceSection";
 import { DangerZone } from "@/components/admin/settings/DangerZone";
 
 export default function AdminSettingsPage() {
@@ -39,6 +40,7 @@ export default function AdminSettingsPage() {
   const [scoring, setScoring] = useState<Partial<SiteSettings>>({});
   const [features, setFeatures] = useState<Partial<SiteSettings>>({});
   const [branding, setBranding] = useState<Partial<SiteSettings>>({});
+  const [appearance, setAppearance] = useState<Partial<SiteSettings>>({});
 
   useEffect(() => {
     if (!settings) return;
@@ -61,6 +63,9 @@ export default function AdminSettingsPage() {
     setBranding({
       company_name: settings.company_name,
       company_logo_url: settings.company_logo_url,
+    });
+    setAppearance({
+      default_theme: settings.default_theme,
     });
   }, [settings]);
 
@@ -129,6 +134,13 @@ export default function AdminSettingsPage() {
         branding={branding}
         onChange={(patch) => setBranding((b) => ({ ...b, ...patch }))}
         onSave={() => saveMutation.mutate(branding)}
+        isPending={saveMutation.isPending}
+      />
+
+      <AppearanceSection
+        appearance={appearance}
+        onChange={(patch) => setAppearance((a) => ({ ...a, ...patch }))}
+        onSave={() => saveMutation.mutate(appearance)}
         isPending={saveMutation.isPending}
       />
 

@@ -106,6 +106,7 @@ class SiteSettingsResponse(BaseModel):
     python_editor_enabled: bool
     company_name: Optional[str]
     company_logo_url: Optional[str]
+    default_theme: Optional[str]
     updated_at: datetime
 
     model_config = {"from_attributes": True}
@@ -124,6 +125,7 @@ class SiteSettingsUpdate(BaseModel):
     python_editor_enabled: Optional[bool] = None
     company_name: Optional[str] = None
     company_logo_url: Optional[str] = None
+    default_theme: Optional[str] = None
 
 
 class PublicSettingsResponse(BaseModel):
@@ -134,3 +136,4 @@ class PublicSettingsResponse(BaseModel):
     python_editor_enabled: bool
     company_name: Optional[str]
     company_logo_url: Optional[str]
+    default_theme: Optional[str]

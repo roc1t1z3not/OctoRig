@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Shield, Clock, Server, AlertTriangle } from "lucide-react";
 import { getInviteLanding, acceptInvite } from "@/lib/api/assessments";
+import { login, getMe } from "@/lib/api/auth";
 import { useUserStore } from "@/stores/user.store";
 import { useNotificationsStore } from "@/stores/notifications.store";
 
@@ -18,6 +19,8 @@ export default function InviteLandingPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
 
   const { data: landing, isLoading, error } = useQuery({
     queryKey: ["invite-landing", token],
@@ -46,7 +49,17 @@ export default function InviteLandingPage() {
       push("error", err?.response?.data?.detail ?? "Registration failed"),
   });
 
-  function handleSubmit(e: React.FormEvent) {
+  const loginMutation = useMutation({
+    mutationFn: () => login(loginUsername, loginPassword),
+    onSuccess: async (data) => {
+      const me = await getMe();
+      setSession(me, data.access_token);
+      router.replace("/assessment");
+    },
+    onError: () => push("error", "Invalid username or password"),
+  });
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (password !== confirm) {
       push("error", "Passwords do not match");
@@ -161,8 +174,8 @@ export default function InviteLandingPage() {
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <div style={dividerStyle}>Create your account to begin</div>
 
-            <div className="form-field">
-              <label className="form-label">Username</label>
+            <div className="ev-field">
+              <label className="ev-label">Username</label>
               <input
                 className="g-input"
                 required
@@ -175,8 +188,8 @@ export default function InviteLandingPage() {
               />
             </div>
 
-            <div className="form-field">
-              <label className="form-label">Password</label>
+            <div className="ev-field">
+              <label className="ev-label">Password</label>
               <input
                 className="g-input"
                 type="password"
@@ -189,8 +202,8 @@ export default function InviteLandingPage() {
               />
             </div>
 
-            <div className="form-field">
-              <label className="form-label">Confirm Password</label>
+            <div className="ev-field">
+              <label className="ev-label">Confirm Password</label>
               <input
                 className="g-input"
                 type="password"
@@ -234,7 +247,48 @@ export default function InviteLandingPage() {
           </div>
         )}
 
-        {landing.status === "accepted" && (
+        {/* Returning candidate: accepted or active but not currently signed in */}
+        {(landing.status === "accepted" || landing.status === "active") && !accessToken && (
+          <form
+            onSubmit={(e) => { e.preventDefault(); loginMutation.mutate(); }}
+            style={{ display: "flex", flexDirection: "column", gap: 14, width: "100%" }}
+          >
+            <div style={dividerStyle}>Sign in to continue your assessment</div>
+            <div className="ev-field">
+              <label className="ev-label">Username</label>
+              <input
+                className="g-input"
+                required
+                placeholder="Your username"
+                value={loginUsername}
+                autoComplete="username"
+                onChange={(e) => setLoginUsername(e.target.value)}
+              />
+            </div>
+            <div className="ev-field">
+              <label className="ev-label">Password</label>
+              <input
+                className="g-input"
+                type="password"
+                required
+                placeholder="Your password"
+                value={loginPassword}
+                autoComplete="current-password"
+                onChange={(e) => setLoginPassword(e.target.value)}
+              />
+            </div>
+            <button
+              type="submit"
+              className="g-btn g-btn-primary"
+              disabled={loginMutation.isPending || !loginUsername || !loginPassword}
+            >
+              {loginMutation.isPending ? "Signing in…" : "Sign In & Go to Assessment"}
+            </button>
+          </form>
+        )}
+
+        {/* Returning candidate: accepted and already signed in */}
+        {landing.status === "accepted" && accessToken && (
           <div style={{ textAlign: "center" }}>
             <p style={{ color: "var(--g-text-muted)", marginBottom: 16 }}>
               You have already accepted this invite. Go to your workspace to start the clock.

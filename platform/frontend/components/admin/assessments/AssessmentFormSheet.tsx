@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { Save, X } from "lucide-react";
 import { type LabTemplate } from "@/lib/api/labs";
-import { type CreateAssessmentPayload } from "@/lib/api/assessments";
+import { type Assessment, type CreateAssessmentPayload } from "@/lib/api/assessments";
 
 const BLANK_FORM = {
   name: "",
@@ -19,6 +19,21 @@ const BLANK_FORM = {
   displayNames: {} as Record<string, string>,
 };
 
+function assessmentToForm(a: Assessment) {
+  return {
+    name: a.name,
+    slug: a.slug,
+    slugEdited: true,
+    companyName: a.company_name ?? "",
+    companyLogoUrl: a.company_logo_url ?? "",
+    description: a.description ?? "",
+    instructions: a.candidate_instructions ?? "",
+    durationHours: a.duration_hours,
+    selectedSlugs: a.lab_slugs,
+    displayNames: { ...a.lab_display_names },
+  };
+}
+
 function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
@@ -29,6 +44,7 @@ interface AssessmentFormSheetProps {
   labsLoading: boolean;
   saveMutation: { mutate: (data: CreateAssessmentPayload) => void; isPending: boolean };
   onClose: () => void;
+  initialValues?: Assessment | null;
 }
 
 export function AssessmentFormSheet({
@@ -37,12 +53,14 @@ export function AssessmentFormSheet({
   labsLoading,
   saveMutation,
   onClose,
+  initialValues,
 }: AssessmentFormSheetProps) {
   const [form, setForm] = useState(BLANK_FORM);
+  const isEdit = !!initialValues;
 
   useEffect(() => {
-    if (open) setForm(BLANK_FORM);
-  }, [open]);
+    if (open) setForm(initialValues ? assessmentToForm(initialValues) : BLANK_FORM);
+  }, [open, initialValues]);
 
   if (!open) return null;
 
@@ -83,7 +101,7 @@ export function AssessmentFormSheet({
       <div className="g-backdrop" onClick={onClose} />
       <div className="ev-sheet">
         <div className="ev-sheet-header">
-          <h2 style={{ margin: 0, fontSize: "1rem", fontWeight: 700 }}>New Assessment</h2>
+          <h2 style={{ margin: 0, fontSize: "1rem", fontWeight: 700 }}>{isEdit ? "Edit Assessment" : "New Assessment"}</h2>
           <button className="g-btn g-btn-ghost g-btn-sm" onClick={onClose}>
             <X size={14} />
           </button>
@@ -265,7 +283,7 @@ export function AssessmentFormSheet({
             onClick={handleSubmit}
           >
             <Save size={13} />
-            {saveMutation.isPending ? "Creating…" : "Create Assessment"}
+            {saveMutation.isPending ? (isEdit ? "Saving…" : "Creating…") : (isEdit ? "Save Changes" : "Create Assessment")}
           </button>
         </div>
       </div>

@@ -5,7 +5,6 @@ import "../admin.css";
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import { Plus, ClipboardList, Users } from "lucide-react";
 import { listAssessments, createAssessment, type Assessment } from "@/lib/api/assessments";
 import { getLabs, type LabTemplate } from "@/lib/api/labs";
@@ -85,7 +84,7 @@ export default function AdminAssessmentsPage() {
           </button>
         </div>
       ) : (
-        <table className="g-table">
+        <table className="g-table g-table-hover">
           <thead>
             <tr>
               <th>Name</th>
@@ -95,12 +94,15 @@ export default function AdminAssessmentsPage() {
               <th>Candidates</th>
               <th>Active</th>
               <th>Status</th>
-              <th></th>
             </tr>
           </thead>
           <tbody>
             {assessments.map((a: Assessment) => (
-              <tr key={a.id}>
+              <tr
+                key={a.id}
+                style={{ cursor: "pointer" }}
+                onClick={() => router.push(`/admin/assessments/${a.id}`)}
+              >
                 <td style={{ fontWeight: 500, color: "var(--g-text)" }}>{a.name}</td>
                 <td style={{ color: "var(--g-text-muted)", fontSize: "0.8rem" }}>
                   {a.company_name ?? <span style={{ opacity: 0.4 }}>—</span>}
@@ -112,40 +114,18 @@ export default function AdminAssessmentsPage() {
                   {a.duration_hours}h
                 </td>
                 <td>
-                  <span
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
-                      color: "var(--g-text-muted)",
-                      fontSize: "0.8rem",
-                    }}
-                  >
+                  <span style={{ display: "flex", alignItems: "center", gap: 4, color: "var(--g-text-muted)", fontSize: "0.8rem" }}>
                     <Users size={12} />
                     {a.invite_count}
                   </span>
                 </td>
                 <td>
-                  <span
-                    style={{
-                      color:
-                        a.active_invite_count > 0 ? "var(--g-accent)" : "var(--g-text-muted)",
-                      fontSize: "0.8rem",
-                    }}
-                  >
+                  <span style={{ color: a.active_invite_count > 0 ? "var(--g-accent)" : "var(--g-text-muted)", fontSize: "0.8rem" }}>
                     {a.active_invite_count}
                   </span>
                 </td>
                 <td>
                   <StatusBadge isActive={a.is_active} />
-                </td>
-                <td>
-                  <Link
-                    href={`/admin/assessments/${a.id}`}
-                    className="g-btn g-btn-ghost g-btn-sm"
-                  >
-                    Manage
-                  </Link>
                 </td>
               </tr>
             ))}
