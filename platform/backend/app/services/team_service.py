@@ -7,6 +7,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
+from app.core.db_types import ensure_aware
 from app.core.exceptions import bad_request, conflict, forbidden_exception, not_found
 from app.models.team import Team, TeamInvitation, TeamMember, TeamRole
 from app.models.user import User
@@ -213,7 +214,7 @@ def get_invitation_by_token(db: Session, token: str) -> TeamInvitation:
         raise not_found("Invitation")
     if inv.accepted_at is not None:
         raise bad_request("Invitation has already been accepted")
-    if inv.expires_at < datetime.now(timezone.utc):
+    if ensure_aware(inv.expires_at) < datetime.now(timezone.utc):
         raise bad_request("Invitation has expired")
     return inv
 
