@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user_or_api_key, get_db
 from app.core.exceptions import bad_request, conflict, forbidden_exception, not_found
-from app.core.permissions import can_destroy_deployment, can_view_logs
+from app.core.permissions import can_destroy_deployment, can_view_logs, is_privileged
 from app.models.challenge import Challenge
 from app.models.deployment import Deployment, DeploymentStatus
 from app.models.lab_template import LabTemplate
@@ -48,7 +48,7 @@ def _to_response(d: Deployment, db: Session) -> DeploymentWithTemplate:
 
 def _visible_to_user(d: Deployment, user: User, db: Session) -> bool:
     """True if `user` should be able to see this deployment."""
-    if user.is_superuser or user.is_admin:
+    if is_privileged(user, db):
         return True
     if d.started_by_id == user.id:
         return True
@@ -71,7 +71,7 @@ def list_deployments(
 ) -> list[DeploymentWithTemplate]:
     q = db.query(Deployment)
 
-    if not (current_user.is_superuser or current_user.is_admin):
+    if not is_privileged(current_user, db):
         # Collect all team IDs the user belongs to
         member_team_ids = [
             m.team_id
@@ -170,7 +170,7 @@ def create_deployment(
         if team is None:
             raise not_found("Team")
         membership = _get_membership(db, current_user, payload.team_id)
-        if membership is None and not (current_user.is_superuser or current_user.is_admin):
+        if membership is None and not is_privileged(current_user, db):
             raise forbidden_exception
 
     # Conflict check — per-user when challenge_id is set, global otherwise.
@@ -225,7 +225,7 @@ def destroy_deployment(
         raise not_found("Deployment")
 
     membership = _get_membership(db, current_user, d.team_id)
-    if not can_destroy_deployment(current_user, d, membership):
+    if not can_destroy_deployment(current_user, db, d, membership):
         raise forbidden_exception
 
     if d.status not in (DeploymentStatus.RUNNING, DeploymentStatus.ERROR):
@@ -250,7 +250,7 @@ def set_visibility(
     if d is None:
         raise not_found("Deployment")
     membership = _get_membership(db, current_user, d.team_id)
-    if not can_destroy_deployment(current_user, d, membership):  # same permission as mutate
+    if not can_destroy_deployment(current_user, db, d, membership):  # same permission as mutate
         raise forbidden_exception
     d.visibility = DeploymentVisibility(visibility)
     db.commit()
@@ -269,7 +269,7 @@ def reset_deployment(
         raise not_found("Deployment")
 
     membership = _get_membership(db, current_user, d.team_id)
-    if not can_destroy_deployment(current_user, d, membership):
+    if not can_destroy_deployment(current_user, db, d, membership):
         raise forbidden_exception
 
     template = db.get(LabTemplate, d.lab_template_id)
@@ -316,7 +316,7 @@ async def stream_logs(
         return
 
     membership = _get_membership(db, current_user, d.team_id)
-    if not can_view_logs(current_user, d, membership):
+    if not can_view_logs(current_user, db, d, membership):
         await websocket.close(code=4003)
         return
 

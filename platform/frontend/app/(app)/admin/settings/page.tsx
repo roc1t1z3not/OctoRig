@@ -27,13 +27,13 @@ export default function AdminSettingsPage() {
   const qc = useQueryClient();
 
   useEffect(() => {
-    if (user && !user.is_admin && !user.is_superuser) router.replace("/");
+    if (user && !user.permissions?.includes("admin.panel")) router.replace("/");
   }, [user, router]);
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ["site-settings"],
     queryFn: getSiteSettings,
-    enabled: !!(user?.is_admin || user?.is_superuser),
+    enabled: !!user?.permissions?.includes("admin.panel"),
   });
 
   const [platform, setPlatform] = useState<Partial<SiteSettings>>({});

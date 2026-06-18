@@ -19,14 +19,16 @@ class OctoWSClient {
   private reconnectCount = 0;
   private reconnectDelay = 2_000;
   private readonly url: string;
+  private getToken: (() => string | null) | null = null;
   state: WsState = "disconnected";
 
   constructor(url: string) {
     this.url = url;
   }
 
-  connect(): void {
+  connect(getToken: () => string | null): void {
     if (this.ws?.readyState === WebSocket.OPEN) return;
+    this.getToken = getToken;
     this._setState("connecting");
     const ws = new WebSocket(this.url);
     this.ws = ws;
@@ -34,6 +36,7 @@ class OctoWSClient {
     ws.onopen = () => {
       this.reconnectCount = 0;
       this.reconnectDelay = 2_000;
+      ws.send(JSON.stringify({ token: this.getToken?.() ?? "" }));
       this._setState("connected");
     };
 
@@ -52,7 +55,9 @@ class OctoWSClient {
       this._setState("disconnected");
       this.reconnectCount++;
       this.reconnectDelay = Math.min(this.reconnectDelay * 1.5, 30_000);
-      this.reconnectTimer = setTimeout(() => this.connect(), this.reconnectDelay);
+      this.reconnectTimer = setTimeout(() => {
+        if (this.getToken) this.connect(this.getToken);
+      }, this.reconnectDelay);
     };
 
     ws.onerror = () => ws.close();

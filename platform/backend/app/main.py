@@ -37,6 +37,7 @@ async def lifespan(app: FastAPI):
     # Migrations are run by the 'migrate' init container before this process starts.
     # Do NOT call alembic here — it races in multi-replica deployments.
     _seed_admin()
+    _seed_roles()
     _seed_badges()
     _seed_ranks()
     _sync_labs()      # upserts lab templates + any inline challenges
@@ -59,6 +60,17 @@ def _seed_badges() -> None:
     db = SessionLocal()
     try:
         seed_badge_catalog(db)
+    finally:
+        db.close()
+
+
+def _seed_roles() -> None:
+    from app.database import SessionLocal
+    from app.services.role_service import seed_roles
+
+    db = SessionLocal()
+    try:
+        seed_roles(db)
     finally:
         db.close()
 
@@ -99,8 +111,7 @@ def _seed_admin() -> None:
                 email=settings.admin_email,
                 hashed_password=hash_password(settings.admin_password),
                 is_active=True,
-                is_superuser=True,
-                is_admin=True,
+                platform_roles=["admin"],
             )
             db.add(admin)
             db.commit()
@@ -154,6 +165,7 @@ def create_app() -> FastAPI:
     from app.api.labs import router as labs_router
     from app.api.scheduler import router as scheduler_router
     from app.api.ranks import router as ranks_router
+    from app.api.roles import router as roles_router
     from app.api.scoreboards import router as scoreboards_router
     from app.api.system import router as system_router
     from app.api.teams import invitations_router, router as teams_router
@@ -169,6 +181,7 @@ def create_app() -> FastAPI:
     app.include_router(api_keys_router, prefix=prefix)
     app.include_router(scheduler_router, prefix=prefix)
     app.include_router(admin_router, prefix=prefix)
+    app.include_router(roles_router, prefix=prefix)
     app.include_router(challenges_router, prefix=prefix)
     app.include_router(ranks_router, prefix=prefix)
     app.include_router(scoreboards_router, prefix=prefix)

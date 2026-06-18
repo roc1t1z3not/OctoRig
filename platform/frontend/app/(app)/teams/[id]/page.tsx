@@ -86,7 +86,7 @@ export default function TeamDetailPage() {
 
   const canManage =
     team?.my_role === "owner" || team?.my_role === "manager" ||
-    user?.is_admin || user?.is_superuser;
+    (user?.permissions?.includes("admin.panel") ?? false);
 
   if (teamLoading) return <div className="page text-muted text-sm">Loading…</div>;
   if (!team) return <div className="page text-muted text-sm">Team not found.</div>;

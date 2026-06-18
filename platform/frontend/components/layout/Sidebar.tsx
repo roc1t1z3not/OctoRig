@@ -34,6 +34,7 @@ const NAV_MAIN = [
 const NAV_ADMIN = [
   { href: "/admin",              icon: ShieldCheck,   label: "Overview" },
   { href: "/admin/users",        icon: UserCog,       label: "Users" },
+  { href: "/admin/roles",        icon: ShieldCheck,   label: "Roles" },
   { href: "/admin/teams",        icon: FolderGit2,    label: "Teams" },
   { href: "/admin/deployments",  icon: Container,     label: "Deployments" },
   { href: "/admin/audit",        icon: ScrollText,    label: "Audit Log" },
@@ -50,7 +51,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { user, clearSession } = useUserStore();
   const { resetExplicit } = useThemeStore();
-  const isPrivileged = user?.is_admin || user?.is_superuser;
+  const isPrivileged = user?.permissions?.includes("admin.panel") ?? false;
   const [menuOpen, setMenuOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(() => pathname.startsWith("/admin"));
   const menuRef = useRef<HTMLDivElement>(null);
@@ -124,7 +125,7 @@ export function Sidebar() {
             </Link>
           );
         })}
-        {(user?.is_admin || user?.platform_roles?.includes("creator")) && (() => {
+        {user?.permissions?.includes("creator.access") && (() => {
           const active = isActive("/creator");
           return (
             <Link

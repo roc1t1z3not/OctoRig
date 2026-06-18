@@ -9,6 +9,6 @@ export function useAdminGuard() {
   const { user } = useUserStore();
   const router = useRouter();
   useEffect(() => {
-    if (user && !user.is_admin && !user.is_superuser) router.replace("/");
+    if (user && !user.permissions?.includes("admin.panel")) router.replace("/");
   }, [user, router]);
 }

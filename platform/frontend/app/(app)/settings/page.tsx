@@ -146,10 +146,10 @@ export default function SettingsPage() {
                 <MetaRow label="Email" value={me?.email ?? user?.email ?? "—"} />
                 <MetaRow
                   label="Role"
-                  value={(me?.is_superuser ?? user?.is_superuser) ? "Administrator" : "User"}
+                  value={(me?.permissions ?? user?.permissions)?.includes("admin.panel") ? "Administrator" : "User"}
                 />
               </div>
-              {(me?.is_superuser ?? user?.is_superuser) && (
+              {(me?.permissions ?? user?.permissions)?.includes("admin.panel") && (
                 <div className="admin-notice mt-3">
                   <Shield size={13} />
                   <span className="text-11 text-warning">Administrator account — full platform access</span>

@@ -96,14 +96,13 @@ def get_current_user_or_api_key(
     raise credentials_exception
 
 
-def require_admin(current_user: User = Depends(get_current_user)) -> User:
-    if not (current_user.is_admin or current_user.is_superuser):
-        raise forbidden_exception
-    return current_user
+def require_admin(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> User:
+    from app.core.permissions import is_privileged
 
-
-def require_superuser(current_user: User = Depends(get_current_user)) -> User:
-    if not current_user.is_superuser:
+    if not is_privileged(current_user, db):
         raise forbidden_exception
     return current_user
 
@@ -134,8 +133,11 @@ def require_team_role(minimum: TeamRole):
     def _check(
         membership: Optional[TeamMember] = Depends(get_team_membership),
         current_user: User = Depends(get_current_user_or_api_key),
+        db: Session = Depends(get_db),
     ) -> TeamMember:
-        if current_user.is_superuser or current_user.is_admin:
+        from app.core.permissions import is_privileged
+
+        if is_privileged(current_user, db):
             return membership  # type: ignore[return-value]
         if membership is None or _ROLE_RANK[membership.role] < _ROLE_RANK[minimum]:
             raise forbidden_exception

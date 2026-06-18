@@ -61,7 +61,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Candidate users get redirected to /assessment — suppress the platform shell while the redirect fires.
   if (user?.is_candidate) return null;
 
-  const isAdmin = user?.is_admin || user?.is_superuser;
+  const isAdmin = user?.permissions?.includes("admin.panel") ?? false;
   const inMaintenance = publicSettings?.maintenance_mode ?? false;
 
   // Non-admins see a full maintenance screen

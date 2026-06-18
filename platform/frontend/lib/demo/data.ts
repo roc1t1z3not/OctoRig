@@ -9,9 +9,16 @@ export const DEMO_ME = {
   id: 1,
   username: "octorig_admin",
   email: "admin@octorig.io",
-  is_superuser: true,
-  is_admin: true,
-  platform_roles: ["creator", "reviewer", "publisher"],
+  platform_roles: ["admin", "creator", "reviewer", "publisher"],
+  permissions: [
+    "platform.dashboard", "platform.challenges", "platform.events", "platform.scoreboard",
+    "platform.badges", "platform.labs", "platform.deployments", "platform.teams",
+    "admin.panel", "admin.users.view", "admin.users.manage", "admin.teams.view",
+    "admin.deployments.view", "admin.deployments.manage", "admin.audit.view",
+    "admin.challenges.manage", "admin.events.manage", "admin.api_keys.view",
+    "admin.ranks.manage", "admin.assessments.manage", "admin.content.manage",
+    "admin.settings.manage", "creator.access",
+  ],
 };
 
 // ─── Profile ──────────────────────────────────────────────────────────────────
@@ -395,16 +402,16 @@ export const DEMO_ADMIN_STATS = {
 };
 
 export const DEMO_ADMIN_USERS = [
-  { id: 7,   username: "vx_phantom",      email: "vx@redops.io",          is_active: true, is_admin: false, is_superuser: false, platform_roles: [],           created_at: "2026-01-01T10:00:00Z", last_login_at: "2026-06-16T07:00:00Z" },
-  { id: 3,   username: "r0otkit",         email: "root@redops.io",        is_active: true, is_admin: false, is_superuser: false, platform_roles: ["reviewer"],  created_at: "2026-01-02T11:00:00Z", last_login_at: "2026-06-15T22:00:00Z" },
-  { id: 11,  username: "nullderef",       email: "null@redops.io",        is_active: true, is_admin: false, is_superuser: false, platform_roles: [],           created_at: "2026-01-20T09:00:00Z", last_login_at: "2026-06-15T20:00:00Z" },
-  { id: 1,   username: "octorig_admin",   email: "admin@octorig.io",      is_active: true, is_admin: true,  is_superuser: true,  platform_roles: ["creator","reviewer","publisher"], created_at: "2025-12-01T08:00:00Z", last_login_at: "2026-06-16T09:00:00Z" },
-  { id: 19,  username: "idor_detective",  email: "idor@example.com",      is_active: true, is_admin: false, is_superuser: false, platform_roles: [],           created_at: "2026-02-01T10:00:00Z", last_login_at: "2026-06-14T18:00:00Z" },
-  { id: 23,  username: "sqli_witch",      email: "sqli@example.com",      is_active: true, is_admin: false, is_superuser: false, platform_roles: ["creator"],  created_at: "2026-02-10T10:00:00Z", last_login_at: "2026-06-14T14:00:00Z" },
-  { id: 8,   username: "xss_reaper",      email: "xss@example.com",       is_active: true, is_admin: false, is_superuser: false, platform_roles: [],           created_at: "2026-02-15T10:00:00Z", last_login_at: "2026-06-13T19:00:00Z" },
-  { id: 42,  username: "byte_bandit",     email: "byte@example.com",      is_active: true, is_admin: false, is_superuser: false, platform_roles: [],           created_at: "2026-03-01T10:00:00Z", last_login_at: "2026-06-10T08:00:00Z" },
-  { id: 55,  username: "l0gic_error",     email: "logic@example.com",     is_active: false,is_admin: false, is_superuser: false, platform_roles: [],           created_at: "2026-03-10T10:00:00Z", last_login_at: "2026-06-09T17:00:00Z" },
-  { id: 61,  username: "h3x_witch",       email: "hex@example.com",       is_active: true, is_admin: false, is_superuser: false, platform_roles: [],           created_at: "2026-04-01T10:00:00Z", last_login_at: "2026-06-07T21:00:00Z" },
+  { id: 7,   username: "vx_phantom",      email: "vx@redops.io",          is_active: true, platform_roles: ["player"],         created_at: "2026-01-01T10:00:00Z", last_login_at: "2026-06-16T07:00:00Z" },
+  { id: 3,   username: "r0otkit",         email: "root@redops.io",        is_active: true, platform_roles: ["player", "reviewer"], created_at: "2026-01-02T11:00:00Z", last_login_at: "2026-06-15T22:00:00Z" },
+  { id: 11,  username: "nullderef",       email: "null@redops.io",        is_active: true, platform_roles: ["player"],         created_at: "2026-01-20T09:00:00Z", last_login_at: "2026-06-15T20:00:00Z" },
+  { id: 1,   username: "octorig_admin",   email: "admin@octorig.io",      is_active: true, platform_roles: ["admin", "creator", "reviewer", "publisher"], created_at: "2025-12-01T08:00:00Z", last_login_at: "2026-06-16T09:00:00Z" },
+  { id: 19,  username: "idor_detective",  email: "idor@example.com",      is_active: true, platform_roles: ["player"],         created_at: "2026-02-01T10:00:00Z", last_login_at: "2026-06-14T18:00:00Z" },
+  { id: 23,  username: "sqli_witch",      email: "sqli@example.com",      is_active: true, platform_roles: ["player", "creator"], created_at: "2026-02-10T10:00:00Z", last_login_at: "2026-06-14T14:00:00Z" },
+  { id: 8,   username: "xss_reaper",      email: "xss@example.com",       is_active: true, platform_roles: ["player"],         created_at: "2026-02-15T10:00:00Z", last_login_at: "2026-06-13T19:00:00Z" },
+  { id: 42,  username: "byte_bandit",     email: "byte@example.com",      is_active: true, platform_roles: ["player"],         created_at: "2026-03-01T10:00:00Z", last_login_at: "2026-06-10T08:00:00Z" },
+  { id: 55,  username: "l0gic_error",     email: "logic@example.com",     is_active: false,platform_roles: ["player"],         created_at: "2026-03-10T10:00:00Z", last_login_at: "2026-06-09T17:00:00Z" },
+  { id: 61,  username: "h3x_witch",       email: "hex@example.com",       is_active: true, platform_roles: ["player"],         created_at: "2026-04-01T10:00:00Z", last_login_at: "2026-06-07T21:00:00Z" },
 ];
 
 export const DEMO_ADMIN_TEAMS = [

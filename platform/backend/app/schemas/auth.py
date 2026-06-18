@@ -22,9 +22,9 @@ class UserResponse(BaseModel):
     username: str
     email: str
     is_active: bool
-    is_superuser: bool
-    is_admin: bool
     is_candidate: bool
+    platform_roles: list[str] = []
+    permissions: list[str] = []
     created_at: datetime
     last_login_at: Optional[datetime]
 

@@ -12,6 +12,7 @@ import {
   updateAdminUser,
   resetUserPassword,
   resetUserPoints,
+  listRoles,
   type AdminUser,
 } from "@/lib/api/admin";
 import { useNotificationsStore } from "@/stores/notifications.store";
@@ -30,14 +31,21 @@ export default function AdminUsersPage() {
   const [selected, setSelected] = useState<AdminUser | null>(null);
   const [showReset, setShowReset] = useState(false);
   const [newPw, setNewPw] = useState("");
+  const [showRoles, setShowRoles] = useState(false);
+  const [pendingRoles, setPendingRoles] = useState<string[]>([]);
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["admin-users", search],
     queryFn: () => getAdminUsers({ search: search || undefined }),
   });
 
+  const { data: availableRoles = [] } = useQuery({
+    queryKey: ["admin-roles"],
+    queryFn: listRoles,
+  });
+
   const createMutation = useMutation({
-    mutationFn: (payload: { username: string; email: string; password: string; is_admin: boolean }) =>
+    mutationFn: (payload: { username: string; email: string; password: string; platform_roles: string[] }) =>
       createAdminUser(payload),
     onSuccess: (_, { username }) => {
       qc.invalidateQueries({ queryKey: ["admin-users"] });
@@ -104,8 +112,8 @@ export default function AdminUsersPage() {
 
       {tab === "create" && (
         <CreateUserForm
-          onSubmit={(username, email, password, is_admin) =>
-            createMutation.mutate({ username, email, password, is_admin })
+          onSubmit={(username, email, password, roles) =>
+            createMutation.mutate({ username, email, password, platform_roles: roles })
           }
           isPending={createMutation.isPending}
         />
@@ -116,8 +124,9 @@ export default function AdminUsersPage() {
           users={users}
           isLoading={isLoading}
           onActivate={(u) => updateMutation.mutate({ id: u.id, patch: { is_active: !u.is_active } })}
-          onGrantAdmin={(u) => updateMutation.mutate({ id: u.id, patch: { is_admin: !u.is_admin } })}
+          onManageRoles={(u) => { setSelected(u); setPendingRoles(u.platform_roles); setShowRoles(true); }}
           onResetPassword={(u) => { setSelected(u); setShowReset(true); }}
+          onUnlock={(u) => updateMutation.mutate({ id: u.id, patch: { unlock: true } })}
           onResetPoints={(u) => confirm({
             title: `Reset points for ${u.username}?`,
             body: "This will delete all their challenge submissions, scores, and hint unlocks. This cannot be undone.",
@@ -155,6 +164,45 @@ export default function AdminUsersPage() {
                 onClick={() => resetMutation.mutate({ id: selected.id, password: newPw })}
               >
                 {resetMutation.isPending ? "Resetting…" : "Reset Password"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showRoles && selected && (
+        <div className="g-backdrop" onClick={() => setShowRoles(false)}>
+          <div className="g-modal reset-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="g-modal-header">
+              <span className="font-mono text-sm">Manage Roles — {selected.username}</span>
+            </div>
+            <div className="g-modal-body">
+              {availableRoles.map((role) => (
+                <label key={role.slug} className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={pendingRoles.includes(role.slug)}
+                    onChange={() =>
+                      setPendingRoles((r) =>
+                        r.includes(role.slug) ? r.filter((s) => s !== role.slug) : [...r, role.slug]
+                      )
+                    }
+                  />
+                  <span className="text-sm">{role.display_name}</span>
+                </label>
+              ))}
+            </div>
+            <div className="g-modal-footer">
+              <button className="g-btn g-btn-ghost" onClick={() => setShowRoles(false)}>Cancel</button>
+              <button
+                className="g-btn g-btn-primary"
+                disabled={updateMutation.isPending}
+                onClick={() => {
+                  updateMutation.mutate({ id: selected.id, patch: { platform_roles: pendingRoles } });
+                  setShowRoles(false);
+                }}
+              >
+                {updateMutation.isPending ? "Saving…" : "Save Roles"}
               </button>
             </div>
           </div>

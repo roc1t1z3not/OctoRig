@@ -219,7 +219,7 @@ export default function EventsPage() {
   const [statusFilter, setStatusFilter] = useState<EventStatus | undefined>(undefined);
   const [showCreate, setShowCreate] = useState(false);
   const { user } = useUserStore();
-  const isAdmin = user?.is_admin || user?.is_superuser;
+  const isAdmin = user?.permissions?.includes("admin.panel") ?? false;
 
   const { data: events = [], isLoading } = useQuery({
     queryKey: ["events", statusFilter],

@@ -16,13 +16,58 @@ export interface AdminUser {
   username: string;
   email: string;
   is_active: boolean;
-  is_superuser: boolean;
-  is_admin: boolean;
+  platform_roles: string[];
+  locked_until: string | null;
   created_at: string;
   last_login_at: string | null;
   team_count: number;
   deployment_count: number;
   api_key_count: number;
+}
+
+export interface PlatformRole {
+  id: number;
+  slug: string;
+  display_name: string;
+  description: string | null;
+  permissions: string[];
+  is_system: boolean;
+  is_default: boolean;
+  created_at: string;
+}
+
+export interface PlatformRoleCreate {
+  slug: string;
+  display_name: string;
+  description?: string;
+  permissions: string[];
+  is_default?: boolean;
+}
+
+export interface PlatformRoleUpdate {
+  display_name?: string;
+  description?: string;
+  permissions?: string[];
+  is_default?: boolean;
+}
+
+export async function listRoles(): Promise<PlatformRole[]> {
+  const { data } = await apiClient.get<PlatformRole[]>("/admin/roles/");
+  return data;
+}
+
+export async function createRole(payload: PlatformRoleCreate): Promise<PlatformRole> {
+  const { data } = await apiClient.post<PlatformRole>("/admin/roles/", payload);
+  return data;
+}
+
+export async function updateRole(slug: string, payload: PlatformRoleUpdate): Promise<PlatformRole> {
+  const { data } = await apiClient.patch<PlatformRole>(`/admin/roles/${slug}`, payload);
+  return data;
+}
+
+export async function deleteRole(slug: string): Promise<void> {
+  await apiClient.delete(`/admin/roles/${slug}`);
 }
 
 export interface AdminTeam {
@@ -80,7 +125,7 @@ export async function createAdminUser(payload: {
   username: string;
   email: string;
   password: string;
-  is_admin?: boolean;
+  platform_roles?: string[];
 }): Promise<AdminUser> {
   const { data } = await apiClient.post<AdminUser>("/admin/users/", payload);
   return data;
@@ -88,7 +133,7 @@ export async function createAdminUser(payload: {
 
 export async function updateAdminUser(
   id: number,
-  payload: { is_active?: boolean; is_admin?: boolean; is_superuser?: boolean }
+  payload: { is_active?: boolean; platform_roles?: string[]; unlock?: boolean }
 ): Promise<AdminUser> {
   const { data } = await apiClient.patch<AdminUser>(`/admin/users/${id}`, payload);
   return data;

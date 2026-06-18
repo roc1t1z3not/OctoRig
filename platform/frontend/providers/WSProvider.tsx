@@ -6,14 +6,17 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { wsClient } from "@/lib/ws";
 import { useLiveStore } from "@/stores/live.store";
+import { useUserStore } from "@/stores/user.store";
 import type { OctoEvent } from "@/lib/ws";
 import type { LiveDeployment, LiveHealth } from "@/stores/live.store";
 
 export function WSProvider({ children }: { children: React.ReactNode }) {
   const qc = useQueryClient();
+  const accessToken = useUserStore((s) => s.accessToken);
 
   useEffect(() => {
-    wsClient.connect();
+    if (!accessToken) return;
+    wsClient.connect(() => useUserStore.getState().accessToken);
 
     const live = () => useLiveStore.getState();
 
@@ -44,7 +47,7 @@ export function WSProvider({ children }: { children: React.ReactNode }) {
       unsubs.forEach((fn) => fn());
       wsClient.disconnect();
     };
-  }, [qc]);
+  }, [qc, accessToken]);
 
   return <>{children}</>;
 }

@@ -41,7 +41,7 @@ export default function AdminDashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    if (user && !user.is_admin && !user.is_superuser) {
+    if (user && !user.permissions?.includes("admin.panel")) {
       router.replace("/");
     }
   }, [user, router]);
@@ -60,7 +60,7 @@ export default function AdminDashboard() {
     <div className="page">
       <div className="page-header">
         <h1 className="page-title font-mono">Admin</h1>
-        {user?.is_superuser && (
+        {user?.platform_roles?.includes("admin") && (
           <span className="superadmin-badge text-11">Super Admin</span>
         )}
       </div>

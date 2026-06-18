@@ -17,6 +17,7 @@ from app.models.refresh_token import RefreshToken
 from app.models.notification import Notification, NotificationPreference
 from app.models.profile import PrivacyLevel, UserProfile
 from app.models.rank import Rank
+from app.models.role import PlatformRole
 from app.models.scheduled_action import ScheduledAction, ScheduledActionStatus, ScheduledActionType
 from app.models.scoring import ScoreTransaction, ScoreTransactionSource
 from app.models.site_settings import SiteSettings
@@ -46,5 +47,6 @@ __all__ = [
     "MarketplacePackage", "PackageInstallation", "PackageType",
     "RefreshToken",
     "Rank",
+    "PlatformRole",
     "SiteSettings",
 ]

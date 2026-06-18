@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db, require_admin
+from app.core.permissions import is_privileged
 from app.models.content import ContentStatus, ContentType, ReviewVerdict
 from app.models.user import User
 from app.services.content_service import (
@@ -94,7 +95,7 @@ def get_endpoint(
     current_user: User = Depends(get_current_user),
 ) -> SubmissionOut:
     sub = get_submission_or_404(db, submission_id)
-    if sub.author_id != current_user.id and not current_user.is_admin:
+    if sub.author_id != current_user.id and not is_privileged(current_user, db):
         roles: list[str] = current_user.platform_roles or []
         if "reviewer" not in roles and "publisher" not in roles:
             from app.core.exceptions import forbidden_exception

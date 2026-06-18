@@ -30,13 +30,13 @@ export default function AdminAssessmentsPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
 
   useEffect(() => {
-    if (user && !user.is_admin && !user.is_superuser) router.replace("/");
+    if (user && !user.permissions?.includes("admin.panel")) router.replace("/");
   }, [user, router]);
 
   const { data: assessments = [], isLoading } = useQuery({
     queryKey: ["admin-assessments"],
     queryFn: listAssessments,
-    enabled: !!(user?.is_admin || user?.is_superuser),
+    enabled: !!user?.permissions?.includes("admin.panel"),
   });
 
   const { data: labs = [], isLoading: labsLoading } = useQuery<LabTemplate[]>({

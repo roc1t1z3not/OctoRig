@@ -17,6 +17,7 @@ from app.core.permissions import (
     can_manage_team,
     can_remove_member,
     can_transfer_ownership,
+    is_privileged,
 )
 from app.database import get_db
 from app.models.team import Team, TeamInvitation, TeamMember, TeamRole
@@ -88,7 +89,7 @@ def get_team(
     membership = db.query(TeamMember).filter(
         TeamMember.team_id == team.id, TeamMember.user_id == current_user.id
     ).first()
-    if membership is None and not (current_user.is_admin or current_user.is_superuser):
+    if membership is None and not is_privileged(current_user, db):
         raise forbidden_exception
     member_count = db.query(TeamMember).filter(TeamMember.team_id == team.id).count()
     role = membership.role if membership else TeamRole.VIEWER
@@ -110,7 +111,7 @@ def update_team(
     membership = db.query(TeamMember).filter(
         TeamMember.team_id == team.id, TeamMember.user_id == current_user.id
     ).first()
-    if not can_manage_team(current_user, membership):
+    if not can_manage_team(current_user, db, membership):
         raise forbidden_exception
     team = team_service.update_team(db, team, payload.name, payload.description)
     audit_service.write_audit(
@@ -130,7 +131,7 @@ def delete_team(
     membership = db.query(TeamMember).filter(
         TeamMember.team_id == team.id, TeamMember.user_id == current_user.id
     ).first()
-    if not can_delete_team(current_user, membership):
+    if not can_delete_team(current_user, db, membership):
         raise forbidden_exception
     if team.is_personal:
         from app.core.exceptions import bad_request
@@ -151,7 +152,7 @@ def list_members(
     membership = db.query(TeamMember).filter(
         TeamMember.team_id == team.id, TeamMember.user_id == current_user.id
     ).first()
-    if membership is None and not (current_user.is_admin or current_user.is_superuser):
+    if membership is None and not is_privileged(current_user, db):
         raise forbidden_exception
     rows = team_service.get_team_members(db, team.id)
     return [MemberResponse(**r) for r in rows]
@@ -168,7 +169,7 @@ def invite_member(
     membership = db.query(TeamMember).filter(
         TeamMember.team_id == team.id, TeamMember.user_id == current_user.id
     ).first()
-    if not can_invite_members(current_user, membership):
+    if not can_invite_members(current_user, db, membership):
         raise forbidden_exception
     inv = team_service.invite_member(db, current_user, team, payload.username, payload.role)
     audit_service.write_audit(
@@ -191,7 +192,7 @@ def remove_member(
         TeamMember.team_id == team.id, TeamMember.user_id == current_user.id
     ).first()
     # A user can remove themselves regardless of role
-    if user_id != current_user.id and not can_remove_member(current_user, membership):
+    if user_id != current_user.id and not can_remove_member(current_user, db, membership):
         raise forbidden_exception
     team_service.remove_member(db, team, user_id)
     audit_service.write_audit(
@@ -213,7 +214,7 @@ def change_member_role(
     membership = db.query(TeamMember).filter(
         TeamMember.team_id == team.id, TeamMember.user_id == current_user.id
     ).first()
-    if not can_change_member_role(current_user, membership):
+    if not can_change_member_role(current_user, db, membership):
         raise forbidden_exception
     updated = team_service.change_member_role(db, team, user_id, payload.role)
     audit_service.write_audit(
@@ -240,7 +241,7 @@ def transfer_ownership(
     membership = db.query(TeamMember).filter(
         TeamMember.team_id == team.id, TeamMember.user_id == current_user.id
     ).first()
-    if not can_transfer_ownership(current_user, membership):
+    if not can_transfer_ownership(current_user, db, membership):
         raise forbidden_exception
     team_service.transfer_ownership(db, team, current_user, payload.new_owner_id)
     audit_service.write_audit(

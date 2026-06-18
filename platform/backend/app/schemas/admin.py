@@ -23,8 +23,8 @@ class AdminUserResponse(BaseModel):
     username: str
     email: str
     is_active: bool
-    is_superuser: bool
-    is_admin: bool
+    platform_roles: list[str] = []
+    locked_until: Optional[datetime] = None
     created_at: datetime
     last_login_at: Optional[datetime]
     team_count: int
@@ -38,18 +38,45 @@ class AdminUserCreate(BaseModel):
     username: str
     email: str
     password: str
-    is_admin: bool = False
-    is_superuser: bool = False
+    platform_roles: list[str] = []
 
 
 class AdminUserUpdate(BaseModel):
     is_active: Optional[bool] = None
-    is_admin: Optional[bool] = None
-    is_superuser: Optional[bool] = None
+    platform_roles: Optional[list[str]] = None
+    unlock: Optional[bool] = None
 
 
 class AdminResetPassword(BaseModel):
     new_password: str
+
+
+class PlatformRoleResponse(BaseModel):
+    id: int
+    slug: str
+    display_name: str
+    description: Optional[str]
+    permissions: list[str]
+    is_system: bool
+    is_default: bool
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class PlatformRoleCreate(BaseModel):
+    slug: str = Field(..., pattern=r"^[a-z0-9_-]+$", max_length=64)
+    display_name: str = Field(..., max_length=128)
+    description: Optional[str] = None
+    permissions: list[str] = []
+    is_default: bool = False
+
+
+class PlatformRoleUpdate(BaseModel):
+    display_name: Optional[str] = Field(None, max_length=128)
+    description: Optional[str] = None
+    permissions: Optional[list[str]] = None
+    is_default: Optional[bool] = None
 
 
 class AdminTeamResponse(BaseModel):

@@ -8,7 +8,10 @@ from pydantic import BaseModel, field_validator
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db, require_admin
+from app.core.exceptions import forbidden_exception
+from app.core.permissions import is_privileged, role_gte
 from app.models.ctf_event import EventScoringMode, EventStatus, EventVisibility
+from app.models.team import TeamMember, TeamRole
 from app.models.user import User
 from app.services import audit_service
 from app.services.event_service import (
@@ -111,7 +114,7 @@ def list_events_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[EventSummary]:
-    include_private = current_user.is_admin or current_user.is_superuser
+    include_private = is_privileged(current_user, db)
     events = list_events(db, status=status, include_private=include_private)
     return [_serialize(ev) for ev in events]
 
@@ -148,6 +151,14 @@ def event_scoreboard_endpoint(
     return [ScoreboardEntry(**r) for r in rows]
 
 
+def _get_membership(db: Session, user: User, team_id: int) -> Optional[TeamMember]:
+    return (
+        db.query(TeamMember)
+        .filter(TeamMember.team_id == team_id, TeamMember.user_id == user.id)
+        .first()
+    )
+
+
 @router.post("/{slug}/register", response_model=dict[str, Any])
 def register_endpoint(
     slug: str,
@@ -156,6 +167,9 @@ def register_endpoint(
     current_user: User = Depends(get_current_user),
 ) -> dict[str, Any]:
     ev = get_event_by_slug_or_404(db, slug)
+    membership = _get_membership(db, current_user, body.team_id)
+    if not role_gte(membership, TeamRole.MEMBER) and not is_privileged(current_user, db):
+        raise forbidden_exception
     reg = register_team(db, ev, body.team_id)
     return {"event_id": ev.id, "team_id": reg.team_id, "registered_at": reg.registered_at.isoformat()}
 
@@ -165,9 +179,12 @@ def unregister_endpoint(
     slug: str,
     team_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ) -> None:
     ev = get_event_by_slug_or_404(db, slug)
+    membership = _get_membership(db, current_user, team_id)
+    if not role_gte(membership, TeamRole.MANAGER) and not is_privileged(current_user, db):
+        raise forbidden_exception
     unregister_team(db, ev, team_id)
 
 

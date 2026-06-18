@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from app.api.deps import get_current_user, get_current_user_or_api_key
 from app.config import settings
-from app.core.exceptions import bad_request, conflict, credentials_exception, forbidden_exception
+from app.core.exceptions import bad_request, conflict, credentials_exception, forbidden_exception, too_many_requests
 from app.core.limiter import limiter
 from app.core.security import (
     create_access_token,
@@ -23,7 +23,7 @@ from app.models.refresh_token import RefreshToken
 from app.models.user import User
 from app.schemas.admin import PublicSettingsResponse
 from app.schemas.auth import LoginRequest, TokenResponse, UserResponse
-from app.services import audit_service
+from app.services import audit_service, login_lockout_service
 from app.services.audit_service import write_audit
 from app.services.settings_service import get_settings
 
@@ -68,7 +68,7 @@ def _purge_expired(db: Session, user_id: int) -> None:
 
 
 @router.post("/login", response_model=TokenResponse)
-@limiter.limit("10/minute")
+@limiter.limit("5/minute")
 def login(
     payload: LoginRequest,
     request: Request,
@@ -78,11 +78,25 @@ def login(
     user = db.query(User).filter(User.username == payload.username).first()
     ip = request.client.host if request.client else None
 
+    if user is not None and login_lockout_service.is_locked(user):
+        write_audit(db, action=audit_service.AUTH_LOGIN_FAILED,
+                    detail={"username": payload.username, "reason": "locked"}, ip=ip)
+        raise too_many_requests("Account temporarily locked due to repeated failed login attempts")
+
     if user is None or not verify_password(payload.password, user.hashed_password):
+        if user is not None:
+            login_lockout_service.record_failed_attempt(user)
+            db.commit()
         write_audit(db, action=audit_service.AUTH_LOGIN_FAILED,
                     detail={"username": payload.username}, ip=ip)
         raise credentials_exception
 
+    if not user.is_active:
+        write_audit(db, action=audit_service.AUTH_LOGIN_FAILED,
+                    detail={"username": payload.username, "reason": "inactive"}, ip=ip)
+        raise credentials_exception
+
+    login_lockout_service.reset(user)
     user.last_login_at = datetime.now(timezone.utc)
     db.commit()
 
@@ -162,8 +176,23 @@ def logout(
 
 
 @router.get("/me", response_model=UserResponse)
-def me(current_user: User = Depends(get_current_user_or_api_key)) -> User:
-    return current_user
+def me(
+    current_user: User = Depends(get_current_user_or_api_key),
+    db: Session = Depends(get_db),
+) -> UserResponse:
+    from app.core.permissions import resolve_permissions
+
+    return UserResponse(
+        id=current_user.id,
+        username=current_user.username,
+        email=current_user.email,
+        is_active=current_user.is_active,
+        is_candidate=current_user.is_candidate,
+        platform_roles=current_user.platform_roles or [],
+        permissions=resolve_permissions(current_user, db),
+        created_at=current_user.created_at,
+        last_login_at=current_user.last_login_at,
+    )
 
 
 class ChangePasswordRequest(BaseModel):
@@ -211,11 +240,16 @@ def register(
     if db.query(User).filter(User.email == payload.email).first():
         raise conflict(f"Email '{payload.email}' is already registered")
 
+    from app.models.role import PlatformRole
+
+    default_slugs = [r.slug for r in db.query(PlatformRole.slug).filter(PlatformRole.is_default.is_(True)).all()]
+
     user = User(
         username=payload.username,
         email=payload.email,
         hashed_password=hash_password(payload.password),
         is_active=True,
+        platform_roles=default_slugs,
     )
     db.add(user)
     db.commit()

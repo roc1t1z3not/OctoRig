@@ -9,10 +9,9 @@ export interface AuthUser {
   id: number;
   username: string;
   email: string;
-  is_superuser: boolean;
-  is_admin: boolean;
   is_candidate: boolean;
   platform_roles?: string[];
+  permissions?: string[];
 }
 
 interface UserState {

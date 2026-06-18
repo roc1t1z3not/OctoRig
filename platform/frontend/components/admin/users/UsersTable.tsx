@@ -1,32 +1,34 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (c) 2026 CommonHuman-Lab
 import Link from "next/link";
-import { ShieldCheck, ShieldOff, RotateCcw } from "lucide-react";
+import { ShieldCheck, ShieldOff, RotateCcw, UserCog, LockOpen } from "lucide-react";
 import type { AdminUser } from "@/lib/api/admin";
 
-function RolePill({ label, active }: { label: string; active: boolean }) {
-  return (
-    <span className={`role-pill ${active ? "role-pill--on" : "role-pill--off"}`}>
-      {label}
-    </span>
-  );
+function isLocked(u: AdminUser): boolean {
+  return !!u.locked_until && new Date(u.locked_until) > new Date();
+}
+
+function RolePill({ label }: { label: string }) {
+  return <span className="role-pill role-pill--on">{label}</span>;
 }
 
 export function UsersTable({
   users,
   isLoading,
   onActivate,
-  onGrantAdmin,
+  onManageRoles,
   onResetPassword,
   onResetPoints,
+  onUnlock,
   isPending,
 }: {
   users: AdminUser[];
   isLoading: boolean;
   onActivate: (user: AdminUser) => void;
-  onGrantAdmin: (user: AdminUser) => void;
+  onManageRoles: (user: AdminUser) => void;
   onResetPassword: (user: AdminUser) => void;
   onResetPoints: (user: AdminUser) => void;
+  onUnlock: (user: AdminUser) => void;
   isPending: boolean;
 }) {
   if (isLoading) {
@@ -57,9 +59,10 @@ export function UsersTable({
             <td className="text-11 text-muted">{u.email}</td>
             <td>
               <div className="role-pills">
-                {u.is_superuser && <RolePill label="Super" active />}
-                {u.is_admin && <RolePill label="Admin" active />}
-                {!u.is_superuser && !u.is_admin && <RolePill label="User" active={false} />}
+                {u.platform_roles.length === 0 && <RolePill label="None" />}
+                {u.platform_roles.map((slug) => (
+                  <RolePill key={slug} label={slug} />
+                ))}
               </div>
             </td>
             <td className="text-11 text-muted">{u.team_count}</td>
@@ -68,6 +71,7 @@ export function UsersTable({
               <span className={`status-dot ${u.is_active ? "status-dot--active" : "status-dot--inactive"}`}>
                 {u.is_active ? "Active" : "Inactive"}
               </span>
+              {isLocked(u) && <span className="role-pill role-pill--off" style={{ marginLeft: 6 }}>Locked</span>}
             </td>
             <td>
               <div className="row-actions">
@@ -78,12 +82,21 @@ export function UsersTable({
                 >
                   {u.is_active ? <ShieldOff size={13} /> : <ShieldCheck size={13} />}
                 </button>
+                {isLocked(u) && (
+                  <button
+                    className="g-btn g-btn-ghost g-btn-icon"
+                    title="Unlock account"
+                    onClick={() => onUnlock(u)}
+                  >
+                    <LockOpen size={13} />
+                  </button>
+                )}
                 <button
-                  className={`g-btn g-btn-ghost g-btn-icon ${u.is_admin ? "role-on" : ""}`}
-                  title={u.is_admin ? "Remove admin" : "Grant admin"}
-                  onClick={() => onGrantAdmin(u)}
+                  className="g-btn g-btn-ghost g-btn-icon"
+                  title="Manage roles"
+                  onClick={() => onManageRoles(u)}
                 >
-                  <ShieldCheck size={13} />
+                  <UserCog size={13} />
                 </button>
                 <button
                   className="g-btn g-btn-ghost g-btn-sm"

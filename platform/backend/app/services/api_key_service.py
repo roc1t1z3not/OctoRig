@@ -46,7 +46,9 @@ def revoke_api_key(db: Session, user: User, key_id: int) -> None:
     key = db.get(ApiKey, key_id)
     if key is None:
         raise not_found("API key")
-    if key.user_id != user.id and not (user.is_admin or user.is_superuser):
+    from app.core.permissions import is_privileged
+
+    if key.user_id != user.id and not is_privileged(user, db):
         raise forbidden_exception
     key.is_active = False
     db.commit()

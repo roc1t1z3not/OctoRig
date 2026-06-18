@@ -35,7 +35,7 @@ export default function AdminEventsPage() {
   const { data: events = [], isLoading } = useQuery({
     queryKey: ["admin-events"],
     queryFn: () => getEvents(),
-    enabled: !!(user?.is_admin || user?.is_superuser),
+    enabled: !!user?.permissions?.includes("admin.panel"),
   });
 
   const [sheet, setSheet] = useState<SheetState>({ open: false, editing: null });

@@ -26,6 +26,10 @@ class ConnectionManager:
         await ws.accept()
         self._connections.add(ws)
 
+    def register(self, ws: WebSocket) -> None:
+        """Track an already-accepted socket (e.g. one authenticated via a first message)."""
+        self._connections.add(ws)
+
     def disconnect(self, ws: WebSocket) -> None:
         self._connections.discard(ws)
 

@@ -27,7 +27,7 @@ export default function AdminApiKeysPage() {
   const { data: keys = [], isLoading } = useQuery({
     queryKey: ["admin-api-keys", activeOnly],
     queryFn: () => getAdminApiKeys({ active_only: activeOnly }),
-    enabled: !!(user?.is_admin || user?.is_superuser),
+    enabled: !!user?.permissions?.includes("admin.panel"),
   });
 
   const revokeMutation = useMutation({

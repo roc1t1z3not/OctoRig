@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user_or_api_key
 from app.core.exceptions import bad_request, forbidden_exception, not_found
+from app.core.permissions import is_privileged
 from app.database import get_db
 from app.models.scheduled_action import ScheduledAction, ScheduledActionStatus, ScheduledActionType
 from app.models.user import User
@@ -23,7 +24,7 @@ def list_scheduled(
     db: Session = Depends(get_db),
 ) -> list[ScheduledActionResponse]:
     q = db.query(ScheduledAction)
-    if not (current_user.is_superuser or current_user.is_admin):
+    if not is_privileged(current_user, db):
         q = q.filter(ScheduledAction.user_id == current_user.id)
     if status:
         q = q.filter(ScheduledAction.status == status)
@@ -51,7 +52,7 @@ def create_scheduled(
         if d is None:
             raise not_found("Deployment")
         membership = _get_membership(db, current_user, d.team_id)
-        if not can_destroy_deployment(current_user, d, membership):
+        if not can_destroy_deployment(current_user, db, d, membership):
             raise forbidden_exception
 
     # Validate team membership when scheduling for a team
@@ -62,7 +63,7 @@ def create_scheduled(
             .filter(TeamMember.team_id == payload.team_id, TeamMember.user_id == current_user.id)
             .first()
         )
-        if member is None and not (current_user.is_superuser or current_user.is_admin):
+        if member is None and not is_privileged(current_user, db):
             raise forbidden_exception
 
     action = ScheduledAction(
@@ -102,7 +103,7 @@ def cancel_scheduled(
     action = db.get(ScheduledAction, action_id)
     if action is None:
         raise not_found("Scheduled action")
-    if action.user_id != current_user.id and not (current_user.is_superuser or current_user.is_admin):
+    if action.user_id != current_user.id and not is_privileged(current_user, db):
         raise forbidden_exception
     if action.status != ScheduledActionStatus.PENDING:
         raise bad_request(f"Cannot cancel action with status '{action.status.value}'")

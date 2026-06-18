@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.exceptions import bad_request, forbidden_exception, not_found
+from app.database import get_db
 from app.models.challenge import (
     Challenge, ChallengeFlag, ChallengeHint,
     ChallengeType, ChallengeDifficulty, FlagType,
@@ -65,9 +66,14 @@ def validate_challenge_body(body: dict) -> list[str]:
 # ── Platform role guard ───────────────────────────────────────────────────────
 
 def require_platform_role(role: str):
-    def dependency(current_user: User = Depends(get_current_user)) -> User:
+    def dependency(
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db),
+    ) -> User:
+        from app.core.permissions import is_privileged
+
         roles: list[str] = current_user.platform_roles or []
-        if role not in roles and not current_user.is_admin and not current_user.is_superuser:
+        if role not in roles and not is_privileged(current_user, db):
             raise forbidden_exception
         return current_user
     return dependency

@@ -138,17 +138,6 @@ def _set_refresh_cookie(response: Response, token: str) -> None:
     )
 
 
-def _get_candidate_user(
-    credentials=Depends(None),
-    db: Session = Depends(get_db),
-) -> User:
-    """Returns the current user only if they are a candidate."""
-    user = get_current_user(credentials, db)
-    if not user.is_candidate:
-        raise forbidden_exception
-    return user
-
-
 # ---------------------------------------------------------------------------
 # Admin — CRUD
 # ---------------------------------------------------------------------------

@@ -73,8 +73,8 @@ def _enrich_user(user: User, db: Session) -> AdminUserResponse:
         username=user.username,
         email=user.email,
         is_active=user.is_active,
-        is_superuser=user.is_superuser,
-        is_admin=user.is_admin,
+        platform_roles=user.platform_roles or [],
+        locked_until=user.locked_until,
         created_at=user.created_at,
         last_login_at=user.last_login_at,
         team_count=team_count,
@@ -111,13 +111,19 @@ def create_user(
     if db.query(User).filter(User.email == payload.email).first():
         raise conflict(f"Email '{payload.email}' is already registered")
 
+    from app.models.role import PlatformRole
+
+    valid_slugs = {r.slug for r in db.query(PlatformRole.slug).all()}
+    invalid = set(payload.platform_roles) - valid_slugs
+    if invalid:
+        raise bad_request(f"Unknown role slugs: {sorted(invalid)}")
+
     user = User(
         username=payload.username,
         email=payload.email,
         hashed_password=hash_password(payload.password),
         is_active=True,
-        is_admin=payload.is_admin,
-        is_superuser=payload.is_superuser,
+        platform_roles=payload.platform_roles,
     )
     db.add(user)
     db.commit()
@@ -164,12 +170,20 @@ def update_user(
     if payload.is_active is not None:
         user.is_active = payload.is_active
         changes["is_active"] = payload.is_active
-    if payload.is_admin is not None and actor.is_superuser:
-        user.is_admin = payload.is_admin
-        changes["is_admin"] = payload.is_admin
-    if payload.is_superuser is not None and actor.is_superuser:
-        user.is_superuser = payload.is_superuser
-        changes["is_superuser"] = payload.is_superuser
+    if payload.platform_roles is not None:
+        from app.models.role import PlatformRole
+
+        valid_slugs = {r.slug for r in db.query(PlatformRole.slug).all()}
+        invalid = set(payload.platform_roles) - valid_slugs
+        if invalid:
+            raise bad_request(f"Unknown role slugs: {sorted(invalid)}")
+        user.platform_roles = payload.platform_roles
+        changes["platform_roles"] = payload.platform_roles
+    if payload.unlock:
+        from app.services.login_lockout_service import reset as reset_lockout
+
+        reset_lockout(user)
+        changes["unlocked"] = True
 
     db.commit()
     audit_service.write_audit(

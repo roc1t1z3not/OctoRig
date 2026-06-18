@@ -30,8 +30,13 @@ export default function LoginPage() {
       const user = await getMe();
       setSession(user, token.access_token);
       router.replace("/");
-    } catch {
-      setError("Invalid username or password");
+    } catch (err: any) {
+      const status = err?.response?.status;
+      if (status === 429) {
+        setError(err?.response?.data?.detail ?? "Too many attempts. Please try again later.");
+      } else {
+        setError("Invalid username or password");
+      }
     } finally {
       setLoading(false);
     }
