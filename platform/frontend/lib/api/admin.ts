@@ -16,6 +16,7 @@ export interface AdminUser {
   username: string;
   email: string;
   is_active: boolean;
+  is_owner: boolean;
   platform_roles: string[];
   locked_until: string | null;
   created_at: string;

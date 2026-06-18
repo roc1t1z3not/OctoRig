@@ -23,6 +23,7 @@ class AdminUserResponse(BaseModel):
     username: str
     email: str
     is_active: bool
+    is_owner: bool = False
     platform_roles: list[str] = []
     locked_until: Optional[datetime] = None
     created_at: datetime

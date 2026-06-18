@@ -73,6 +73,7 @@ def _enrich_user(user: User, db: Session) -> AdminUserResponse:
         username=user.username,
         email=user.email,
         is_active=user.is_active,
+        is_owner=user.is_owner,
         platform_roles=user.platform_roles or [],
         locked_until=user.locked_until,
         created_at=user.created_at,
@@ -167,6 +168,10 @@ def update_user(
         raise bad_request("Cannot deactivate your own account")
     if user.id == actor.id and payload.platform_roles is not None:
         raise bad_request("Cannot change your own roles")
+    if user.is_owner and payload.is_active is False:
+        raise bad_request("The owner account cannot be deactivated")
+    if user.is_owner and payload.platform_roles is not None:
+        raise bad_request("The owner's roles cannot be changed")
     if payload.is_active is False and "admin" in (user.platform_roles or []):
         other_active_admins = (
             db.query(User)

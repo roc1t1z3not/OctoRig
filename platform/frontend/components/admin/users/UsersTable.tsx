@@ -76,10 +76,11 @@ export function UsersTable({
                 {u.is_active ? "Active" : "Inactive"}
               </span>
               {isLocked(u) && <span className="role-pill role-pill--off" style={{ marginLeft: 6 }}>Locked</span>}
+              {u.is_owner && <span className="role-pill role-pill--on" style={{ marginLeft: 6 }}>Owner</span>}
             </td>
             <td>
               <div className="row-actions">
-                {!(u.is_active && u.id === currentUserId) && (
+                {!u.is_owner && !(u.is_active && u.id === currentUserId) && (
                   <button
                     className="g-btn g-btn-ghost g-btn-icon row-action-icon"
                     title={u.is_active ? "Deactivate" : "Activate"}
@@ -97,7 +98,7 @@ export function UsersTable({
                     <LockOpen size={ACTION_ICON_SIZE} />
                   </button>
                 )}
-                {u.id !== currentUserId && (
+                {!u.is_owner && u.id !== currentUserId && (
                   <button
                     className="g-btn g-btn-ghost g-btn-icon row-action-icon"
                     title="Manage roles"

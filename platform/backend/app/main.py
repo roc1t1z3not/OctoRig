@@ -112,6 +112,7 @@ def _seed_admin() -> None:
                 hashed_password=hash_password(settings.admin_password),
                 is_active=True,
                 platform_roles=["admin"],
+                is_owner=True,
             )
             db.add(admin)
             db.commit()

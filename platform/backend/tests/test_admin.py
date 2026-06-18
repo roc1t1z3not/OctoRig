@@ -128,6 +128,55 @@ def test_admin_can_deactivate_other_account(client):
     assert resp.json()["is_active"] is False
 
 
+def test_seeded_admin_is_marked_owner(client):
+    admin_token = _admin_token(client)
+    admin_id = _admin_id(client, admin_token)
+    users = client.get("/api/v1/admin/users/", headers=_auth(admin_token)).json()
+    seeded = next(u for u in users if u["id"] == admin_id)
+    assert seeded["is_owner"] is True
+
+
+def test_owner_cannot_be_deactivated_even_by_another_admin(client):
+    """Ownership is a stronger protection than the regular admin role: it
+    must hold even when a second active admin exists, which rules out the
+    last-remaining-admin guard as the explanation for the 400."""
+    admin_token = _admin_token(client)
+    admin_id = _admin_id(client, admin_token)
+
+    second_token = _register_and_login(client, "second_admin")
+    second_id = _user_id(client, second_token)
+    client.patch(
+        f"/api/v1/admin/users/{second_id}",
+        json={"platform_roles": ["admin"]},
+        headers=_auth(admin_token),
+    )
+
+    resp = client.patch(
+        f"/api/v1/admin/users/{admin_id}", json={"is_active": False}, headers=_auth(second_token)
+    )
+    assert resp.status_code == 400
+
+
+def test_owner_roles_cannot_be_changed_by_another_admin(client):
+    admin_token = _admin_token(client)
+    admin_id = _admin_id(client, admin_token)
+
+    second_token = _register_and_login(client, "second_admin")
+    second_id = _user_id(client, second_token)
+    client.patch(
+        f"/api/v1/admin/users/{second_id}",
+        json={"platform_roles": ["admin"]},
+        headers=_auth(admin_token),
+    )
+
+    resp = client.patch(
+        f"/api/v1/admin/users/{admin_id}",
+        json={"platform_roles": ["player"]},
+        headers=_auth(second_token),
+    )
+    assert resp.status_code == 400
+
+
 def test_cannot_deactivate_last_remaining_admin(client):
     """A non-admin actor with just enough delegated permission to reach this
     endpoint must still be blocked from deactivating the sole remaining
