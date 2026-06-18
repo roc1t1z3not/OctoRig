@@ -115,14 +115,17 @@ export function RankFormSheet({ open, initialValues, saveMutation, onToggleActiv
           </label>
 
           {isEdit && (
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={initialValues!.is_active}
-                onChange={() => onToggleActive(initialValues!)}
-              />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span className="text-sm">Active</span>
-            </label>
+              <label className="toggle">
+                <input
+                  type="checkbox"
+                  checked={initialValues!.is_active}
+                  onChange={() => onToggleActive(initialValues!)}
+                />
+                <span className="toggle-track" />
+              </label>
+            </div>
           )}
         </div>
 
