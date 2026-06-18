@@ -66,6 +66,8 @@ def update_role(
     role = db.query(PlatformRole).filter(PlatformRole.slug == slug).first()
     if role is None:
         raise not_found("Role")
+    if role.slug == "admin":
+        raise bad_request("The admin role cannot be edited")
 
     if payload.display_name is not None:
         role.display_name = payload.display_name

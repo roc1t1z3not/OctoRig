@@ -39,7 +39,13 @@ dev = [
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
+filterwarnings = [
+    # python-jose calls the deprecated datetime.utcnow() internally (jose/jwt.py).
+    # Vendor code we don't control — nothing to fix on our side.
+    "ignore:datetime.datetime.utcnow\\(\\) is deprecated:DeprecationWarning:jose.*",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["app"]

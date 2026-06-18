@@ -241,7 +241,7 @@ def destroy_deployment(
 @router.patch("/{deployment_id}/visibility", response_model=DeploymentWithTemplate)
 def set_visibility(
     deployment_id: int,
-    visibility: str = Query(..., regex="^(private|team|public)$"),
+    visibility: str = Query(..., pattern="^(private|team|public)$"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user_or_api_key),
 ) -> DeploymentWithTemplate:

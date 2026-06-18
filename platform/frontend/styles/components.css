@@ -740,8 +740,9 @@ code.g-inline {
   display: flex; justify-content: flex-end; gap: 0.5rem;
   padding: 1rem 1.25rem; border-top: 1px solid var(--g-border);
 }
-.ev-field { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
+.ev-field { display: flex; flex-direction: column; gap: 0.25rem; flex: 0 0 auto; }
 .ev-field-row { display: flex; gap: 0.75rem; }
+.ev-field-row > .ev-field { flex: 1; }
 .ev-label { font-size: 0.75rem; font-weight: 600; color: var(--g-text-muted); }
 
 /* Shared rank chip — used in scoreboard and admin/ranks */

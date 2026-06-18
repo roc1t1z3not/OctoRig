@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (c) 2026 CommonHuman-Lab
 import Link from "next/link";
-import { ShieldCheck, ShieldOff, RotateCcw, UserCog, LockOpen } from "lucide-react";
+import { ShieldCheck, ShieldOff, RotateCcw, UserCog, LockOpen, KeyRound } from "lucide-react";
 import type { AdminUser } from "@/lib/api/admin";
+
+const ACTION_ICON_SIZE = 16;
 
 function isLocked(u: AdminUser): boolean {
   return !!u.locked_until && new Date(u.locked_until) > new Date();
@@ -21,6 +23,7 @@ export function UsersTable({
   onResetPoints,
   onUnlock,
   isPending,
+  currentUserId,
 }: {
   users: AdminUser[];
   isLoading: boolean;
@@ -30,6 +33,7 @@ export function UsersTable({
   onResetPoints: (user: AdminUser) => void;
   onUnlock: (user: AdminUser) => void;
   isPending: boolean;
+  currentUserId?: number;
 }) {
   if (isLoading) {
     return <div className="loading-cell text-muted text-sm">Loading…</div>;
@@ -75,44 +79,47 @@ export function UsersTable({
             </td>
             <td>
               <div className="row-actions">
-                <button
-                  className="g-btn g-btn-ghost g-btn-icon"
-                  title={u.is_active ? "Deactivate" : "Activate"}
-                  onClick={() => onActivate(u)}
-                >
-                  {u.is_active ? <ShieldOff size={13} /> : <ShieldCheck size={13} />}
-                </button>
+                {!(u.is_active && u.id === currentUserId) && (
+                  <button
+                    className="g-btn g-btn-ghost g-btn-icon row-action-icon"
+                    title={u.is_active ? "Deactivate" : "Activate"}
+                    onClick={() => onActivate(u)}
+                  >
+                    {u.is_active ? <ShieldOff size={ACTION_ICON_SIZE} /> : <ShieldCheck size={ACTION_ICON_SIZE} />}
+                  </button>
+                )}
                 {isLocked(u) && (
                   <button
-                    className="g-btn g-btn-ghost g-btn-icon"
+                    className="g-btn g-btn-ghost g-btn-icon row-action-icon"
                     title="Unlock account"
                     onClick={() => onUnlock(u)}
                   >
-                    <LockOpen size={13} />
+                    <LockOpen size={ACTION_ICON_SIZE} />
+                  </button>
+                )}
+                {u.id !== currentUserId && (
+                  <button
+                    className="g-btn g-btn-ghost g-btn-icon row-action-icon"
+                    title="Manage roles"
+                    onClick={() => onManageRoles(u)}
+                  >
+                    <UserCog size={ACTION_ICON_SIZE} />
                   </button>
                 )}
                 <button
-                  className="g-btn g-btn-ghost g-btn-icon"
-                  title="Manage roles"
-                  onClick={() => onManageRoles(u)}
-                >
-                  <UserCog size={13} />
-                </button>
-                <button
-                  className="g-btn g-btn-ghost g-btn-sm"
+                  className="g-btn g-btn-ghost g-btn-icon row-action-icon"
                   title="Reset password"
                   onClick={() => onResetPassword(u)}
                 >
-                  Reset PW
+                  <KeyRound size={ACTION_ICON_SIZE} />
                 </button>
                 <button
-                  className="g-btn g-btn-ghost g-btn-sm"
+                  className="g-btn g-btn-ghost g-btn-icon row-action-icon"
                   title="Reset points &amp; submissions"
                   disabled={isPending}
                   onClick={() => onResetPoints(u)}
                 >
-                  <RotateCcw size={12} />
-                  Pts
+                  <RotateCcw size={ACTION_ICON_SIZE} />
                 </button>
               </div>
             </td>

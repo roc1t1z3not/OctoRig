@@ -5,7 +5,7 @@ import "./users-admin.css";
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, UserPlus } from "lucide-react";
+import { Search, UserPlus, X } from "lucide-react";
 import {
   getAdminUsers,
   createAdminUser,
@@ -17,16 +17,16 @@ import {
 } from "@/lib/api/admin";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { useConfirmStore } from "@/stores/confirm.store";
+import { useUserStore } from "@/stores/user.store";
 import { UsersTable } from "@/components/admin/users/UsersTable";
 import { CreateUserForm } from "@/components/admin/users/CreateUserForm";
-
-type Tab = "list" | "create";
 
 export default function AdminUsersPage() {
   const qc = useQueryClient();
   const { push } = useNotificationsStore();
   const { confirm } = useConfirmStore();
-  const [tab, setTab] = useState<Tab>("list");
+  const { user: currentUser } = useUserStore();
+  const [showCreate, setShowCreate] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<AdminUser | null>(null);
   const [showReset, setShowReset] = useState(false);
@@ -50,7 +50,7 @@ export default function AdminUsersPage() {
     onSuccess: (_, { username }) => {
       qc.invalidateQueries({ queryKey: ["admin-users"] });
       push("success", `User ${username} created`);
-      setTab("list");
+      setShowCreate(false);
     },
     onError: (err: any) => push("error", err?.response?.data?.detail ?? "Failed to create user"),
   });
@@ -101,29 +101,41 @@ export default function AdminUsersPage() {
             />
           </div>
           <button
-            className={`g-btn ${tab === "create" ? "g-btn-primary" : "g-btn-ghost"} g-btn-sm`}
-            onClick={() => setTab(tab === "create" ? "list" : "create")}
+            className="g-btn g-btn-primary g-btn-sm"
+            onClick={() => setShowCreate(true)}
           >
             <UserPlus size={13} />
-            {tab === "create" ? "Cancel" : "New User"}
+            New User
           </button>
         </div>
       </div>
 
-      {tab === "create" && (
-        <CreateUserForm
-          onSubmit={(username, email, password, roles) =>
-            createMutation.mutate({ username, email, password, platform_roles: roles })
-          }
-          isPending={createMutation.isPending}
-        />
-      )}
+      <CreateUserForm
+        open={showCreate}
+        onClose={() => setShowCreate(false)}
+        onSubmit={(username, email, password, roles) =>
+          createMutation.mutate({ username, email, password, platform_roles: roles })
+        }
+        isPending={createMutation.isPending}
+      />
 
       <div className="table-wrap g-panel">
         <UsersTable
           users={users}
           isLoading={isLoading}
-          onActivate={(u) => updateMutation.mutate({ id: u.id, patch: { is_active: !u.is_active } })}
+          onActivate={(u) => {
+            if (!u.is_active) {
+              updateMutation.mutate({ id: u.id, patch: { is_active: true } });
+              return;
+            }
+            confirm({
+              title: `Deactivate ${u.username}?`,
+              body: "They will be immediately signed out and unable to log back in until reactivated.",
+              confirmLabel: "Deactivate",
+              dangerous: true,
+              onConfirm: () => updateMutation.mutate({ id: u.id, patch: { is_active: false } }),
+            });
+          }}
           onManageRoles={(u) => { setSelected(u); setPendingRoles(u.platform_roles); setShowRoles(true); }}
           onResetPassword={(u) => { setSelected(u); setShowReset(true); }}
           onUnlock={(u) => updateMutation.mutate({ id: u.id, patch: { unlock: true } })}
@@ -135,18 +147,26 @@ export default function AdminUsersPage() {
             onConfirm: () => resetPointsMutation.mutate(u.id),
           })}
           isPending={resetPointsMutation.isPending}
+          currentUserId={currentUser?.id}
         />
       </div>
 
       {showReset && selected && (
-        <div className="g-backdrop" onClick={() => setShowReset(false)}>
-          <div className="g-modal reset-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="g-modal-header">
-              <span className="font-mono text-sm">Reset Password — {selected.username}</span>
+        <>
+          <div className="g-backdrop" onClick={() => setShowReset(false)} />
+          <div className="ev-sheet">
+            <div className="ev-sheet-header">
+              <h2 style={{ margin: 0, fontSize: "1rem", fontWeight: 700 }}>
+                Reset Password — {selected.username}
+              </h2>
+              <button className="g-btn g-btn-ghost g-btn-sm" onClick={() => setShowReset(false)}>
+                <X size={14} />
+              </button>
             </div>
-            <div className="g-modal-body">
-              <div className="field">
-                <label className="text-11 text-muted">New Password</label>
+
+            <div className="ev-sheet-body">
+              <label className="ev-field">
+                <span className="ev-label">New Password</span>
                 <input
                   className="g-input"
                   type="password"
@@ -154,9 +174,10 @@ export default function AdminUsersPage() {
                   onChange={(e) => setNewPw(e.target.value)}
                   autoFocus
                 />
-              </div>
+              </label>
             </div>
-            <div className="g-modal-footer">
+
+            <div className="ev-sheet-footer">
               <button className="g-btn g-btn-ghost" onClick={() => setShowReset(false)}>Cancel</button>
               <button
                 className="g-btn g-btn-primary"
@@ -167,16 +188,23 @@ export default function AdminUsersPage() {
               </button>
             </div>
           </div>
-        </div>
+        </>
       )}
 
       {showRoles && selected && (
-        <div className="g-backdrop" onClick={() => setShowRoles(false)}>
-          <div className="g-modal reset-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="g-modal-header">
-              <span className="font-mono text-sm">Manage Roles — {selected.username}</span>
+        <>
+          <div className="g-backdrop" onClick={() => setShowRoles(false)} />
+          <div className="ev-sheet">
+            <div className="ev-sheet-header">
+              <h2 style={{ margin: 0, fontSize: "1rem", fontWeight: 700 }}>
+                Manage Roles — {selected.username}
+              </h2>
+              <button className="g-btn g-btn-ghost g-btn-sm" onClick={() => setShowRoles(false)}>
+                <X size={14} />
+              </button>
             </div>
-            <div className="g-modal-body">
+
+            <div className="ev-sheet-body">
               {availableRoles.map((role) => (
                 <label key={role.slug} className="checkbox-label">
                   <input
@@ -192,7 +220,8 @@ export default function AdminUsersPage() {
                 </label>
               ))}
             </div>
-            <div className="g-modal-footer">
+
+            <div className="ev-sheet-footer">
               <button className="g-btn g-btn-ghost" onClick={() => setShowRoles(false)}>Cancel</button>
               <button
                 className="g-btn g-btn-primary"
@@ -206,7 +235,7 @@ export default function AdminUsersPage() {
               </button>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

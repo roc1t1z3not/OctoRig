@@ -165,6 +165,16 @@ def update_user(
         raise not_found("User")
     if user.id == actor.id and payload.is_active is False:
         raise bad_request("Cannot deactivate your own account")
+    if user.id == actor.id and payload.platform_roles is not None:
+        raise bad_request("Cannot change your own roles")
+    if payload.is_active is False and "admin" in (user.platform_roles or []):
+        other_active_admins = (
+            db.query(User)
+            .filter(User.id != user.id, User.is_active.is_(True))
+            .all()
+        )
+        if not any("admin" in (u.platform_roles or []) for u in other_active_admins):
+            raise bad_request("Cannot deactivate the last remaining admin")
 
     changes: dict = {}
     if payload.is_active is not None:
