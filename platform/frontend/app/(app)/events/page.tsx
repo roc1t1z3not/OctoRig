@@ -6,7 +6,7 @@ import "./events.css";
 import { useState } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Calendar, Clock, Trophy, Users, Lock, Globe, Eye, Plus, X } from "lucide-react";
+import { Calendar, Clock, Trophy, Users, Lock, Globe, Eye, Plus } from "lucide-react";
 import {
   getEvents,
   createEvent,
@@ -18,6 +18,10 @@ import { useUserStore } from "@/stores/user.store";
 import { formatDateTime } from "@/lib/utils/date";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { EVENT_STATUS_COLORS } from "@/lib/utils/status";
+import {
+  EventFormSheet, BLANK_FORM, toISOOrNull,
+  type SheetState, type EventForm,
+} from "@/components/admin/events/EventFormSheet";
 
 const STATUS_TABS: { id: EventStatus | undefined; label: string }[] = [
   { id: undefined, label: "All" },
@@ -79,48 +83,28 @@ function EventCard({ ev }: { ev: CtfEvent }) {
   );
 }
 
-function CreateEventModal({ onClose }: { onClose: () => void }) {
-  const qc = useQueryClient();
+export default function EventsPage() {
+  const [statusFilter, setStatusFilter] = useState<EventStatus | undefined>(undefined);
+  const [sheet, setSheet] = useState<SheetState>({ open: false, editing: null });
+  const [form, setForm] = useState<EventForm>(BLANK_FORM);
+  const { user } = useUserStore();
   const { push } = useNotificationsStore();
+  const qc = useQueryClient();
+  const isAdmin = user?.permissions?.includes("admin.panel") ?? false;
 
-  const [form, setForm] = useState<{
-    title: string;
-    slug: string;
-    description: string;
-    start_at: string;
-    end_at: string;
-    visibility: "public" | "private" | "unlisted";
-    scoring_mode: "static" | "dynamic";
-    max_team_size: string;
-  }>({
-    title: "",
-    slug: "",
-    description: "",
-    start_at: "",
-    end_at: "",
-    visibility: "private",
-    scoring_mode: "static",
-    max_team_size: "",
+  const { data: events = [], isLoading } = useQuery({
+    queryKey: ["events", statusFilter],
+    queryFn: () => getEvents(statusFilter),
   });
 
-  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
-
-  // Auto-generate slug from title
-  const handleTitle = (v: string) => {
-    set("title", v);
-    if (!form.slug || form.slug === slugify(form.title)) {
-      set("slug", slugify(v));
-    }
-  };
-
-  const mutation = useMutation({
+  const saveMutation = useMutation({
     mutationFn: () => {
       const payload: CreateEventPayload = {
         slug: form.slug,
         title: form.title,
         description: form.description || undefined,
-        start_at: form.start_at ? new Date(form.start_at).toISOString() : undefined,
-        end_at: form.end_at ? new Date(form.end_at).toISOString() : undefined,
+        start_at: toISOOrNull(form.start_at) ?? undefined,
+        end_at: toISOOrNull(form.end_at) ?? undefined,
         visibility: form.visibility,
         scoring_mode: form.scoring_mode,
         max_team_size: form.max_team_size ? Number(form.max_team_size) : undefined,
@@ -130,101 +114,15 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["events"] });
       push("success", `Event "${form.title}" created as draft`);
-      onClose();
+      setSheet({ open: false, editing: null });
     },
-    onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? "Failed to create event";
-      push("error", msg);
-    },
+    onError: (err: any) => push("error", err?.response?.data?.detail ?? "Failed to create event"),
   });
 
-  const canSubmit = form.title.trim() && form.slug.trim();
-
-  return (
-    <div className="ev-create-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="ev-create-modal">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <h2>Create CTF Event</h2>
-          <button className="g-btn g-btn-ghost g-btn-icon" onClick={onClose}>
-            <X size={14} />
-          </button>
-        </div>
-
-        <div className="ev-form-row">
-          <label>Title *</label>
-          <input className="g-input" value={form.title} onChange={(e) => handleTitle(e.target.value)} placeholder="Autumn CTF 2026" />
-        </div>
-        <div className="ev-form-row">
-          <label>Slug *</label>
-          <input className="g-input" value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="autumn-ctf-2026" />
-        </div>
-        <div className="ev-form-row">
-          <label>Description</label>
-          <textarea className="g-input" rows={2} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Optional description…" style={{ resize: "vertical" }} />
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-          <div className="ev-form-row">
-            <label>Start</label>
-            <input type="datetime-local" className="g-input" value={form.start_at} onChange={(e) => set("start_at", e.target.value)} />
-          </div>
-          <div className="ev-form-row">
-            <label>End</label>
-            <input type="datetime-local" className="g-input" value={form.end_at} onChange={(e) => set("end_at", e.target.value)} />
-          </div>
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.75rem" }}>
-          <div className="ev-form-row">
-            <label>Visibility</label>
-            <select className="g-input" value={form.visibility} onChange={(e) => set("visibility", e.target.value)}>
-              <option value="private">Private</option>
-              <option value="unlisted">Unlisted</option>
-              <option value="public">Public</option>
-            </select>
-          </div>
-          <div className="ev-form-row">
-            <label>Scoring</label>
-            <select className="g-input" value={form.scoring_mode} onChange={(e) => set("scoring_mode", e.target.value)}>
-              <option value="static">Static</option>
-              <option value="dynamic">Dynamic</option>
-            </select>
-          </div>
-          <div className="ev-form-row">
-            <label>Max team size</label>
-            <input type="number" min={1} className="g-input" value={form.max_team_size} onChange={(e) => set("max_team_size", e.target.value)} placeholder="Any" />
-          </div>
-        </div>
-
-        <div className="ev-form-actions">
-          <button className="g-btn g-btn-ghost" onClick={onClose}>Cancel</button>
-          <button
-            className="g-btn g-btn-primary"
-            disabled={!canSubmit || mutation.isPending}
-            onClick={() => mutation.mutate()}
-          >
-            {mutation.isPending ? "Creating…" : "Create Event"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function slugify(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-}
-
-export default function EventsPage() {
-  const [statusFilter, setStatusFilter] = useState<EventStatus | undefined>(undefined);
-  const [showCreate, setShowCreate] = useState(false);
-  const { user } = useUserStore();
-  const isAdmin = user?.permissions?.includes("admin.panel") ?? false;
-
-  const { data: events = [], isLoading } = useQuery({
-    queryKey: ["events", statusFilter],
-    queryFn: () => getEvents(statusFilter),
-  });
+  function openCreate() {
+    setForm(BLANK_FORM);
+    setSheet({ open: true, editing: null });
+  }
 
   return (
     <div className="page">
@@ -234,7 +132,7 @@ export default function EventsPage() {
           <button
             className="g-btn g-btn-primary"
             style={{ marginLeft: "auto" }}
-            onClick={() => setShowCreate(true)}
+            onClick={openCreate}
           >
             <Plus size={13} />
             New Event
@@ -268,7 +166,13 @@ export default function EventsPage() {
         </div>
       )}
 
-      {showCreate && <CreateEventModal onClose={() => setShowCreate(false)} />}
+      <EventFormSheet
+        sheet={sheet}
+        form={form}
+        onChange={(update) => setForm((f) => ({ ...f, ...update }))}
+        onClose={() => setSheet({ open: false, editing: null })}
+        saveMutation={saveMutation}
+      />
     </div>
   );
 }

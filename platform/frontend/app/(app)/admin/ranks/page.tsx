@@ -16,15 +16,15 @@ import {
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { useConfirmStore } from "@/stores/confirm.store";
 import { RankTable } from "@/components/admin/ranks/RankTable";
-import { RankForm, EMPTY_RANK_FORM, type RankFormState } from "@/components/admin/ranks/RankForm";
+import { RankFormSheet } from "@/components/admin/ranks/RankFormSheet";
 
 export default function AdminRanksPage() {
   const qc = useQueryClient();
   const { push } = useNotificationsStore();
   const { confirm } = useConfirmStore();
 
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [selected, setSelected] = useState<Rank | null>(null);
-  const [form, setForm] = useState<RankFormState>(EMPTY_RANK_FORM);
 
   const { data: ranks = [], isLoading } = useQuery({
     queryKey: ["admin-ranks"],
@@ -33,41 +33,27 @@ export default function AdminRanksPage() {
 
   function openCreate() {
     setSelected(null);
-    setForm(EMPTY_RANK_FORM);
+    setSheetOpen(true);
   }
 
   function openEdit(rank: Rank) {
     setSelected(rank);
-    setForm({
-      name: rank.name,
-      min_points: rank.min_points,
-      icon: rank.icon ?? "",
-      color: rank.color ?? "#6b7280",
-    });
+    setSheetOpen(true);
   }
 
-  function closePanel() {
+  function closeSheet() {
+    setSheetOpen(false);
     setSelected(null);
-    setForm(EMPTY_RANK_FORM);
   }
 
   const saveMutation = useMutation({
-    mutationFn: () => {
-      const payload = {
-        name: form.name,
-        min_points: form.min_points,
-        icon: form.icon || undefined,
-        color: form.color || undefined,
-      };
-      return selected
-        ? updateAdminRank(selected.id, payload)
-        : createAdminRank(payload);
-    },
+    mutationFn: (payload: { name: string; min_points: number; icon?: string; color?: string }) =>
+      selected ? updateAdminRank(selected.id, payload) : createAdminRank(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-ranks"] });
       qc.invalidateQueries({ queryKey: ["ranks"] });
       push("success", selected ? "Rank updated." : "Rank created.");
-      closePanel();
+      closeSheet();
     },
     onError: () => push("error", "Failed to save rank."),
   });
@@ -87,7 +73,7 @@ export default function AdminRanksPage() {
       qc.invalidateQueries({ queryKey: ["admin-ranks"] });
       qc.invalidateQueries({ queryKey: ["ranks"] });
       push("success", "Rank deleted.");
-      closePanel();
+      closeSheet();
     },
     onError: () => push("error", "Failed to delete rank."),
   });
@@ -115,28 +101,23 @@ export default function AdminRanksPage() {
         </button>
       </div>
 
-      <div className="ranks-grid">
-        <div className="g-card" style={{ padding: 0, overflow: "hidden" }}>
-          <RankTable
-            ranks={ranks}
-            selected={selected}
-            isLoading={isLoading}
-            onEdit={openEdit}
-            onDelete={handleDelete}
-          />
-        </div>
-
-        <RankForm
+      <div className="g-card" style={{ padding: 0, overflow: "hidden" }}>
+        <RankTable
+          ranks={ranks}
           selected={selected}
-          form={form}
-          onChange={(patch) => setForm((f) => ({ ...f, ...patch }))}
-          onSave={() => saveMutation.mutate()}
-          onToggleActive={(rank) => toggleMutation.mutate(rank)}
+          isLoading={isLoading}
+          onEdit={openEdit}
           onDelete={handleDelete}
-          onClose={closePanel}
-          isPending={saveMutation.isPending}
         />
       </div>
+
+      <RankFormSheet
+        open={sheetOpen}
+        initialValues={selected}
+        saveMutation={saveMutation}
+        onToggleActive={(rank) => toggleMutation.mutate(rank)}
+        onClose={closeSheet}
+      />
     </div>
   );
 }

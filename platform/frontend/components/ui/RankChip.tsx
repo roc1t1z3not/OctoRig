@@ -9,6 +9,7 @@ export function RankChip({ rank }: { rank: Rank | null }) {
       className="rank-chip"
       style={{ color: rank.color ?? "var(--g-text-muted)", borderColor: rank.color ?? "var(--g-border)" }}
     >
+      {rank.icon && <span aria-hidden="true">{rank.icon}</span>}
       {rank.name}
     </span>
   );

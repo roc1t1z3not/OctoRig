@@ -26,7 +26,6 @@ export function RankTable({
       <thead>
         <tr>
           <th>Rank</th>
-          <th>Icon</th>
           <th>Min Points</th>
           <th>Status</th>
           <th></th>
@@ -42,9 +41,6 @@ export function RankTable({
           >
             <td>
               <RankChip rank={rank} />
-            </td>
-            <td style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem" }}>
-              {rank.icon || "—"}
             </td>
             <td className="rank-pts">{rank.min_points.toLocaleString()}</td>
             <td>

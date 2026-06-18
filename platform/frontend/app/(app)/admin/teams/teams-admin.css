@@ -10,3 +10,5 @@
         .search-input { padding-left: 2rem; }
         .loading-cell, .empty-cell { padding: 1.5rem; }
         .personal-badge { color: var(--g-text-muted); font-style: italic; }
+        .row-actions { display: flex; gap: 0.25rem; align-items: center; }
+        .row-action-icon { padding: 0.5rem; }
