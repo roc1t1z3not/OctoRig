@@ -70,3 +70,8 @@ Thumbs.db
 .idea/
 .vscode/
 *.code-workspace
+
+# ── Miscellaneous ─────────────────────────────────────────────────────────────
+/scripts/screenshots/
+package-lock.json
+package.json

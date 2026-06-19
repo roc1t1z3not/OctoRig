@@ -8,13 +8,11 @@ import {
   DEMO_MY_RANK,
   DEMO_SCOREBOARD,
   DEMO_EVENTS,
-  DEMO_EVENT_CHALLENGES_SLUGS,
+  DEMO_EVENT_CHALLENGES,
   DEMO_EVENT_SCOREBOARD,
   DEMO_NOTIFICATIONS,
   DEMO_DEPLOYMENTS,
   DEMO_TEAMS,
-  DEMO_TEAM_DETAIL,
-  DEMO_TEAM_MEMBERS,
   DEMO_API_KEYS,
   DEMO_HEALTH,
   DEMO_CONTAINERS,
@@ -24,11 +22,18 @@ import {
   DEMO_ADMIN_API_KEYS,
   DEMO_ADMIN_SETTINGS,
   DEMO_AUDIT_LOGS,
+  DEMO_CONTENT_MINE,
+  DEMO_CONTENT_PENDING,
+  DEMO_CONTENT_APPROVED,
+  DEMO_ASSESSMENTS,
+  DEMO_ASSESSMENT_INVITES,
   augmentChallengeList,
   augmentChallengeDetail,
   augmentBadgeList,
   demoUserProfile,
   demoUserRank,
+  demoTeamDetail,
+  demoTeamMembers,
 } from "./data";
 
 // ─── URL helpers ──────────────────────────────────────────────────────────────
@@ -63,6 +68,13 @@ function withMock(data: unknown, config: InternalAxiosRequestConfig, status = 20
 }
 
 // ─── Route matching helpers ───────────────────────────────────────────────────
+//
+// Catalog data — labs, challenges, badges, ranks — is intentionally NOT
+// matched/mocked here. Those requests pass through to the real backend so
+// they can never drift from app/labs/registry, app/badge_catalog, and
+// app/services/rank_service.py; only the personal/social overlay
+// (solve_count, solved_by_me, earned, my rank) is faked, via the augment*
+// helpers in data.ts applied in onResponse below.
 
 const SEG = "[^/]+";
 
@@ -79,7 +91,7 @@ const RE = {
   eventScoreboard:  new RegExp(`^/events/${SEG}/scoreboard`),
   teamList:         /^\/teams\/?(\?.*)?$/,
   teamDetail:       /^\/teams\/(\d+)$/,
-  teamMembers:      /^\/teams\/\d+\/members/,
+  teamMembers:      /^\/teams\/(\d+)\/members/,
   profileMe:        /^\/profiles\/me$/,
   profileUser:      /^\/profiles\/([^/?]+)$/,
   adminUsers:       /^\/admin\/users\//,
@@ -87,8 +99,15 @@ const RE = {
   adminDeployments: /^\/admin\/deployments\//,
   adminAuditLogs:   /^\/admin\/audit-logs\//,
   adminApiKeys:     /^\/admin\/api-keys\//,
-  adminRanks:       /^\/admin\/ranks\//,
   rankUser:         /^\/ranks\/users\/\d+/,
+  contentMine:      /^\/content\/mine/,
+  contentPending:   /^\/content\/queue\/pending/,
+  contentApproved:  /^\/content\/queue\/approved/,
+  contentMutation:  /^\/content\/(\d+)(\/(submit|claim|review|publish))?$/,
+  assessmentList:   /^\/admin\/assessments\/?(\?.*)?$/,
+  assessmentDetail: /^\/admin\/assessments\/(\d+)$/,
+  assessmentInvites:/^\/admin\/assessments\/(\d+)\/invites\/?(\?.*)?$/,
+  assessmentInviteProgress: /^\/admin\/assessments\/(\d+)\/invites\/(\d+)\/progress$/,
 };
 
 // ─── Request interceptor — fully-replaced endpoints ───────────────────────────
@@ -100,13 +119,73 @@ function onRequest(config: InternalAxiosRequestConfig): InternalAxiosRequestConf
   const m = method(config);
 
   if (m !== "get") {
-    // Let mutations pass through but return success shapes for key POST endpoints
+    // Let mutations pass through but return success shapes for key POST/PATCH endpoints
     if (/\/notifications\/\d+\/read$/.test(u) || /\/notifications\/read-all/.test(u))
       config.adapter = () => mockResponse({ count: 0, marked: 0 }, config);
     if (/\/badges\/evaluate/.test(u))
       config.adapter = () => mockResponse([], config);
     if (/\/challenges\/[^/]+\/submit$/.test(u))
       config.adapter = () => mockResponse({ correct: false, already_solved: false, first_blood: false, points_awarded: 0, message: "Demo mode — flag submission disabled." }, config);
+
+    // Content creator / review queue mutations — echo back a plausible updated shape.
+    const contentMatch = RE.contentMutation.exec(u);
+    if (contentMatch && m !== "get") {
+      const id = parseInt(contentMatch[1], 10);
+      const action = contentMatch[3];
+      const base =
+        [...DEMO_CONTENT_MINE, ...DEMO_CONTENT_PENDING, ...DEMO_CONTENT_APPROVED].find((s) => s.id === id) ??
+        DEMO_CONTENT_MINE[0];
+      const statusByAction: Record<string, string> = {
+        submit: "pending_review",
+        claim: "in_review",
+        publish: "published",
+      };
+      if (action === "review") {
+        config.adapter = () => mockResponse({ review_id: 9000 + id, verdict: "approved", submission_status: "approved" }, config);
+      } else {
+        config.adapter = () => mockResponse({ ...base, status: statusByAction[action ?? ""] ?? base.status }, config);
+      }
+      return config;
+    }
+    if (/^\/content\/?$/.test(u) && m === "post") {
+      config.adapter = () => mockResponse({
+        id: Math.floor(Math.random() * 1000) + 500,
+        author_id: 1,
+        author_username: "octorig_admin",
+        content_type: "challenge",
+        title: "Untitled Draft",
+        body: {},
+        status: "draft",
+        reviewer_id: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, config);
+      return config;
+    }
+
+    // Admin assessments — create/update/delete invites and the assessment itself.
+    if (RE.assessmentDetail.test(u) || RE.assessmentList.test(u) || RE.assessmentInvites.test(u)) {
+      const detailMatch = RE.assessmentDetail.exec(u);
+      const existing = detailMatch ? DEMO_ASSESSMENTS.find((a) => a.id === parseInt(detailMatch[1], 10)) : undefined;
+      if (m === "post" && RE.assessmentInvites.test(u)) {
+        config.adapter = () => mockResponse({
+          id: Math.floor(Math.random() * 1000) + 100,
+          assessment_id: detailMatch ? parseInt(detailMatch[1], 10) : 0,
+          email: (config.data && JSON.parse(config.data).email) ?? "new.candidate@example.com",
+          candidate_name: (config.data && JSON.parse(config.data).candidate_name) ?? null,
+          token: `tok_${Math.random().toString(36).slice(2, 8)}`,
+          user_id: null, accepted_at: null, started_at: null, expires_at: null,
+          deployment_ids: [], is_revoked: false, status: "pending",
+        }, config);
+      } else {
+        config.adapter = () => mockResponse(
+          existing ?? { ...DEMO_ASSESSMENTS[0], id: Math.floor(Math.random() * 1000) + 500 },
+          config
+        );
+      }
+      return config;
+    }
+
     return config;
   }
 
@@ -118,16 +197,12 @@ function onRequest(config: InternalAxiosRequestConfig): InternalAxiosRequestConf
   if (RE.eventScoreboard.test(u)) { withMock(DEMO_EVENT_SCOREBOARD, config); return config; }
   if (/^\/scoreboards\/events\/\d+/.test(u)) { withMock(DEMO_EVENT_SCOREBOARD, config); return config; }
 
-  // Events — full replacement
+  // Events — full replacement. Challenge metadata bundled into events is
+  // real (see DEMO_EVENT_CHALLENGES in data.ts), not derived from the slug.
   if (RE.eventChallenges.test(u)) {
-    // Return a minimal EventChallenge[] with the first 5 slugs as placeholder.
-    // The real challenge list will be fetched separately; here we just need valid shapes.
-    withMock(DEMO_EVENT_CHALLENGES_SLUGS.map((slug, i) => ({
-      id: 100 + i, slug, title: slug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
-      category: ["sql-injection","xss","idor","web","recon"][i % 5],
-      difficulty: ["easy","medium","hard","medium","easy"][i % 5],
-      points: [100,200,300,200,100][i % 5],
-      tags: [], solve_count: 10 + i * 8, solved_by_me: i % 2 === 0, released_at: null,
+    withMock(DEMO_EVENT_CHALLENGES.map((c, i) => ({
+      ...c,
+      tags: [], released_at: i < 4 ? "2026-06-14T12:00:00Z" : null,
     })), config);
     return config;
   }
@@ -139,7 +214,9 @@ function onRequest(config: InternalAxiosRequestConfig): InternalAxiosRequestConf
     return config;
   }
 
-  // Ranks — me and by-user-id are replaced; /ranks/ list passes through
+  // Ranks — only /ranks/me and /ranks/users/:id (personal, computed) are
+  // mocked. The /ranks/ catalog and /admin/ranks/ pass through to the real
+  // backend untouched.
   if (/^\/ranks\/me$/.test(u)) { withMock(DEMO_MY_RANK, config); return config; }
   if (RE.rankUser.test(u)) {
     const id = parseInt(u.split("/").pop() ?? "0");
@@ -173,9 +250,18 @@ function onRequest(config: InternalAxiosRequestConfig): InternalAxiosRequestConf
   }
   if (/^\/profiles\/search/.test(u)) { withMock([], config); return config; }
 
-  // Teams
-  if (RE.teamMembers.test(u)) { withMock(DEMO_TEAM_MEMBERS, config); return config; }
-  if (RE.teamDetail.test(u)) { withMock(DEMO_TEAM_DETAIL, config); return config; }
+  // Teams — detail/members are looked up by id so each team in DEMO_TEAMS
+  // shows its own roster instead of a single shared fixture.
+  if (RE.teamMembers.test(u)) {
+    const id = parseInt(RE.teamMembers.exec(u)?.[1] ?? "1", 10);
+    withMock(demoTeamMembers(id), config);
+    return config;
+  }
+  if (RE.teamDetail.test(u)) {
+    const id = parseInt(RE.teamDetail.exec(u)?.[1] ?? "1", 10);
+    withMock(demoTeamDetail(id), config);
+    return config;
+  }
   if (RE.teamList.test(u)) { withMock(DEMO_TEAMS, config); return config; }
 
   // API Keys
@@ -186,8 +272,13 @@ function onRequest(config: InternalAxiosRequestConfig): InternalAxiosRequestConf
   if (/^\/system\/containers/.test(u)) { withMock(DEMO_CONTAINERS, config); return config; }
   if (/^\/system\/plugins/.test(u)) { withMock([], config); return config; }
 
-  // Schedule
+  // Schedule — per-deployment auto-stop list; no dedicated admin view exists.
   if (/^\/schedule\//.test(u) || /^\/schedule\/?(\?.*)?$/.test(u)) { withMock([], config); return config; }
+
+  // Content creator / review queue
+  if (RE.contentMine.test(u)) { withMock(DEMO_CONTENT_MINE, config); return config; }
+  if (RE.contentPending.test(u)) { withMock(DEMO_CONTENT_PENDING, config); return config; }
+  if (RE.contentApproved.test(u)) { withMock(DEMO_CONTENT_APPROVED, config); return config; }
 
   // Admin
   if (/^\/admin\/stats/.test(u)) { withMock(DEMO_ADMIN_STATS, config); return config; }
@@ -197,7 +288,36 @@ function onRequest(config: InternalAxiosRequestConfig): InternalAxiosRequestConf
   if (RE.adminAuditLogs.test(u)) { withMock(DEMO_AUDIT_LOGS, config); return config; }
   if (RE.adminApiKeys.test(u)) { withMock(DEMO_ADMIN_API_KEYS, config); return config; }
   if (/^\/admin\/settings/.test(u)) { withMock(DEMO_ADMIN_SETTINGS, config); return config; }
-  if (RE.adminRanks.test(u)) { withMock(null, config); return config; } // pass to ranks list
+  // /admin/roles/ intentionally passes through — it's the real seeded
+  // ROLE_SEED catalog (admin/creator/player/viewer), not usage data.
+
+  // Admin assessments + invites
+  if (RE.assessmentInviteProgress.test(u)) {
+    const [, aId, iId] = RE.assessmentInviteProgress.exec(u) ?? [];
+    const invite = (DEMO_ASSESSMENT_INVITES[parseInt(aId ?? "0", 10)] ?? []).find(
+      (i) => i.id === parseInt(iId ?? "0", 10)
+    );
+    withMock({
+      ...(invite ?? DEMO_ASSESSMENT_INVITES[401][0]),
+      flags_solved: [
+        { challenge_slug: "rw-recon-robots", challenge_title: "What's Off-Limits?", solved_at: "2026-06-10T13:30:00Z" },
+        { challenge_slug: "hb-idor-accounts", challenge_title: "Everyone's Balance", solved_at: "2026-06-10T14:10:00Z" },
+      ],
+      report_submitted: false,
+    }, config);
+    return config;
+  }
+  if (RE.assessmentInvites.test(u)) {
+    const id = parseInt(RE.assessmentInvites.exec(u)?.[1] ?? "0", 10);
+    withMock(DEMO_ASSESSMENT_INVITES[id] ?? [], config);
+    return config;
+  }
+  if (RE.assessmentDetail.test(u)) {
+    const id = parseInt(RE.assessmentDetail.exec(u)?.[1] ?? "0", 10);
+    withMock(DEMO_ASSESSMENTS.find((a) => a.id === id) ?? DEMO_ASSESSMENTS[0], config);
+    return config;
+  }
+  if (RE.assessmentList.test(u)) { withMock(DEMO_ASSESSMENTS, config); return config; }
 
   return config;
 }
