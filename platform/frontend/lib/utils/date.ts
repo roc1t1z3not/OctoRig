@@ -26,6 +26,10 @@ export function formatDate(iso: string | null | undefined): string {
   return new Date(iso).toLocaleDateString("en-GB", DATE_OPTS);
 }
 
+export function formatTime(date: Date): string {
+  return date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+}
+
 export function addHours(h: number): string {
   return new Date(Date.now() + h * 3_600_000).toISOString().slice(0, 16);
 }

@@ -7,6 +7,7 @@ import { Shield, Send } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { submitReport } from "@/lib/api/assessments";
+import { formatTime } from "@/lib/utils/date";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { MarkdownEditor } from "@/components/ui/MarkdownEditor";
 
@@ -112,7 +113,7 @@ export function ReportSection({
             {autosaving
               ? "Saving…"
               : lastSaved
-                ? `Saved ${timeAgo(lastSaved, now)} (${lastSaved.toLocaleTimeString()})`
+                ? `Saved ${timeAgo(lastSaved, now)} (${formatTime(lastSaved)})`
                 : "Not saved yet"}
           </span>
         )}
