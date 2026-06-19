@@ -314,6 +314,7 @@ def list_candidate_progress(
             flags_solved=flags_solved,
             score=sum(f.points for f in flags_solved),
             report_submitted=invite.report is not None,
+            report_content=invite.report.content if invite.report else None,
         ))
     return results
 
@@ -421,6 +422,7 @@ def get_candidate_progress(
         flags_solved=flags_solved,
         score=score,
         report_submitted=report_submitted,
+        report_content=invite.report.content if invite.report else None,
     )
 
 

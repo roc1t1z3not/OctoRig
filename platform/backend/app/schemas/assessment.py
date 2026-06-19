@@ -97,6 +97,7 @@ class AssessmentInviteWithProgress(AssessmentInviteResponse):
     flags_solved: list[FlagSolve] = []
     score: int = 0
     report_submitted: bool = False
+    report_content: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------

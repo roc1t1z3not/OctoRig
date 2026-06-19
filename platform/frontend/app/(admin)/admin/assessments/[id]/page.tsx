@@ -9,6 +9,8 @@ import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Copy, Check, Plus, ChevronDown, ChevronRight, Shield, Pencil } from "lucide-react";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   getAssessment,
   listInvites,
@@ -25,6 +27,7 @@ import { getLabs, type LabTemplate } from "@/lib/api/labs";
 import { AssessmentFormSheet } from "@/components/admin/assessments/AssessmentFormSheet";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { useConfirmStore } from "@/stores/confirm.store";
+import { formatDateTime } from "@/lib/utils/date";
 
 function StatusBadge({ status }: { status: InviteStatus }) {
   const colors: Record<InviteStatus, string> = {
@@ -110,10 +113,10 @@ function ProgressRow({
         </td>
         <td><StatusBadge status={invite.status} /></td>
         <td style={{ color: "var(--g-text-muted)", fontSize: "0.75rem", fontFamily: "var(--font-mono, monospace)" }}>
-          {invite.started_at ? new Date(invite.started_at).toLocaleString() : "—"}
+          {formatDateTime(invite.started_at)}
         </td>
         <td style={{ color: "var(--g-text-muted)", fontSize: "0.75rem", fontFamily: "var(--font-mono, monospace)" }}>
-          {invite.expires_at ? new Date(invite.expires_at).toLocaleString() : "—"}
+          {formatDateTime(invite.expires_at)}
         </td>
         <td style={{ fontSize: "0.8rem", color: "var(--g-text-muted)" }}>
           {invite.deployment_ids.length > 0 ? `${invite.deployment_ids.length} labs` : "—"}
@@ -157,38 +160,67 @@ function ProgressRow({
         <tr>
           <td colSpan={10} style={{ background: "var(--g-surface-elevated, var(--g-surface))", padding: "12px 20px" }}>
             {progress ? (
-              <div style={{ display: "flex", gap: 32 }}>
-                <div>
-                  <div style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--g-text-muted)", marginBottom: 6 }}>
-                    Flags Solved ({progress.flags_solved.length}) · {progress.score} pts
+              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
+                  <div>
+                    <div style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--g-text-muted)", marginBottom: 6 }}>
+                      Flags Solved ({progress.flags_solved.length}) · {progress.score} pts
+                    </div>
+                    {progress.flags_solved.length === 0 ? (
+                      <span className="text-muted" style={{ fontSize: "0.8rem" }}>None yet</span>
+                    ) : (
+                      <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+                        {progress.flags_solved.map((f) => (
+                          <li key={f.challenge_slug} style={{ fontSize: "0.8rem", display: "flex", alignItems: "center", gap: 6 }}>
+                            <Shield size={11} style={{ color: "var(--g-accent)" }} />
+                            <span style={{ color: "var(--g-text)" }}>{f.challenge_title}</span>
+                            <span style={{ color: "var(--g-text-muted)", fontSize: "0.7rem" }}>+{f.points} pts</span>
+                            <span style={{ color: "var(--g-text-muted)", fontSize: "0.7rem" }}>
+                              {formatDateTime(f.solved_at)}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
-                  {progress.flags_solved.length === 0 ? (
-                    <span className="text-muted" style={{ fontSize: "0.8rem" }}>None yet</span>
-                  ) : (
-                    <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 4 }}>
-                      {progress.flags_solved.map((f) => (
-                        <li key={f.challenge_slug} style={{ fontSize: "0.8rem", display: "flex", alignItems: "center", gap: 6 }}>
-                          <Shield size={11} style={{ color: "var(--g-accent)" }} />
-                          <span style={{ color: "var(--g-text)" }}>{f.challenge_title}</span>
-                          <span style={{ color: "var(--g-text-muted)", fontSize: "0.7rem" }}>+{f.points} pts</span>
-                          <span style={{ color: "var(--g-text-muted)", fontSize: "0.7rem" }}>
-                            {new Date(f.solved_at).toLocaleString()}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                  <div>
+                    <div style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--g-text-muted)", marginBottom: 6 }}>
+                      Completed
+                    </div>
+                    <span style={{ fontSize: "0.8rem", color: "var(--g-text)", fontFamily: "var(--font-mono, monospace)" }}>
+                      {formatDateTime(invite.completed_at)}
+                    </span>
+                  </div>
                 </div>
+
                 <div>
-                  <div style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--g-text-muted)", marginBottom: 6 }}>
+                  <div style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--g-text-muted)", marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}>
                     Report
+                    {invite.completed_at ? (
+                      <span className="role-pill role-pill--on" style={{ fontSize: "0.7rem" }}>Submitted</span>
+                    ) : progress.report_content ? (
+                      <span className="role-pill" style={{ fontSize: "0.7rem", color: "var(--g-warning, #f59e0b)" }}>Draft (in progress)</span>
+                    ) : (
+                      <span className="role-pill role-pill--off" style={{ fontSize: "0.7rem" }}>Not started</span>
+                    )}
                   </div>
-                  <span
-                    className={`role-pill ${progress.report_submitted ? "role-pill--on" : "role-pill--off"}`}
-                    style={{ fontSize: "0.75rem" }}
-                  >
-                    {progress.report_submitted ? "Submitted" : "Not submitted"}
-                  </span>
+                  {progress.report_content ? (
+                    <div
+                      className="md-preview"
+                      style={{
+                        maxHeight: 480,
+                        overflowY: "auto",
+                        background: "var(--g-surface)",
+                        border: "1px solid var(--g-border, rgba(255,255,255,0.08))",
+                        borderRadius: 6,
+                        padding: "12px 16px",
+                      }}
+                    >
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{progress.report_content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <span className="text-muted" style={{ fontSize: "0.8rem" }}>No report saved yet.</span>
+                  )}
                 </div>
               </div>
             ) : (

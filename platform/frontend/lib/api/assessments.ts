@@ -49,6 +49,7 @@ export interface AssessmentInviteWithProgress extends AssessmentInvite {
   flags_solved: FlagSolve[];
   score: number;
   report_submitted: boolean;
+  report_content: string | null;
 }
 
 export interface CandidateLabInfo {
