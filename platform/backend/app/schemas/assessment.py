@@ -89,11 +89,13 @@ class AssessmentInviteResponse(BaseModel):
 class FlagSolve(BaseModel):
     challenge_slug: str
     challenge_title: str
+    points: int
     solved_at: datetime
 
 
 class AssessmentInviteWithProgress(AssessmentInviteResponse):
     flags_solved: list[FlagSolve] = []
+    score: int = 0
     report_submitted: bool = False
 
 

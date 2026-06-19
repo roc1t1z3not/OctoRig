@@ -27,6 +27,7 @@ import {
   DEMO_CONTENT_APPROVED,
   DEMO_ASSESSMENTS,
   DEMO_ASSESSMENT_INVITES,
+  DEMO_ASSESSMENT_FLAGS,
   augmentChallengeList,
   augmentChallengeDetail,
   augmentBadgeList,
@@ -108,6 +109,7 @@ const RE = {
   assessmentDetail: /^\/admin\/assessments\/(\d+)$/,
   assessmentInvites:/^\/admin\/assessments\/(\d+)\/invites\/?(\?.*)?$/,
   assessmentInviteProgress: /^\/admin\/assessments\/(\d+)\/invites\/(\d+)\/progress$/,
+  assessmentProgress: /^\/admin\/assessments\/(\d+)\/progress$/,
 };
 
 // ─── Request interceptor — fully-replaced endpoints ───────────────────────────
@@ -299,12 +301,21 @@ function onRequest(config: InternalAxiosRequestConfig): InternalAxiosRequestConf
     );
     withMock({
       ...(invite ?? DEMO_ASSESSMENT_INVITES[401][0]),
-      flags_solved: [
-        { challenge_slug: "rw-recon-robots", challenge_title: "What's Off-Limits?", solved_at: "2026-06-10T13:30:00Z" },
-        { challenge_slug: "hb-idor-accounts", challenge_title: "Everyone's Balance", solved_at: "2026-06-10T14:10:00Z" },
-      ],
+      flags_solved: DEMO_ASSESSMENT_FLAGS,
+      score: DEMO_ASSESSMENT_FLAGS.reduce((sum, f) => sum + f.points, 0),
       report_submitted: false,
     }, config);
+    return config;
+  }
+  if (RE.assessmentProgress.test(u)) {
+    const id = parseInt(RE.assessmentProgress.exec(u)?.[1] ?? "0", 10);
+    const invites = DEMO_ASSESSMENT_INVITES[id] ?? [];
+    withMock(invites.map((invite, idx) => ({
+      ...invite,
+      flags_solved: idx === 0 ? DEMO_ASSESSMENT_FLAGS : [],
+      score: idx === 0 ? DEMO_ASSESSMENT_FLAGS.reduce((sum, f) => sum + f.points, 0) : 0,
+      report_submitted: false,
+    })), config);
     return config;
   }
   if (RE.assessmentInvites.test(u)) {

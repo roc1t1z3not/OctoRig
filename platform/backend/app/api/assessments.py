@@ -267,6 +267,57 @@ def list_invites(
     return [_invite_response(i) for i in invites]
 
 
+@admin_router.get("/{assessment_id}/progress", response_model=list[AssessmentInviteWithProgress])
+def list_candidate_progress(
+    assessment_id: int,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> list[AssessmentInviteWithProgress]:
+    assessment = db.get(Assessment, assessment_id)
+    if assessment is None:
+        raise not_found("Assessment")
+
+    invites = db.query(AssessmentInvite).filter(
+        AssessmentInvite.assessment_id == assessment_id
+    ).order_by(AssessmentInvite.id.desc()).all()
+
+    from app.models.challenge import Challenge
+
+    user_ids = [i.user_id for i in invites if i.user_id is not None]
+    subs_by_user: dict[int, list[FlagSolve]] = {}
+    if user_ids:
+        rows = (
+            db.query(ChallengeSubmission, Challenge)
+            .join(Challenge, Challenge.id == ChallengeSubmission.challenge_id)
+            .join(LabTemplate, LabTemplate.id == Challenge.lab_template_id)
+            .filter(
+                ChallengeSubmission.user_id.in_(user_ids),
+                ChallengeSubmission.is_correct.is_(True),
+                LabTemplate.slug.in_(assessment.lab_slugs),
+            )
+            .all()
+        )
+        for sub, ch in rows:
+            subs_by_user.setdefault(sub.user_id, []).append(FlagSolve(
+                challenge_slug=ch.slug,
+                challenge_title=ch.title,
+                points=ch.points,
+                solved_at=sub.submitted_at,
+            ))
+
+    results: list[AssessmentInviteWithProgress] = []
+    for invite in invites:
+        flags_solved = subs_by_user.get(invite.user_id, [])
+        base = _invite_response(invite)
+        results.append(AssessmentInviteWithProgress(
+            **base.model_dump(),
+            flags_solved=flags_solved,
+            score=sum(f.points for f in flags_solved),
+            report_submitted=invite.report is not None,
+        ))
+    return results
+
+
 @admin_router.post("/{assessment_id}/invites", response_model=AssessmentInviteResponse, status_code=201)
 def create_invite(
     assessment_id: int,
@@ -333,28 +384,33 @@ def get_candidate_progress(
     if invite is None:
         raise not_found("Invite")
 
+    assessment = db.get(Assessment, assessment_id)
     flags_solved: list[FlagSolve] = []
+    score = 0
     report_submitted = False
 
     if invite.user_id is not None:
         from app.models.challenge import Challenge
+
         subs = (
-            db.query(ChallengeSubmission)
+            db.query(ChallengeSubmission, Challenge)
             .join(Challenge, Challenge.id == ChallengeSubmission.challenge_id)
+            .join(LabTemplate, LabTemplate.id == Challenge.lab_template_id)
             .filter(
                 ChallengeSubmission.user_id == invite.user_id,
                 ChallengeSubmission.is_correct.is_(True),
+                LabTemplate.slug.in_(assessment.lab_slugs),
             )
             .all()
         )
-        for sub in subs:
-            ch = db.get(Challenge, sub.challenge_id)
-            if ch:
-                flags_solved.append(FlagSolve(
-                    challenge_slug=ch.slug,
-                    challenge_title=ch.title,
-                    solved_at=sub.submitted_at,
-                ))
+        for sub, ch in subs:
+            flags_solved.append(FlagSolve(
+                challenge_slug=ch.slug,
+                challenge_title=ch.title,
+                points=ch.points,
+                solved_at=sub.submitted_at,
+            ))
+        score = sum(f.points for f in flags_solved)
 
     if invite.report is not None:
         report_submitted = True
@@ -363,6 +419,7 @@ def get_candidate_progress(
     return AssessmentInviteWithProgress(
         **base.model_dump(),
         flags_solved=flags_solved,
+        score=score,
         report_submitted=report_submitted,
     )
 

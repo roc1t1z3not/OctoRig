@@ -41,11 +41,13 @@ export interface AssessmentInvite {
 export interface FlagSolve {
   challenge_slug: string;
   challenge_title: string;
+  points: number;
   solved_at: string;
 }
 
 export interface AssessmentInviteWithProgress extends AssessmentInvite {
   flags_solved: FlagSolve[];
+  score: number;
   report_submitted: boolean;
 }
 
@@ -154,6 +156,15 @@ export async function createInvite(
 
 export async function revokeInvite(assessmentId: number, inviteId: number): Promise<void> {
   await apiClient.delete(`/admin/assessments/${assessmentId}/invites/${inviteId}`);
+}
+
+export async function listCandidateProgress(
+  assessmentId: number
+): Promise<AssessmentInviteWithProgress[]> {
+  const { data } = await apiClient.get<AssessmentInviteWithProgress[]>(
+    `/admin/assessments/${assessmentId}/progress`
+  );
+  return data;
 }
 
 export async function getCandidateProgress(

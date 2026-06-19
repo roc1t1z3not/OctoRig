@@ -740,6 +740,13 @@ export const DEMO_ASSESSMENT_INVITES: Record<number, Array<{
   403: [],
 };
 
+export const DEMO_ASSESSMENT_FLAGS: Array<{
+  challenge_slug: string; challenge_title: string; points: number; solved_at: string;
+}> = [
+  { challenge_slug: "rw-recon-robots", challenge_title: "What's Off-Limits?", points: 100, solved_at: "2026-06-10T13:30:00Z" },
+  { challenge_slug: "hb-idor-accounts", challenge_title: "Everyone's Balance", points: 250, solved_at: "2026-06-10T14:10:00Z" },
+];
+
 // ─── Augmentation helpers (applied to real API responses) ─────────────────────
 // These overlay fake personal/social state (solve_count, solved_by_me, earned)
 // on top of catalog data that always comes from the real backend, so the

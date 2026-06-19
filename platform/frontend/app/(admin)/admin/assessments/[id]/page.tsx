@@ -15,7 +15,7 @@ import {
   createInvite,
   revokeInvite,
   updateAssessment,
-  getCandidateProgress,
+  listCandidateProgress,
   type CreateAssessmentPayload,
   type AssessmentInvite,
   type AssessmentInviteWithProgress,
@@ -70,20 +70,16 @@ function CopyButton({ text }: { text: string }) {
 function ProgressRow({
   assessmentId,
   invite,
+  progress,
 }: {
   assessmentId: number;
   invite: AssessmentInvite;
+  progress?: AssessmentInviteWithProgress;
 }) {
   const [expanded, setExpanded] = useState(false);
   const { push } = useNotificationsStore();
   const { confirm } = useConfirmStore();
   const qc = useQueryClient();
-
-  const { data: progress, isLoading } = useQuery<AssessmentInviteWithProgress>({
-    queryKey: ["assessment-invite-progress", assessmentId, invite.id],
-    queryFn: () => getCandidateProgress(assessmentId, invite.id),
-    enabled: expanded,
-  });
 
   const revokeMutation = useMutation({
     mutationFn: () => revokeInvite(assessmentId, invite.id),
@@ -122,6 +118,17 @@ function ProgressRow({
         <td style={{ fontSize: "0.8rem", color: "var(--g-text-muted)" }}>
           {invite.deployment_ids.length > 0 ? `${invite.deployment_ids.length} labs` : "—"}
         </td>
+        <td style={{ fontSize: "0.8rem", color: "var(--g-text)" }}>
+          {progress ? (
+            <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <Shield size={11} style={{ color: "var(--g-accent)" }} />
+              {progress.flags_solved.length}
+            </span>
+          ) : "—"}
+        </td>
+        <td style={{ fontSize: "0.8rem", color: "var(--g-text)", fontFamily: "var(--font-mono, monospace)" }}>
+          {progress ? progress.score : "—"}
+        </td>
         <td>
           <div style={{ display: "flex", gap: 6 }} onClick={(e) => e.stopPropagation()}>
             <CopyButton text={inviteUrl} />
@@ -148,14 +155,12 @@ function ProgressRow({
 
       {expanded && (
         <tr>
-          <td colSpan={8} style={{ background: "var(--g-surface-elevated, var(--g-surface))", padding: "12px 20px" }}>
-            {isLoading ? (
-              <span className="text-muted text-sm">Loading progress…</span>
-            ) : progress ? (
+          <td colSpan={10} style={{ background: "var(--g-surface-elevated, var(--g-surface))", padding: "12px 20px" }}>
+            {progress ? (
               <div style={{ display: "flex", gap: 32 }}>
                 <div>
                   <div style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--g-text-muted)", marginBottom: 6 }}>
-                    Flags Solved ({progress.flags_solved.length})
+                    Flags Solved ({progress.flags_solved.length}) · {progress.score} pts
                   </div>
                   {progress.flags_solved.length === 0 ? (
                     <span className="text-muted" style={{ fontSize: "0.8rem" }}>None yet</span>
@@ -165,6 +170,7 @@ function ProgressRow({
                         <li key={f.challenge_slug} style={{ fontSize: "0.8rem", display: "flex", alignItems: "center", gap: 6 }}>
                           <Shield size={11} style={{ color: "var(--g-accent)" }} />
                           <span style={{ color: "var(--g-text)" }}>{f.challenge_title}</span>
+                          <span style={{ color: "var(--g-text-muted)", fontSize: "0.7rem" }}>+{f.points} pts</span>
                           <span style={{ color: "var(--g-text-muted)", fontSize: "0.7rem" }}>
                             {new Date(f.solved_at).toLocaleString()}
                           </span>
@@ -185,7 +191,9 @@ function ProgressRow({
                   </span>
                 </div>
               </div>
-            ) : null}
+            ) : (
+              <span className="text-muted text-sm">No progress yet.</span>
+            )}
           </td>
         </tr>
       )}
@@ -212,6 +220,14 @@ export default function AssessmentDetailPage() {
     queryKey: ["assessment-invites", assessmentId],
     queryFn: () => listInvites(assessmentId),
   });
+
+  const { data: progressList = [] } = useQuery({
+    queryKey: ["assessment-progress", assessmentId],
+    queryFn: () => listCandidateProgress(assessmentId),
+    enabled: invites.length > 0,
+    refetchInterval: 30_000,
+  });
+  const progressByInviteId = new Map(progressList.map((p) => [p.id, p]));
 
   const { data: labs = [], isLoading: labsLoading } = useQuery<LabTemplate[]>({
     queryKey: ["labs", "world"],
@@ -373,12 +389,19 @@ export default function AssessmentDetailPage() {
                 <th>Started</th>
                 <th>Expires</th>
                 <th>Labs</th>
+                <th>Flags</th>
+                <th>Score</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {invites.map((invite) => (
-                <ProgressRow key={invite.id} assessmentId={assessmentId} invite={invite} />
+                <ProgressRow
+                  key={invite.id}
+                  assessmentId={assessmentId}
+                  invite={invite}
+                  progress={progressByInviteId.get(invite.id)}
+                />
               ))}
             </tbody>
           </table>
