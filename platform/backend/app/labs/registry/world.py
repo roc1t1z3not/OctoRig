@@ -13,14 +13,9 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "images": {"app": "octorig-rewindrange:latest"},
         "build_contexts": {"app": "labs/rewindrange"},
         "start_order": ["app"],
-        "network_name": "octorig-rewindrange-net",
-        "subnet": "172.28.1.0/24",
-        "app_ip": "172.28.1.2",
         "exposed_ports": {"http": 80, "ssh": 22, "ftp": 21},
         "access_info": [
-            {"key": "URL", "value": "http://172.28.1.2"},
-            {"key": "SSH", "value": "ssh staff@172.28.1.2 (password: dragon)"},
-            {"key": "FTP", "value": "ftp 172.28.1.2 (anonymous)"},
+            {"key": "URL", "value": "http://{container_ip}"},
         ],
         "volume_names": [],
         "env_vars": {},
@@ -33,7 +28,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "Every web server has a way to tell search engines what *not* to index. "
                     "Find the right file, follow where it leads, and you'll end up somewhere "
                     "the store would rather keep private.\n\n"
-                    "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -58,7 +53,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "user input and passes it straight to the back end. "
                     "The back room holds more than product listings — "
                     "the right input might bring some of it to the surface.\n\n"
-                    "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -81,7 +76,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "description": (
                     "You don't have admin credentials. You might not need them.\n\n"
                     "Rewind Range's login form makes a decision based on what you submit. "
-                    "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -107,7 +102,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The database knows more than what's on the shelves, "
                     "and the admin's credentials are somewhere in there.\n\n"
                     "Find the admin's password and wrap it in `FLAG{}`.\n\n"
-                    "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -130,7 +125,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "description": (
                     "Whatever you search for, Rewind Range echoes it back on the results "
                     "page. The question is whether it echoes *only* what you typed.\n\n"
-                    "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -155,7 +150,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "or something that acts like reading happens. "
                     "The question is who's on the other end, and what their browser does "
                     "when your submission arrives.\n\n"
-                    "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -179,7 +174,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "Rewind Range has a private messaging feature. Messages are fetched "
                     "by number — but whose messages can you actually read?\n\n"
                     "Log in as any regular user and find out.\n\n"
-                    "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -203,7 +198,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "Rewind Range has a REST API for rental orders. Each order has an ID. "
                     "As an authenticated user, how many orders can you actually access?\n\n"
                     "Explore the API and see what turns up in records that aren't yours.\n\n"
-                    "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind, requires auth)"
+                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind, requires auth)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -229,7 +224,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "way into source code.\n\n"
                     "Craft a session that says you're the admin and walk through a door "
                     "you were never given a key to.\n\n"
-                    "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "hard",
@@ -254,7 +249,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "database can be sent programmatically — faster, quieter, and repeatable. "
                     "Craft a Python script that talks directly to the server and pulls back "
                     "something the UI was never meant to show you.\n\n"
-                    "**Target:** `http://172.28.1.2` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -283,14 +278,9 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "images": {"app": "octorig-tradefloor:latest"},
         "build_contexts": {"app": "labs/tradefloor"},
         "start_order": ["app"],
-        "network_name": "octorig-tradefloor-net",
-        "subnet": "172.28.2.0/24",
-        "app_ip": "172.28.2.2",
         "exposed_ports": {"http": 80, "ssh": 22, "ftp": 21},
         "access_info": [
-            {"key": "URL", "value": "http://172.28.2.2"},
-            {"key": "SSH", "value": "ssh tradeops@172.28.2.2"},
-            {"key": "FTP", "value": "ftp 172.28.2.2"},
+            {"key": "URL", "value": "http://{container_ip}"},
         ],
         "volume_names": [],
         "env_vars": {},
@@ -304,7 +294,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "no different — there's a public file that hints at paths the "
                     "operators would prefer you didn't visit.\n\n"
                     "Find one of those paths and access it as a logged-in user.\n\n"
-                    "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -327,7 +317,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The order book search takes a ticker symbol and surfaces market data. "
                     "The database running behind it holds more than trade history — "
                     "and the search field may accept more than just ticker symbols.\n\n"
-                    "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -352,7 +342,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The credential check has a flaw — the right username might "
                     "bypass the need for a password entirely.\n\n"
                     "Obtain an admin token, then call a privileged endpoint.\n\n"
-                    "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -376,7 +366,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "TradeFloor stores more than tickers and prices. "
                     "Somewhere in that database is a user registry — accounts, credentials, "
                     "the kind of data that was never meant to be readable from the outside.\n\n"
-                    "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -399,7 +389,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "description": (
                     "The market search field echoes your query back on the results page. "
                     "How faithfully does it reproduce what you type?\n\n"
-                    "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -422,7 +412,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "description": (
                     "Trade orders each have an ID. As a logged-in user, you can view "
                     "your own orders — but are they truly *your* orders?\n\n"
-                    "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -446,7 +436,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "TradeFloor's admin panel has a per-user detail view. Being logged "
                     "in might be enough to reach it — try navigating there as a "
                     "regular user.\n\n"
-                    "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -471,7 +461,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "is worth examining — specifically, what the token itself says "
                     "about how it should be verified.\n\n"
                     "Forge an admin token and call a privileged endpoint.\n\n"
-                    "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "hard",
@@ -495,7 +485,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "Profiles are numbered. Each number belongs to someone — or it should. "
                     "Write a Python script that walks the sequence and notices when a record "
                     "surfaces that the current session has no business seeing.\n\n"
-                    "**Target:** `http://172.28.2.2` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -524,14 +514,9 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "images": {"app": "octorig-goldenace:latest"},
         "build_contexts": {"app": "labs/goldenace"},
         "start_order": ["app"],
-        "network_name": "octorig-goldenace-net",
-        "subnet": "172.28.3.0/24",
-        "app_ip": "172.28.3.2",
         "exposed_ports": {"http": 80, "ssh": 22, "ftp": 21},
         "access_info": [
-            {"key": "URL", "value": "http://172.28.3.2"},
-            {"key": "SSH", "value": "ssh casinoops@172.28.3.2 (password: sunshine)"},
-            {"key": "FTP", "value": "ftp 172.28.3.2"},
+            {"key": "URL", "value": "http://{container_ip}"},
         ],
         "volume_names": [],
         "env_vars": {},
@@ -701,7 +686,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "There's a sequence of calls that can leave your balance in a state the "
                     "server didn't intend. A Python script can issue them in the right order, "
                     "at the right speed.\n\n"
-                    "**Target:** `http://172.28.3.2` (start Lab 3 — GoldenAce)"
+                    "**Target:** `http://{container_ip}` (start Lab 3 — GoldenAce)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -730,14 +715,9 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "images": {"app": "octorig-humanbank:latest"},
         "build_contexts": {"app": "labs/humanbank"},
         "start_order": ["app"],
-        "network_name": "octorig-humanbank-net",
-        "subnet": "172.28.4.0/24",
-        "app_ip": "172.28.4.2",
         "exposed_ports": {"http": 80, "ssh": 22, "ftp": 21, "redis": 6379},
         "access_info": [
-            {"key": "URL", "value": "http://172.28.4.2"},
-            {"key": "SSH", "value": "ssh bankops@172.28.4.2"},
-            {"key": "Redis", "value": "redis-cli -h 172.28.4.2"},
+            {"key": "URL", "value": "http://{container_ip}"},
         ],
         "volume_names": [],
         "env_vars": {},
@@ -750,7 +730,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "An internal diagnostics endpoint was deployed and never locked down. "
                     "It responds to anyone who asks — no session required. "
                     "The raw financial history of the entire bank is there for the taking.\n\n"
-                    "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -776,7 +756,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "A carefully chosen username might make the decision for you.\n\n"
                     "Once inside as admin, check the admin profile — "
                     "there is a field the bank keeps very close to its chest.\n\n"
-                    "**Target:** `http://172.28.4.2/login` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}/login` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -801,7 +781,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The transaction search takes your query and goes hunting. "
                     "What it brings back might surprise you — especially if you ask "
                     "it to go looking somewhere it wasn't designed to reach.\n\n"
-                    "**Target:** `http://172.28.4.2/search` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}/search` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -826,7 +806,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The transaction list accepts filters — search by memo, type, date range. "
                     "Each field shapes how the underlying query is built. "
                     "The database knows more than just transaction history.\n\n"
-                    "**Target:** `http://172.28.4.2/accounts/1/transactions` "
+                    "**Target:** `http://{container_ip}/accounts/1/transactions` "
                     "(start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
@@ -853,7 +833,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "But what if the account list page didn't share that assumption?\n\n"
                     "One account in the system belongs to an entity that shouldn't be visible "
                     "to regular customers. Its transaction history has a memo worth reading.\n\n"
-                    "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -878,7 +858,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "Does the system verify that the number you're requesting belongs to you?\n\n"
                     "An internal ticket was created by bank staff and was never meant "
                     "to be seen by customers. Find it.\n\n"
-                    "**Target:** `http://172.28.4.2/tickets/` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}/tickets/` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -902,7 +882,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "There's an API endpoint meant for administrators only. "
                     "The door asks if you have a key — not whether the key is the right one. "
                     "Any customer who walks in authenticated might find the vault wide open.\n\n"
-                    "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -928,7 +908,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "not whose session it is.\n\n"
                     "The first account in the system has something stored that "
                     "was never meant to be customer-facing.\n\n"
-                    "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -954,7 +934,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "When an admin reads your ticket, their browser does the rendering — "
                     "and rendering decisions have consequences.\n\n"
                     "Leave something in a ticket that persists.\n\n"
-                    "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "hard",
@@ -979,7 +959,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The bank's data doesn't stay locked when the query is written carelessly. "
                     "A Python script can do in seconds what a proxy intercept does one request "
                     "at a time — chain the steps together and the vault opens itself.\n\n"
-                    "**Target:** `http://172.28.4.2` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}` (start Lab 4 — HumanBank)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -1008,13 +988,9 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "images": {"app": "octorig-medihuman:latest"},
         "build_contexts": {"app": "labs/medihuman"},
         "start_order": ["app"],
-        "network_name": "octorig-medihuman-net",
-        "subnet": "172.28.5.0/24",
-        "app_ip": "172.28.5.2",
         "exposed_ports": {"http": 80, "ssh": 22, "ftp": 21},
         "access_info": [
-            {"key": "URL", "value": "http://172.28.5.2"},
-            {"key": "SSH", "value": "ssh mediadmin@172.28.5.2"},
+            {"key": "URL", "value": "http://{container_ip}"},
         ],
         "volume_names": [],
         "env_vars": {},
@@ -1027,7 +1003,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The portal publishes a complete map of itself — every endpoint, "
                     "every parameter — without requiring a login. "
                     "Read it carefully. Developers sometimes leave notes in places they assume nobody will look.\n\n"
-                    "**Target:** `http://172.28.5.2` (start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}` (start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -1053,7 +1029,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "bypass the password check entirely.\n\n"
                     "Once inside as admin, check the HTTP response from the admin panel — "
                     "the server reveals more than just the page.\n\n"
-                    "**Target:** `http://172.28.5.2/login` (start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}/login` (start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -1078,7 +1054,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The patient search accepts a name and queries the database. "
                     "What the database returns depends entirely on how you frame the question.\n\n"
                     "The system stores more than patient names.\n\n"
-                    "**Target:** `http://172.28.5.2/patients` (start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}/patients` (start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -1105,7 +1081,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "One result in the system was filed by an external party "
                     "and should never have been accessible to patients. "
                     "The notes field tells a different story.\n\n"
-                    "**Target:** `http://172.28.5.2` (start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}` (start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -1131,7 +1107,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "but it doesn't enforce it.\n\n"
                     "There is a prescription in the system that belongs to someone else. "
                     "The notes field carries something that shouldn't be there.\n\n"
-                    "**Target:** `http://172.28.5.2` (start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}` (start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -1155,7 +1131,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The admin section has a data export that dumps every patient record "
                     "in the system. The door is labelled admin-only — "
                     "but the bouncer just checks if you exist, not who you are.\n\n"
-                    "**Target:** `http://172.28.5.2` (start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}` (start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -1180,7 +1156,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The lock on the door checks whether you're logged in — "
                     "not whether you're staff.\n\n"
                     "The first staff member's profile has a field that doesn't belong there.\n\n"
-                    "**Target:** `http://172.28.5.2` (start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}` (start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -1204,7 +1180,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The patient search echoes your search term back on the results page. "
                     "It reads it in, and it reads it back out — without checking what it contains.\n\n"
                     "There is a cookie set on this page that is readable from the browser.\n\n"
-                    "**Target:** `http://172.28.5.2/patients` "
+                    "**Target:** `http://{container_ip}/patients` "
                     "(start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
@@ -1232,7 +1208,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "that belong to you.\n\n"
                     "Some fields are never shown in the patient form — but the server "
                     "will accept them anyway.\n\n"
-                    "**Target:** `http://172.28.5.2/api/v1/appointments/1` "
+                    "**Target:** `http://{container_ip}/api/v1/appointments/1` "
                     "(start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
@@ -1258,7 +1234,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "Patient records are fetched by ID. The IDs are sequential. "
                     "Not every ID belongs to you — but the server doesn't always check. "
                     "Script a sweep and see whose records surface.\n\n"
-                    "**Target:** `http://172.28.5.2` (start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}` (start Lab 5 — MediHuman)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -1287,13 +1263,9 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "images": {"app": "octorig-netpulse:latest"},
         "build_contexts": {"app": "labs/netpulse"},
         "start_order": ["app"],
-        "network_name": "octorig-netpulse-net",
-        "subnet": "172.28.6.0/24",
-        "app_ip": "172.28.6.2",
         "exposed_ports": {"http": 80, "ssh": 22, "ftp": 21},
         "access_info": [
-            {"key": "URL", "value": "http://172.28.6.2"},
-            {"key": "SSH", "value": "ssh netops@172.28.6.2"},
+            {"key": "URL", "value": "http://{container_ip}"},
         ],
         "volume_names": [],
         "env_vars": {},
@@ -1456,7 +1428,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The engine that fills those placeholders in is more powerful than the "
                     "interface suggests. A well-placed expression can reach well beyond the "
                     "intended output.\n\n"
-                    "**Target:** `http://172.28.6.2` (start Lab 6 — NetPulse)"
+                    "**Target:** `http://{container_ip}` (start Lab 6 — NetPulse)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -1485,14 +1457,9 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "images": {"app": "octorig-limelight:latest"},
         "build_contexts": {"app": "labs/limelight"},
         "start_order": ["app"],
-        "network_name": "octorig-limelight-net",
-        "subnet": "172.28.7.0/24",
-        "app_ip": "172.28.7.2",
         "exposed_ports": {"http": 80, "ssh": 22, "ftp": 21},
         "access_info": [
-            {"key": "URL", "value": "http://172.28.7.2"},
-            {"key": "SSH", "value": "ssh cinemaops@172.28.7.2 (password: abc123)"},
-            {"key": "FTP", "value": "ftp 172.28.7.2 (user: cinemaops / abc123)"},
+            {"key": "URL", "value": "http://{container_ip}"},
         ],
         "volume_names": [],
         "env_vars": {},
@@ -1675,7 +1642,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "Seats are finite. The booking logic enforces that limit — but only if "
                     "requests arrive one at a time. A Python script can send many at once. "
                     "What happens to the seat count when the server can't keep up?\n\n"
-                    "**Target:** `http://172.28.7.2` (start Lab 7 — Limelight)"
+                    "**Target:** `http://{container_ip}` (start Lab 7 — Limelight)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "hard",
@@ -1704,14 +1671,9 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "images": {"app": "octorig-subverse:latest"},
         "build_contexts": {"app": "labs/subverse"},
         "start_order": ["app"],
-        "network_name": "octorig-subverse-net",
-        "subnet": "172.28.18.0/24",
-        "app_ip": "172.28.18.2",
         "exposed_ports": {"http": 80, "ssh": 22, "ftp": 21},
         "access_info": [
-            {"key": "URL", "value": "http://172.28.18.2"},
-            {"key": "SSH", "value": "ssh sysadmin@172.28.18.2 (password: subverse2024)"},
-            {"key": "FTP", "value": "ftp 172.28.18.2 (anonymous)"},
+            {"key": "URL", "value": "http://{container_ip}"},
         ],
         "volume_names": [],
         "env_vars": {},
@@ -1875,7 +1837,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "call. A browser makes that awkward to exploit — a Python script does not. "
                     "Construct the right payload, send it programmatically, and read what the "
                     "server hands back.\n\n"
-                    "**Target:** `http://172.28.18.2` (start Lab 8 — SubVerse)"
+                    "**Target:** `http://{container_ip}` (start Lab 8 — SubVerse)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "hard",
@@ -1904,14 +1866,9 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
         "images": {"app": "octorig-smartgridops:latest"},
         "build_contexts": {"app": "labs/smartgridops"},
         "start_order": ["app"],
-        "network_name": "octorig-smartgridops-net",
-        "subnet": "172.28.16.0/24",
-        "app_ip": "172.28.16.2",
         "exposed_ports": {"http": 80, "ssh": 22, "ftp": 21},
         "access_info": [
-            {"key": "URL", "value": "http://172.28.16.2"},
-            {"key": "SSH", "value": "ssh admin@172.28.16.2 (password: grid-master-2023)"},
-            {"key": "FTP", "value": "ftp 172.28.16.2 (anonymous)"},
+            {"key": "URL", "value": "http://{container_ip}"},
         ],
         "volume_names": [],
         "env_vars": {},
@@ -1925,7 +1882,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "field device configurations to the operator fleet. "
                     "The server accepts anonymous connections. "
                     "Not everything in the config directory was meant for the public internet.\n\n"
-                    "**Target:** `http://172.28.16.2` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}` (start Lab 18 — SmartGridOps)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -1951,7 +1908,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "a crafted username might make the password less relevant than "
                     "the form implies.\n\n"
                     "Once inside the admin panel, check the HTTP response headers.\n\n"
-                    "**Target:** `http://172.28.16.2/login` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}/login` (start Lab 18 — SmartGridOps)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -1977,7 +1934,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "operational procedures. Your account is assigned to a specific zone. "
                     "The endpoint that serves zone details doesn't enforce that assignment.\n\n"
                     "Zone 4 carries something that should be restricted to its operator.\n\n"
-                    "**Target:** `http://172.28.16.2` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}` (start Lab 18 — SmartGridOps)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -2002,7 +1959,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "field hardware fleet. The FTP config file hints at where to find it. "
                     "Once you have the admin token, a privileged endpoint hands back "
                     "the full operator roster — and whatever the admin keeps in their notes field.\n\n"
-                    "**Target:** `http://172.28.16.2` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}` (start Lab 18 — SmartGridOps)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -2027,7 +1984,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "the server fetches it and reflects the response back. "
                     "The server-side fetch can reach addresses that aren't reachable from "
                     "your browser — including endpoints that only respond to local requests.\n\n"
-                    "**Target:** `http://172.28.16.2/devices/poll` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}/devices/poll` (start Lab 18 — SmartGridOps)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -2052,7 +2009,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "to confirm the device is reachable. An operator can override the "
                     "management target address before the ping fires. "
                     "The override goes directly into a shell call, unsanitised.\n\n"
-                    "**Target:** `http://172.28.16.2` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}` (start Lab 18 — SmartGridOps)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "hard",
@@ -2077,7 +2034,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "and can forward them to colleagues. The credit transfer form accepts "
                     "a recipient ID and an amount. "
                     "The system does not check the sign of that amount before applying it.\n\n"
-                    "**Target:** `http://172.28.16.2/credits` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}/credits` (start Lab 18 — SmartGridOps)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -2102,7 +2059,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "command channel. Grid commands are supposed to stay within an operator's "
                     "own zone. The topic field is editable — what happens when you publish "
                     "to a zone you don't control?\n\n"
-                    "**Target:** `http://172.28.16.2/mqtt` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}/mqtt` (start Lab 18 — SmartGridOps)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -2128,7 +2085,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "A browser makes injection awkward — a Python script makes it precise. "
                     "Authenticate, target the reboot endpoint, and read the flag from "
                     "the host filesystem.\n\n"
-                    "**Target:** `http://172.28.16.2` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}` (start Lab 18 — SmartGridOps)"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",

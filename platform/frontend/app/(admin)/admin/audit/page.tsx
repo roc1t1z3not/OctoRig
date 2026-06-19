@@ -63,8 +63,8 @@ export default function AdminAuditPage() {
       </div>
 
       {/* Filter bar */}
-      <div className="filter-bar g-panel">
-        <div className="filter-group">
+      <div className="audit-filter-bar g-panel">
+        <div className="audit-filter-group">
           <label className="text-11 text-muted">Action</label>
           <div className="action-pills">
             {ACTION_GROUPS.map((g) => (

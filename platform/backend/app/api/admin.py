@@ -37,6 +37,7 @@ from app.schemas.admin import (
     SystemStats,
 )
 from app.services import api_key_service, audit_service, lab_service
+from app.services.docker_runtime import docker_service
 from app.services.settings_service import get_settings
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -362,6 +363,52 @@ def stop_all_deployments(
         detail={"count": len(active), "triggered_by": actor.username},
         ip=request.client.host if request.client else None,
     )
+
+
+# Restart "octorig-platform-api" last — it's the container serving this very
+# request, so its sibling services get restarted first regardless of whether
+# this process survives long enough to issue its own restart.
+_PLATFORM_CONTAINERS = [
+    "octorig-platform-worker",
+    "octorig-platform-beat",
+    "octorig-platform-ui",
+    "octorig-platform-api",
+]
+
+
+def _restart_platform_containers() -> None:
+    for name in _PLATFORM_CONTAINERS:
+        docker_service.restart_container(name)
+
+
+@router.post("/platform/restart", status_code=202)
+def restart_platform(
+    request: Request,
+    background_tasks: BackgroundTasks,
+    actor: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> None:
+    """Stop every active lab deployment, then restart the platform's own
+    service containers (api/worker/beat/ui). The response is sent before
+    any container actually restarts — including this one."""
+    active = db.query(Deployment).filter(
+        Deployment.status.in_([DeploymentStatus.RUNNING, DeploymentStatus.STARTING])
+    ).all()
+
+    for d in active:
+        d.status = DeploymentStatus.STOPPING
+    db.commit()
+
+    for d in active:
+        background_tasks.add_task(lab_service.stop_lab, d.id, actor.id)
+
+    audit_service.write_audit(
+        db, action="admin.restart_platform", user_id=actor.id,
+        detail={"stopped_deployments": len(active), "triggered_by": actor.username},
+        ip=request.client.host if request.client else None,
+    )
+
+    background_tasks.add_task(_restart_platform_containers)
 
 
 # ── Audit logs ───────────────────────────────────────────────────────────────

@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
 import { getHealth } from "@/lib/api/system";
 import { getUnreadCount } from "@/lib/api/notifications";
+import { Brand } from "@/components/layout/Brand";
 
 export function TopBar() {
   const { data: health } = useQuery({
@@ -28,10 +29,7 @@ export function TopBar() {
     >
       {/* Brand */}
       <div className="flex items-center gap-2">
-        <span className="font-mono font-black text-20px tracking-brand">
-          <span style={{ color: "var(--g-accent)" }}>OCTO</span>
-          <span style={{ color: "var(--g-text)" }}>RIG</span>
-        </span>
+        <Brand />
       </div>
 
       {/* Status + notifications */}

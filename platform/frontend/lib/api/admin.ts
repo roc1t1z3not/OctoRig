@@ -220,3 +220,7 @@ export async function resetDatabase(): Promise<void> {
 export async function stopAllDeployments(): Promise<void> {
   await apiClient.post("/admin/deployments/stop-all");
 }
+
+export async function restartPlatform(): Promise<void> {
+  await apiClient.post("/admin/platform/restart");
+}

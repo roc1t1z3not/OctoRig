@@ -14,6 +14,7 @@ from app.core.exceptions import bad_request, not_found
 from app.models.challenge import ChallengeDifficulty, ChallengeSubmission, ChallengeType
 from app.models.user import User
 from app.services import audit_service
+from app.services.challenge_rendering import render_target_text
 from app.services.challenge_service import (
     get_challenge_by_slug_or_404, get_solve_count,
     get_unlocked_hint_ids, list_challenges, submit_flag, unlock_hint,
@@ -138,13 +139,18 @@ class HintUnlockResponse(BaseModel):
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def _serialize_hint(hint, unlocked_ids: set[int]) -> HintResponse:
+def _serialize_hint(
+    hint, unlocked_ids: set[int], db: Session, current_user: User, lab_template_id: Optional[int]
+) -> HintResponse:
     unlocked = hint.id in unlocked_ids
+    content = hint.content if unlocked else None
+    if unlocked:
+        content = render_target_text(content, db, current_user, lab_template_id)
     return HintResponse(
         id=hint.id,
         order_num=hint.order_num,
         cost=hint.cost,
-        content=hint.content if unlocked else None,
+        content=content,
         unlocked=unlocked,
     )
 
@@ -233,7 +239,7 @@ def get_challenge_endpoint(
         id=ch.id,
         slug=ch.slug,
         title=ch.title,
-        description=ch.description,
+        description=render_target_text(ch.description, db, current_user, ch.lab_template_id),
         difficulty=ch.difficulty,
         category=ch.category,
         tags=ch.tags,
@@ -242,7 +248,7 @@ def get_challenge_endpoint(
         challenge_type=ch.challenge_type,
         estimated_minutes=ch.estimated_minutes,
         content=ch.content,
-        hints=[_serialize_hint(h, unlocked_ids) for h in ch.hints],
+        hints=[_serialize_hint(h, unlocked_ids, db, current_user, ch.lab_template_id) for h in ch.hints],
         files=[{"id": f.id, "filename": f.filename, "size_bytes": f.size_bytes} for f in ch.files],
         solve_count=get_solve_count(db, ch.id),
         solved_by_me=check_already_solved(db, ch.id, current_user.id),
@@ -381,7 +387,8 @@ def unlock_hint_endpoint(
         from app.services.scoring_service import deduct_hint_cost
         deduct_hint_cost(db, user_id=current_user.id, cost=hint.cost, hint_id=hint_id, team_id=team_id)
 
-    return HintUnlockResponse(hint_id=hint.id, content=hint.content, cost=hint.cost)
+    content = render_target_text(hint.content, db, current_user, ch.lab_template_id)
+    return HintUnlockResponse(hint_id=hint.id, content=content, cost=hint.cost)
 
 
 # ── Admin endpoints ───────────────────────────────────────────────────────────

@@ -21,6 +21,7 @@ from app.labs.registry import LAB_REGISTRY, LabDefinition, REGISTRY_BY_ID, STAND
 from app.models.deployment import Deployment, DeploymentStatus
 from app.models.lab_template import LabTemplate
 from app.services.audit_service import write_audit
+from app.services.deployment_provisioning import prepare_deployment
 from app.services.docker_runtime import docker_service
 from app.ws.manager import emit as ws_emit
 
@@ -50,9 +51,6 @@ def sync_registry(db: Session) -> None:
                 images=lab_def["images"],
                 build_contexts=lab_def["build_contexts"],
                 start_order=lab_def["start_order"],
-                network_name=lab_def["network_name"],
-                subnet=lab_def["subnet"],
-                app_ip=lab_def["app_ip"],
                 exposed_ports=lab_def["exposed_ports"],
                 access_info=lab_def["access_info"],
                 volume_names=lab_def["volume_names"],
@@ -68,9 +66,6 @@ def sync_registry(db: Session) -> None:
             existing.images = lab_def["images"]
             existing.build_contexts = lab_def["build_contexts"]
             existing.start_order = lab_def["start_order"]
-            existing.network_name = lab_def["network_name"]
-            existing.subnet = lab_def["subnet"]
-            existing.app_ip = lab_def["app_ip"]
             existing.exposed_ports = lab_def["exposed_ports"]
             existing.access_info = lab_def["access_info"]
             existing.volume_names = lab_def["volume_names"]
@@ -178,15 +173,28 @@ def sync_registry(db: Session) -> None:
 # Active deployment lookup                                             #
 # ------------------------------------------------------------------ #
 
-def get_active_deployment(db: Session, lab_template_id: int) -> Optional[Deployment]:
-    return (
-        db.query(Deployment)
-        .filter(
-            Deployment.lab_template_id == lab_template_id,
-            Deployment.status.in_([DeploymentStatus.STARTING, DeploymentStatus.RUNNING]),
-        )
-        .first()
+def get_active_deployment(
+    db: Session,
+    lab_template_id: int,
+    *,
+    started_by_id: Optional[int] = None,
+    team_id: Optional[int] = None,
+) -> Optional[Deployment]:
+    """Active deployment lookup, scoped to a user or team when given.
+
+    Different users/teams may now run the same lab template concurrently —
+    callers that need the old "any active deployment at all" behaviour
+    should pass neither kwarg.
+    """
+    q = db.query(Deployment).filter(
+        Deployment.lab_template_id == lab_template_id,
+        Deployment.status.in_([DeploymentStatus.STARTING, DeploymentStatus.RUNNING]),
     )
+    if started_by_id is not None:
+        q = q.filter(Deployment.started_by_id == started_by_id)
+    if team_id is not None:
+        q = q.filter(Deployment.team_id == team_id)
+    return q.first()
 
 
 # ------------------------------------------------------------------ #
@@ -242,14 +250,14 @@ def _do_start(db: Session, deployment: Deployment, template: LabTemplate, lab_de
         if role not in lab_def["build_contexts"]:
             docker_service.pull_image(image_tag)
 
-    # 3. Create volumes
-    for vol_name in lab_def["volume_names"]:
+    # 3. Create volumes — per-deployment names, allocated in prepare_deployment()
+    for vol_name in deployment.volume_names:
         docker_service.ensure_volume(vol_name)
 
-    # 4. Create network — internal by default to block lab egress traffic
+    # 4. Create network — per-deployment name/subnet, internal by default to block egress
     requires_internet = lab_def.get("requires_internet", False)
     docker_service.ensure_network(
-        lab_def["network_name"], lab_def["subnet"], internal=not requires_internet
+        deployment.network_name, deployment.subnet, internal=not requires_internet
     )
 
     # 5. Generate dynamic flag if this is a challenge-linked deployment
@@ -262,17 +270,17 @@ def _do_start(db: Session, deployment: Deployment, template: LabTemplate, lab_de
 
     # 5b. Start containers in declared order
     container_ids: dict[str, str] = {}
-    subnet_prefix = lab_def["subnet"].rsplit(".", 1)[0]  # e.g. "172.28.8"
+    subnet_prefix = deployment.subnet.rsplit(".", 1)[0]  # e.g. "10.90.8"
 
     for i, role in enumerate(lab_def["start_order"]):
-        container_name = _container_name_for_role(lab_def, role)
+        container_name = _container_name_for_role(deployment, lab_def, role)
         image_tag = lab_def["images"][role]
 
-        # Assign fixed IPs: .2 for first container (app), .3 for db, .4 for pg, etc.
+        # Assign fixed IPs within this deployment's subnet: .2 for app, .3 for db, etc.
         ip = f"{subnet_prefix}.{i + 2}"
 
         # Build volume mounts for this container
-        volumes = _volumes_for_role(lab_def, role)
+        volumes = _volumes_for_role(deployment, lab_def, role)
 
         base_env = lab_def["env_vars"] if role == "app" else _db_env_for_role(lab_def, role)
         if role == "app" and dynamic_flag:
@@ -281,7 +289,7 @@ def _do_start(db: Session, deployment: Deployment, template: LabTemplate, lab_de
         cid = docker_service.run_container(
             name=container_name,
             image=image_tag,
-            network=lab_def["network_name"],
+            network=deployment.network_name,
             ip=ip,
             environment=base_env,
             volumes=volumes,
@@ -295,20 +303,19 @@ def _do_start(db: Session, deployment: Deployment, template: LabTemplate, lab_de
             time.sleep(5)
 
     # 6. Wait for all containers to report 'running'
-    all_names = _all_container_names(lab_def)
     deadline = time.time() + 120
     while time.time() < deadline:
-        if all(docker_service.get_container_status(n) == "running" for n in all_names):
+        if all(docker_service.get_container_status(n) == "running" for n in deployment.container_names):
             break
         time.sleep(2)
 
     # 7. For fire-ranges, additionally poll /health endpoint
     if template.category == "firerange":
-        _wait_for_health(lab_def["app_ip"])
+        _wait_for_health(deployment.app_ip)
 
     # 8. VulnAD post-start exec
     if template.slug == "vulnad":
-        docker_service.exec_in_container("octorig-vulnad", "/usr/local/bin/_populate_ad")
+        docker_service.exec_in_container(_container_name_for_role(deployment, lab_def, "app"), "/usr/local/bin/_populate_ad")
 
     # 9. Mark running
     deployment.status = DeploymentStatus.RUNNING
@@ -348,18 +355,17 @@ def stop_lab(deployment_id: int, user_id: int, remove_volumes: bool = False) -> 
         if template is None:
             return
 
-        lab_def = REGISTRY_BY_ID.get(template.id)
-
         # Stop containers
         for name in deployment.container_names:
             docker_service.stop_container(name)
 
-        # Remove network
-        if lab_def:
-            docker_service.remove_network(lab_def["network_name"])
-            if remove_volumes:
-                for vol in lab_def["volume_names"]:
-                    docker_service.remove_volume(vol)
+        # Remove network — per-deployment name, so other concurrent
+        # deployments of the same lab are untouched.
+        if deployment.network_name:
+            docker_service.remove_network(deployment.network_name)
+        if remove_volumes:
+            for vol in deployment.volume_names:
+                docker_service.remove_volume(vol)
 
         deployment.status = DeploymentStatus.STOPPED
         deployment.stopped_at = datetime.now(timezone.utc)
@@ -399,18 +405,26 @@ def reset_lab(deployment_id: int, user_id: int) -> None:
         if old_deployment is None:
             return
         template_id = old_deployment.lab_template_id
+        template = db.get(LabTemplate, template_id)
+        lab_def = REGISTRY_BY_ID.get(template_id)
+        if template is None or lab_def is None:
+            return
 
         # Stop and remove volumes
         stop_lab(deployment_id, user_id, remove_volumes=True)
 
-        # Create a new deployment and start
-        new_deployment = Deployment(
-            lab_template_id=template_id,
+        # Create a new deployment (fresh subnet/IP/container names) and start it
+        new_deployment = prepare_deployment(
+            db,
+            template,
+            lab_def,
             started_by_id=user_id,
-            status=DeploymentStatus.STARTING,
-            container_names=old_deployment.container_names,
+            team_id=old_deployment.team_id,
+            challenge_id=old_deployment.challenge_id,
+            instance_for_user_id=old_deployment.instance_for_user_id,
+            auto_destroy_at=old_deployment.auto_destroy_at,
+            visibility=old_deployment.visibility,
         )
-        db.add(new_deployment)
         db.commit()
         db.refresh(new_deployment)
 
@@ -449,28 +463,21 @@ def _fail(db: Session, deployment: Deployment, message: str) -> None:
     })
 
 
-def _container_name_for_role(lab_def: LabDefinition, role: str) -> str:
-    """Pick the right container name from container_names by matching role suffix."""
-    names = lab_def["container_names"]
+def _container_name_for_role(deployment: Deployment, lab_def: LabDefinition, role: str) -> str:
+    """Pick this deployment's container name for `role`, by position — deployment.container_names
+    is generated 1:1 in the same order as lab_def["container_names"]."""
+    names = deployment.container_names
     if len(names) == 1:
         return names[0]
-    for name in names:
-        if name.endswith(f"-{role}"):
-            return name
-    # Fallback: use positional index from start_order
     idx = lab_def["start_order"].index(role)
     return names[idx]
 
 
-def _all_container_names(lab_def: LabDefinition) -> list[str]:
-    return lab_def["container_names"]
-
-
-def _volumes_for_role(lab_def: LabDefinition, role: str) -> dict[str, dict[str, str]]:
+def _volumes_for_role(deployment: Deployment, lab_def: LabDefinition, role: str) -> dict[str, dict[str, str]]:
     """Mount score volumes only on the app container."""
     if role != "app":
         return {}
-    return {vol: {"bind": f"/data/{vol}", "mode": "rw"} for vol in lab_def["volume_names"]}
+    return {vol: {"bind": f"/data/{vol}", "mode": "rw"} for vol in deployment.volume_names}
 
 
 def _db_env_for_role(lab_def: LabDefinition, role: str) -> dict[str, str]:

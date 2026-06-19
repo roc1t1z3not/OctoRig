@@ -47,16 +47,16 @@ export function DeploymentSidebar({
 }: DeploymentSidebarProps) {
   return (
     <div className="dd-sidebar">
-      {isActive && lab && lab.access_info.length > 0 && (
+      {isActive && (deployment.access_info.length > 0 || (lab && lab.access_info.length > 0)) && (
         <div className="g-card dd-card">
           <div className="dd-section-title">Access</div>
           <div className="dd-access-rows">
-            {lab.access_info.map((row) => (
+            {(deployment.access_info.length > 0 ? deployment.access_info : lab!.access_info).map((row) => (
               <div key={row.key} className="dd-access-row">
                 <span className="dd-access-key">{row.key}</span>
                 <span className="dd-access-val font-mono">{row.value}</span>
                 <CopyButton value={row.value} />
-                {(row.key === "URL" || row.value.startsWith("http")) && (
+                {row.value.startsWith("http") && (
                   <a href={row.value} target="_blank" rel="noopener noreferrer" className="dd-access-link">
                     <ExternalLink size={11} />
                   </a>
@@ -107,10 +107,10 @@ export function DeploymentSidebar({
           {deployment.stopped_at && (
             <MetaRow label="Stopped" value={formatDateTime(deployment.stopped_at)} />
           )}
-          {lab && (
+          {(deployment.subnet || deployment.app_ip) && (
             <>
-              <MetaRow label="Subnet" value={lab.subnet} mono />
-              <MetaRow label="App IP" value={lab.app_ip} mono />
+              <MetaRow label="Subnet" value={deployment.subnet ?? "—"} mono />
+              <MetaRow label="App IP" value={deployment.app_ip ?? "—"} mono />
             </>
           )}
           <div className="dd-meta-row">

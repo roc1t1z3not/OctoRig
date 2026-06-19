@@ -103,10 +103,12 @@ def no_docker(monkeypatch):
     from unittest.mock import MagicMock
 
     import app.services.lab_service as lab_service
+    from app.services.docker_runtime import docker_service
 
     monkeypatch.setattr(lab_service, "start_lab", MagicMock(name="start_lab"))
     monkeypatch.setattr(lab_service, "stop_lab", MagicMock(name="stop_lab"))
     monkeypatch.setattr(lab_service, "reset_lab", MagicMock(name="reset_lab"))
+    monkeypatch.setattr(docker_service, "restart_container", MagicMock(name="restart_container"))
 
 
 class _FakeRedis:

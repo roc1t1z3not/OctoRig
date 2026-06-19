@@ -35,6 +35,10 @@ class DeploymentResponse(BaseModel):
     visibility: DeploymentVisibility
     container_names: list[str]
     container_ids: dict[str, Any]
+    subnet: Optional[str] = None
+    app_ip: Optional[str] = None
+    network_name: Optional[str] = None
+    access_info: list[dict[str, str]] = []
     error_message: Optional[str]
     started_at: Optional[datetime]
     stopped_at: Optional[datetime]

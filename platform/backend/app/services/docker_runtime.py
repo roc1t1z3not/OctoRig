@@ -197,6 +197,16 @@ class DockerRuntimeService:
         """Matches docker rm -f in lab stop handlers."""
         self._force_remove_container(name)
 
+    def restart_container(self, name: str, timeout: int = 10) -> None:
+        """Restart a container in place (no rm/recreate) — used for restarting
+        the platform's own service containers. Silent no-op if the container
+        doesn't exist (e.g. the optional UI profile isn't running)."""
+        try:
+            container: Container = self._get_client().containers.get(name)
+            container.restart(timeout=timeout)
+        except NotFound:
+            pass
+
     def exec_in_container(self, name: str, command: str) -> tuple[int, bytes]:
         """Run a command inside a running container and return (exit_code, output)."""
         container: Container = self._get_client().containers.get(name)

@@ -83,10 +83,7 @@ export function StartLabDialog({ lab, open, onClose }: Props) {
             <>
               <p className="text-secondary text-sm mb-1">{lab.description}</p>
               <p className="text-muted text-11">
-                Network: <span className="font-mono text-accent">{lab.subnet}</span>
-              </p>
-              <p className="text-muted text-11">
-                Containers: <span className="font-mono">{lab.container_names.join(", ")}</span>
+                A private subnet and IP will be assigned to this lab when it starts.
               </p>
               {lab.requires_privileged && (
                 <p className="text-warning text-11 mt-1">⚠ This lab requires --privileged mode</p>

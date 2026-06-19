@@ -56,6 +56,14 @@ class Deployment(Base):
     auto_destroy_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+    # Per-deployment network allocation — distinct from LabTemplate's static
+    # defaults so the same lab can run concurrently for different users/teams.
+    subnet: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    app_ip: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    network_name: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    volume_names: Mapped[list[Any]] = mapped_column(JSON, nullable=False, default=list)
+    access_info: Mapped[list[Any]] = mapped_column(JSON, nullable=False, default=list)
+
     started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     stopped_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -68,3 +76,11 @@ class Deployment(Base):
     challenge: Mapped[Optional["Challenge"]] = relationship(back_populates="deployments")
     audit_logs: Mapped[list["AuditLog"]] = relationship(back_populates="deployment")
     scheduled_actions: Mapped[list["ScheduledAction"]] = relationship(back_populates="deployment")
+
+
+class NetworkAllocationLock(Base):
+    """Single-row mutex — SELECT ... FOR UPDATE on it serializes subnet allocation."""
+
+    __tablename__ = "network_allocation_locks"
+
+    id: Mapped[int] = mapped_column(primary_key=True)

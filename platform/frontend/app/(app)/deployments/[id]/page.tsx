@@ -124,7 +124,8 @@ export default function DeploymentDetailPage() {
   const canSchedule = deployment.status === "running";
   const vis = (deployment.visibility ?? "private") as Visibility;
 
-  const labUrl = lab?.access_info.find((a) => a.key === "URL")?.value;
+  const accessInfo = deployment.access_info.length > 0 ? deployment.access_info : (lab?.access_info ?? []);
+  const labUrl = accessInfo.find((a) => a.key === "URL")?.value;
 
   return (
     <div className="page">

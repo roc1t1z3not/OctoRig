@@ -35,6 +35,11 @@ class Settings(BaseSettings):
     # Docker / Labs
     labs_root: str = "/octorig/labs"
 
+    # Per-deployment subnet pool — carved into /24 blocks, one per active deployment.
+    # Kept outside Docker's default bridge auto-assignment range (172.17.0.0/16-172.31.255.255)
+    # and outside the legacy per-template defaults (172.28.0.0/16) baked into the lab registry.
+    network_pool_cidr: str = "10.90.0.0/16"
+
     # CORS — comma-separated string; split into list by the app at startup
     cors_origins: str = "http://localhost:3000,http://localhost:8000"
 

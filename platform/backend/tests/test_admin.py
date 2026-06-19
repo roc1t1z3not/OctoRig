@@ -325,6 +325,37 @@ def test_stop_all_deployments_transitions_active_to_stopping(client, db_session)
     assert lab_service.stop_lab.called  # never touches real Docker
 
 
+def test_restart_platform_stops_active_deployments_and_restarts_containers(client, db_session):
+    import app.services.lab_service as lab_service
+    from app.services.docker_runtime import docker_service
+
+    admin_token = _admin_token(client)
+    player_token = _register_and_login(client, "alice")
+    template_id = client.get("/api/v1/labs/", headers=_auth(player_token)).json()[0]["id"]
+    body = client.post(
+        "/api/v1/deployments/", json={"lab_template_id": template_id}, headers=_auth(player_token)
+    ).json()
+
+    d = db_session.get(Deployment, body["id"])
+    d.status = DeploymentStatus.RUNNING
+    db_session.commit()
+
+    resp = client.post("/api/v1/admin/platform/restart", headers=_auth(admin_token))
+    assert resp.status_code == 202
+
+    db_session.expire_all()
+    assert db_session.get(Deployment, body["id"]).status == DeploymentStatus.STOPPING
+    assert lab_service.stop_lab.called  # never touches real Docker
+    assert docker_service.restart_container.called
+    assert docker_service.restart_container.call_count == 4  # api, worker, beat, ui
+
+
+def test_restart_platform_requires_admin(client):
+    player_token = _register_and_login(client, "alice")
+    resp = client.post("/api/v1/admin/platform/restart", headers=_auth(player_token))
+    assert resp.status_code == 403
+
+
 # ── audit logs ───────────────────────────────────────────────────────────────
 
 def test_audit_logs_record_login_events(client):

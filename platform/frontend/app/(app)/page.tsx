@@ -5,6 +5,7 @@ import "./dashboard.css";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 import { getDeployments, stopDeployment } from "@/lib/api/deployments";
 import { getHealth, getContainers } from "@/lib/api/system";
@@ -27,6 +28,7 @@ function formatRelative(iso: string): string {
 export default function Dashboard() {
   const qc = useQueryClient();
   const { push } = useNotificationsStore();
+  const router = useRouter();
 
   const { data: deployments = [], isLoading } = useQuery({
     queryKey: ["deployments"],
@@ -68,13 +70,16 @@ export default function Dashboard() {
     (c) => !knownNames.has(c.name) && c.name.startsWith("octorig-") && !c.name.includes("platform")
   );
 
-  const labByContainer = new Map<string, LabTemplate>();
-  for (const lab of labs) {
-    for (const cn of lab.container_names) labByContainer.set(cn, lab);
-  }
+  // Container names are now per-deployment (e.g. "octorig-rewindrange-42"), so
+  // match orphan containers to a lab template by base-name prefix rather than
+  // exact equality — this is only a best-effort label for untracked containers.
   const getLabUrl = (containerName: string) => {
-    const lab = labByContainer.get(containerName);
-    return lab?.access_info.find((a) => a.key === "URL")?.value ?? null;
+    const lab = labs.find((l) => l.container_names.some((cn) => containerName.startsWith(`${cn}-`)));
+    const url = lab?.access_info.find((a) => a.key === "URL")?.value ?? null;
+    // The template's access_info is just a "not running" placeholder unless
+    // it belongs to a real deployment, which this orphan-container lookup
+    // can't establish — only show it if it's an actual clickable URL.
+    return url && url.startsWith("http") ? url : null;
   };
 
   return (
@@ -145,12 +150,13 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {activeDeployments.map((d) => (
-                  <tr key={d.id}>
+                  <tr
+                    key={d.id}
+                    onClick={() => router.push(`/deployments/${d.id}`)}
+                    style={{ cursor: "pointer" }}
+                  >
                     <td>
-                      <Link href={`/deployments/${d.id}`} className="text-accent flex items-center gap-1">
-                        {d.lab_name}
-                        <ExternalLink size={12} />
-                      </Link>
+                      <span className="text-accent">{d.lab_name}</span>
                     </td>
                     <td><DeploymentStatusBadge status={d.status} /></td>
                     <td className="text-secondary">{d.started_by_username}</td>
@@ -160,7 +166,7 @@ export default function Dashboard() {
                     <td>
                       <button
                         className="g-btn g-btn-danger g-btn-icon"
-                        onClick={() => stopMutation.mutate(d.id)}
+                        onClick={(e) => { e.stopPropagation(); stopMutation.mutate(d.id); }}
                         disabled={d.status === "stopping" || stopMutation.isPending}
                         title="Stop lab"
                       >

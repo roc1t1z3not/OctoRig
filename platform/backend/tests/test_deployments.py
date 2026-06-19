@@ -321,3 +321,66 @@ def test_unrelated_user_cannot_reset_deployment(client, db_session):
     outsider_token = _register_and_login(client, "bob")
     resp = client.post(f"/api/v1/deployments/{body['id']}/reset", headers=_auth(outsider_token))
     assert resp.status_code == 403
+
+
+# ── per-deployment network isolation / concurrency ──────────────────────────
+
+def test_deployment_gets_a_subnet_and_per_deployment_container_names(client):
+    token = _register_and_login(client, "alice")
+    template_id = _any_lab_template_id(client, token)
+    body = _deploy(client, token, lab_template_id=template_id)
+
+    assert body["subnet"]
+    assert body["app_ip"]
+    assert body["network_name"]
+    assert all(str(body["id"]) in name for name in body["container_names"])
+
+
+def test_different_users_can_run_the_same_lab_concurrently(client):
+    alice_token = _register_and_login(client, "alice")
+    template_id = _any_lab_template_id(client, alice_token)
+    alice_dep = _deploy(client, alice_token, lab_template_id=template_id)
+
+    bob_token = _register_and_login(client, "bob")
+    bob_dep = _deploy(client, bob_token, lab_template_id=template_id)
+
+    assert alice_dep["subnet"] != bob_dep["subnet"]
+    assert alice_dep["container_names"] != bob_dep["container_names"]
+
+
+def test_same_user_double_starting_same_lab_is_rejected(client):
+    token = _register_and_login(client, "alice")
+    template_id = _any_lab_template_id(client, token)
+    _deploy(client, token, lab_template_id=template_id)
+
+    resp = client.post(
+        "/api/v1/deployments/", json={"lab_template_id": template_id}, headers=_auth(token)
+    )
+    assert resp.status_code == 409
+
+
+def test_different_teams_can_run_the_same_lab_concurrently(client):
+    alice_token = _register_and_login(client, "alice")
+    red_team = client.post("/api/v1/teams/", json={"name": "Red Team"}, headers=_auth(alice_token)).json()
+    template_id = _any_lab_template_id(client, alice_token)
+    red_dep = _deploy(client, alice_token, lab_template_id=template_id, team_id=red_team["id"])
+
+    bob_token = _register_and_login(client, "bob")
+    blue_team = client.post("/api/v1/teams/", json={"name": "Blue Team"}, headers=_auth(bob_token)).json()
+    blue_dep = _deploy(client, bob_token, lab_template_id=template_id, team_id=blue_team["id"])
+
+    assert red_dep["subnet"] != blue_dep["subnet"]
+
+
+def test_same_team_double_starting_same_lab_is_rejected(client):
+    token = _register_and_login(client, "alice")
+    team = client.post("/api/v1/teams/", json={"name": "Red Team"}, headers=_auth(token)).json()
+    template_id = _any_lab_template_id(client, token)
+    _deploy(client, token, lab_template_id=template_id, team_id=team["id"])
+
+    resp = client.post(
+        "/api/v1/deployments/",
+        json={"lab_template_id": template_id, "team_id": team["id"]},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 409

@@ -305,14 +305,8 @@ platform_action() {
     start)
       _platform_env_check
       check_docker
-      if [[ "$extra" == "ui" ]]; then
-        header "Starting platform (API + workers + UI)..."
-        _dc --profile ui up -d --build
-      else
-        header "Starting platform (API + workers)..."
-        _dc up -d --build
-      fi
-      echo ""
+      info "Starting platform..."
+      _dc --progress quiet --profile ui up -d --build
       # Wait for the API to be reachable
       info "Waiting for API to be ready..."
       local deadline=$(( $(date +%s) + 60 ))
@@ -322,7 +316,6 @@ platform_action() {
         fi
         sleep 1
       done
-      echo ""
       good "Platform is up"
       echo ""
       echo -e "  ${BOLD}Dashboard${RESET}  →  ${GREEN}http://localhost:3000${RESET}"
@@ -330,19 +323,15 @@ platform_action() {
       echo ""
       ;;
     stop)
-      header "Stopping platform..."
+      info "Stopping platform..."
       _dc --profile ui down
       good "Platform stopped (data volumes preserved)"
       ;;
     restart)
-      header "Restarting platform..."
+      info "Restarting platform..."
       _dc --profile ui down
       _platform_env_check
-      if [[ "$extra" == "ui" ]]; then
-        _dc --profile ui up -d --build
-      else
-        _dc up -d --build
-      fi
+      _dc --progress quiet --profile ui up -d --build
       good "Platform restarted"
       ;;
     wipe)
@@ -352,12 +341,12 @@ platform_action() {
         info "Aborted."
         return
       fi
-      header "Wiping platform..."
+      info "Wiping platform..."
       _dc --profile ui down -v
       good "Platform stopped and volumes removed"
       ;;
     status)
-      header "Platform Service Status"
+      info "Platform Service Status"
       echo ""
       _dc ps 2>/dev/null || info "Platform is not running."
       echo ""
@@ -377,8 +366,7 @@ platform_action() {
     help|*)
       echo ""
       echo -e "  ${BOLD}platform commands:${RESET}"
-      echo -e "  ${GREEN}platform start${RESET}          — Start API + workers"
-      echo -e "  ${GREEN}platform start ui${RESET}       — Start API + workers + frontend UI"
+      echo -e "  ${GREEN}platform start${RESET}          — Start API + workers + frontend UI"
       echo -e "  ${GREEN}platform stop${RESET}           — Stop all platform services"
       echo -e "  ${GREEN}platform restart${RESET}        — Rebuild and restart platform"
       echo -e "  ${GREEN}platform wipe${RESET}           — Stop and delete all data volumes"

@@ -6,6 +6,10 @@ export interface DeploymentSummary {
   id: number;
   status: string;
   started_at: string | null;
+  subnet: string | null;
+  app_ip: string | null;
+  container_names: string[];
+  access_info: Array<{ key: string; value: string }>;
 }
 
 export interface LabTemplate {
@@ -18,9 +22,6 @@ export interface LabTemplate {
   images: Record<string, string>;
   build_contexts: Record<string, string>;
   start_order: string[];
-  network_name: string;
-  subnet: string;
-  app_ip: string;
   exposed_ports: Record<string, number>;
   access_info: Array<{ key: string; value: string }>;
   volume_names: string[];

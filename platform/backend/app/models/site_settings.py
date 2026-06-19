@@ -31,6 +31,7 @@ class SiteSettings(Base):
 
     # Features
     python_editor_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    hide_lab_ports: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     # Branding
     company_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)

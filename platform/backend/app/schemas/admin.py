@@ -132,6 +132,7 @@ class SiteSettingsResponse(BaseModel):
     scoreboard_frozen_at: Optional[datetime]
     first_blood_enabled: bool
     python_editor_enabled: bool
+    hide_lab_ports: bool
     company_name: Optional[str]
     company_logo_url: Optional[str]
     default_theme: Optional[str]
@@ -151,6 +152,7 @@ class SiteSettingsUpdate(BaseModel):
     scoreboard_frozen_at: Optional[datetime] = None
     first_blood_enabled: Optional[bool] = None
     python_editor_enabled: Optional[bool] = None
+    hide_lab_ports: Optional[bool] = None
     company_name: Optional[str] = None
     company_logo_url: Optional[str] = None
     default_theme: Optional[str] = None

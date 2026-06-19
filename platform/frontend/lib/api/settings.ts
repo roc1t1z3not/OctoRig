@@ -13,6 +13,7 @@ export interface SiteSettings {
   scoreboard_frozen_at: string | null;
   first_blood_enabled: boolean;
   python_editor_enabled: boolean;
+  hide_lab_ports: boolean;
   company_name: string | null;
   company_logo_url: string | null;
   default_theme: string | null;

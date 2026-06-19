@@ -100,10 +100,11 @@ def execute_destroy(self, scheduled_action_id: int) -> None:
 )
 def execute_deploy(self, scheduled_action_id: int) -> None:
     from app.database import SessionLocal
-    from app.models.deployment import Deployment, DeploymentStatus
+    from app.labs.registry import REGISTRY_BY_ID
     from app.models.lab_template import LabTemplate
     from app.models.scheduled_action import ScheduledAction, ScheduledActionStatus
     from app.services import audit_service, lab_service
+    from app.services.deployment_provisioning import prepare_deployment
 
     db = SessionLocal()
     try:
@@ -122,18 +123,24 @@ def execute_deploy(self, scheduled_action_id: int) -> None:
             if template is None:
                 raise ValueError("Lab template not found")
 
-            existing = lab_service.get_active_deployment(db, template.id)
-            if existing:
-                raise ValueError(f"Lab already has an active deployment (id={existing.id})")
+            lab_def = REGISTRY_BY_ID.get(template.id)
+            if lab_def is None:
+                raise ValueError("Lab definition missing from registry")
 
-            deployment = Deployment(
-                lab_template_id=template.id,
+            if action.team_id is not None:
+                existing = lab_service.get_active_deployment(db, template.id, team_id=action.team_id)
+            else:
+                existing = lab_service.get_active_deployment(db, template.id, started_by_id=action.user_id)
+            if existing:
+                raise ValueError(f"You already have an active deployment of this lab (id={existing.id})")
+
+            deployment = prepare_deployment(
+                db,
+                template,
+                lab_def,
                 started_by_id=action.user_id,
                 team_id=action.team_id,
-                status=DeploymentStatus.STARTING,
-                container_names=template.container_names,
             )
-            db.add(deployment)
             db.commit()
             db.refresh(deployment)
 

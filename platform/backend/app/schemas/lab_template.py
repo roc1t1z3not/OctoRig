@@ -10,6 +10,10 @@ class DeploymentSummary(BaseModel):
     id: int
     status: str
     started_at: Optional[datetime]
+    subnet: Optional[str] = None
+    app_ip: Optional[str] = None
+    container_names: list[str] = []
+    access_info: list[dict[str, str]] = []
 
     model_config = {"from_attributes": True}
 
@@ -24,9 +28,6 @@ class LabTemplateResponse(BaseModel):
     images: dict[str, str]
     build_contexts: dict[str, str]
     start_order: list[str]
-    network_name: str
-    subnet: str
-    app_ip: str
     exposed_ports: dict[str, int]
     access_info: list[dict[str, str]]
     volume_names: list[str]

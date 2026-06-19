@@ -5,8 +5,8 @@
 .page { padding: 1.5rem; }
         .page-header { margin-bottom: 1rem; }
         .page-title { font-size: 1.125rem; }
-        .filter-bar { padding: 0.875rem; margin-bottom: 0.875rem; display: flex; flex-direction: column; gap: 0.75rem; }
-        .filter-group { display: flex; flex-direction: column; gap: 0.375rem; }
+        .audit-filter-bar { padding: 0.875rem; margin-bottom: 0.875rem; display: flex; flex-direction: column; gap: 0.75rem; }
+        .audit-filter-group { display: flex; flex-direction: column; gap: 0.375rem; }
         .action-pills { display: flex; gap: 0.375rem; flex-wrap: wrap; }
         .action-pill { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.6875rem; border: 1px solid var(--g-border); background: var(--g-raised); color: var(--g-text-muted); cursor: pointer; }
         .action-pill:hover { border-color: var(--g-accent); color: var(--g-accent); }

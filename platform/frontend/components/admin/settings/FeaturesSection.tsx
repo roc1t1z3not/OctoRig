@@ -26,6 +26,13 @@ export function FeaturesSection({
         onChange={(v) => onChange({ python_editor_enabled: v })}
       />
 
+      <SettingToggle
+        label="Hide Lab Ports"
+        description="Don't reveal a lab's exposed ports anywhere in the UI or API — candidates have to scan for them. Disable this to show port numbers on lab and deployment pages."
+        checked={features.hide_lab_ports ?? true}
+        onChange={(v) => onChange({ hide_lab_ports: v })}
+      />
+
       <div className="settings-row-actions">
         <button
           className="g-btn g-btn-primary g-btn-sm"

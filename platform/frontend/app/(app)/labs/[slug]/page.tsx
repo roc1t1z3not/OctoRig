@@ -111,7 +111,14 @@ export default function LabDetailPage() {
 
   const deployment = lab.current_deployment;
   const isRunning = deployment?.status === "running" || deployment?.status === "starting";
-  const labUrl = lab.access_info.find((a) => a.key === "URL")?.value;
+  const accessInfo = deployment?.access_info.length ? deployment.access_info : lab.access_info;
+  // Subnet/IP/container names are allocated fresh per deployment now — the
+  // template's values are just static defaults that no longer match any
+  // running container, so only show them once a deployment actually exists.
+  const subnet = deployment?.subnet ?? null;
+  const appIp = deployment?.app_ip ?? null;
+  const containerNames = deployment?.container_names?.length ? deployment.container_names : null;
+  const labUrl = accessInfo.find((a) => a.key === "URL")?.value;
 
   const portChips = Object.entries(lab.exposed_ports).map(([name, port]) => (
     <span key={name} className="g-tag text-10">{name.toUpperCase()}:{port}</span>
@@ -172,17 +179,28 @@ export default function LabDetailPage() {
         <div className="g-card ld-info-card">
           <h2 className="ld-section-title">Network</h2>
           <div className="ld-info-rows">
-            <div className="ld-info-row">
-              <span className="ld-info-key"><Network size={12} /> Subnet</span>
-              <span className="ld-info-val font-mono">{lab.subnet}</span>
-            </div>
-            <div className="ld-info-row">
-              <span className="ld-info-key"><Server size={12} /> App IP</span>
-              <span className="ld-info-val font-mono">{lab.app_ip}</span>
-            </div>
+            {subnet && appIp ? (
+              <>
+                <div className="ld-info-row">
+                  <span className="ld-info-key"><Network size={12} /> Subnet</span>
+                  <span className="ld-info-val font-mono">{subnet}</span>
+                </div>
+                <div className="ld-info-row">
+                  <span className="ld-info-key"><Server size={12} /> App IP</span>
+                  <span className="ld-info-val font-mono">{appIp}</span>
+                </div>
+              </>
+            ) : (
+              <div className="ld-info-row">
+                <span className="ld-info-key"><Network size={12} /> Subnet / App IP</span>
+                <span className="ld-info-val text-muted">Assigned when started</span>
+              </div>
+            )}
             <div className="ld-info-row">
               <span className="ld-info-key"><Terminal size={12} /> Containers</span>
-              <span className="ld-info-val font-mono">{lab.container_names.join(", ")}</span>
+              <span className="ld-info-val font-mono">
+                {containerNames ? containerNames.join(", ") : "Assigned when started"}
+              </span>
             </div>
             <div className="ld-info-row">
               <span className="ld-info-key"><Globe size={12} /> Ports</span>
@@ -192,16 +210,16 @@ export default function LabDetailPage() {
         </div>
 
         {/* Access info — only shown when running */}
-        {isRunning && lab.access_info.length > 0 && (
+        {isRunning && accessInfo.length > 0 && (
           <div className="g-card ld-info-card">
             <h2 className="ld-section-title">Access</h2>
             <div className="ld-access-rows">
-              {lab.access_info.map((row) => (
+              {accessInfo.map((row) => (
                 <div key={row.key} className="ld-access-row">
                   <span className="ld-access-key">{row.key}</span>
                   <span className="ld-access-val font-mono">{row.value}</span>
                   <CopyButton value={row.value} />
-                  {(row.key === "URL" || row.value.startsWith("http")) && (
+                  {row.value.startsWith("http") && (
                     <a href={row.value} target="_blank" rel="noopener noreferrer" className="ld-access-link">
                       <ExternalLink size={11} />
                     </a>

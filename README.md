@@ -36,24 +36,18 @@ Unlike traditional CTF-style machines, OctoRig labs are designed to feel closer 
 ```bash
 git clone https://github.com/CommonHuman-Lab/OctoRig.git
 cd OctoRig
-./octorig.sh
-```
-
-Or non-interactively:
-
-```bash
-./octorig.sh start 1     # Start a specific lab
-./octorig.sh start all   # Start all labs
-./octorig.sh status      # Show running labs
-./octorig.sh stop all    # Tear everything down
-```
-
-To also start the training platform (dashboard, API, CTF engine):
-
-```bash
-./octorig.sh platform start      # API + workers  →  http://localhost:8000/docs
-./octorig.sh platform start ui   # + frontend UI  →  http://localhost:3000
+./octorig.sh platform start      # API + workers + UI  →  http://localhost:3000
 ./octorig.sh platform stop       # stop platform services
+```
+
+Drive labs directly from the CLI instead:
+
+```bash
+./octorig.sh              # interactive menu
+./octorig.sh start 1      # Start a specific lab
+./octorig.sh start all    # Start all labs
+./octorig.sh status       # Show running labs
+./octorig.sh stop all     # Tear everything down
 ```
 
 ---

@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user_or_api_key, get_db
 from app.core.exceptions import bad_request, conflict, forbidden_exception, not_found
 from app.core.permissions import can_destroy_deployment, can_view_logs, is_privileged
+from app.labs.registry import REGISTRY_BY_ID
 from app.models.challenge import Challenge
 from app.models.deployment import Deployment, DeploymentStatus
 from app.models.lab_template import LabTemplate
@@ -16,6 +17,8 @@ from app.models.team import Team, TeamMember
 from app.models.user import User
 from app.schemas.deployment import DeploymentCreate, DeploymentResponse, DeploymentWithTemplate
 from app.services import audit_service, lab_service
+from app.services.challenge_rendering import render_access_info
+from app.services.deployment_provisioning import prepare_deployment
 from app.services.docker_runtime import docker_service
 
 router = APIRouter(prefix="/deployments", tags=["deployments"])
@@ -36,6 +39,12 @@ def _to_response(d: Deployment, db: Session) -> DeploymentWithTemplate:
     user = db.get(User, d.started_by_id)
     team = db.get(Team, d.team_id) if d.team_id else None
     base = DeploymentResponse.model_validate(d).model_dump()
+    # Legacy rows created before per-deployment network isolation have no
+    # access_info of their own — the template's static defaults are an
+    # unrendered {container_ip} placeholder with no specific deployment to
+    # point at, so this always renders as "not running".
+    if not base.get("access_info") and template is not None:
+        base["access_info"] = render_access_info(template.access_info or [])
     return DeploymentWithTemplate(
         **base,
         lab_name=template.name if template else "Unknown",
@@ -173,10 +182,16 @@ def create_deployment(
         if membership is None and not is_privileged(current_user, db):
             raise forbidden_exception
 
-    # Conflict check — per-user when challenge_id is set, global otherwise.
-    # The SELECT FOR UPDATE above serializes concurrent requests; these checks are now
-    # race-free. The DB partial unique index (uq_one_active_deployment_per_template)
-    # provides a second line of defence.
+    lab_def = REGISTRY_BY_ID.get(template.id)
+    if lab_def is None:
+        raise bad_request("Lab definition missing from registry")
+
+    # Conflict check — per-user for challenge instances and personal labs, per-team
+    # for team labs. Different users/teams may now run the same lab concurrently;
+    # this only stops a single actor from double-starting their own duplicate.
+    # The SELECT FOR UPDATE above serializes concurrent requests; these checks are
+    # race-free. The DB partial unique indexes (uq_one_active_deployment_per_template_*)
+    # provide a second line of defence.
     if challenge_id is not None:
         existing = (
             db.query(Deployment)
@@ -189,23 +204,26 @@ def create_deployment(
         )
         if existing is not None:
             raise conflict(f"You already have an active instance for this challenge (id={existing.id})")
-    else:
-        existing = lab_service.get_active_deployment(db, template.id)
+    elif payload.team_id is not None:
+        existing = lab_service.get_active_deployment(db, template.id, team_id=payload.team_id)
         if existing is not None:
-            raise conflict(f"Lab '{template.name}' already has an active deployment (id={existing.id})")
+            raise conflict(f"Your team already has an active deployment of '{template.name}' (id={existing.id})")
+    else:
+        existing = lab_service.get_active_deployment(db, template.id, started_by_id=current_user.id)
+        if existing is not None:
+            raise conflict(f"You already have an active deployment of '{template.name}' (id={existing.id})")
 
-    deployment = Deployment(
-        lab_template_id=template.id,
+    deployment = prepare_deployment(
+        db,
+        template,
+        lab_def,
         started_by_id=current_user.id,
         team_id=payload.team_id,
         challenge_id=challenge_id,
         instance_for_user_id=instance_for_user_id,
         auto_destroy_at=auto_destroy_at,
-        status=DeploymentStatus.STARTING,
         visibility=payload.visibility,
-        container_names=template.container_names,
     )
-    db.add(deployment)
     db.commit()
     db.refresh(deployment)
 
@@ -333,12 +351,19 @@ async def stream_logs(
 
 
 def _resolve_container_name(deployment: Deployment, template: Optional[LabTemplate], role: str) -> str:
-    if template is None:
-        return deployment.container_names[0]
-    names = template.container_names
-    if len(names) == 1:
-        return names[0]
-    for name in names:
-        if name.endswith(f"-{role}"):
-            return name
-    return names[0]
+    """Pick this deployment's own container name for `role` — never the
+    template's static name, which no longer matches any running container
+    now that containers are named per-deployment (see prepare_deployment())."""
+    dep_names = deployment.container_names
+    if not dep_names:
+        return template.container_names[0] if template else ""
+    if len(dep_names) == 1 or template is None:
+        return dep_names[0]
+    # template.container_names and deployment.container_names are generated
+    # 1:1 in the same order — match the role by position via the template's
+    # static names (which still carry the "-{role}" suffix), then return the
+    # deployment's name at that same index.
+    for i, name in enumerate(template.container_names):
+        if name.endswith(f"-{role}") and i < len(dep_names):
+            return dep_names[i]
+    return dep_names[0]

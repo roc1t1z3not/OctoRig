@@ -8,9 +8,8 @@ import { useRef, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard, FlaskConical, Rocket, Settings, LogOut, Users,
-  KeyRound, ShieldCheck, UserCog, FolderGit2, Container, ScrollText,
-  Swords, Flag, Award, ChevronUp, Zap, PenTool, User, ClipboardList, Trophy,
-  BarChart3,
+  KeyRound, ShieldCheck, Swords, Flag, Award, ChevronUp, Zap, PenTool,
+  User, Trophy,
 } from "lucide-react";
 import { getMyRank } from "@/lib/api/ranks";
 import { clsx } from "clsx";
@@ -31,29 +30,12 @@ const NAV_MAIN = [
   { href: "/api-keys",     icon: KeyRound,        label: "API Keys" },
 ];
 
-const NAV_ADMIN = [
-  { href: "/admin",              icon: ShieldCheck,   label: "Overview" },
-  { href: "/admin/users",        icon: UserCog,       label: "Users" },
-  { href: "/admin/roles",        icon: ShieldCheck,   label: "Roles" },
-  { href: "/admin/teams",        icon: FolderGit2,    label: "Teams" },
-  { href: "/admin/deployments",  icon: Container,     label: "Deployments" },
-  { href: "/admin/audit",        icon: ScrollText,    label: "Audit Log" },
-  { href: "/admin/challenges",   icon: Trophy,        label: "Challenges" },
-  { href: "/admin/events",       icon: Flag,          label: "Events" },
-  { href: "/admin/api-keys",     icon: KeyRound,      label: "API Keys" },
-  { href: "/admin/ranks",        icon: BarChart3,     label: "Ranks" },
-  { href: "/admin/assessments",  icon: Zap,           label: "Assessments" },
-  { href: "/admin/content",      icon: ClipboardList, label: "Content" },
-  { href: "/admin/settings",     icon: Settings,      label: "Settings" },
-];
-
 export function Sidebar() {
   const pathname = usePathname();
   const { user, clearSession } = useUserStore();
   const { resetExplicit } = useThemeStore();
   const isPrivileged = user?.permissions?.includes("admin.panel") ?? false;
   const [menuOpen, setMenuOpen] = useState(false);
-  const [adminOpen, setAdminOpen] = useState(() => pathname.startsWith("/admin"));
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { data: profile } = useQuery({
@@ -88,7 +70,6 @@ export function Sidebar() {
 
   function isActive(href: string) {
     if (href === "/") return pathname === "/";
-    if (href === "/admin") return pathname === "/admin";
     return pathname.startsWith(href);
   }
 
@@ -152,51 +133,13 @@ export function Sidebar() {
         })()}
       </nav>
 
-      {/* Admin nav */}
+      {/* Admin entry — opens the separate admin area (its own sidebar/layout) */}
       {isPrivileged && (
         <div className="p-2 border-t shrink-0" style={{ borderColor: "var(--g-border)" }}>
-          <button
-            onClick={() => setAdminOpen((o) => !o)}
-            className="w-full flex items-center justify-between px-2 py-1 rounded hover:bg-[var(--g-accent-dim)] transition-colors"
-          >
-            <span className="text-9px font-mono uppercase" style={{ color: "var(--g-text-muted)", letterSpacing: "0.12em" }}>
-              Admin
-            </span>
-            <ChevronUp
-              size={11}
-              className="shrink-0 transition-transform duration-150"
-              style={{ color: "var(--g-text-muted)", transform: adminOpen ? "rotate(180deg)" : "rotate(0deg)" }}
-            />
-          </button>
-          {adminOpen && (
-            <div className="space-y-0.5 mt-0.5">
-              {NAV_ADMIN.map(({ href, icon: Icon, label }) => {
-                const active = isActive(href);
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={clsx("g-nav-item", active && "active")}
-                    style={active ? {
-                      background: "var(--g-accent-dim)",
-                      color: "var(--g-text)",
-                      borderColor: "var(--g-border-hover)",
-                    } : undefined}
-                    title={label}
-                  >
-                    <Icon
-                      size={14}
-                      className="shrink-0"
-                      style={{ color: active ? "var(--g-accent)" : "var(--g-text-muted)" }}
-                    />
-                    <span style={{ color: active ? "var(--g-text)" : "var(--g-text-muted)" }}>
-                      {label}
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
+          <Link href="/admin" className="g-nav-item" title="Admin">
+            <ShieldCheck size={14} className="shrink-0" style={{ color: "var(--g-text-muted)" }} />
+            <span style={{ color: "var(--g-text-muted)" }}>Admin</span>
+          </Link>
         </div>
       )}
 

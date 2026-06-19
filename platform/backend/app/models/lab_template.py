@@ -27,10 +27,6 @@ class LabTemplate(Base):
     build_contexts: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
     start_order: Mapped[list[Any]] = mapped_column(JSON, nullable=False, default=list)
 
-    network_name: Mapped[str] = mapped_column(String(128), nullable=False)
-    subnet: Mapped[str] = mapped_column(String(32), nullable=False)
-    app_ip: Mapped[str] = mapped_column(String(32), nullable=False)
-
     exposed_ports: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
     access_info: Mapped[list[Any]] = mapped_column(JSON, nullable=False, default=list)
 

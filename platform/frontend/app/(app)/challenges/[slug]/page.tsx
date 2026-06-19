@@ -88,9 +88,6 @@ export default function ChallengeDetailPage() {
     labTemplate?.current_deployment?.status === "running" ||
     labTemplate?.current_deployment?.status === "starting";
 
-  const labUrl =
-    labTemplate?.access_info.find((a) => a.key === "URL")?.value ?? null;
-
   const { data: instance = null } = useQuery({
     queryKey: ["challenge-instance", ch?.id],
     queryFn: () => getMyInstance(ch!.id),
@@ -100,6 +97,13 @@ export default function ChallengeDetailPage() {
       return s === "starting" || s === "stopping" ? 3_000 : 15_000;
     },
   });
+
+  // Prefer the caller's own running instance's access_info (per-deployment,
+  // dynamically allocated) over the lab template's static defaults.
+  const labUrl =
+    instance?.access_info.find((a) => a.key === "URL")?.value ??
+    labTemplate?.access_info.find((a) => a.key === "URL")?.value ??
+    null;
 
   const deployMutation = useMutation({
     mutationFn: () => deployInstance(ch!.id, 2),

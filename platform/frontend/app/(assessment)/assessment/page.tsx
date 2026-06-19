@@ -4,7 +4,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Shield, Server, Clock, AlertTriangle, Play, Send } from "lucide-react";
+import { clsx } from "clsx";
+import { Shield, Server, Clock, AlertTriangle, Play, Send, LayoutDashboard, FileText } from "lucide-react";
 import {
   getAssessmentStatus,
   startAssessment,
@@ -14,6 +15,7 @@ import {
 } from "@/lib/api/assessments";
 import { useUserStore } from "@/stores/user.store";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { MarkdownEditor } from "@/components/ui/MarkdownEditor";
 
 // ---------------------------------------------------------------------------
 // Countdown timer
@@ -213,59 +215,78 @@ function ReportSection({
         )}
       </div>
 
-      {expired ? (
-        <div
-          style={{
-            background: "var(--g-surface)",
-            borderRadius: 6,
-            padding: "14px 16px",
-            color: "var(--g-text)",
-            fontSize: "0.85rem",
-            lineHeight: 1.7,
-            whiteSpace: "pre-wrap",
-            minHeight: 120,
-          }}
-        >
-          {content || <span style={{ color: "var(--g-text-muted)" }}>No report was submitted.</span>}
+      <MarkdownEditor
+        value={content}
+        onChange={setContent}
+        disabled={expired}
+        minHeight={280}
+        placeholder={`# Pentest Report\n\n## Executive Summary\n...\n\n## Findings\n### Finding 1\n- **Severity**: High\n- **Location**: ...\n- **Description**: ...\n- **Proof of Concept**: ...\n- **Remediation**: ...\n\n## Flags Captured\n- FLAG{...} — ...`}
+      />
+
+      {!expired && (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10 }}>
+          <button
+            className="g-btn g-btn-primary g-btn-sm"
+            disabled={submitMutation.isPending || !content.trim()}
+            onClick={() => submitMutation.mutate()}
+          >
+            <Send size={13} />
+            {submitMutation.isPending ? "Saving…" : alreadySubmitted ? "Update Report" : "Submit Report"}
+          </button>
+          <span style={{ fontSize: "0.75rem", color: "var(--g-text-muted)" }}>
+            You can update your report any time before the deadline. Supports Markdown.
+          </span>
         </div>
-      ) : (
-        <>
-          <textarea
-            style={{
-              width: "100%",
-              minHeight: 280,
-              padding: "12px 14px",
-              background: "var(--g-surface)",
-              border: "1px solid var(--g-border)",
-              borderRadius: 6,
-              color: "var(--g-text)",
-              fontFamily: "var(--font-mono, monospace)",
-              fontSize: "0.825rem",
-              lineHeight: 1.7,
-              resize: "vertical",
-              outline: "none",
-              boxSizing: "border-box",
-            }}
-            placeholder={`# Pentest Report\n\n## Executive Summary\n...\n\n## Findings\n### Finding 1\n- **Severity**: High\n- **Location**: ...\n- **Description**: ...\n- **Proof of Concept**: ...\n- **Remediation**: ...\n\n## Flags Captured\n- FLAG{...} — ...`}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-          />
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10 }}>
-            <button
-              className="g-btn g-btn-primary g-btn-sm"
-              disabled={submitMutation.isPending || !content.trim()}
-              onClick={() => submitMutation.mutate()}
-            >
-              <Send size={13} />
-              {submitMutation.isPending ? "Saving…" : alreadySubmitted ? "Update Report" : "Submit Report"}
-            </button>
-            <span style={{ fontSize: "0.75rem", color: "var(--g-text-muted)" }}>
-              You can update your report any time before the deadline. Supports Markdown.
-            </span>
-          </div>
-        </>
       )}
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Sidebar nav
+// ---------------------------------------------------------------------------
+
+const SECTIONS = [
+  { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "labs", label: "Labs", icon: Server },
+  { id: "report", label: "Report", icon: FileText },
+] as const;
+
+type SectionId = (typeof SECTIONS)[number]["id"];
+
+function WorkspaceSidebar({ active, onSelect }: { active: SectionId; onSelect: (id: SectionId) => void }) {
+  return (
+    <aside
+      className="w-44 shrink-0 flex flex-col"
+      style={{ borderRight: "1px solid var(--g-border)", background: "var(--g-chrome)" }}
+    >
+      <nav className="p-2 space-y-0.5">
+        {SECTIONS.map(({ id, label, icon: Icon }) => {
+          const isActive = active === id;
+          return (
+            <button
+              key={id}
+              onClick={() => onSelect(id)}
+              className={clsx("g-nav-item w-full text-left", isActive && "active")}
+              style={isActive ? {
+                background: "var(--g-accent-dim)",
+                color: "var(--g-text)",
+                borderColor: "var(--g-border-hover)",
+              } : undefined}
+            >
+              <Icon
+                size={14}
+                className="shrink-0"
+                style={{ color: isActive ? "var(--g-accent)" : "var(--g-text-muted)" }}
+              />
+              <span style={{ color: isActive ? "var(--g-text)" : "var(--g-text-muted)" }}>
+                {label}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+    </aside>
   );
 }
 
@@ -278,6 +299,7 @@ export default function AssessmentWorkspacePage() {
   const { push } = useNotificationsStore();
   const router = useRouter();
   const qc = useQueryClient();
+  const [section, setSection] = useState<SectionId>("overview");
 
   useEffect(() => {
     if (_hasHydrated && !isRestoringToken && !accessToken) {
@@ -376,88 +398,125 @@ export default function AssessmentWorkspacePage() {
       </div>
 
       {/* Body */}
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 24px" }}>
-        {/* Instructions */}
-        {status.candidate_instructions && (
-          <div
-            style={{
-              background: "var(--g-card)",
-              border: "1px solid var(--g-border)",
-              borderRadius: 10,
-              padding: "16px 20px",
-              marginBottom: 28,
-              fontSize: "0.85rem",
-              color: "var(--g-text)",
-              lineHeight: 1.7,
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            {status.candidate_instructions}
-          </div>
-        )}
+      <div style={{ display: "flex", minHeight: "calc(100vh - 57px)" }}>
+        <WorkspaceSidebar active={section} onSelect={setSection} />
 
-        {/* Start button */}
-        {notStarted && !expired && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "40px 24px",
-              background: "var(--g-card)",
-              border: "1px solid var(--g-border)",
-              borderRadius: 12,
-              marginBottom: 28,
-            }}
-          >
-            <Clock size={36} style={{ color: "var(--g-accent)", marginBottom: 12 }} />
-            <h2 style={{ color: "var(--g-text)", marginBottom: 8 }}>Ready to Begin?</h2>
-            <p style={{ color: "var(--g-text-muted)", marginBottom: 20, maxWidth: 400, margin: "0 auto 20px" }}>
-              Once you start, {status.labs.length} lab{status.labs.length !== 1 ? "s" : ""} will be
-              deployed for you and the <strong>{status.assessment_name}</strong> timer will begin.
-              You have <strong>{Math.floor(
-                (/* duration */ status.time_remaining_seconds ?? 0) / 3600 || 48
-              )}h</strong> to complete the assessment.
-            </p>
-            <button
-              className="g-btn g-btn-primary"
-              disabled={startMutation.isPending}
-              onClick={() => startMutation.mutate()}
-            >
-              <Play size={15} />
-              {startMutation.isPending ? "Starting…" : "Start Assessment"}
-            </button>
-          </div>
-        )}
+        <div style={{ flex: 1, maxWidth: 900, margin: "0 auto", padding: "32px 24px" }}>
+          {section === "overview" && (
+            <>
+              {status.candidate_instructions && (
+                <div
+                  style={{
+                    background: "var(--g-card)",
+                    border: "1px solid var(--g-border)",
+                    borderRadius: 10,
+                    padding: "16px 20px",
+                    marginBottom: 28,
+                    fontSize: "0.85rem",
+                    color: "var(--g-text)",
+                    lineHeight: 1.7,
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  {status.candidate_instructions}
+                </div>
+              )}
 
-        {/* Lab cards */}
-        {!notStarted && (
-          <>
-            <h2
-              style={{
-                color: "var(--g-text-muted)",
-                fontSize: "0.7rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                marginBottom: 12,
-              }}
-            >
-              Target Machines ({status.labs.length})
-            </h2>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 16, marginBottom: 8 }}>
-              {status.labs.map((lab) => (
-                <LabCard key={lab.slug} lab={lab} expired={expired} />
-              ))}
-            </div>
-          </>
-        )}
+              {notStarted && !expired && (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "40px 24px",
+                    background: "var(--g-card)",
+                    border: "1px solid var(--g-border)",
+                    borderRadius: 12,
+                    marginBottom: 28,
+                  }}
+                >
+                  <Clock size={36} style={{ color: "var(--g-accent)", marginBottom: 12 }} />
+                  <h2 style={{ color: "var(--g-text)", marginBottom: 8 }}>Ready to Begin?</h2>
+                  <p style={{ color: "var(--g-text-muted)", marginBottom: 20, maxWidth: 400, margin: "0 auto 20px" }}>
+                    Once you start, {status.labs.length} lab{status.labs.length !== 1 ? "s" : ""} will be
+                    deployed for you and the <strong>{status.assessment_name}</strong> timer will begin.
+                    You have <strong>{Math.floor(
+                      (/* duration */ status.time_remaining_seconds ?? 0) / 3600 || 48
+                    )}h</strong> to complete the assessment.
+                  </p>
+                  <button
+                    className="g-btn g-btn-primary"
+                    disabled={startMutation.isPending}
+                    onClick={() => startMutation.mutate()}
+                  >
+                    <Play size={15} />
+                    {startMutation.isPending ? "Starting…" : "Start Assessment"}
+                  </button>
+                </div>
+              )}
 
-        {/* Report */}
-        {!notStarted && (
-          <ReportSection
-            initialContent={status.report_content}
-            alreadySubmitted={status.report_submitted}
-            expired={expired}
-          />
-        )}
+              {!notStarted && (
+                <div
+                  style={{
+                    background: "var(--g-card)",
+                    border: "1px solid var(--g-border)",
+                    borderRadius: 10,
+                    padding: "16px 20px",
+                    color: "var(--g-text-muted)",
+                    fontSize: "0.85rem",
+                  }}
+                >
+                  {expired
+                    ? "This assessment has ended. Your labs have been shut down and your report is final."
+                    : `${status.labs.length} target machine${status.labs.length !== 1 ? "s" : ""} deployed — see the Labs tab for access details, and the Report tab to write up your findings.`}
+                </div>
+              )}
+            </>
+          )}
+
+          {section === "labs" && (
+            <>
+              {notStarted ? (
+                <p style={{ color: "var(--g-text-muted)", fontSize: "0.85rem" }}>
+                  Start the assessment from the Overview tab to deploy target machines.
+                </p>
+              ) : (
+                <>
+                  <h2
+                    style={{
+                      color: "var(--g-text-muted)",
+                      fontSize: "0.7rem",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      marginBottom: 12,
+                    }}
+                  >
+                    Target Machines ({status.labs.length})
+                  </h2>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 16, marginBottom: 8 }}>
+                    {status.labs.map((lab) => (
+                      <LabCard key={lab.slug} lab={lab} expired={expired} />
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {section === "report" && (
+            <>
+              {notStarted ? (
+                <p style={{ color: "var(--g-text-muted)", fontSize: "0.85rem" }}>
+                  Start the assessment from the Overview tab to unlock the report.
+                </p>
+              ) : (
+                <ReportSection
+                  initialContent={status.report_content}
+                  alreadySubmitted={status.report_submitted}
+                  expired={expired}
+                />
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

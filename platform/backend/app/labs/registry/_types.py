@@ -52,11 +52,11 @@ class LabDefinition(TypedDict):
     images: dict[str, str]  # role → image tag
     build_contexts: dict[str, str]  # role → path relative to OctoRig repo root
     start_order: list[str]  # roles in the order containers must start
-    network_name: str
-    subnet: str
-    app_ip: str
     exposed_ports: dict[str, int]   # service name → port number
-    access_info: list[dict[str, str]]  # [{"key": "URL", "value": "..."}]
+    # [{"key": "URL", "value": "..."}] — "{container_ip}" is substituted at
+    # deployment time with the per-deployment allocated IP (see
+    # app/services/deployment_provisioning.py:_scoped_access_info).
+    access_info: list[dict[str, str]]
     volume_names: list[str]
     env_vars: dict[str, str]
     requires_privileged: bool

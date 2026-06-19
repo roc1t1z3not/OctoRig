@@ -7,7 +7,7 @@ import "./settings.css";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { resetDatabase } from "@/lib/api/admin";
+import { resetDatabase, restartPlatform } from "@/lib/api/admin";
 import { getSiteSettings, updateSiteSettings, type SiteSettings } from "@/lib/api/settings";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { useConfirmStore } from "@/stores/confirm.store";
@@ -94,6 +94,22 @@ export default function AdminSettingsPage() {
     });
   }
 
+  const restartPlatformMutation = useMutation({
+    mutationFn: restartPlatform,
+    onSuccess: () => push("success", "Platform restarting — this may take a minute"),
+    onError: () => push("error", "Failed to restart platform"),
+  });
+
+  function handleRestartPlatform() {
+    confirm({
+      title: "Restart the platform?",
+      body: "This stops every running lab, then restarts the API, worker, and frontend containers. The platform — including this page — will be briefly unreachable while it comes back up.",
+      confirmLabel: "Restart Platform",
+      dangerous: true,
+      onConfirm: () => restartPlatformMutation.mutate(),
+    });
+  }
+
   if (isLoading || !settings) {
     return (
       <div className="page">
@@ -144,7 +160,12 @@ export default function AdminSettingsPage() {
         isPending={saveMutation.isPending}
       />
 
-      <DangerZone onResetDb={handleResetDb} isPending={resetDbMutation.isPending} />
+      <DangerZone
+        onResetDb={handleResetDb}
+        isPending={resetDbMutation.isPending}
+        onRestartPlatform={handleRestartPlatform}
+        isRestartPending={restartPlatformMutation.isPending}
+      />
     </div>
   );
 }

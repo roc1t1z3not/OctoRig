@@ -10,7 +10,7 @@ from app.models.challenge import (
 )
 from app.models.content import ContentReview, ContentStatus, ContentSubmission, ContentType, ReviewVerdict
 from app.models.ctf_event import CtfEvent, EventChallengeMap, EventRegistration, EventScoringMode, EventStatus, EventVisibility
-from app.models.deployment import Deployment, DeploymentStatus, DeploymentVisibility
+from app.models.deployment import Deployment, DeploymentStatus, DeploymentVisibility, NetworkAllocationLock
 from app.models.lab_template import LabTemplate
 from app.models.marketplace import MarketplacePackage, PackageInstallation, PackageType
 from app.models.refresh_token import RefreshToken
@@ -29,7 +29,7 @@ __all__ = [
     "User",
     "Team", "TeamMember", "TeamInvitation", "TeamRole",
     "LabTemplate",
-    "Deployment", "DeploymentStatus", "DeploymentVisibility",
+    "Deployment", "DeploymentStatus", "DeploymentVisibility", "NetworkAllocationLock",
     "AuditLog",
     "ApiKey",
     "ScheduledAction", "ScheduledActionStatus", "ScheduledActionType",

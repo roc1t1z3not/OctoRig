@@ -15,6 +15,10 @@ export interface Deployment {
   visibility: "private" | "team" | "public";
   container_names: string[];
   container_ids: Record<string, string>;
+  subnet: string | null;
+  app_ip: string | null;
+  network_name: string | null;
+  access_info: Array<{ key: string; value: string }>;
   error_message: string | null;
   started_at: string | null;
   stopped_at: string | null;

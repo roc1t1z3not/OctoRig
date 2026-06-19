@@ -38,6 +38,8 @@ from app.schemas.assessment import (
 from app.schemas.auth import TokenResponse
 from app.services import audit_service
 from app.services.audit_service import write_audit
+from app.services.challenge_rendering import render_access_info
+from app.services.deployment_provisioning import prepare_deployment
 from app.services.lab_service import start_lab
 from app.services.settings_service import get_settings
 from app.services.team_service import ensure_personal_team
@@ -490,19 +492,19 @@ def start_assessment(
         template = db.query(LabTemplate).filter(LabTemplate.slug == slug).first()
         if template is None:
             continue
+        lab_def = REGISTRY_BY_SLUG.get(slug)
+        if lab_def is None:
+            continue
 
-        deployment = Deployment(
-            lab_template_id=template.id,
+        deployment = prepare_deployment(
+            db,
+            template,
+            lab_def,
             started_by_id=current_user.id,
             instance_for_user_id=current_user.id,
-            status=DeploymentStatus.STARTING,
-            visibility=DeploymentVisibility.PRIVATE,
-            container_names=template.container_names,
-            container_ids={},
             auto_destroy_at=invite.expires_at,
+            visibility=DeploymentVisibility.PRIVATE,
         )
-        db.add(deployment)
-        db.flush()
         deployment_ids.append(deployment.id)
         background_tasks.add_task(start_lab, deployment.id, current_user.id)
 
@@ -565,9 +567,11 @@ def _build_candidate_status(invite: AssessmentInvite, db: Session) -> CandidateA
             if dep:
                 dep_status = dep.status
                 if dep.status == DeploymentStatus.RUNNING:
-                    template = db.get(LabTemplate, dep.lab_template_id)
-                    if template:
-                        access_info = template.access_info or []
+                    access_info = dep.access_info or []
+                    if not access_info:
+                        template = db.get(LabTemplate, dep.lab_template_id)
+                        if template:
+                            access_info = render_access_info(template.access_info or [])
 
         labs.append(CandidateLabInfo(
             display_name=display_name,
