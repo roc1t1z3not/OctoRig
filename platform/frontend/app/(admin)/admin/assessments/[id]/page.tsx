@@ -31,6 +31,7 @@ function StatusBadge({ status }: { status: InviteStatus }) {
     pending: "var(--g-text-muted)",
     accepted: "var(--g-warning, #f59e0b)",
     active: "var(--g-accent)",
+    completed: "var(--g-success, #22c55e)",
     expired: "var(--g-danger)",
     revoked: "var(--g-danger)",
   };

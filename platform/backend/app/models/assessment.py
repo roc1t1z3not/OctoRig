@@ -65,6 +65,7 @@ class AssessmentInvite(Base):
     accepted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # IDs of Deployment rows created for this candidate
     deployment_ids: Mapped[list[Any]] = mapped_column(JSON, nullable=False, default=list)

@@ -40,7 +40,7 @@ from app.services import audit_service
 from app.services.audit_service import write_audit
 from app.services.challenge_rendering import render_access_info
 from app.services.deployment_provisioning import prepare_deployment
-from app.services.lab_service import start_lab
+from app.services.lab_service import start_lab, stop_lab
 from app.services.settings_service import get_settings
 from app.services.team_service import ensure_personal_team
 
@@ -62,6 +62,8 @@ def _compute_status(invite: AssessmentInvite) -> InviteStatus:
         return "pending"
     if invite.started_at is None:
         return "accepted"
+    if invite.completed_at is not None:
+        return "completed"
     now = datetime.now(timezone.utc)
     if invite.expires_at and invite.expires_at.replace(tzinfo=timezone.utc) < now:
         return "expired"
@@ -79,6 +81,7 @@ def _invite_response(invite: AssessmentInvite) -> AssessmentInviteResponse:
         accepted_at=invite.accepted_at,
         started_at=invite.started_at,
         expires_at=invite.expires_at,
+        completed_at=invite.completed_at,
         deployment_ids=invite.deployment_ids or [],
         is_revoked=invite.is_revoked,
         status=_compute_status(invite),
@@ -589,6 +592,7 @@ def _build_candidate_status(invite: AssessmentInvite, db: Session) -> CandidateA
         candidate_instructions=assessment.candidate_instructions,
         started_at=invite.started_at,
         expires_at=invite.expires_at,
+        completed_at=invite.completed_at,
         time_remaining_seconds=time_remaining,
         labs=labs,
         report_submitted=report is not None,
@@ -617,6 +621,10 @@ def submit_report(
         raise not_found("Assessment invite")
     if invite.started_at is None:
         raise bad_request("Assessment has not been started")
+    if invite.completed_at is not None:
+        raise bad_request("Assessment is complete — the report is locked")
+    if invite.expires_at and invite.expires_at.replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc):
+        raise bad_request("Assessment has expired — the report is locked")
 
     if invite.report is not None:
         invite.report.content = payload.content
@@ -633,3 +641,43 @@ def submit_report(
         content=invite.report.content,
         submitted_at=invite.report.submitted_at,
     )
+
+
+# ---------------------------------------------------------------------------
+# Candidate — finish early
+# ---------------------------------------------------------------------------
+
+@candidate_router.post("/me/complete", response_model=CandidateAssessmentStatus)
+def complete_assessment(
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> CandidateAssessmentStatus:
+    if not current_user.is_candidate:
+        raise forbidden_exception
+
+    invite = db.query(AssessmentInvite).filter(
+        AssessmentInvite.user_id == current_user.id,
+        AssessmentInvite.is_revoked.is_(False),
+    ).first()
+    if invite is None:
+        raise not_found("Assessment invite")
+    if invite.started_at is None:
+        raise bad_request("Assessment has not been started")
+
+    # Idempotent — completing twice just returns the already-locked state.
+    if invite.completed_at is None:
+        now = datetime.now(timezone.utc)
+        invite.completed_at = now
+        if invite.expires_at is None or invite.expires_at.replace(tzinfo=timezone.utc) > now:
+            invite.expires_at = now
+        db.commit()
+        db.refresh(invite)
+
+        for deployment_id in (invite.deployment_ids or []):
+            background_tasks.add_task(stop_lab, deployment_id, current_user.id)
+
+        write_audit(db, action="assessment.completed", user_id=current_user.id,
+                    detail={"assessment_id": invite.assessment_id, "invite_id": invite.id})
+
+    return _build_candidate_status(invite, db)

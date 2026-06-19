@@ -685,7 +685,7 @@ export const DEMO_ASSESSMENTS = [
     created_by_id: 1,
     created_at: "2026-05-20T10:00:00Z",
     invite_count: 3,
-    active_invite_count: 1,
+    active_invite_count: 0,
   },
   {
     id: 402,
@@ -726,15 +726,16 @@ export const DEMO_ASSESSMENTS = [
 export const DEMO_ASSESSMENT_INVITES: Record<number, Array<{
   id: number; assessment_id: number; email: string; candidate_name: string | null;
   token: string; user_id: number | null; accepted_at: string | null; started_at: string | null;
-  expires_at: string | null; deployment_ids: number[]; is_revoked: boolean; status: string;
+  expires_at: string | null; completed_at: string | null; deployment_ids: number[];
+  is_revoked: boolean; status: string;
 }>> = {
   401: [
-    { id: 1, assessment_id: 401, email: "j.romero@candidatemail.com", candidate_name: "Javier Romero", token: "tok_8h2kq", user_id: 110, accepted_at: "2026-06-10T13:00:00Z", started_at: "2026-06-10T13:05:00Z", expires_at: "2026-06-10T17:05:00Z", deployment_ids: [2001, 2002], is_revoked: false, status: "expired" },
-    { id: 2, assessment_id: 401, email: "a.chen@candidatemail.com",   candidate_name: "Amy Chen",     token: "tok_9j3lr", user_id: 111, accepted_at: "2026-06-15T09:00:00Z", started_at: "2026-06-15T09:02:00Z", expires_at: "2026-06-15T13:02:00Z", deployment_ids: [2010], is_revoked: false, status: "active" },
-    { id: 3, assessment_id: 401, email: "pending.candidate@example.com", candidate_name: null,         token: "tok_2m9zx", user_id: null, accepted_at: null, started_at: null, expires_at: null, deployment_ids: [], is_revoked: false, status: "pending" },
+    { id: 1, assessment_id: 401, email: "j.romero@candidatemail.com", candidate_name: "Javier Romero", token: "tok_8h2kq", user_id: 110, accepted_at: "2026-06-10T13:00:00Z", started_at: "2026-06-10T13:05:00Z", expires_at: "2026-06-10T17:05:00Z", completed_at: null, deployment_ids: [2001, 2002], is_revoked: false, status: "expired" },
+    { id: 2, assessment_id: 401, email: "a.chen@candidatemail.com",   candidate_name: "Amy Chen",     token: "tok_9j3lr", user_id: 111, accepted_at: "2026-06-15T09:00:00Z", started_at: "2026-06-15T09:02:00Z", expires_at: "2026-06-15T11:40:00Z", completed_at: "2026-06-15T11:40:00Z", deployment_ids: [2010], is_revoked: false, status: "completed" },
+    { id: 3, assessment_id: 401, email: "pending.candidate@example.com", candidate_name: null,         token: "tok_2m9zx", user_id: null, accepted_at: null, started_at: null, expires_at: null, completed_at: null, deployment_ids: [], is_revoked: false, status: "pending" },
   ],
   402: [
-    { id: 4, assessment_id: 402, email: "k.osei@candidatemail.com", candidate_name: "Kwame Osei", token: "tok_4p7qs", user_id: 112, accepted_at: "2026-06-14T10:00:00Z", started_at: "2026-06-14T10:01:00Z", expires_at: "2026-06-14T12:01:00Z", deployment_ids: [2020], is_revoked: false, status: "active" },
+    { id: 4, assessment_id: 402, email: "k.osei@candidatemail.com", candidate_name: "Kwame Osei", token: "tok_4p7qs", user_id: 112, accepted_at: "2026-06-14T10:00:00Z", started_at: "2026-06-14T10:01:00Z", expires_at: "2026-06-14T12:01:00Z", completed_at: null, deployment_ids: [2020], is_revoked: false, status: "active" },
   ],
   403: [],
 };

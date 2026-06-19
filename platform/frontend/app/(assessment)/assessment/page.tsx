@@ -5,17 +5,21 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
-import { Shield, Server, Clock, AlertTriangle, Play, Send, LayoutDashboard, FileText } from "lucide-react";
+import { Shield, Server, Clock, AlertTriangle, Play, Send, LayoutDashboard, FileText, Lock, CheckCircle2 } from "lucide-react";
 import {
   getAssessmentStatus,
   startAssessment,
   submitReport,
+  completeAssessment,
   type CandidateAssessmentStatus,
   type CandidateLabInfo,
 } from "@/lib/api/assessments";
 import { useUserStore } from "@/stores/user.store";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { useConfirmStore } from "@/stores/confirm.store";
 import { MarkdownEditor } from "@/components/ui/MarkdownEditor";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 // ---------------------------------------------------------------------------
 // Countdown timer
@@ -183,12 +187,10 @@ function timeAgo(date: Date, now: number): string {
 function ReportSection({
   content,
   onChange,
-  alreadySubmitted,
   expired,
 }: {
   content: string;
   onChange: (value: string) => void;
-  alreadySubmitted: boolean;
   expired: boolean;
 }) {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -247,43 +249,57 @@ function ReportSection({
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Shield size={16} style={{ color: "var(--g-accent)" }} />
           <span style={{ fontWeight: 600, color: "var(--g-text)" }}>Pentest Report</span>
-          {alreadySubmitted && (
-            <span className="role-pill role-pill--on" style={{ fontSize: "0.7rem" }}>Submitted</span>
+          {expired && (
+            <span className="role-pill role-pill--on" style={{ fontSize: "0.7rem" }}>Locked</span>
           )}
         </div>
-        <span
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            fontSize: "0.75rem",
-            color: autosaving ? "var(--g-accent)" : "var(--g-text-muted)",
-          }}
-        >
-          {autosaving && (
-            <span
-              aria-hidden
-              style={{
-                width: 6, height: 6, borderRadius: "50%",
-                background: "var(--g-accent)",
-                animation: "pulse 1s ease-in-out infinite",
-              }}
-            />
-          )}
-          {autosaving
-            ? "Saving…"
-            : lastSaved
-              ? `Saved ${timeAgo(lastSaved, now)} (${lastSaved.toLocaleTimeString()})`
-              : "Not saved yet"}
-        </span>
+        {!expired && (
+          <span
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              fontSize: "0.75rem",
+              color: autosaving ? "var(--g-accent)" : "var(--g-text-muted)",
+            }}
+          >
+            {autosaving && (
+              <span
+                aria-hidden
+                style={{
+                  width: 6, height: 6, borderRadius: "50%",
+                  background: "var(--g-accent)",
+                  animation: "pulse 1s ease-in-out infinite",
+                }}
+              />
+            )}
+            {autosaving
+              ? "Saving…"
+              : lastSaved
+                ? `Saved ${timeAgo(lastSaved, now)} (${lastSaved.toLocaleTimeString()})`
+                : "Not saved yet"}
+          </span>
+        )}
       </div>
 
-      <MarkdownEditor
-        value={content}
-        onChange={onChange}
-        disabled={expired}
-        minHeight={520}
-        fill
-        placeholder={`# Pentest Report\n\n## Executive Summary\n...\n\n## Findings\n### Finding 1\n- **Severity**: High\n- **Location**: ...\n- **Description**: ...\n- **Proof of Concept**: ...\n- **Remediation**: ...\n\n## Flags Captured\n- FLAG{...} — ...`}
-      />
+      {expired ? (
+        <div
+          className="md-preview"
+          style={{ flex: 1, minHeight: 0, overflowY: "auto" }}
+        >
+          {content ? (
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+          ) : (
+            <p className="md-preview-empty">No report was submitted.</p>
+          )}
+        </div>
+      ) : (
+        <MarkdownEditor
+          value={content}
+          onChange={onChange}
+          minHeight={520}
+          fill
+          placeholder={`# Pentest Report\n\n## Executive Summary\n...\n\n## Findings\n### Finding 1\n- **Severity**: High\n- **Location**: ...\n- **Description**: ...\n- **Proof of Concept**: ...\n- **Remediation**: ...\n\n## Flags Captured\n- FLAG{...} — ...`}
+        />
+      )}
 
       {!expired && (
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10 }}>
@@ -359,6 +375,7 @@ function WorkspaceSidebar({ active, onSelect }: { active: SectionId; onSelect: (
 export default function AssessmentWorkspacePage() {
   const { accessToken, user, _hasHydrated, isRestoringToken } = useUserStore();
   const { push } = useNotificationsStore();
+  const { confirm } = useConfirmStore();
   const router = useRouter();
   const qc = useQueryClient();
   const [section, setSection] = useState<SectionId>("overview");
@@ -394,6 +411,26 @@ export default function AssessmentWorkspacePage() {
       push("error", err?.response?.data?.detail ?? "Failed to start assessment"),
   });
 
+  const completeMutation = useMutation({
+    mutationFn: completeAssessment,
+    onSuccess: (data) => {
+      qc.setQueryData(["assessment-status"], data);
+      push("success", "Assessment completed — your labs have been shut down.");
+    },
+    onError: (err: any) =>
+      push("error", err?.response?.data?.detail ?? "Failed to complete assessment"),
+  });
+
+  function confirmComplete() {
+    confirm({
+      title: "Complete the assessment?",
+      body: "This locks in your report and immediately shuts down your labs. You won't be able to make further changes — only do this once you're done.",
+      confirmLabel: "Complete Assessment",
+      dangerous: true,
+      onConfirm: () => completeMutation.mutate(),
+    });
+  }
+
   if (!_hasHydrated || isRestoringToken || !accessToken) return null;
 
   if (isLoading) {
@@ -418,6 +455,7 @@ export default function AssessmentWorkspacePage() {
     );
   }
 
+  const completedByChoice = status.completed_at !== null;
   const expired = (status.time_remaining_seconds ?? 1) === 0;
   const notStarted = status.started_at === null;
   const companyName = status.company_name || "OctoRig";
@@ -454,12 +492,17 @@ export default function AssessmentWorkspacePage() {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          {expired && (
+          {completedByChoice ? (
+            <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.75rem", color: "var(--g-success, #22c55e)", fontFamily: "var(--font-mono, monospace)" }}>
+              <CheckCircle2 size={14} />
+              COMPLETED
+            </span>
+          ) : expired && (
             <span style={{ fontSize: "0.75rem", color: "var(--g-danger)", fontFamily: "var(--font-mono, monospace)" }}>
               ASSESSMENT ENDED
             </span>
           )}
-          {!notStarted && <CountdownDisplay expiresAt={status.expires_at} />}
+          {!notStarted && !expired && <CountdownDisplay expiresAt={status.expires_at} />}
           <span style={{ fontSize: "0.8rem", color: "var(--g-text-muted)" }}>
             {user?.username}
           </span>
@@ -543,9 +586,46 @@ export default function AssessmentWorkspacePage() {
                     fontSize: "0.85rem",
                   }}
                 >
-                  {expired
-                    ? "This assessment has ended. Your labs have been shut down and your report is final."
-                    : `${status.labs.length} target machine${status.labs.length !== 1 ? "s" : ""} deployed — see the Labs tab for access details, and the Report tab to write up your findings.`}
+                  {completedByChoice
+                    ? "You marked this assessment complete. Your labs have been shut down and your report is final."
+                    : expired
+                      ? "This assessment has ended. Your labs have been shut down and your report is final."
+                      : `${status.labs.length} target machine${status.labs.length !== 1 ? "s" : ""} deployed — see the Labs tab for access details, and the Report tab to write up your findings.`}
+                </div>
+              )}
+
+              {!notStarted && !expired && !completedByChoice && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 16,
+                    marginTop: 20,
+                    padding: "16px 20px",
+                    background: "var(--g-card)",
+                    border: "1px solid var(--g-border)",
+                    borderRadius: 10,
+                  }}
+                >
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 600, color: "var(--g-text)", marginBottom: 4 }}>
+                      <Lock size={14} style={{ color: "var(--g-text-muted)" }} />
+                      Done early?
+                    </div>
+                    <p style={{ color: "var(--g-text-muted)", fontSize: "0.8rem", margin: 0 }}>
+                      Finalize your report and shut down your labs now, instead of waiting for the timer to run out.
+                    </p>
+                  </div>
+                  <button
+                    className="g-btn g-btn-danger g-btn-sm"
+                    style={{ flexShrink: 0 }}
+                    disabled={completeMutation.isPending}
+                    onClick={confirmComplete}
+                  >
+                    <CheckCircle2 size={13} />
+                    {completeMutation.isPending ? "Completing…" : "Complete Assessment"}
+                  </button>
                 </div>
               )}
             </>
@@ -590,7 +670,6 @@ export default function AssessmentWorkspacePage() {
                 <ReportSection
                   content={reportContent ?? ""}
                   onChange={setReportContent}
-                  alreadySubmitted={status.report_submitted}
                   expired={expired}
                 />
               )}

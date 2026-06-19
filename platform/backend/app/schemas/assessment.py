@@ -60,7 +60,7 @@ class AssessmentResponse(BaseModel):
 # AssessmentInvite
 # ---------------------------------------------------------------------------
 
-InviteStatus = Literal["pending", "accepted", "active", "expired", "revoked"]
+InviteStatus = Literal["pending", "accepted", "active", "completed", "expired", "revoked"]
 
 
 class AssessmentInviteCreate(BaseModel):
@@ -78,6 +78,7 @@ class AssessmentInviteResponse(BaseModel):
     accepted_at: Optional[datetime]
     started_at: Optional[datetime]
     expires_at: Optional[datetime]
+    completed_at: Optional[datetime]
     deployment_ids: list[Any]
     is_revoked: bool
     status: InviteStatus
@@ -127,6 +128,7 @@ class CandidateAssessmentStatus(BaseModel):
     candidate_instructions: Optional[str]
     started_at: Optional[datetime]
     expires_at: Optional[datetime]
+    completed_at: Optional[datetime]
     time_remaining_seconds: Optional[int]
     labs: list[CandidateLabInfo]
     report_submitted: bool

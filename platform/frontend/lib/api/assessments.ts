@@ -2,7 +2,7 @@
 // Copyright (c) 2026 CommonHuman-Lab
 import { apiClient } from "./client";
 
-export type InviteStatus = "pending" | "accepted" | "active" | "expired" | "revoked";
+export type InviteStatus = "pending" | "accepted" | "active" | "completed" | "expired" | "revoked";
 
 export interface Assessment {
   id: number;
@@ -32,6 +32,7 @@ export interface AssessmentInvite {
   accepted_at: string | null;
   started_at: string | null;
   expires_at: string | null;
+  completed_at: string | null;
   deployment_ids: number[];
   is_revoked: boolean;
   status: InviteStatus;
@@ -63,6 +64,7 @@ export interface CandidateAssessmentStatus {
   candidate_instructions: string | null;
   started_at: string | null;
   expires_at: string | null;
+  completed_at: string | null;
   time_remaining_seconds: number | null;
   labs: CandidateLabInfo[];
   report_submitted: boolean;
@@ -203,4 +205,9 @@ export async function getAssessmentStatus(): Promise<CandidateAssessmentStatus> 
 
 export async function submitReport(content: string): Promise<void> {
   await apiClient.post("/assessments/me/report", { content });
+}
+
+export async function completeAssessment(): Promise<CandidateAssessmentStatus> {
+  const { data } = await apiClient.post<CandidateAssessmentStatus>("/assessments/me/complete");
+  return data;
 }
