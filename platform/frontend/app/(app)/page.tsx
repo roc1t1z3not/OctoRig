@@ -67,7 +67,11 @@ export default function Dashboard() {
   const activeDeployments = deployments.filter((d) => d.status !== "stopped");
   const knownNames = new Set(deployments.flatMap((d) => d.container_names));
   const externalContainers = containers.filter(
-    (c) => !knownNames.has(c.name) && c.name.startsWith("octorig-") && !c.name.includes("platform")
+    (c) =>
+      !knownNames.has(c.name) &&
+      c.name.startsWith("octorig-") &&
+      !c.name.includes("platform") &&
+      c.name !== "octorig-socket-proxy"
   );
 
   // Container names are now per-deployment (e.g. "octorig-rewindrange-42"), so
