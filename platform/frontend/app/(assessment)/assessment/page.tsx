@@ -18,6 +18,7 @@ import { useUserStore } from "@/stores/user.store";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { useConfirmStore } from "@/stores/confirm.store";
 import { MarkdownEditor } from "@/components/ui/MarkdownEditor";
+import { CopyButton } from "@/components/ui/CopyButton";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -130,7 +131,7 @@ function LabCard({ lab, expired }: { lab: CandidateLabInfo; expired: boolean }) 
           }}
         >
           {lab.access_info.map((info) => (
-            <div key={info.key} style={{ display: "flex", gap: 8, fontSize: "0.78rem" }}>
+            <div key={info.key} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.78rem" }}>
               <span style={{ color: "var(--g-text-muted)", minWidth: 40 }}>{info.key}</span>
               <code
                 style={{
@@ -138,10 +139,12 @@ function LabCard({ lab, expired }: { lab: CandidateLabInfo; expired: boolean }) 
                   fontFamily: "var(--font-mono, monospace)",
                   fontSize: "0.75rem",
                   wordBreak: "break-all",
+                  flex: 1,
                 }}
               >
                 {info.value}
               </code>
+              <CopyButton value={info.value} />
             </div>
           ))}
         </div>
