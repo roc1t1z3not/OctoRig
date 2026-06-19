@@ -26,7 +26,6 @@ export interface UserProfile {
   website_url: string | null;
   location: string | null;
   github_handle: string | null;
-  twitter_handle: string | null;
   privacy_level: "public" | "team_only" | "private";
   show_activity: boolean;
   theme: string | null;
@@ -44,7 +43,6 @@ export interface ProfileUpdatePayload {
   website_url?: string;
   location?: string;
   github_handle?: string;
-  twitter_handle?: string;
   privacy_level?: "public" | "team_only" | "private";
   show_activity?: boolean;
   theme?: string | null;

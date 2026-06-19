@@ -61,25 +61,14 @@ export function ProfileForm({
         />
       </div>
 
-      <div className="form-two-col">
-        <div className="form-row">
-          <label className="form-label">GitHub handle</label>
-          <input
-            className="g-input"
-            value={form.github_handle ?? ""}
-            onChange={(e) => onChange("github_handle", e.target.value)}
-            placeholder="username"
-          />
-        </div>
-        <div className="form-row">
-          <label className="form-label">Twitter handle</label>
-          <input
-            className="g-input"
-            value={form.twitter_handle ?? ""}
-            onChange={(e) => onChange("twitter_handle", e.target.value)}
-            placeholder="username"
-          />
-        </div>
+      <div className="form-row">
+        <label className="form-label">GitHub handle</label>
+        <input
+          className="g-input"
+          value={form.github_handle ?? ""}
+          onChange={(e) => onChange("github_handle", e.target.value)}
+          placeholder="username"
+        />
       </div>
 
       <div className="form-row">

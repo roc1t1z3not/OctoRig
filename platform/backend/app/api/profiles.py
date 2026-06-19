@@ -19,7 +19,6 @@ class ProfileUpdateRequest(BaseModel):
     website_url: Optional[str] = None
     location: Optional[str] = None
     github_handle: Optional[str] = None
-    twitter_handle: Optional[str] = None
     privacy_level: Optional[str] = None
     show_activity: Optional[bool] = None
     theme: Optional[str] = None
@@ -47,7 +46,6 @@ def update_my_profile(
         website_url=body.website_url,
         location=body.location,
         github_handle=body.github_handle,
-        twitter_handle=body.twitter_handle,
         privacy_level=body.privacy_level,
         show_activity=body.show_activity,
         theme=body.theme,

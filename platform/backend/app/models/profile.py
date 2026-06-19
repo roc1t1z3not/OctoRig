@@ -29,7 +29,6 @@ class UserProfile(Base):
     website_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
     location: Mapped[str | None] = mapped_column(String(128), nullable=True)
     github_handle: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    twitter_handle: Mapped[str | None] = mapped_column(String(64), nullable=True)
     privacy_level: Mapped[PrivacyLevel] = mapped_column(
         SQLEnum(PrivacyLevel), nullable=False, default=PrivacyLevel.PUBLIC
     )

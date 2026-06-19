@@ -28,7 +28,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "Every web server has a way to tell search engines what *not* to index. "
                     "Find the right file, follow where it leads, and you'll end up somewhere "
                     "the store would rather keep private.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -53,7 +53,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "user input and passes it straight to the back end. "
                     "The back room holds more than product listings — "
                     "the right input might bring some of it to the surface.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -76,7 +76,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "description": (
                     "You don't have admin credentials. You might not need them.\n\n"
                     "Rewind Range's login form makes a decision based on what you submit. "
-                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -102,7 +102,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The database knows more than what's on the shelves, "
                     "and the admin's credentials are somewhere in there.\n\n"
                     "Find the admin's password and wrap it in `FLAG{}`.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -125,7 +125,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "description": (
                     "Whatever you search for, Rewind Range echoes it back on the results "
                     "page. The question is whether it echoes *only* what you typed.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -150,7 +150,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "or something that acts like reading happens. "
                     "The question is who's on the other end, and what their browser does "
                     "when your submission arrives.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -174,7 +174,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "Rewind Range has a private messaging feature. Messages are fetched "
                     "by number — but whose messages can you actually read?\n\n"
                     "Log in as any regular user and find out.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -198,7 +198,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "Rewind Range has a REST API for rental orders. Each order has an ID. "
                     "As an authenticated user, how many orders can you actually access?\n\n"
                     "Explore the API and see what turns up in records that aren't yours.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind, requires auth)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -224,7 +224,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "way into source code.\n\n"
                     "Craft a session that says you're the admin and walk through a door "
                     "you were never given a key to.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "hard",
@@ -249,7 +249,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "database can be sent programmatically — faster, quieter, and repeatable. "
                     "Craft a Python script that talks directly to the server and pulls back "
                     "something the UI was never meant to show you.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 1 — Rewind)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -294,7 +294,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "no different — there's a public file that hints at paths the "
                     "operators would prefer you didn't visit.\n\n"
                     "Find one of those paths and access it as a logged-in user.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -317,7 +317,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The order book search takes a ticker symbol and surfaces market data. "
                     "The database running behind it holds more than trade history — "
                     "and the search field may accept more than just ticker symbols.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -342,7 +342,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The credential check has a flaw — the right username might "
                     "bypass the need for a password entirely.\n\n"
                     "Obtain an admin token, then call a privileged endpoint.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -366,7 +366,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "TradeFloor stores more than tickers and prices. "
                     "Somewhere in that database is a user registry — accounts, credentials, "
                     "the kind of data that was never meant to be readable from the outside.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -389,7 +389,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "description": (
                     "The market search field echoes your query back on the results page. "
                     "How faithfully does it reproduce what you type?\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -412,7 +412,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                 "description": (
                     "Trade orders each have an ID. As a logged-in user, you can view "
                     "your own orders — but are they truly *your* orders?\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -436,7 +436,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "TradeFloor's admin panel has a per-user detail view. Being logged "
                     "in might be enough to reach it — try navigating there as a "
                     "regular user.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -461,7 +461,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "is worth examining — specifically, what the token itself says "
                     "about how it should be verified.\n\n"
                     "Forge an admin token and call a privileged endpoint.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "hard",
@@ -485,7 +485,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "Profiles are numbered. Each number belongs to someone — or it should. "
                     "Write a Python script that walks the sequence and notices when a record "
                     "surfaces that the current session has no business seeing.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 2 — TradeFloor)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -525,7 +525,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ga-recon-robots",
                 "title": "House Rules",
-                "description": "Every casino has areas off-limits to regular guests. The web equivalent of a staff-only door is well-known — and what's listed behind it doesn't always require a key.",
+                "description": (
+                    "Every casino has areas off-limits to regular guests. The web equivalent of a staff-only door is well-known — and what's listed behind it doesn't always require a key.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "easy",
                 "category": "recon",
                 "points": 50,
@@ -542,7 +545,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ga-sqli-promo",
                 "title": "Free Chips",
-                "description": "The promo desk is how the casino hands out credits. You enter a code, the system checks it, and something happens. The question is whether that check is as airtight as the house assumes.",
+                "description": (
+                    "The promo desk is how the casino hands out credits. You enter a code, the system checks it, and something happens. The question is whether that check is as airtight as the house assumes.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "medium",
                 "category": "sqli",
                 "points": 200,
@@ -560,7 +566,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ga-sqli-leaderboard",
                 "title": "Rigged Rankings",
-                "description": "The leaderboard keeps score. The search helps you find your ranking. What you type into that field and what the database does with it may not be the same thing.",
+                "description": (
+                    "The leaderboard keeps score. The search helps you find your ranking. What you type into that field and what the database does with it may not be the same thing.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "medium",
                 "category": "sqli",
                 "points": 150,
@@ -578,7 +587,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ga-xss-chat",
                 "title": "Dealer's Message",
-                "description": "The live casino chat is open to all registered players. What you post is visible to everyone who loads the room — including what you didn't intend to post.",
+                "description": (
+                    "The live casino chat is open to all registered players. What you post is visible to everyone who loads the room — including what you didn't intend to post.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "easy",
                 "category": "xss",
                 "points": 150,
@@ -596,7 +608,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ga-idor-suite",
                 "title": "Wrong Room",
-                "description": "Every high-roller gets a suite: their own room, their own history. The suite number lives in the URL. Whether the hotel actually checks your key card is another question.",
+                "description": (
+                    "Every high-roller gets a suite: their own room, their own history. The suite number lives in the URL. Whether the hotel actually checks your key card is another question.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "easy",
                 "category": "idor",
                 "points": 100,
@@ -613,7 +628,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ga-biz-negative-bet",
                 "title": "The House Loses",
-                "description": "The slot machine accepts your bet via a form. The server processes what you send — but does it validate it?",
+                "description": (
+                    "The slot machine accepts your bet via a form. The server processes what you send — but does it validate it?\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "medium",
                 "category": "web",
                 "points": 200,
@@ -630,7 +648,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ga-bac-admin",
                 "title": "Staff Only",
-                "description": "The casino's administrative area isn't linked from the player dashboard. But the route exists, the server responds to it, and the guest list may not be as exclusive as the signage implies.",
+                "description": (
+                    "The casino's administrative area isn't linked from the player dashboard. But the route exists, the server responds to it, and the guest list may not be as exclusive as the signage implies.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "easy",
                 "category": "web",
                 "points": 150,
@@ -647,7 +668,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ga-bac-high-rollers",
                 "title": "VIP Lounge",
-                "description": "Every casino keeps a back room for its best clients. This one's not advertised, but it's there — and the velvet rope may be less strict than the signage implies.",
+                "description": (
+                    "Every casino keeps a back room for its best clients. This one's not advertised, but it's there — and the velvet rope may be less strict than the signage implies.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "easy",
                 "category": "web",
                 "points": 100,
@@ -664,7 +688,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ga-promo-reuse",
                 "title": "Double Down",
-                "description": "The promo system hands out rewards. What happens if you try to collect more than once?",
+                "description": (
+                    "The promo system hands out rewards. What happens if you try to collect more than once?\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "medium",
                 "category": "web",
                 "points": 150,
@@ -686,7 +713,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "There's a sequence of calls that can leave your balance in a state the "
                     "server didn't intend. A Python script can issue them in the right order, "
                     "at the right speed.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 3 — GoldenAce)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -730,7 +757,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "An internal diagnostics endpoint was deployed and never locked down. "
                     "It responds to anyone who asks — no session required. "
                     "The raw financial history of the entire bank is there for the taking.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -756,7 +783,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "A carefully chosen username might make the decision for you.\n\n"
                     "Once inside as admin, check the admin profile — "
                     "there is a field the bank keeps very close to its chest.\n\n"
-                    "**Target:** `http://{container_ip}/login` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}/login`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -781,7 +808,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The transaction search takes your query and goes hunting. "
                     "What it brings back might surprise you — especially if you ask "
                     "it to go looking somewhere it wasn't designed to reach.\n\n"
-                    "**Target:** `http://{container_ip}/search` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}/search`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -806,8 +833,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The transaction list accepts filters — search by memo, type, date range. "
                     "Each field shapes how the underlying query is built. "
                     "The database knows more than just transaction history.\n\n"
-                    "**Target:** `http://{container_ip}/accounts/1/transactions` "
-                    "(start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}/accounts/1/transactions`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -833,7 +859,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "But what if the account list page didn't share that assumption?\n\n"
                     "One account in the system belongs to an entity that shouldn't be visible "
                     "to regular customers. Its transaction history has a memo worth reading.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -858,7 +884,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "Does the system verify that the number you're requesting belongs to you?\n\n"
                     "An internal ticket was created by bank staff and was never meant "
                     "to be seen by customers. Find it.\n\n"
-                    "**Target:** `http://{container_ip}/tickets/` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}/tickets/`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -882,7 +908,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "There's an API endpoint meant for administrators only. "
                     "The door asks if you have a key — not whether the key is the right one. "
                     "Any customer who walks in authenticated might find the vault wide open.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -908,7 +934,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "not whose session it is.\n\n"
                     "The first account in the system has something stored that "
                     "was never meant to be customer-facing.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -934,7 +960,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "When an admin reads your ticket, their browser does the rendering — "
                     "and rendering decisions have consequences.\n\n"
                     "Leave something in a ticket that persists.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "hard",
@@ -959,7 +985,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The bank's data doesn't stay locked when the query is written carelessly. "
                     "A Python script can do in seconds what a proxy intercept does one request "
                     "at a time — chain the steps together and the vault opens itself.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 4 — HumanBank)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -1003,7 +1029,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The portal publishes a complete map of itself — every endpoint, "
                     "every parameter — without requiring a login. "
                     "Read it carefully. Developers sometimes leave notes in places they assume nobody will look.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -1029,7 +1055,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "bypass the password check entirely.\n\n"
                     "Once inside as admin, check the HTTP response from the admin panel — "
                     "the server reveals more than just the page.\n\n"
-                    "**Target:** `http://{container_ip}/login` (start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}/login`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -1054,7 +1080,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The patient search accepts a name and queries the database. "
                     "What the database returns depends entirely on how you frame the question.\n\n"
                     "The system stores more than patient names.\n\n"
-                    "**Target:** `http://{container_ip}/patients` (start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}/patients`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -1081,7 +1107,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "One result in the system was filed by an external party "
                     "and should never have been accessible to patients. "
                     "The notes field tells a different story.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -1107,7 +1133,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "but it doesn't enforce it.\n\n"
                     "There is a prescription in the system that belongs to someone else. "
                     "The notes field carries something that shouldn't be there.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -1131,7 +1157,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The admin section has a data export that dumps every patient record "
                     "in the system. The door is labelled admin-only — "
                     "but the bouncer just checks if you exist, not who you are.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -1156,7 +1182,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The lock on the door checks whether you're logged in — "
                     "not whether you're staff.\n\n"
                     "The first staff member's profile has a field that doesn't belong there.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -1180,8 +1206,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The patient search echoes your search term back on the results page. "
                     "It reads it in, and it reads it back out — without checking what it contains.\n\n"
                     "There is a cookie set on this page that is readable from the browser.\n\n"
-                    "**Target:** `http://{container_ip}/patients` "
-                    "(start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}/patients`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -1208,8 +1233,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "that belong to you.\n\n"
                     "Some fields are never shown in the patient form — but the server "
                     "will accept them anyway.\n\n"
-                    "**Target:** `http://{container_ip}/api/v1/appointments/1` "
-                    "(start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}/api/v1/appointments/1`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "hard",
@@ -1234,7 +1258,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "Patient records are fetched by ID. The IDs are sequential. "
                     "Not every ID belongs to you — but the server doesn't always check. "
                     "Script a sweep and see whose records surface.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 5 — MediHuman)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -1274,7 +1298,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "np-recon-billing-db",
                 "title": "Internal Memo",
-                "description": "An endpoint that was never meant to be public is still reachable. The billing data it serves has no gate in front of it — only the assumption that nobody would think to look.",
+                "description": (
+                    "An endpoint that was never meant to be public is still reachable. The billing data it serves has no gate in front of it — only the assumption that nobody would think to look.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "recon",
                 "difficulty": "easy",
@@ -1290,7 +1317,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "np-sqli-login",
                 "title": "Ghost Credentials",
-                "description": "The admin panel sits behind a login. The form expects a username and a password — but the decision it makes may depend more on the username than you'd think.",
+                "description": (
+                    "The admin panel sits behind a login. The form expects a username and a password — but the decision it makes may depend more on the username than you'd think.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "sqli",
                 "difficulty": "easy",
@@ -1307,7 +1337,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "np-sqli-board-search",
                 "title": "Thread Unraveled",
-                "description": "The community board has a search box. Your query travels further than the forum posts — the database has more to offer if you ask the right way.",
+                "description": (
+                    "The community board has a search box. Your query travels further than the forum posts — the database has more to offer if you ask the right way.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "sqli",
                 "difficulty": "medium",
@@ -1324,7 +1357,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "np-idor-user",
                 "title": "Wrong Account",
-                "description": "The user API returns account details by ID. You are logged in — but does that mean you can only see yourself?",
+                "description": (
+                    "The user API returns account details by ID. You are logged in — but does that mean you can only see yourself?\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "idor",
                 "difficulty": "easy",
@@ -1340,7 +1376,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "np-idor-ticket",
                 "title": "Internal Dispatch",
-                "description": "Support tickets are accessed by number. The system verifies you're logged in — not that the ticket is yours.",
+                "description": (
+                    "Support tickets are accessed by number. The system verifies you're logged in — not that the ticket is yours.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "idor",
                 "difficulty": "easy",
@@ -1356,7 +1395,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "np-bac-admin-config",
                 "title": "Backdoor Config",
-                "description": "There's an administrative configuration endpoint that the operators never restricted. The path exists, the server responds, and the check that should gate access may not be there.",
+                "description": (
+                    "There's an administrative configuration endpoint that the operators never restricted. The path exists, the server responds, and the check that should gate access may not be there.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "web",
                 "difficulty": "easy",
@@ -1372,7 +1414,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "np-ssti-template",
                 "title": "Preview Flaw",
-                "description": "The notification system lets admins preview message templates before sending. The preview renders content on the server side — and the render context is richer than the feature implies.",
+                "description": (
+                    "The notification system lets admins preview message templates before sending. The preview renders content on the server side — and the render context is richer than the feature implies.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "web",
                 "difficulty": "hard",
@@ -1389,7 +1434,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "np-cmdi-dnslookup",
                 "title": "Diagnostic Override",
-                "description": "The network tools section has a hostname lookup feature. It runs a system command in the background. What happens when the hostname isn't a hostname?",
+                "description": (
+                    "The network tools section has a hostname lookup feature. It runs a system command in the background. What happens when the hostname isn't a hostname?\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "web",
                 "difficulty": "medium",
@@ -1406,7 +1454,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "np-xss-reflected-board",
                 "title": "Open Mic Night",
-                "description": "The community board search reflects your search term back in the response. The page also sets a cookie that isn't protected from client-side access.",
+                "description": (
+                    "The community board search reflects your search term back in the response. The page also sets a cookie that isn't protected from client-side access.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "xss",
                 "difficulty": "easy",
@@ -1428,7 +1479,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "The engine that fills those placeholders in is more powerful than the "
                     "interface suggests. A well-placed expression can reach well beyond the "
                     "intended output.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 6 — NetPulse)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -1468,7 +1519,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ll-recon-robots",
                 "title": "Curtain Call",
-                "description": "Before the main feature begins, someone left instructions for web crawlers. Read the disallowed lines — one of those paths hands back more than it should to any logged-in visitor.",
+                "description": (
+                    "Before the main feature begins, someone left instructions for web crawlers. Read the disallowed lines — one of those paths hands back more than it should to any logged-in visitor.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "easy",
                 "category": "recon",
                 "points": 50,
@@ -1485,7 +1539,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ll-sqli-search",
                 "title": "Director's Cut",
-                "description": "The film catalogue search is how you find what's playing. The database has more in it than the current programme — and what comes back may depend on more than the title you type.",
+                "description": (
+                    "The film catalogue search is how you find what's playing. The database has more in it than the current programme — and what comes back may depend on more than the title you type.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "medium",
                 "category": "sqli",
                 "points": 200,
@@ -1503,7 +1560,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ll-sqli-gift",
                 "title": "Redeem Yourself",
-                "description": "Gift cards are validated by code. The redemption form takes your input, checks it against the database, and tells you whether you're in credit. What the database does with that input is worth examining.",
+                "description": (
+                    "Gift cards are validated by code. The redemption form takes your input, checks it against the database, and tells you whether you're in credit. What the database does with that input is worth examining.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "medium",
                 "category": "sqli",
                 "points": 250,
@@ -1521,7 +1581,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ll-sqli-api-reviews",
                 "title": "Critical Review",
-                "description": "A JSON endpoint returns film reviews by ID. The ID segment travels from the URL into the query without a stop in between.",
+                "description": (
+                    "A JSON endpoint returns film reviews by ID. The ID segment travels from the URL into the query without a stop in between.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "medium",
                 "category": "sqli",
                 "points": 200,
@@ -1538,7 +1601,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ll-xss-stored-review",
                 "title": "Standing Ovation",
-                "description": "The review system stores and renders submitted text without sanitisation. A payload posted on any film page executes in the browser of every subsequent visitor.",
+                "description": (
+                    "The review system stores and renders submitted text without sanitisation. A payload posted on any film page executes in the browser of every subsequent visitor.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "easy",
                 "category": "xss",
                 "points": 150,
@@ -1555,7 +1621,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ll-idor-booking",
                 "title": "Not Your Seat",
-                "description": "You booked a seat. So did everyone else. Booking IDs are assigned when a reservation is made — whether the cinema enforces whose reservation you can view is worth testing.",
+                "description": (
+                    "You booked a seat. So did everyone else. Booking IDs are assigned when a reservation is made — whether the cinema enforces whose reservation you can view is worth testing.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "easy",
                 "category": "idor",
                 "points": 100,
@@ -1572,7 +1641,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ll-bac-admin-panel",
                 "title": "Staff Entrance",
-                "description": "The administration panel verifies that a session exists. It does not verify whether the session holder is supposed to be there.",
+                "description": (
+                    "The administration panel verifies that a session exists. It does not verify whether the session holder is supposed to be there.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "easy",
                 "category": "web",
                 "points": 150,
@@ -1588,7 +1660,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ll-ssti-announce",
                 "title": "The Projectionist's Script",
-                "description": "The announcement editor lets you preview your message before publishing. The preview is rendered on the server — and the render context may know more than the message author.",
+                "description": (
+                    "The announcement editor lets you preview your message before publishing. The preview is rendered on the server — and the render context may know more than the message author.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "hard",
                 "category": "web",
                 "points": 450,
@@ -1605,7 +1680,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ll-mass-assign-privesc",
                 "title": "Rewrite the Credits",
-                "description": "Profile updates accept fields straight from the POST body with no filtering. Sending fields that were never shown in the form can change more than a display name.",
+                "description": (
+                    "Profile updates accept fields straight from the POST body with no filtering. Sending fields that were never shown in the form can change more than a display name.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "medium",
                 "category": "web",
                 "points": 250,
@@ -1622,7 +1700,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "ll-gift-admin-noauth",
                 "title": "Unlocked Vault",
-                "description": "An administrative endpoint for managing gift cards was deployed without any authentication requirement. The path is hinted from a familiar file.",
+                "description": (
+                    "An administrative endpoint for managing gift cards was deployed without any authentication requirement. The path is hinted from a familiar file.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "difficulty": "easy",
                 "category": "web",
                 "points": 100,
@@ -1642,7 +1723,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "Seats are finite. The booking logic enforces that limit — but only if "
                     "requests arrive one at a time. A Python script can send many at once. "
                     "What happens to the seat count when the server can't keep up?\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 7 — Limelight)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "hard",
@@ -1682,7 +1763,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "sv-recon-robots",
                 "title": "Hidden Community",
-                "description": "SubVerse hosts communities for all kinds of groups. Not all of them are listed publicly. A file the site publishes for crawlers hints at where the private ones live.",
+                "description": (
+                    "SubVerse hosts communities for all kinds of groups. Not all of them are listed publicly. A file the site publishes for crawlers hints at where the private ones live.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "recon",
                 "difficulty": "easy",
@@ -1698,7 +1782,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "sv-sqli-login",
                 "title": "Skeleton Key",
-                "description": "The login form takes a username and a password. Whether both of them actually matter is worth investigating.",
+                "description": (
+                    "The login form takes a username and a password. Whether both of them actually matter is worth investigating.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "sqli",
                 "difficulty": "easy",
@@ -1715,7 +1802,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "sv-sqli-search-union",
                 "title": "Search Party",
-                "description": "The post search takes your query and finds matching content. The database stores more than forum posts — and how you phrase the query affects what comes back.",
+                "description": (
+                    "The post search takes your query and finds matching content. The database stores more than forum posts — and how you phrase the query affects what comes back.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "sqli",
                 "difficulty": "medium",
@@ -1732,7 +1822,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "sv-idor-message",
                 "title": "Someone's DM",
-                "description": "Private messages are meant to stay private. Every message has an ID, and the API has an endpoint that retrieves by that ID. Try pulling up a conversation you were never part of.",
+                "description": (
+                    "Private messages are meant to stay private. Every message has an ID, and the API has an endpoint that retrieves by that ID. Try pulling up a conversation you were never part of.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "idor",
                 "difficulty": "easy",
@@ -1748,7 +1841,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "sv-idor-draft-post",
                 "title": "Unpublished",
-                "description": "Before a post goes live, it lives as a draft. Draft posts aren't linked in the UI — but if you know the path, and you're logged in, the server will show you.",
+                "description": (
+                    "Before a post goes live, it lives as a draft. Draft posts aren't linked in the UI — but if you know the path, and you're logged in, the server will show you.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "idor",
                 "difficulty": "easy",
@@ -1764,7 +1860,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "sv-mass-assign-escalate",
                 "title": "Power Up",
-                "description": "The profile editor shows you a few fields: display name, bio, the basics. The server that handles your update may be listening for a few more than that.",
+                "description": (
+                    "The profile editor shows you a few fields: display name, bio, the basics. The server that handles your update may be listening for a few more than that.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "web",
                 "difficulty": "medium",
@@ -1781,7 +1880,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "sv-ssti-announce",
                 "title": "The Announcement",
-                "description": "Community moderators can preview announcements before publishing. The preview renders on the server — and the rendering context is more capable than a text formatter should be.",
+                "description": (
+                    "Community moderators can preview announcements before publishing. The preview renders on the server — and the rendering context is more capable than a text formatter should be.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "web",
                 "difficulty": "hard",
@@ -1798,7 +1900,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "sv-cmdi-preview-link",
                 "title": "Preview Exploit",
-                "description": "When you share a link in a post, the site fetches a preview. Somewhere between your input and the network request, the URL is processed in a way that may allow more than fetching.",
+                "description": (
+                    "When you share a link in a post, the site fetches a preview. Somewhere between your input and the network request, the URL is processed in a way that may allow more than fetching.\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "web",
                 "difficulty": "medium",
@@ -1815,7 +1920,10 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
             {
                 "slug": "sv-xss-stored-bio",
                 "title": "Bio Hazard",
-                "description": "User bios are displayed on public profile pages. The profile page also sets a session cookie. Is the bio display safe to include arbitrary text?",
+                "description": (
+                    "User bios are displayed on public profile pages. The profile page also sets a session cookie. Is the bio display safe to include arbitrary text?\n\n"
+                    "**Target:** `http://{container_ip}`"
+                ),
                 "challenge_type": "flag",
                 "category": "xss",
                 "difficulty": "easy",
@@ -1837,7 +1945,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "call. A browser makes that awkward to exploit — a Python script does not. "
                     "Construct the right payload, send it programmatically, and read what the "
                     "server hands back.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 8 — SubVerse)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "hard",
@@ -1882,7 +1990,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "field device configurations to the operator fleet. "
                     "The server accepts anonymous connections. "
                     "Not everything in the config directory was meant for the public internet.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -1908,7 +2016,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "a crafted username might make the password less relevant than "
                     "the form implies.\n\n"
                     "Once inside the admin panel, check the HTTP response headers.\n\n"
-                    "**Target:** `http://{container_ip}/login` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}/login`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -1934,7 +2042,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "operational procedures. Your account is assigned to a specific zone. "
                     "The endpoint that serves zone details doesn't enforce that assignment.\n\n"
                     "Zone 4 carries something that should be restricted to its operator.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "easy",
@@ -1959,7 +2067,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "field hardware fleet. The FTP config file hints at where to find it. "
                     "Once you have the admin token, a privileged endpoint hands back "
                     "the full operator roster — and whatever the admin keeps in their notes field.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -1984,7 +2092,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "the server fetches it and reflects the response back. "
                     "The server-side fetch can reach addresses that aren't reachable from "
                     "your browser — including endpoints that only respond to local requests.\n\n"
-                    "**Target:** `http://{container_ip}/devices/poll` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}/devices/poll`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -2009,7 +2117,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "to confirm the device is reachable. An operator can override the "
                     "management target address before the ping fires. "
                     "The override goes directly into a shell call, unsanitised.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "hard",
@@ -2034,7 +2142,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "and can forward them to colleagues. The credit transfer form accepts "
                     "a recipient ID and an amount. "
                     "The system does not check the sign of that amount before applying it.\n\n"
-                    "**Target:** `http://{container_ip}/credits` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}/credits`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -2059,7 +2167,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "command channel. Grid commands are supposed to stay within an operator's "
                     "own zone. The topic field is editable — what happens when you publish "
                     "to a zone you don't control?\n\n"
-                    "**Target:** `http://{container_ip}/mqtt` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}/mqtt`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",
@@ -2085,7 +2193,7 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
                     "A browser makes injection awkward — a Python script makes it precise. "
                     "Authenticate, target the reboot endpoint, and read the flag from "
                     "the host filesystem.\n\n"
-                    "**Target:** `http://{container_ip}` (start Lab 18 — SmartGridOps)"
+                    "**Target:** `http://{container_ip}`"
                 ),
                 "challenge_type": "flag",
                 "difficulty": "medium",

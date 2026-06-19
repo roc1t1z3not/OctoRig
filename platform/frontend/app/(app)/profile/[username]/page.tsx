@@ -5,9 +5,10 @@ import "../profile.css";
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  ArrowLeft, MapPin, Globe, Link2, AtSign,
+  ArrowLeft, MapPin, Globe, Link2,
   Trophy, Target, Droplets, Users, Pencil,
 } from "lucide-react";
 import { getUserProfile, type UserProfile } from "@/lib/api/profiles";
@@ -15,6 +16,7 @@ import { getUserRank, type UserRank } from "@/lib/api/ranks";
 import { formatDate } from "@/lib/utils/date";
 import { useUserStore } from "@/stores/user.store";
 import { ICON_MAP } from "@/lib/utils/badge-icons";
+import { EditProfileSheet } from "@/components/profile/EditProfileSheet";
 
 function StatBlock({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
   return (
@@ -74,11 +76,6 @@ function ProfileView({ profile, rankData }: { profile: UserProfile; rankData?: U
               <Link2 size={12} />@{profile.github_handle}
             </a>
           )}
-          {profile.twitter_handle && (
-            <a href={`https://twitter.com/${profile.twitter_handle}`} className="profile-link-item profile-link" target="_blank" rel="noopener">
-              <AtSign size={12} />@{profile.twitter_handle}
-            </a>
-          )}
         </div>
       </aside>
 
@@ -136,6 +133,7 @@ export default function UserProfilePage() {
   const { username } = useParams<{ username: string }>();
   const { user } = useUserStore();
   const isOwnProfile = user?.username === username;
+  const [editOpen, setEditOpen] = useState(false);
 
   const { data: profile, isLoading, isError } = useQuery({
     queryKey: ["profile", username],
@@ -157,16 +155,24 @@ export default function UserProfilePage() {
           <span>Back</span>
         </Link>
         {isOwnProfile && (
-          <Link href="/profile/me" className="g-btn g-btn-ghost g-btn-sm" style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}>
+          <button
+            className="g-btn g-btn-ghost g-btn-sm"
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
+            onClick={() => setEditOpen(true)}
+          >
             <Pencil size={13} />
             Edit Profile
-          </Link>
+          </button>
         )}
       </div>
 
       {isLoading && <div className="text-muted text-sm">Loading profile…</div>}
       {isError && <div className="text-muted text-sm">Profile not found.</div>}
       {profile && <ProfileView profile={profile} rankData={rankData} />}
+
+      {isOwnProfile && (
+        <EditProfileSheet open={editOpen} profile={profile} onClose={() => setEditOpen(false)} />
+      )}
     </div>
   );
 }

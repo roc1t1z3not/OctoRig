@@ -104,7 +104,6 @@ def get_profile(db: Session, username: str, viewer_id: Optional[int] = None) -> 
         "website_url": profile.website_url,
         "location": profile.location,
         "github_handle": profile.github_handle,
-        "twitter_handle": profile.twitter_handle,
         "privacy_level": profile.privacy_level.value,
         "show_activity": profile.show_activity,
         "theme": profile.theme,
@@ -133,7 +132,6 @@ def update_profile(
     website_url: Optional[str] = None,
     location: Optional[str] = None,
     github_handle: Optional[str] = None,
-    twitter_handle: Optional[str] = None,
     privacy_level: Optional[str] = None,
     show_activity: Optional[bool] = None,
     theme: Optional[str] = None,
@@ -149,8 +147,6 @@ def update_profile(
         profile.location = location
     if github_handle is not None:
         profile.github_handle = github_handle
-    if twitter_handle is not None:
-        profile.twitter_handle = twitter_handle
     if privacy_level is not None:
         profile.privacy_level = PrivacyLevel(privacy_level)
     if show_activity is not None:

@@ -25,7 +25,7 @@ def test_render_target_text_not_running_drops_backticks_and_links_to_lab(client,
     user = _user(db_session)
     template = _template(db_session)
 
-    text = "**Target:** `http://{container_ip}/login` (start Lab 5 — MediHuman)"
+    text = "**Target:** `http://{container_ip}/login`"
     rendered = render_target_text(text, db_session, user, template.id)
 
     assert "{container_ip}" not in rendered
@@ -46,10 +46,10 @@ def test_render_target_text_running_substitutes_real_ip_and_keeps_path(client, d
     ))
     db_session.commit()
 
-    text = "**Target:** `http://{container_ip}/login` (start Lab 5 — MediHuman)"
+    text = "**Target:** `http://{container_ip}/login`"
     rendered = render_target_text(text, db_session, user, template.id)
 
-    assert rendered == "**Target:** `http://10.90.5.2/login` (start Lab 5 — MediHuman)"
+    assert rendered == "**Target:** `http://10.90.5.2/login`"
 
 
 def test_render_target_text_passthrough_without_placeholder(client, db_session):
