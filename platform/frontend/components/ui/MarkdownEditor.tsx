@@ -12,6 +12,7 @@ interface MarkdownEditorProps {
   placeholder?: string;
   minHeight?: number;
   disabled?: boolean;
+  fill?: boolean;
 }
 
 function insertWrap(
@@ -52,6 +53,7 @@ export function MarkdownEditor({
   placeholder = "Write markdown…",
   minHeight = 160,
   disabled = false,
+  fill = false,
 }: MarkdownEditorProps) {
   const [tab, setTab] = useState<"write" | "preview">("write");
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -74,7 +76,10 @@ export function MarkdownEditor({
   ];
 
   return (
-    <div className="md-editor">
+    <div
+      className="md-editor"
+      style={fill ? { display: "flex", flexDirection: "column", flex: 1, minHeight: 0 } : undefined}
+    >
       <div className="md-editor-bar">
         <div className="md-editor-tabs">
           <button
@@ -118,11 +123,20 @@ export function MarkdownEditor({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           disabled={disabled}
-          style={{ minHeight, resize: "vertical", fontFamily: "var(--font-mono, monospace)", fontSize: "0.8125rem" }}
+          style={{
+            minHeight,
+            resize: "vertical",
+            fontFamily: "var(--font-mono, monospace)",
+            fontSize: "0.8125rem",
+            ...(fill ? { flex: 1 } : undefined),
+          }}
           spellCheck={false}
         />
       ) : (
-        <div className="md-preview" style={{ minHeight }}>
+        <div
+          className="md-preview"
+          style={{ minHeight, overflowY: "auto", ...(fill ? { flex: 1 } : undefined) }}
+        >
           {value ? (
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown>
           ) : (

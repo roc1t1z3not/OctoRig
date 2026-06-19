@@ -168,27 +168,66 @@ function LabCard({ lab, expired }: { lab: CandidateLabInfo; expired: boolean }) 
 // Report editor
 // ---------------------------------------------------------------------------
 
+const AUTOSAVE_DELAY_MS = 1500;
+
+function timeAgo(date: Date, now: number): string {
+  const s = Math.max(0, Math.floor((now - date.getTime()) / 1000));
+  if (s < 5) return "just now";
+  if (s < 60) return `${s}s ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  return `${h}h ago`;
+}
+
 function ReportSection({
-  initialContent,
+  content,
+  onChange,
   alreadySubmitted,
   expired,
 }: {
-  initialContent: string | null;
+  content: string;
+  onChange: (value: string) => void;
   alreadySubmitted: boolean;
   expired: boolean;
 }) {
-  const [content, setContent] = useState(initialContent ?? "");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [autosaving, setAutosaving] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
   const { push } = useNotificationsStore();
+  const savedContentRef = useRef(content);
 
-  const submitMutation = useMutation({
-    mutationFn: () => submitReport(content),
-    onSuccess: () => {
+  // Tick once a second so "Saved Xs/Xm ago" stays live without re-saving.
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const saveMutation = useMutation({
+    mutationFn: (value: string) => submitReport(value),
+    onSuccess: (_data, value) => {
+      savedContentRef.current = value;
       setLastSaved(new Date());
-      push("success", "Report saved");
     },
-    onError: () => push("error", "Failed to save report"),
   });
+
+  // Autosave a few seconds after the user stops typing — nothing is lost
+  useEffect(() => {
+    if (expired || content === savedContentRef.current) return;
+    setAutosaving(true);
+    const id = setTimeout(() => {
+      saveMutation.mutate(content, { onSettled: () => setAutosaving(false) });
+    }, AUTOSAVE_DELAY_MS);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content, expired]);
+
+  function saveNow() {
+    saveMutation.mutate(content, {
+      onSuccess: () => push("success", "Report saved"),
+      onError: () => push("error", "Failed to save report"),
+    });
+  }
 
   return (
     <div
@@ -198,6 +237,10 @@ function ReportSection({
         borderRadius: 10,
         padding: "20px 24px",
         marginTop: 32,
+        display: "flex",
+        flexDirection: "column",
+        flex: 1,
+        minHeight: 0,
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
@@ -208,18 +251,37 @@ function ReportSection({
             <span className="role-pill role-pill--on" style={{ fontSize: "0.7rem" }}>Submitted</span>
           )}
         </div>
-        {lastSaved && (
-          <span style={{ fontSize: "0.75rem", color: "var(--g-text-muted)" }}>
-            Last saved: {lastSaved.toLocaleTimeString()}
-          </span>
-        )}
+        <span
+          style={{
+            display: "flex", alignItems: "center", gap: 6,
+            fontSize: "0.75rem",
+            color: autosaving ? "var(--g-accent)" : "var(--g-text-muted)",
+          }}
+        >
+          {autosaving && (
+            <span
+              aria-hidden
+              style={{
+                width: 6, height: 6, borderRadius: "50%",
+                background: "var(--g-accent)",
+                animation: "pulse 1s ease-in-out infinite",
+              }}
+            />
+          )}
+          {autosaving
+            ? "Saving…"
+            : lastSaved
+              ? `Saved ${timeAgo(lastSaved, now)} (${lastSaved.toLocaleTimeString()})`
+              : "Not saved yet"}
+        </span>
       </div>
 
       <MarkdownEditor
         value={content}
-        onChange={setContent}
+        onChange={onChange}
         disabled={expired}
-        minHeight={280}
+        minHeight={520}
+        fill
         placeholder={`# Pentest Report\n\n## Executive Summary\n...\n\n## Findings\n### Finding 1\n- **Severity**: High\n- **Location**: ...\n- **Description**: ...\n- **Proof of Concept**: ...\n- **Remediation**: ...\n\n## Flags Captured\n- FLAG{...} — ...`}
       />
 
@@ -227,14 +289,14 @@ function ReportSection({
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10 }}>
           <button
             className="g-btn g-btn-primary g-btn-sm"
-            disabled={submitMutation.isPending || !content.trim()}
-            onClick={() => submitMutation.mutate()}
+            disabled={saveMutation.isPending || !content.trim() || content === savedContentRef.current}
+            onClick={saveNow}
           >
             <Send size={13} />
-            {submitMutation.isPending ? "Saving…" : alreadySubmitted ? "Update Report" : "Submit Report"}
+            {saveMutation.isPending ? "Saving…" : "Save Report"}
           </button>
           <span style={{ fontSize: "0.75rem", color: "var(--g-text-muted)" }}>
-            You can update your report any time before the deadline. Supports Markdown.
+            Autosaves a couple seconds after you stop typing.
           </span>
         </div>
       )}
@@ -300,6 +362,7 @@ export default function AssessmentWorkspacePage() {
   const router = useRouter();
   const qc = useQueryClient();
   const [section, setSection] = useState<SectionId>("overview");
+  const [reportContent, setReportContent] = useState<string | null>(null);
 
   useEffect(() => {
     if (_hasHydrated && !isRestoringToken && !accessToken) {
@@ -314,6 +377,12 @@ export default function AssessmentWorkspacePage() {
     refetchInterval: 30_000,
     retry: false,
   });
+
+  useEffect(() => {
+    if (status && reportContent === null) {
+      setReportContent(status.report_content ?? "");
+    }
+  }, [status, reportContent]);
 
   const startMutation = useMutation({
     mutationFn: startAssessment,
@@ -401,7 +470,17 @@ export default function AssessmentWorkspacePage() {
       <div style={{ display: "flex", minHeight: "calc(100vh - 57px)" }}>
         <WorkspaceSidebar active={section} onSelect={setSection} />
 
-        <div style={{ flex: 1, maxWidth: 900, margin: "0 auto", padding: "32px 24px" }}>
+        <div
+          style={{
+            flex: 1,
+            maxWidth: section === "report" ? 1280 : 900,
+            margin: "0 auto",
+            padding: "32px 24px",
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+          }}
+        >
           {section === "overview" && (
             <>
               {status.candidate_instructions && (
@@ -509,7 +588,8 @@ export default function AssessmentWorkspacePage() {
                 </p>
               ) : (
                 <ReportSection
-                  initialContent={status.report_content}
+                  content={reportContent ?? ""}
+                  onChange={setReportContent}
                   alreadySubmitted={status.report_submitted}
                   expired={expired}
                 />
