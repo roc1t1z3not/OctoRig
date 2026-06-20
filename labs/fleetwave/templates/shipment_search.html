@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}Search shipments{% endblock %}
+{% block content %}
+<h2>Shipment search</h2>
+<form method="get" action="{{ url_for('shipment_search') }}" class="inline-form" style="margin-bottom:1rem">
+  <input type="text" name="q" value="{{ q }}" placeholder="Tracking number or recipient…" style="flex:1;min-width:280px">
+  <button class="btn btn-sm" type="submit">Search</button>
+</form>
+
+{% if error %}<div class="alert alert-bad">{{ error }}</div>{% endif %}
+
+{% if q %}
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="data">
+      <thead><tr><th>Tracking</th><th>Recipient</th><th>Destination</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for r in results %}
+        <tr><td><code>{{ r.tracking_no }}</code></td><td>{{ r.recipient }}</td><td class="muted">{{ r.destination }}</td><td>{{ r.status }}</td></tr>
+      {% else %}
+        <tr><td colspan="4" class="muted">No shipments matched.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+{% endblock %}

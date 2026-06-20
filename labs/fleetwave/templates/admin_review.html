@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}Feedback Review{% endblock %}
+{% block content %}
+<h2>Delivery Feedback — Review Queue</h2>
+<div class="card" style="padding:0;overflow:hidden">
+  <table class="data">
+    <thead><tr><th>Shipment</th><th>Note</th><th>Reported</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr><td><code>{{ r.tracking_no }}</code></td><td>{{ r.note | safe }}</td><td class="muted">{{ r.created_at }}</td></tr>
+    {% else %}
+      <tr><td colspan="3" class="muted">Nothing in the review queue.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

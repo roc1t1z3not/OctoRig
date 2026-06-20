@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<h2>My Profile</h2>
+{% if saved %}<div class="alert">Profile updated.</div>{% endif %}
+{% if escalated %}<div class="alert alert-flag">Role updated to admin: FLAG{fw_mass_assign_admin_escalated}</div>{% endif %}
+<div class="grid-2">
+  <form method="POST" class="card" style="max-width:480px">
+    <h3 style="margin-top:0">Edit details</h3>
+    <label>Full name</label>
+    <input type="text" name="full_name" value="{{ user.full_name }}">
+    <label>Email</label>
+    <input type="email" name="email" value="{{ user.email }}">
+    <label>Bio</label>
+    <input type="text" name="bio" value="{{ user.bio }}">
+    <button class="btn" type="submit" style="margin-top:1rem">Save changes</button>
+  </form>
+  <div class="card">
+    <h3 style="margin-top:0">Account</h3>
+    <table class="kv">
+      <tr><th>Username</th><td>{{ user.username }}</td></tr>
+      <tr><th>Role</th><td><span class="badge {{ 'badge-admin' if user.role == 'admin' else '' }}">{{ user.role }}</span></td></tr>
+      <tr><th>API token</th><td><code>{{ user.api_token }}</code></td></tr>
+    </table>
+  </div>
+</div>
+{% endblock %}

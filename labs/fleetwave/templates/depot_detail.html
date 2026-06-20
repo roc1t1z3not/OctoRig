@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}{{ depot.name }}{% endblock %}
+{% block content %}
+<h2>{{ depot.name }}</h2>
+<div class="card">
+  <table class="kv">
+    <tr><th>Region</th><td>{{ depot.region }}</td></tr>
+    <tr><th>Manager</th><td>{{ manager.full_name if manager else '—' }} ({{ manager.username if manager else '?' }})</td></tr>
+    <tr><th>Capacity</th><td>{{ '{:,}'.format(depot.capacity) }} units</td></tr>
+    {% if depot.secret_note %}
+    <tr><th>Restricted manifest</th><td style="color:#8a5a00">{{ depot.secret_note }}</td></tr>
+    {% endif %}
+  </table>
+</div>
+
+<h3>Outbound from this depot</h3>
+<div class="card" style="padding:0;overflow:hidden">
+  <table class="data">
+    <thead><tr><th>Tracking</th><th>Recipient</th><th>Destination</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for s in shipments %}
+      <tr><td><a href="{{ url_for('shipment_detail', shipment_id=s.id) }}"><code>{{ s.tracking_no }}</code></a></td>
+        <td>{{ s.recipient }}</td><td class="muted">{{ s.destination }}</td>
+        <td><span class="st st-{{ s.status }}">{{ s.status.replace('_',' ') }}</span></td></tr>
+    {% else %}
+      <tr><td colspan="4" class="muted">No outbound shipments.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p style="margin-top:1rem"><a href="{{ url_for('depots') }}">&larr; All depots</a></p>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}Users{% endblock %}
+{% block content %}
+<h2>Operator Directory</h2>
+<div class="card" style="padding:0;overflow:hidden">
+  <table class="data">
+    <thead><tr><th>ID</th><th>Username</th><th>Full name</th><th>Role</th><th>API token</th></tr></thead>
+    <tbody>
+    {% for u in users %}
+      <tr><td>{{ u.id }}</td><td>{{ u.username }}</td><td>{{ u.full_name }}</td>
+        <td><span class="badge {{ 'badge-admin' if u.role == 'admin' else '' }}">{{ u.role }}</span></td>
+        <td><code>{{ u.api_token }}</code></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
