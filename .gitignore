@@ -76,5 +76,10 @@ Thumbs.db
 package-lock.json
 package.json
 wiki/
-scripts/demo.gif
-scripts/themes/
+scripts/*.gif
+scripts/*.png
+scripts/*.jpg
+scripts/*.json
+scripts/themes/*.png
+scripts/themes/*.json
+

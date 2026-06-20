@@ -1,14 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (c) 2026 CommonHuman-Lab
 //
-// screenshot-gif.mjs — stitch the PNGs from screenshot-demo.mjs into a single
-// looping crossfade GIF for the README.
+// screenshots-to-gif.mjs — stitch a directory of PNGs into a single looping
+// crossfade GIF for the README. Generic over the source directory: point it
+// at scripts/screenshots (from screenshot-demo.mjs) for the page-by-page demo
+// gif, or at scripts/themes (from screenshot-themes.mjs) for a gif cycling
+// through every UI theme.
 //
 // Usage:
-//   1. Run scripts/screenshot-demo.mjs first to produce ./screenshots
+//   1. Run scripts/screenshot-demo.mjs or scripts/screenshot-themes.mjs first
+//      to produce the PNGs (./screenshots or ./themes respectively)
 //   2. Make sure ffmpeg is on PATH (any 4.3+ build with xfade/palettegen)
 //   3. Run:
-//        node scripts/screenshot-gif.mjs
+//        node scripts/screenshots-to-gif.mjs
+//        IN_DIR=scripts/themes OUT_FILE=scripts/themes.gif node scripts/screenshots-to-gif.mjs
 //
 // Env vars (all optional):
 //   IN_DIR          default ./screenshots (next to this script)
@@ -25,7 +30,11 @@
 //   ONLY            comma-separated substrings — keep only filenames containing one
 //
 // Example — drop the login screens, slower pace, hard cuts:
-//   SKIP=after-login,settings-demo-on HOLD_MS=1500 FADE_MS=0 node scripts/screenshot-gif.mjs
+//   SKIP=after-login,settings-demo-on HOLD_MS=1500 FADE_MS=0 node scripts/screenshots-to-gif.mjs
+//
+// Example — themes gif (files already sort alphabetically: crimson, matrix,
+// nightfall, nord, obsidian, unicorn):
+//   IN_DIR=scripts/themes OUT_FILE=scripts/themes.gif node scripts/screenshots-to-gif.mjs
 
 import fs from "fs";
 import path from "path";
