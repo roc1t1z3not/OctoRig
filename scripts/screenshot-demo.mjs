@@ -56,8 +56,7 @@ await page.click('button[type="submit"]');
 await page.waitForURL(`${BASE_URL}/`, { timeout: 15000 }).catch(() => {});
 await shot("00-after-login");
 
-// Enable demo mode: Settings -> Demo tab -> toggle (component reloads the
-// page itself ~150ms after the change, see app/(app)/settings/page.tsx).
+// Enable demo mode: Settings -> Demo tab -> toggle
 await page.goto(`${BASE_URL}/settings`);
 await page.click('text="Demo"');
 await page.waitForTimeout(300);
@@ -68,22 +67,22 @@ await shot("00b-settings-demo-on");
 const pages = [
   ["01-dashboard", "/"],
   ["02-challenges", "/challenges"],
-  ["03-badges", "/badges"],
+  ["03-events", "/events"],
   ["04-scoreboard", "/scoreboard"],
-  ["05-events", "/events"],
-  ["06-teams", "/teams"],
-  ["07-labs", "/labs"],
-  ["08-deployments", "/deployments"],
+  ["05-badges", "/badges"],
+  ["06-labs", "/labs"],
+  ["07-deployments", "/deployments"],
+  ["08-teams", "/teams"],
   ["09-api-keys", "/api-keys"],
   ["10-notifications", "/notifications"],
   ["11-admin", "/admin"],
   ["12-admin-users", "/admin/users"],
-  ["13-admin-teams", "/admin/teams"],
-  ["14-admin-audit", "/admin/audit"],
-  ["15-admin-assessments", "/admin/assessments"],
-  ["16-admin-content", "/admin/content"],
-  ["17-admin-roles", "/admin/roles"],
-  ["18-admin-deployments", "/admin/deployments"],
+  ["13-admin-roles", "/admin/roles"],
+  ["14-admin-teams", "/admin/teams"],
+  ["15-admin-deployments", "/admin/deployments"],
+  ["16-admin-audit", "/admin/audit"],
+  ["17-admin-assessments", "/admin/assessments"],
+  ["18-admin-content", "/admin/content"],
 ];
 
 for (const [name, path] of pages) {
