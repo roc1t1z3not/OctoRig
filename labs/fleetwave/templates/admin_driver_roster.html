@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}Driver Roster{% endblock %}
+{% block content %}
+<h2>Driver Roster <span class="badge badge-admin">PII</span></h2>
+<p class="muted" style="font-size:13px">Licence numbers and contact details for active drivers.</p>
+<div class="card" style="padding:0;overflow:hidden">
+  <table class="data">
+    <thead><tr><th>ID</th><th>Driver</th><th>Depot</th><th>Licence</th><th>Phone</th><th>Vehicle</th><th>Notes</th></tr></thead>
+    <tbody>
+    {% for d in drivers %}
+      <tr><td>{{ d.id }}</td><td>{{ d.full_name }}</td><td>{{ d.depot_name }}</td>
+        <td><code>{{ d.license_no }}</code></td><td>{{ d.phone }}</td><td>{{ d.vehicle }}</td>
+        <td class="muted">{{ d.notes }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

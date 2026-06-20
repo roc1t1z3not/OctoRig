@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}FleetWave — Logistics Control{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="eyebrow">Fleet &amp; Delivery Operations</div>
+  <h1>Every parcel, <span class="grad">in motion</span></h1>
+  <p>The internal control plane for dispatchers, depot managers, and last-mile drivers — live shipment tracking, depot manifests, driver rosters, freight-credit billing, and carrier checks in one console.</p>
+  <div class="hero-actions">
+    <a href="{{ url_for('login') }}" class="btn">Sign in to the ops board &rarr;</a>
+  </div>
+  <svg class="route-svg" viewBox="0 0 640 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M40 95 C 160 95, 180 35, 300 35 S 480 95, 600 55" stroke="#cfd9e6" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/>
+    <path d="M40 95 C 160 95, 180 35, 300 35 S 440 70, 510 62" stroke="url(#g)" stroke-width="3.5" stroke-linecap="round"/>
+    <defs><linearGradient id="g" x1="40" y1="0" x2="600" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#16b6b1"/><stop offset="1" stop-color="#0b7e83"/></linearGradient></defs>
+    <circle cx="40" cy="95" r="7" fill="#0b7e83"/><circle cx="40" cy="95" r="13" fill="#0b7e83" opacity=".15"/>
+    <g transform="translate(503 62)"><circle r="11" fill="#f59e0b"/><circle r="18" fill="#f59e0b" opacity=".15"/>
+      <path d="M-5 0h7l3 3v3h-10z M-5 -3h7v3" stroke="#2a1c00" stroke-width="1.4" fill="none" stroke-linejoin="round"/></g>
+    <circle cx="600" cy="55" r="6" fill="#123a63"/>
+  </svg>
+</section>
+
+<section class="grid-3" style="margin-top:1.5rem">
+  <div class="card">
+    <div class="kpi-icon" style="width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:#e8f0fe;color:#2f6fed;margin-bottom:.6rem"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m12 7 0 5 3 3"/></svg></div>
+    <h3 style="margin-top:0">Live Tracking</h3><p class="muted">Every shipment, status, and exception across all depots in real time.</p>
+  </div>
+  <div class="card">
+    <div class="kpi-icon" style="width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:#e8f6f6;color:#0b7e83;margin-bottom:.6rem"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21v-6h6v6"/></svg></div>
+    <h3 style="margin-top:0">Depot Manifests</h3><p class="muted">Cross-dock schedules, capacity, and bonded-cargo handling per depot.</p>
+  </div>
+  <div class="card">
+    <div class="kpi-icon" style="width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:#fdf1da;color:#c47e06;margin-bottom:.6rem"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>
+    <h3 style="margin-top:0">Freight Credits</h3><p class="muted">Demand-response billing and inter-account freight-credit settlement.</p>
+  </div>
+</section>
+
+<p class="muted center" style="margin-top:2rem;font-family:var(--mono);font-size:12px;letter-spacing:1px">FLEETWAVE WMS v4.1 &middot; AUTHORISED OPERATORS ONLY</p>
+{% endblock %}

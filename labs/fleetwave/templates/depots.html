@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}Depots{% endblock %}
+{% block content %}
+<h2>Depots</h2>
+<div class="grid-3">
+  {% for d in depots %}
+    <div class="card">
+      <strong><a href="{{ url_for('depot_detail', depot_id=d.id) }}">{{ d.name }}</a></strong>
+      <div class="muted" style="font-size:13px">{{ d.region }}</div>
+      <div class="muted" style="font-size:13px;margin-top:.5rem">Capacity {{ '{:,}'.format(d.capacity) }} units</div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

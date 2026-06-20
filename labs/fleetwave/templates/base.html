@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<!-- Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}FleetWave{% endblock %} — Fleet &amp; Delivery Ops</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% set u = current_user() %}
+{% set ep = request.endpoint %}
+
+<header class="fw-mast {{ '' if u else 'mast-plain' }}">
+  <a class="fw-brand" href="{{ url_for('index') }}">
+    <span class="mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h13v13H1z"/><path d="M14 8h5l3 3v5h-8z"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg>
+    </span>
+    <span>Fleet<b>Wave</b><span class="tag">Dispatch Control</span></span>
+  </a>
+
+  {% if u %}
+  <form class="fw-track" method="GET" action="{{ url_for('shipment_search') }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" name="q" placeholder="Track shipment or recipient…" autocomplete="off">
+  </form>
+  {% endif %}
+
+  <div class="fw-user">
+    {% if u %}
+      <span class="who">Signed in as <b>{{ u.username }}</b></span>
+      <span class="fw-avatar" title="{{ u.username }}">{{ u.username[0] | upper }}</span>
+      <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm">Sign out</a>
+    {% else %}
+      <a href="{{ url_for('login') }}" class="btn btn-ghost btn-sm">Sign in</a>
+    {% endif %}
+  </div>
+</header>
+
+{% if u %}
+<nav class="fw-tabs">
+  <a class="fw-tab {{ 'active' if ep == 'dashboard' else '' }}" href="{{ url_for('dashboard') }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+    Dashboard</a>
+  <a class="fw-tab {{ 'active' if ep in ['shipments','shipment_detail','shipment_search'] else '' }}" href="{{ url_for('shipments') }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>
+    Shipments</a>
+  <a class="fw-tab {{ 'active' if ep in ['depots','depot_detail'] else '' }}" href="{{ url_for('depots') }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21v-6h6v6"/></svg>
+    Depots</a>
+  <a class="fw-tab {{ 'active' if ep == 'billing' else '' }}" href="{{ url_for('billing') }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+    Freight Credits</a>
+  <a class="fw-tab {{ 'active' if ep == 'profile' else '' }}" href="{{ url_for('profile') }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+    Profile</a>
+  {% if u.is_admin or u.role == 'admin' %}
+    <a class="fw-tab admin {{ 'active' if ep == 'admin_index' else '' }}" href="{{ url_for('admin_index') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.5c2.5.3 5.5 1.8 5.5 5"/></svg>
+      Users</a>
+    <a class="fw-tab admin {{ 'active' if ep == 'admin_driver_roster' else '' }}" href="{{ url_for('admin_driver_roster') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6h11v9H1z"/><path d="M12 9h5l4 3v3h-9z"/><circle cx="5" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+      Drivers</a>
+    <a class="fw-tab admin {{ 'active' if ep == 'admin_review' else '' }}" href="{{ url_for('admin_review') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.2L4 18z"/><path d="M8 9h8M8 12h5"/></svg>
+      Review</a>
+  {% endif %}
+</nav>
+{% endif %}
+
+<main class="fw-main">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="fw-footer">
+  FleetWave — Fleet &amp; Delivery Management Platform &middot;
+  Lab author: <a href="https://github.com/roc1t1z3not" target="_blank">roc1t1z3not</a> &middot;
+  Made with <a href="https://github.com/CommonHuman-Lab" target="_blank">CommonHuman-Lab</a>
+</footer>
+<!--
+     ___
+    /   \     CommonHuman-Lab
+   | o_o |    Security Training Labs
+    \___/     Lab: FleetWave
+   /|   |\    Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not
+  (_)   (_)
+-->
+<script>console.log('%c\u{1F419} OctoRig By CommonHuman | Lab: FleetWave | Author: roc1t1z3not | Happy hacking!','color:#0b7285;font-size:14px;font-weight:bold;');</script>
+</body>
+</html>

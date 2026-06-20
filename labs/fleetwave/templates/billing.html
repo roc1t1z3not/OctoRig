@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}Freight Credits{% endblock %}
+{% block content %}
+<h2>Freight Credits</h2>
+
+<div class="kpi-row" style="grid-template-columns:repeat(2,1fr);max-width:520px">
+  <div class="kpi"><div class="n">{{ '%.2f'|format(balance) }}</div><div class="l">Your credit balance</div></div>
+</div>
+
+{% if message %}<div class="alert">{{ message }}</div>{% endif %}
+{% if flag %}<div class="alert alert-flag">Reconciliation alarm: balance exceeds {{ '{:,}'.format(threshold) }} — {{ flag }}</div>{% endif %}
+
+<div class="card">
+  <h3 style="margin-top:0">Transfer freight credits</h3>
+  <p class="muted" style="font-size:13px">Settle demand-response credits to another account.</p>
+  <form method="post" action="{{ url_for('billing') }}" class="inline-form">
+    <div>
+      <label>To account</label>
+      <select name="to_account">
+        {% for a in accounts %}<option value="{{ a.id }}">{{ a.id }} — {{ a.full_name or a.username }}</option>{% endfor %}
+      </select>
+    </div>
+    <div><label>Amount</label><input type="text" name="amount" placeholder="100"></div>
+    <button class="btn btn-sm" type="submit">Transfer</button>
+  </form>
+</div>
+
+<h3>Recent ledger</h3>
+<div class="card" style="padding:0;overflow:hidden">
+  <table class="data">
+    <thead><tr><th>#</th><th>Delta</th><th>Reason</th><th>When</th></tr></thead>
+    <tbody>
+    {% for l in ledger %}
+      <tr><td>{{ l.id }}</td><td>{{ '%.2f'|format(l.delta) }}</td><td>{{ l.reason }}</td><td class="muted">{{ l.created_at }}</td></tr>
+    {% else %}
+      <tr><td colspan="4" class="muted">No ledger entries yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

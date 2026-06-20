@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2026 CommonHuman-Lab
 from .._types import LabDefinition
+from .fleetwave import FLEETWAVE_LAB
 from .goldenace import GOLDENACE_LAB
 from .humanbank import HUMANBANK_LAB
 from .limelight import LIMELIGHT_LAB
@@ -25,4 +26,5 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
     SMARTGRIDOPS_LAB,
     VAULTSYNC_LAB,
     MEDIACRATE_LAB,
+    FLEETWAVE_LAB,
 ]

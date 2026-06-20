@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}Shipments{% endblock %}
+{% block content %}
+<h2>Shipments</h2>
+<div class="card" style="padding:0;overflow:hidden">
+  <table class="data">
+    <thead><tr><th>ID</th><th>Tracking</th><th>Recipient</th><th>Destination</th><th>Cost</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for s in shipments %}
+      <tr>
+        <td><code>{{ '%03d'|format(s.id) }}</code></td>
+        <td><a href="{{ url_for('shipment_detail', shipment_id=s.id) }}"><code>{{ s.tracking_no }}</code></a></td>
+        <td>{{ s.recipient }}</td>
+        <td class="muted">{{ s.destination }}</td>
+        <td>${{ '%.2f'|format(s.cost) }}</td>
+        <td><span class="st st-{{ s.status }}">{{ s.status.replace('_',' ') }}</span></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
