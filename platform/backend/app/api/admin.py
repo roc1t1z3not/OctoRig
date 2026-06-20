@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2026 CommonHuman-Lab
+from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Query, Request
@@ -17,6 +18,7 @@ from app.models.badge import UserBadge
 from app.models.challenge import ChallengeSubmission, HintUnlock
 from app.models.ctf_event import EventRegistration
 from app.models.deployment import Deployment, DeploymentStatus
+from app.models.lab_template import LabTemplate
 from app.models.notification import Notification
 from app.models.rank import Rank
 from app.models.refresh_token import RefreshToken
@@ -313,6 +315,89 @@ def list_teams(
             )
         )
     return result
+
+
+# ── Labs ─────────────────────────────────────────────────────────────────────
+
+class AdminLabResponse(BaseModel):
+    id: int
+    slug: str
+    name: str
+    description: str
+    category: str
+    requires_privileged: bool
+    is_active: bool
+    exposed_ports: dict
+    container_names: list[str]
+    active_deployment_count: int
+    total_deployment_count: int
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class AdminLabUpdate(BaseModel):
+    is_active: bool
+
+
+def _enrich_admin_lab(template: LabTemplate, db: Session) -> AdminLabResponse:
+    active_count = db.query(Deployment).filter(
+        Deployment.lab_template_id == template.id,
+        Deployment.status.in_([DeploymentStatus.STARTING, DeploymentStatus.RUNNING]),
+    ).count()
+    total_count = db.query(Deployment).filter(Deployment.lab_template_id == template.id).count()
+    return AdminLabResponse(
+        id=template.id,
+        slug=template.slug,
+        name=template.name,
+        description=template.description,
+        category=template.category,
+        requires_privileged=template.requires_privileged,
+        is_active=template.is_active,
+        exposed_ports=template.exposed_ports,
+        container_names=template.container_names,
+        active_deployment_count=active_count,
+        total_deployment_count=total_count,
+        created_at=template.created_at,
+        updated_at=template.updated_at,
+    )
+
+
+@router.get("/labs/", response_model=list[AdminLabResponse])
+def list_admin_labs(
+    category: Optional[str] = Query(None),
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> list[AdminLabResponse]:
+    q = db.query(LabTemplate)
+    if category:
+        q = q.filter(LabTemplate.category == category)
+    templates = q.order_by(LabTemplate.id).all()
+    return [_enrich_admin_lab(t, db) for t in templates]
+
+
+@router.patch("/labs/{lab_id}", response_model=AdminLabResponse)
+def update_admin_lab(
+    lab_id: int,
+    body: AdminLabUpdate,
+    request: Request,
+    actor: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> AdminLabResponse:
+    template = db.get(LabTemplate, lab_id)
+    if template is None:
+        raise not_found("Lab")
+    if template.is_active != body.is_active:
+        template.is_active = body.is_active
+        db.commit()
+        db.refresh(template)
+        audit_service.write_audit(
+            db, action=audit_service.ADMIN_LAB_TOGGLED, user_id=actor.id,
+            detail={"lab_id": lab_id, "lab_slug": template.slug, "is_active": body.is_active},
+            ip=request.client.host if request.client else None,
+        )
+    return _enrich_admin_lab(template, db)
 
 
 # ── Deployments (all) ────────────────────────────────────────────────────────

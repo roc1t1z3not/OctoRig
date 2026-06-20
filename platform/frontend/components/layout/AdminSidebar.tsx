@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import {
   ShieldCheck, UserCog, FolderGit2, Container, ScrollText,
   Trophy, Flag, KeyRound, BarChart3, Zap, ClipboardList, Settings,
-  ArrowLeft, LogOut,
+  ArrowLeft, LogOut, Boxes,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useUserStore } from "@/stores/user.store";
@@ -20,6 +20,7 @@ const NAV_ADMIN = [
   { href: "/admin/users",        icon: UserCog,       label: "Users" },
   { href: "/admin/roles",        icon: ShieldCheck,   label: "Roles" },
   { href: "/admin/teams",        icon: FolderGit2,    label: "Teams" },
+  { href: "/admin/labs",         icon: Boxes,         label: "Labs" },
   { href: "/admin/deployments",  icon: Container,     label: "Deployments" },
   { href: "/admin/audit",        icon: ScrollText,    label: "Audit Log" },
   { href: "/admin/challenges",   icon: Trophy,        label: "Challenges" },

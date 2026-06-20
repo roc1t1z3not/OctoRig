@@ -33,6 +33,7 @@ API_KEY_REVOKED = "api_key.revoked"
 ADMIN_USER_CREATED = "admin.user_created"
 ADMIN_USER_DEACTIVATED = "admin.user_deactivated"
 ADMIN_ROLE_CHANGED = "admin.role_changed"
+ADMIN_LAB_TOGGLED = "admin.lab_toggled"
 
 SCHEDULE_CREATED = "schedule.created"
 SCHEDULE_CANCELLED = "schedule.cancelled"

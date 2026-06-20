@@ -224,3 +224,29 @@ export async function stopAllDeployments(): Promise<void> {
 export async function restartPlatform(): Promise<void> {
   await apiClient.post("/admin/platform/restart");
 }
+
+export interface AdminLab {
+  id: number;
+  slug: string;
+  name: string;
+  description: string;
+  category: string;
+  requires_privileged: boolean;
+  is_active: boolean;
+  exposed_ports: Record<string, number>;
+  container_names: string[];
+  active_deployment_count: number;
+  total_deployment_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getAdminLabs(params?: { category?: string }): Promise<AdminLab[]> {
+  const { data } = await apiClient.get<AdminLab[]>("/admin/labs/", { params });
+  return data;
+}
+
+export async function updateAdminLab(id: number, payload: { is_active: boolean }): Promise<AdminLab> {
+  const { data } = await apiClient.patch<AdminLab>(`/admin/labs/${id}`, payload);
+  return data;
+}
