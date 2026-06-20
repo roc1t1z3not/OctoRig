@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ vault.name }}</h2>
+<p class="muted">Owner: {{ owner.username if owner else 'unknown' }}</p>
+<table class="data">
+  <thead><tr><th>Title</th><th>Site</th><th>User</th><th></th></tr></thead>
+  <tbody>
+  {% for i in items %}
+    <tr>
+      <td>{{ i.title }}</td>
+      <td>{{ i.site_url }}</td>
+      <td>{{ i.item_user }}</td>
+      <td><a class="btn btn-sm" href="{{ url_for('vault_item_detail', item_id=i.id) }}">View</a></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="4" class="muted">This vault has no items.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

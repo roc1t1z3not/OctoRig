@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="narrow card auth-card">
+  <div class="auth-mark">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+  </div>
+  <h2 class="center" style="border:0;justify-content:center">Sign in</h2>
+  {% if error %}<div class="alert alert-bad">{{ error }}</div>{% endif %}
+  <form method="POST">
+    <label>Username</label>
+    <input type="text" name="username" autocomplete="off">
+    <label>Master password</label>
+    <input type="password" name="password">
+    <button class="btn" type="submit">Unlock vault</button>
+  </form>
+  <p class="muted center" style="margin-top:1rem">No account? <a href="{{ url_for('register') }}">Create one</a></p>
+</div>
+{% endblock %}

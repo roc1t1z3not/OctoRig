@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Platform recovery codes</h2>
+<div class="alert alert-flag">
+  Master recovery code: FLAG{vs_bac_admin_recovery_exposed}
+</div>
+<p class="muted">These codes unlock the platform's master encryption key if the
+admin's master password is ever lost. This page should never be reachable by
+a non-admin account.</p>
+{% endblock %}

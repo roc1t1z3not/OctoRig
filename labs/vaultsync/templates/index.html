@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="hero">
+  <div class="eyebrow">Zero-Knowledge&trade; Vault</div>
+  <h1>Your passwords, <span class="amber">synced</span> everywhere.</h1>
+  <p class="lede">VaultSync stores, shares, and syncs your credentials across every device.
+    One master password unlocks everything.</p>
+  <div class="hero-actions">
+    <a class="btn" href="{{ url_for('register') }}">Create a free vault</a>
+    <a class="btn btn-sm btn-amber" href="{{ url_for('login') }}">Sign in</a>
+  </div>
+</div>
+
+<div class="grid-3">
+  <div class="card">
+    <h3>Sync everywhere</h3>
+    <p class="muted">Your vault follows you across browser, mobile, and CLI.</p>
+  </div>
+  <div class="card">
+    <h3>Share securely</h3>
+    <p class="muted">Grant teammates or family read access to a vault without exposing your master password.</p>
+  </div>
+  <div class="card">
+    <h3>Breach monitoring</h3>
+    <p class="muted">Admins can run breach checks against any URL to verify a credential hasn't leaked.</p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Share "{{ vault.name }}"</h2>
+{% if error %}<div class="alert alert-bad">{{ error }}</div>{% endif %}
+<form method="POST" class="inline-form">
+  <div>
+    <label>Share with username</label>
+    <input type="text" name="username">
+  </div>
+  <button class="btn btn-sm" type="submit">Grant read access</button>
+</form>
+<table class="data" style="margin-top:1.4rem">
+  <thead><tr><th>Shared with</th><th>Permission</th></tr></thead>
+  <tbody>
+  {% for s in shares %}
+    <tr><td>{{ s.username }}</td><td>{{ s.permission }}</td></tr>
+  {% else %}
+    <tr><td colspan="2" class="muted">Not shared with anyone yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}VaultSync{% endblock %} — Password Manager</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="scanlines"></div>
+{% set u = current_user() %}
+{% set ep = request.endpoint %}
+
+<header class="topbar">
+  <a class="brand" href="{{ url_for('index') }}">
+    <span class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </span>
+    <span class="name">VAULT<span>SYNC</span></span>
+    <span class="ver">v2.1</span>
+  </a>
+
+  <div class="telemetry">
+    <span class="tele">VAULTS<b>8</b></span>
+    <span class="tele">ITEMS SYNCED<b>10</b></span>
+    <span class="tele warn">PLAN<b>{{ (u.plan if u else 'guest') | upper }}</b></span>
+  </div>
+
+  <div class="session">
+    {% if u %}
+      <span class="status-dot" title="session active"></span>
+      <span class="op-name">{{ (u.full_name if u.full_name else u.username) }}</span>
+      <span class="role-pill">{{ u.role }}</span>
+      <a href="{{ url_for('logout') }}" class="btn btn-sm btn-amber">Sign out</a>
+    {% else %}
+      <span class="status-dot" style="background:var(--muted);animation:none" title="signed out"></span>
+      <a href="{{ url_for('login') }}" class="btn btn-sm">Sign in</a>
+    {% endif %}
+  </div>
+</header>
+
+<div class="shell {{ '' if u else 'no-side' }}">
+  {% if u %}
+  <aside class="sidebar">
+    <div class="side-label">Vault</div>
+    <a class="side-link {{ 'active' if ep == 'dashboard' else '' }}" href="{{ url_for('dashboard') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      Dashboard
+    </a>
+    <a class="side-link {{ 'active' if ep == 'vault_search' else '' }}" href="{{ url_for('vault_search') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      Search
+    </a>
+    <a class="side-link {{ 'active' if ep == 'profile' else '' }}" href="{{ url_for('profile') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>
+      Profile
+    </a>
+    {% if u.is_admin or u.role == 'admin' %}
+    <div class="side-label">Admin</div>
+    <a class="side-link {{ 'active' if ep == 'admin_index' else '' }}" href="{{ url_for('admin_index') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4z"/></svg>
+      User Roster
+    </a>
+    <a class="side-link {{ 'active' if ep == 'admin_review' else '' }}" href="{{ url_for('admin_review') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Review Queue
+    </a>
+    {% endif %}
+    <div class="side-foot">
+      CommonHuman-Lab<br>
+      VaultSync &mdash; OctoRig
+    </div>
+  </aside>
+  {% endif %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+<footer>
+  VaultSync — Password Manager SaaS &middot;
+  Made with <a href="https://github.com/CommonHuman-Lab" target="_blank">CommonHuman-Lab</a>
+</footer>
+</body>
+</html>

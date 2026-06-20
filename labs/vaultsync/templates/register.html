@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="narrow card auth-card">
+  <div class="auth-mark">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>
+  </div>
+  <h2 class="center" style="border:0;justify-content:center">Create your vault</h2>
+  {% if error %}<div class="alert alert-bad">{{ error }}</div>{% endif %}
+  <form method="POST">
+    <label>Username</label>
+    <input type="text" name="username" autocomplete="off">
+    <label>Email</label>
+    <input type="email" name="email">
+    <label>Master password</label>
+    <input type="password" name="password">
+    <button class="btn" type="submit">Create vault</button>
+  </form>
+  <p class="muted center" style="margin-top:1rem">Already have a vault? <a href="{{ url_for('login') }}">Sign in</a></p>
+</div>
+{% endblock %}

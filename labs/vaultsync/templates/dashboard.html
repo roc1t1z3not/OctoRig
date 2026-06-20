@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Your vaults</h2>
+<table class="data">
+  <thead><tr><th>Vault</th><th>Created</th><th></th></tr></thead>
+  <tbody>
+  {% for v in vaults %}
+    <tr>
+      <td>{{ v.name }}</td>
+      <td>{{ v.created_at }}</td>
+      <td>
+        <a class="btn btn-sm" href="{{ url_for('vault_detail', vault_id=v.id) }}">Open</a>
+        <a class="btn btn-sm btn-amber" href="{{ url_for('vault_share', vault_id=v.id) }}">Share</a>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2 style="margin-top:2rem">Shared with you</h2>
+<table class="data">
+  <thead><tr><th>Vault</th><th></th></tr></thead>
+  <tbody>
+  {% for v in shared %}
+    <tr><td>{{ v.name }}</td><td><a class="btn btn-sm" href="{{ url_for('vault_detail', vault_id=v.id) }}">Open</a></td></tr>
+  {% else %}
+    <tr><td colspan="2" class="muted">No vaults have been shared with you yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

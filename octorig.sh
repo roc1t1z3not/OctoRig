@@ -71,10 +71,11 @@ LABS=(
   "16|WebGoat|webgoat.sh|OWASP WebGoat - PortSwigger-style lesson-based labs"
   "17|VulnAD|vulnad.sh|Vulnerable Active Directory - Samba4 AD with AD attack paths"
   "18|SmartGridOps|smartgridops.sh|Vulnerable IoT smart-city power-grid control dashboard — SSRF, command injection, hardcoded device tokens, IDOR, business logic, MQTT/IoT injection, SSH/FTP"
+  "19|VaultSync|vaultsync.sh|Vulnerable password manager SaaS — SQLi, IDOR, XSS, BAC, mass assignment, SSRF chained to command injection, SSH/FTP weak creds"
 )
 
 # IDs of real-world scenario labs (for "start world")
-WORLD_LAB_IDS=(1 2 3 4 5 6 7 8 18)
+WORLD_LAB_IDS=(1 2 3 4 5 6 7 8 18 19)
 
 # ---------------- dependency checks ------------------------------------------
 install_docker() {

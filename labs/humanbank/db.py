@@ -239,6 +239,13 @@ INSERT OR IGNORE INTO users VALUES
   (57,'carl.sanchez',     'cc25c0f861a83f5efadc6e1ba9d1269e','carl.sanchez@example.com',     'Carl Sanchez',     0,'','','19 Border Street, El Paso TX'),
   (58,'diane.morris',     'b696aef7776367787253dc2acdd10279','diane.morris@example.com',     'Diane Morris',     0,'Veterinarian. Loves animals, hates spreadsheets.','+1 651 555 0411','77 Lakeview Drive, St Paul MN');
 
+-- Contractor account. Cross-lab credential-reuse pivot target for VaultSync's
+-- vs-credential-reuse-pivot challenge — this password is only discoverable by
+-- reading j.reyes' VaultSync vault (item id 11, planted in labs/vaultsync/db.py),
+-- not by anything inside this lab on its own.
+INSERT OR IGNORE INTO users VALUES
+  (59,'j.reyes','correct1','j.reyes@contractor.example','Jordan Reyes',0,'Contractor — temporary access for the Q2 ledger migration. FLAG{vs_credential_reuse_pivot}','','c/o IT Contracting Pool');
+
 INSERT OR IGNORE INTO accounts VALUES
   (14, 9,'HB-0014','','checking',  3450.00,'2022-03-15'),
   (15, 9,'HB-0015','','savings',   8200.00,'2022-03-15'),
