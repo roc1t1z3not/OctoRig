@@ -6,16 +6,20 @@ import "./deployments.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Square, RotateCcw } from "lucide-react";
-import { getDeployments, stopDeployment, resetDeployment } from "@/lib/api/deployments";
+import { Square, RotateCcw, Play, Trash2 } from "lucide-react";
+import {
+  getDeployments, stopDeployment, resetDeployment, restartDeployment, removeDeployment,
+} from "@/lib/api/deployments";
 import { DeploymentStatusBadge } from "@/components/deployments/DeploymentStatusBadge";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { useConfirmStore } from "@/stores/confirm.store";
 import { formatDateTime } from "@/lib/utils/date";
 
 export default function DeploymentsPage() {
   const qc = useQueryClient();
   const router = useRouter();
   const { push } = useNotificationsStore();
+  const { confirm } = useConfirmStore();
 
   const { data: deployments = [], isLoading } = useQuery({
     queryKey: ["deployments"],
@@ -41,6 +45,35 @@ export default function DeploymentsPage() {
     },
     onError: () => push("error", "Failed to reset lab"),
   });
+
+  const startMutation = useMutation({
+    mutationFn: restartDeployment,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["deployments"] });
+      qc.invalidateQueries({ queryKey: ["labs"] });
+      push("success", "Lab start requested");
+    },
+    onError: () => push("error", "Failed to start lab"),
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: removeDeployment,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["deployments"] });
+      push("success", "Deployment removed");
+    },
+    onError: () => push("error", "Failed to remove deployment"),
+  });
+
+  function handleRemove(id: number, labName: string) {
+    confirm({
+      title: "Remove deployment?",
+      body: `Permanently remove the "${labName}" deployment record? This cannot be undone.`,
+      confirmLabel: "Remove",
+      dangerous: true,
+      onConfirm: () => removeMutation.mutate(id),
+    });
+  }
 
   return (
     <div className="page">
@@ -70,6 +103,8 @@ export default function DeploymentsPage() {
             {deployments.map((d) => {
               const canStop = d.status === "running" || d.status === "starting";
               const canReset = d.status === "running" && d.lab_category === "firerange";
+              const canStart = d.status === "stopped" || d.status === "error";
+              const canRemove = d.status === "stopped" || d.status === "error";
               return (
                 <tr
                   key={d.id}
@@ -106,6 +141,26 @@ export default function DeploymentsPage() {
                           title="Reset scoreboard"
                         >
                           <RotateCcw size={13} />
+                        </button>
+                      )}
+                      {canStart && (
+                        <button
+                          className="g-btn g-btn-primary g-btn-icon"
+                          onClick={() => startMutation.mutate(d.id)}
+                          disabled={startMutation.isPending}
+                          title="Start lab"
+                        >
+                          <Play size={13} />
+                        </button>
+                      )}
+                      {canRemove && (
+                        <button
+                          className="g-btn g-btn-danger g-btn-icon"
+                          onClick={() => handleRemove(d.id, d.lab_name)}
+                          disabled={removeMutation.isPending}
+                          title="Remove deployment"
+                        >
+                          <Trash2 size={13} />
                         </button>
                       )}
                     </div>

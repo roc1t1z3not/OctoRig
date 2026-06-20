@@ -394,6 +394,54 @@ def stop_lab(deployment_id: int, user_id: int, remove_volumes: bool = False) -> 
         db.close()
 
 
+def purge_deployment(db: Session, deployment_id: int, user_id: int) -> None:
+    """Hard-delete a stopped/errored deployment's DB row.
+
+    Runs synchronously in the request — containers are already gone for
+    STOPPED deployments. For ERROR deployments (which may have failed
+    mid-start or mid-stop) this does a best-effort cleanup pass first so we
+    never orphan a container/network/volume.
+    """
+    deployment = db.get(Deployment, deployment_id)
+    if deployment is None:
+        return
+
+    template = db.get(LabTemplate, deployment.lab_template_id)
+
+    for name in deployment.container_names:
+        try:
+            docker_service.stop_container(name)
+        except Exception:
+            pass
+    if deployment.network_name:
+        try:
+            docker_service.remove_network(deployment.network_name)
+        except Exception:
+            pass
+    for vol in deployment.volume_names:
+        try:
+            docker_service.remove_volume(vol)
+        except Exception:
+            pass
+
+    write_audit(
+        db,
+        action="lab.remove",
+        user_id=user_id,
+        deployment_id=deployment_id,
+        detail={"lab": template.slug if template else None},
+    )
+
+    db.delete(deployment)
+    db.commit()
+
+    ws_emit("deployment.update", {
+        "id": deployment_id,
+        "lab_template_id": template.id if template else None,
+        "status": "removed",
+    })
+
+
 def reset_lab(deployment_id: int, user_id: int) -> None:
     """
     Fire-range reset: stop the lab (removing score volumes), then start fresh.

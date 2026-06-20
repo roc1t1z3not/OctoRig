@@ -60,6 +60,15 @@ export async function stopDeployment(id: number): Promise<Deployment> {
   return data;
 }
 
+export async function restartDeployment(id: number): Promise<Deployment> {
+  const { data } = await apiClient.post<Deployment>(`/deployments/${id}/start`);
+  return data;
+}
+
+export async function removeDeployment(id: number): Promise<void> {
+  await apiClient.delete(`/deployments/${id}/purge`);
+}
+
 export async function resetDeployment(id: number): Promise<Deployment> {
   const { data } = await apiClient.post<Deployment>(`/deployments/${id}/reset`);
   return data;

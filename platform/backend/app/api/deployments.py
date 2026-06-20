@@ -256,6 +256,52 @@ def destroy_deployment(
     return _to_response(d, db)
 
 
+@router.post("/{deployment_id}/start", response_model=DeploymentWithTemplate, status_code=202)
+def start_deployment(
+    deployment_id: int,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_or_api_key),
+) -> DeploymentWithTemplate:
+    d = db.get(Deployment, deployment_id)
+    if d is None:
+        raise not_found("Deployment")
+
+    membership = _get_membership(db, current_user, d.team_id)
+    if not can_destroy_deployment(current_user, db, d, membership):
+        raise forbidden_exception
+
+    if d.status not in (DeploymentStatus.STOPPED, DeploymentStatus.ERROR):
+        raise bad_request(f"Deployment is {d.status.value} — can only start stopped or errored deployments")
+
+    d.status = DeploymentStatus.STARTING
+    d.error_message = None
+    db.commit()
+
+    background_tasks.add_task(lab_service.start_lab, deployment_id, current_user.id)
+    return _to_response(d, db)
+
+
+@router.delete("/{deployment_id}/purge", status_code=204)
+def purge_deployment(
+    deployment_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_or_api_key),
+) -> None:
+    d = db.get(Deployment, deployment_id)
+    if d is None:
+        raise not_found("Deployment")
+
+    membership = _get_membership(db, current_user, d.team_id)
+    if not can_destroy_deployment(current_user, db, d, membership):
+        raise forbidden_exception
+
+    if d.status not in (DeploymentStatus.STOPPED, DeploymentStatus.ERROR):
+        raise bad_request(f"Deployment is {d.status.value} — can only remove stopped or errored deployments")
+
+    lab_service.purge_deployment(db, deployment_id, current_user.id)
+
+
 @router.patch("/{deployment_id}/visibility", response_model=DeploymentWithTemplate)
 def set_visibility(
     deployment_id: int,

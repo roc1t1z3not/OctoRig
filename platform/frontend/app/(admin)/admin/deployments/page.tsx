@@ -5,10 +5,11 @@ import "./admin-deployments.css";
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Trash2, RefreshCw, StopCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Trash2, RefreshCw, StopCircle, Play, X } from "lucide-react";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { getAdminDeployments, stopAllDeployments, type AdminDeployment } from "@/lib/api/admin";
-import { stopDeployment, resetDeployment } from "@/lib/api/deployments";
+import { stopDeployment, resetDeployment, restartDeployment, removeDeployment } from "@/lib/api/deployments";
 import { DeploymentStatusBadge } from "@/components/deployments/DeploymentStatusBadge";
 import { LoadingCell, EmptyCell } from "@/components/ui/TableStates";
 import { useNotificationsStore } from "@/stores/notifications.store";
@@ -16,12 +17,14 @@ import { useConfirmStore } from "@/stores/confirm.store";
 import { formatDateTime } from "@/lib/utils/date";
 
 const ACTIVE_STATUSES = new Set(["starting", "running", "error"]);
+const STOPPABLE_STATUSES = new Set(["stopped", "error"]);
 
 export default function AdminDeploymentsPage() {
   const [search, setSearch] = useState("");
   const { push } = useNotificationsStore();
   const { confirm } = useConfirmStore();
   const qc = useQueryClient();
+  const router = useRouter();
 
   const { data: deployments = [], isLoading } = useQuery<AdminDeployment[]>({
     queryKey: ["admin-deployments", search],
@@ -62,6 +65,34 @@ export default function AdminDeploymentsPage() {
       body: `Reset the "${d.lab_name}" lab for ${d.started_by_username}? The container will restart with a fresh state.`,
       confirmLabel: "Reset",
       onConfirm: () => resetMutation.mutate(d.id),
+    });
+  }
+
+  const startMutation = useMutation({
+    mutationFn: restartDeployment,
+    onSuccess: () => {
+      push("success", "Deployment start requested");
+      qc.invalidateQueries({ queryKey: ["admin-deployments"] });
+    },
+    onError: () => push("error", "Failed to start deployment"),
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: removeDeployment,
+    onSuccess: () => {
+      push("success", "Deployment removed");
+      qc.invalidateQueries({ queryKey: ["admin-deployments"] });
+    },
+    onError: () => push("error", "Failed to remove deployment"),
+  });
+
+  function handleRemove(d: AdminDeployment) {
+    confirm({
+      title: "Remove deployment?",
+      body: `Permanently remove the "${d.lab_name}" deployment record for ${d.started_by_username}? This cannot be undone.`,
+      confirmLabel: "Remove",
+      dangerous: true,
+      onConfirm: () => removeMutation.mutate(d.id),
     });
   }
 
@@ -124,8 +155,13 @@ export default function AdminDeploymentsPage() {
             <tbody>
               {deployments.map((d) => {
                 const isActive = ACTIVE_STATUSES.has(d.status);
+                const isStoppable = STOPPABLE_STATUSES.has(d.status);
                 return (
-                  <tr key={d.id}>
+                  <tr
+                    key={d.id}
+                    className="g-table-row-link"
+                    onClick={() => router.push(`/deployments/${d.id}`)}
+                  >
                     <td className="font-mono text-sm">{d.lab_name}</td>
                     <td className="text-11 text-secondary">{d.started_by_username}</td>
                     <td className="text-11 text-muted">{d.team_name ?? "—"}</td>
@@ -143,27 +179,49 @@ export default function AdminDeploymentsPage() {
                     <td className="font-mono text-11 text-muted">
                       {formatDateTime(d.stopped_at)}
                     </td>
-                    <td>
-                      {isActive && (
-                        <div style={{ display: "flex", gap: 4 }}>
-                          <button
-                            className="g-btn g-btn-ghost g-btn-sm"
-                            title="Reset"
-                            disabled={resetMutation.isPending}
-                            onClick={() => handleReset(d)}
-                          >
-                            <RefreshCw size={12} />
-                          </button>
-                          <button
-                            className="g-btn g-btn-danger g-btn-sm"
-                            title="Destroy"
-                            disabled={destroyMutation.isPending}
-                            onClick={() => handleDestroy(d)}
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      )}
+                    <td onClick={(e) => e.stopPropagation()}>
+                      <div style={{ display: "flex", gap: 4 }}>
+                        {isActive && (
+                          <>
+                            <button
+                              className="g-btn g-btn-ghost g-btn-sm"
+                              title="Reset"
+                              disabled={resetMutation.isPending}
+                              onClick={() => handleReset(d)}
+                            >
+                              <RefreshCw size={12} />
+                            </button>
+                            <button
+                              className="g-btn g-btn-danger g-btn-sm"
+                              title="Destroy"
+                              disabled={destroyMutation.isPending}
+                              onClick={() => handleDestroy(d)}
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </>
+                        )}
+                        {isStoppable && (
+                          <>
+                            <button
+                              className="g-btn g-btn-primary g-btn-sm"
+                              title="Start"
+                              disabled={startMutation.isPending}
+                              onClick={() => startMutation.mutate(d.id)}
+                            >
+                              <Play size={12} />
+                            </button>
+                            <button
+                              className="g-btn g-btn-danger g-btn-sm"
+                              title="Remove"
+                              disabled={removeMutation.isPending}
+                              onClick={() => handleRemove(d)}
+                            >
+                              <X size={12} />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );

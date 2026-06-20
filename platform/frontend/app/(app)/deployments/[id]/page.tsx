@@ -4,16 +4,18 @@
 import "../deployment-detail.css";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, CheckCircle2, Clock, ExternalLink,
-  RotateCcw, Square, Target,
+  Play, RotateCcw, Square, Target, Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import {
   getDeployment,
+  removeDeployment,
   resetDeployment,
+  restartDeployment,
   setDeploymentVisibility,
   stopDeployment,
   type Deployment,
@@ -28,6 +30,7 @@ import { LabCategoryBadge } from "@/components/labs/LabCategoryBadge";
 import { LogViewer } from "@/components/deployments/LogViewer";
 import { useCountdown } from "@/hooks/useCountdown";
 import { useNotificationsStore } from "@/stores/notifications.store";
+import { useConfirmStore } from "@/stores/confirm.store";
 import { PageSpinner } from "@/components/ui/Spinner";
 import { DIFF_COLOR } from "@/lib/utils/difficulty";
 import { addHours } from "@/lib/utils/date";
@@ -44,7 +47,9 @@ export default function DeploymentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const deploymentId = Number(id);
   const qc = useQueryClient();
+  const router = useRouter();
   const { push } = useNotificationsStore();
+  const { confirm } = useConfirmStore();
 
   const [showSchedule, setShowSchedule] = useState(false);
   const [scheduledAt, setScheduledAt] = useState(() => addHours(2));
@@ -89,6 +94,38 @@ export default function DeploymentDetailPage() {
     onError: () => push("error", "Failed to reset lab"),
   });
 
+  const startMutation = useMutation({
+    mutationFn: () => restartDeployment(deploymentId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["deployment", deploymentId] });
+      qc.invalidateQueries({ queryKey: ["deployments"] });
+      qc.invalidateQueries({ queryKey: ["labs"] });
+      push("success", "Lab start requested");
+    },
+    onError: () => push("error", "Failed to start lab"),
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: () => removeDeployment(deploymentId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["deployments"] });
+      push("success", "Deployment removed");
+      router.push("/deployments");
+    },
+    onError: () => push("error", "Failed to remove deployment"),
+  });
+
+  function handleRemove() {
+    if (!deployment) return;
+    confirm({
+      title: "Remove deployment?",
+      body: `Permanently remove the "${deployment.lab_name}" deployment record? This cannot be undone.`,
+      confirmLabel: "Remove",
+      dangerous: true,
+      onConfirm: () => removeMutation.mutate(),
+    });
+  }
+
   const visMutation = useMutation({
     mutationFn: (v: Visibility) => setDeploymentVisibility(deploymentId, v),
     onSuccess: (updated) => {
@@ -122,6 +159,8 @@ export default function DeploymentDetailPage() {
   const canStop = deployment.status === "running" || deployment.status === "error";
   const canReset = deployment.status === "running" && deployment.lab_category === "firerange";
   const canSchedule = deployment.status === "running";
+  const canStart = deployment.status === "stopped" || deployment.status === "error";
+  const canRemove = deployment.status === "stopped" || deployment.status === "error";
   const vis = (deployment.visibility ?? "private") as Visibility;
 
   const accessInfo = deployment.access_info.length > 0 ? deployment.access_info : (lab?.access_info ?? []);
@@ -161,6 +200,24 @@ export default function DeploymentDetailPage() {
               disabled={resetMutation.isPending}
             >
               <RotateCcw size={14} /> Reset
+            </button>
+          )}
+          {canStart && (
+            <button
+              className="g-btn g-btn-primary"
+              onClick={() => startMutation.mutate()}
+              disabled={startMutation.isPending}
+            >
+              <Play size={14} /> Start
+            </button>
+          )}
+          {canRemove && (
+            <button
+              className="g-btn g-btn-danger"
+              onClick={handleRemove}
+              disabled={removeMutation.isPending}
+            >
+              <Trash2 size={14} /> Remove
             </button>
           )}
           {labUrl && isActive && (
