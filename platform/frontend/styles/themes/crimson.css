@@ -1,0 +1,42 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* Copyright (c) 2026 CommonHuman-Lab */
+
+/* Topbar — ember glow, rose to orange and back */
+[data-theme="crimson"] header {
+  position: relative;
+  border-bottom: none;
+}
+[data-theme="crimson"] header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1.5px;
+  background: linear-gradient(90deg, #be123c, #f43f5e, #fb923c, #f43f5e, #be123c);
+  background-size: 300% auto;
+  animation: header-border-shift 7s linear infinite;
+  opacity: 0.9;
+}
+
+/* Sidebar footer — rose centre fade */
+[data-theme="crimson"] .sidebar-footer {
+  position: relative;
+  border-top: none;
+}
+[data-theme="crimson"] .sidebar-footer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  animation: u-pulse 3s ease infinite;
+  background: linear-gradient(90deg, transparent, #be123c, #f43f5e, #be123c, transparent);
+  opacity: 0.8;
+}
+
+/* Page/challenge titles — static gradient text */
+[data-theme="crimson"] .page-title,
+[data-theme="crimson"] .ch-title {
+  background: linear-gradient(90deg, #be123c, #f43f5e, #fb923c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

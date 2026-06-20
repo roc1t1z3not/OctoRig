@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (c) 2026 CommonHuman-Lab
+import { useEffect } from "react";
 import { Save } from "lucide-react";
 import { THEMES } from "@/lib/themes";
 import type { SiteSettings } from "@/lib/api/settings";
+import { useThemeStore } from "@/stores/theme.store";
 import { SettingRow } from "./SettingRow";
 
 export function AppearanceSection({
@@ -16,6 +18,14 @@ export function AppearanceSection({
   onSave: () => void;
   isPending: boolean;
 }) {
+  // Previewing the site default shouldn't permanently change the admin's own theme —
+  // snap their view back to their real theme when they leave this section.
+  useEffect(() => {
+    return () => {
+      document.documentElement.setAttribute("data-theme", useThemeStore.getState().theme);
+    };
+  }, []);
+
   return (
     <section className="settings-section">
       <h2 className="settings-section-title">Appearance</h2>
@@ -34,7 +44,10 @@ export function AppearanceSection({
               return (
                 <button
                   key={t.id}
-                  onClick={() => onChange({ default_theme: t.id })}
+                  onClick={() => {
+                    onChange({ default_theme: t.id });
+                    document.documentElement.setAttribute("data-theme", t.id);
+                  }}
                   title={t.name}
                   aria-pressed={isActive}
                   style={{

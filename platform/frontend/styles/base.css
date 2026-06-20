@@ -52,7 +52,7 @@ header, aside, [data-chrome] {
   color: var(--g-text);
 }
 
-/* ── Sidebar footer (referenced by unicorn.css theme overrides) ───────────── */
+/* ── Sidebar footer (referenced by styles/themes/* overrides) ───────────── */
 .sidebar-footer {
   border-top: 1px solid var(--g-border);
 }

@@ -1,0 +1,43 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* Copyright (c) 2026 CommonHuman-Lab */
+
+/* Topbar — cyan point source sweeping like a radar ping */
+[data-theme="obsidian"] header {
+  position: relative;
+  border-bottom: none;
+}
+[data-theme="obsidian"] header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(6,182,212,0.25) 20%,
+    #06b6d4 50%,
+    rgba(6,182,212,0.25) 80%, transparent 100%);
+  background-size: 300% auto;
+  animation: header-border-shift 3.5s linear infinite;
+}
+
+/* Sidebar footer — cyan centre fade */
+[data-theme="obsidian"] .sidebar-footer {
+  position: relative;
+  border-top: none;
+}
+[data-theme="obsidian"] .sidebar-footer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  animation: u-pulse 3s ease infinite;
+  background: linear-gradient(90deg, transparent, rgba(6,182,212,0.5), #06b6d4, rgba(6,182,212,0.5), transparent);
+}
+
+/* Page/challenge titles — static gradient text */
+[data-theme="obsidian"] .page-title,
+[data-theme="obsidian"] .ch-title {
+  background: linear-gradient(90deg, #0891b2, #22d3ee, #67e8f9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

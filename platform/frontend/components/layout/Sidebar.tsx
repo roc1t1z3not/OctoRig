@@ -146,7 +146,7 @@ export function Sidebar() {
       {/* Footer — user card + inline menu */}
       <div
         ref={menuRef}
-        className="border-t shrink-0"
+        className="sidebar-footer border-t shrink-0"
         style={{ borderColor: "var(--g-border)" }}
       >
         {/* Menu items — slide in above the trigger */}

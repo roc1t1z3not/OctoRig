@@ -1,0 +1,42 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* Copyright (c) 2026 CommonHuman-Lab */
+
+/* Topbar — violet → indigo → sky, slow cosmic sweep */
+[data-theme="nightfall"] header {
+  position: relative;
+  border-bottom: none;
+}
+[data-theme="nightfall"] header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1.5px;
+  background: linear-gradient(90deg, #7c3aed, #6366f1, #38bdf8, #6366f1, #7c3aed);
+  background-size: 300% auto;
+  animation: header-border-shift 10s linear infinite;
+  opacity: 0.85;
+}
+
+/* Sidebar footer — violet centre fade */
+[data-theme="nightfall"] .sidebar-footer {
+  position: relative;
+  border-top: none;
+}
+[data-theme="nightfall"] .sidebar-footer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  animation: u-pulse 3s ease infinite;
+  background: linear-gradient(90deg, transparent, #6366f1, #8b5cf6, #6366f1, transparent);
+  opacity: 0.7;
+}
+
+/* Page/challenge titles — static gradient text */
+[data-theme="nightfall"] .page-title,
+[data-theme="nightfall"] .ch-title {
+  background: linear-gradient(90deg, #7c3aed, #6366f1, #38bdf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

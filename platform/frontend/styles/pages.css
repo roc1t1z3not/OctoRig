@@ -18,6 +18,7 @@
 }
 
 .page-title {
+  display: inline-block; /* shrink-to-fit so themed gradient text lines up with the glyphs */
   font-size: 1.125rem;
   font-family: var(--font-mono, monospace);
   margin: 0 0 1.25rem;
