@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Review queue</h2>
+<table class="data">
+  <thead><tr><th>Video</th><th>Note</th><th>Reported</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+    <tr><td>{{ r.title }}</td><td>{{ r.note | safe }}</td><td>{{ r.created_at }}</td></tr>
+  {% else %}
+    <tr><td colspan="3" class="muted">Nothing in the review queue.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

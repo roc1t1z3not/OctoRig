@@ -4,6 +4,7 @@ from .._types import LabDefinition
 from .goldenace import GOLDENACE_LAB
 from .humanbank import HUMANBANK_LAB
 from .limelight import LIMELIGHT_LAB
+from .mediacrate import MEDIACRATE_LAB
 from .medihuman import MEDIHUMAN_LAB
 from .netpulse import NETPULSE_LAB
 from .rewindrange import REWINDRANGE_LAB
@@ -23,4 +24,5 @@ WORLD_LABS: list[LabDefinition] = [  # type: ignore[assignment]
     SUBVERSE_LAB,
     SMARTGRIDOPS_LAB,
     VAULTSYNC_LAB,
+    MEDIACRATE_LAB,
 ]

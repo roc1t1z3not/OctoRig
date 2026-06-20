@@ -1,31 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Your vaults</h2>
-<table class="data">
-  <thead><tr><th>Vault</th><th>Created</th><th></th></tr></thead>
-  <tbody>
+<div class="vs-list">
   {% for v in vaults %}
-    <tr>
-      <td>{{ v.name }}</td>
-      <td>{{ v.created_at }}</td>
-      <td>
+    <div class="vs-list-row">
+      <div>
+        <div class="vs-list-title">{{ v.name }}</div>
+        <div class="vs-list-sub">Created {{ v.created_at }}</div>
+      </div>
+      <div class="vs-list-actions">
         <a class="btn btn-sm" href="{{ url_for('vault_detail', vault_id=v.id) }}">Open</a>
         <a class="btn btn-sm btn-amber" href="{{ url_for('vault_share', vault_id=v.id) }}">Share</a>
-      </td>
-    </tr>
+      </div>
+    </div>
   {% endfor %}
-  </tbody>
-</table>
+</div>
 
 <h2 style="margin-top:2rem">Shared with you</h2>
-<table class="data">
-  <thead><tr><th>Vault</th><th></th></tr></thead>
-  <tbody>
+<div class="vs-list">
   {% for v in shared %}
-    <tr><td>{{ v.name }}</td><td><a class="btn btn-sm" href="{{ url_for('vault_detail', vault_id=v.id) }}">Open</a></td></tr>
+    <div class="vs-list-row">
+      <div class="vs-list-title">{{ v.name }}</div>
+      <a class="btn btn-sm" href="{{ url_for('vault_detail', vault_id=v.id) }}">Open</a>
+    </div>
   {% else %}
-    <tr><td colspan="2" class="muted">No vaults have been shared with you yet.</td></tr>
+    <div class="vs-list-row"><span class="muted">No vaults have been shared with you yet.</span></div>
   {% endfor %}
-  </tbody>
-</table>
+</div>
 {% endblock %}

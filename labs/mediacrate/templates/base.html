@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}MediaCrate{% endblock %} — Stream &amp; Create</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% set u = current_user() %}
+{% set ep = request.endpoint %}
+
+<header class="mc-nav">
+  <a class="mc-logo" href="{{ url_for('index') }}">
+    <span class="mc-logo-mark">
+      <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg>
+    </span>
+    MediaCrate
+  </a>
+
+  {% if u %}
+  <form method="GET" action="{{ url_for('video_search') }}" class="mc-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" name="q" placeholder="Search videos…" autocomplete="off">
+  </form>
+  {% endif %}
+
+  <nav class="mc-nav-links">
+    {% if u %}
+      <a href="{{ url_for('dashboard') }}" class="mc-navlink {{ 'active' if ep == 'dashboard' else '' }}">Dashboard</a>
+      <a href="{{ url_for('profile') }}" class="mc-navlink {{ 'active' if ep == 'profile' else '' }}">Profile</a>
+      {% if u.is_admin or u.role == 'admin' %}
+        <a href="{{ url_for('admin_index') }}" class="mc-navlink {{ 'active' if ep == 'admin_index' else '' }}">Users</a>
+        <a href="{{ url_for('admin_review') }}" class="mc-navlink {{ 'active' if ep == 'admin_review' else '' }}">Review</a>
+      {% endif %}
+      <span class="mc-avatar" title="{{ u.username }}">{{ u.username[0] | upper }}</span>
+      <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm">Sign out</a>
+    {% else %}
+      <a href="{{ url_for('login') }}" class="btn btn-sm">Sign in</a>
+    {% endif %}
+  </nav>
+</header>
+
+<main class="mc-main">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="mc-footer">
+  MediaCrate — Stream &amp; Creator Platform &middot;
+  Made By <a href="https://github.com/CommonHuman-Lab" target="_blank">CommonHuman-Lab</a>
+</footer>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Profile</h2>
+{% if saved %}<div class="alert">Profile updated.</div>{% endif %}
+{% if escalated %}<div class="alert alert-flag">Role updated to admin: FLAG{mc_mass_assign_admin_escalated}</div>{% endif %}
+<form method="POST" class="card" style="max-width:480px">
+  <label>Full name</label>
+  <input type="text" name="full_name" value="{{ user.full_name }}">
+  <label>Email</label>
+  <input type="email" name="email" value="{{ user.email }}">
+  <label>Bio</label>
+  <input type="text" name="bio" value="{{ user.bio }}">
+  <button class="btn" type="submit" style="margin-top:1rem">Save changes</button>
+</form>
+<table class="kv" style="margin-top:1.4rem">
+  <tr><th>Username</th><td>{{ user.username }}</td></tr>
+  <tr><th>Role</th><td>{{ user.role }}</td></tr>
+</table>
+{% endblock %}

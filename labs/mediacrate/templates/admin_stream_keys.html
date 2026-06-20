@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Stream key escrow</h2>
+<div class="alert alert-flag">
+  Master stream key escrow access: FLAG{mc_bac_admin_streamkeys_exposed}
+</div>
+<table class="data">
+  <thead><tr><th>Channel</th><th>Stream title</th><th>Live</th><th>Stream key</th></tr></thead>
+  <tbody>
+  {% for s in streams %}
+    <tr><td>{{ s.channel_name }}</td><td>{{ s.title }}</td><td>{{ 'yes' if s.is_live else 'no' }}</td><td><code>{{ s.stream_key }}</code></td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p class="muted">This page should never be reachable by a non-admin account.</p>
+{% endblock %}

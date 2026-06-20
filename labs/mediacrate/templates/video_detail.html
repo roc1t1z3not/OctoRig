@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ video.title }}</h2>
+<p class="muted">Channel: {{ channel.name if channel else 'unknown' }} &middot; Visibility: {{ video.visibility }}</p>
+<table class="kv">
+  <tr><th>Description</th><td>{{ video.description }}</td></tr>
+  <tr><th>Views</th><td>{{ video.views }}</td></tr>
+  <tr><th>Uploaded</th><td>{{ video.upload_date }}</td></tr>
+  <tr><th>Notes</th><td>{{ video.notes }}</td></tr>
+</table>
+
+<h3>Report this video</h3>
+<form method="POST" action="{{ url_for('video_report', video_id=video.id) }}" class="inline-form">
+  <div>
+    <label>Note for the moderation team</label>
+    <input type="text" name="note" placeholder="Why are you reporting this video?">
+  </div>
+  <button class="btn btn-sm" type="submit">Submit report</button>
+</form>
+{% endblock %}

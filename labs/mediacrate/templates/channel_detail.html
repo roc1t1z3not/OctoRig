@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ channel.name }}</h2>
+<p class="muted">{{ channel.description }}</p>
+<p class="meta-row">
+  <span>Subscribers: {{ channel.subscriber_count }}</span>
+  {% if channel.is_verified %}<span class="badge badge-nominal">Verified</span>{% endif %}
+</p>
+{% if videos %}
+<div class="mc-video-grid">
+  {% for v in videos %}
+  <a class="mc-video-card" href="{{ url_for('video_detail', video_id=v.id) }}">
+    <div class="mc-thumb">
+      <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg>
+    </div>
+    <div class="mc-video-card-body">
+      <div class="mc-video-title">{{ v.title }}</div>
+      <div class="mc-video-meta">{{ v.views }} views</div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<p class="muted">No public videos yet.</p>
+{% endif %}
+<a class="btn btn-sm btn-amber" href="{{ url_for('channel_exclusive', channel_id=channel.id) }}">Subscriber-exclusive content</a>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>User roster</h2>
+<table class="data">
+  <thead><tr><th>ID</th><th>Username</th><th>Role</th><th>API token</th></tr></thead>
+  <tbody>
+  {% for u in users %}
+    <tr><td>{{ u.id }}</td><td>{{ u.username }}</td><td>{{ u.role }}</td><td><code>{{ u.api_token }}</code></td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

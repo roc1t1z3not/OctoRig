@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Your channel</h2>
+{% if channel %}
+<table class="kv">
+  <tr><th>Name</th><td>{{ channel.name }}</td></tr>
+  <tr><th>Description</th><td>{{ channel.description }}</td></tr>
+  <tr><th>Subscribers</th><td>{{ channel.subscriber_count }}</td></tr>
+</table>
+<a class="btn btn-sm" href="{{ url_for('channel_detail', channel_id=channel.id) }}">View channel page</a>
+{% else %}
+<p class="muted">You don't run a channel yet.</p>
+{% endif %}
+
+<h2 style="margin-top:2rem">Subscriptions</h2>
+<table class="data">
+  <thead><tr><th>Channel</th><th></th></tr></thead>
+  <tbody>
+  {% for c in subs %}
+    <tr><td>{{ c.name }}</td><td><a class="btn btn-sm" href="{{ url_for('channel_detail', channel_id=c.id) }}">Open</a></td></tr>
+  {% else %}
+    <tr><td colspan="2" class="muted">You haven't subscribed to any channels yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ channel.name }} — Tier 2 Exclusive</h2>
+{% if channel.exclusive_content %}
+<div class="alert alert-flag">{{ channel.exclusive_content }}</div>
+{% else %}
+<p class="muted">This channel has no exclusive content posted yet.</p>
+{% endif %}
+<p class="muted">This page is meant for tier-2 subscribers of {{ channel.name }} only.</p>
+{% endblock %}

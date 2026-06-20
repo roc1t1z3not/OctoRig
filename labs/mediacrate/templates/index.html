@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="hero">
+  <div class="eyebrow">Live &amp; On-Demand</div>
+  <h1>Stream it. <span class="amber">Crate</span> it. Watch it.</h1>
+  <p class="lede">MediaCrate hosts creator channels, live streams, and on-demand video —
+    with subscriber perks for the people who show up every week.</p>
+  <div class="hero-actions">
+    <a class="btn" href="{{ url_for('register') }}">Start a channel</a>
+    <a class="btn btn-sm btn-amber" href="{{ url_for('login') }}">Sign in</a>
+  </div>
+</div>
+
+<div class="grid-3">
+  <div class="card">
+    <h3>Go live</h3>
+    <p class="muted">Stream straight from your encoder with a personal stream key.</p>
+  </div>
+  <div class="card">
+    <h3>Subscriber tiers</h3>
+    <p class="muted">Reward your top supporters with exclusive posts and perks.</p>
+  </div>
+  <div class="card">
+    <h3>Creator tools</h3>
+    <p class="muted">Import thumbnails from a URL and let our admin team handle moderation.</p>
+  </div>
+</div>
+{% endblock %}
