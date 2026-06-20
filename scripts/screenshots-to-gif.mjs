@@ -55,6 +55,8 @@ const LOOP = Number(process.env.LOOP ?? 0);
 const DITHER = process.env.DITHER ?? "bayer";
 const SKIP = (process.env.SKIP ?? "").split(",").map((s) => s.trim()).filter(Boolean);
 const ONLY = (process.env.ONLY ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+const LOOP_FADE = (process.env.LOOP_FADE ?? "0") !== "0";
+const DUP_HOLD_MS = Number(process.env.DUP_HOLD_MS ?? 0);
 
 let files = fs.readdirSync(IN_DIR)
   .filter((f) => f.toLowerCase().endsWith(".png"))
@@ -68,13 +70,17 @@ if (files.length < 2) {
   process.exit(1);
 }
 
-console.log(`Frames (${files.length}):`);
+if (LOOP_FADE) files = [...files, files[0]];
+
+console.log(`Frames (${files.length}${LOOP_FADE ? ", last is a loop-fade duplicate of the first" : ""}):`);
 files.forEach((f) => console.log("  " + f));
 
 const fadeSec = Math.max(0, FADE_MS) / 1000;
+const lastRealIdx = LOOP_FADE ? files.length - 2 : files.length - 1;
 const holdSeconds = files.map((_, i) => {
+  if (LOOP_FADE && i === files.length - 1) return DUP_HOLD_MS / 1000;
   if (i === 0) return FIRST_HOLD_MS / 1000;
-  if (i === files.length - 1) return LAST_HOLD_MS / 1000;
+  if (i === lastRealIdx) return LAST_HOLD_MS / 1000;
   return HOLD_MS / 1000;
 });
 // Each per-image input clip is held fully visible for holdSeconds[i], plus an

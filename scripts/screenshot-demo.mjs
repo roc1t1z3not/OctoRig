@@ -75,14 +75,21 @@ const pages = [
   ["08-teams", "/teams"],
   ["09-api-keys", "/api-keys"],
   ["10-notifications", "/notifications"],
+  // Order mirrors AdminSidebar's NAV_ADMIN in platform/frontend/components/layout/AdminSidebar.tsx
   ["11-admin", "/admin"],
   ["12-admin-users", "/admin/users"],
   ["13-admin-roles", "/admin/roles"],
   ["14-admin-teams", "/admin/teams"],
-  ["15-admin-deployments", "/admin/deployments"],
-  ["16-admin-audit", "/admin/audit"],
-  ["17-admin-assessments", "/admin/assessments"],
-  ["18-admin-content", "/admin/content"],
+  ["15-admin-labs", "/admin/labs"],
+  ["16-admin-deployments", "/admin/deployments"],
+  ["17-admin-audit", "/admin/audit"],
+  ["18-admin-challenges", "/admin/challenges"],
+  ["19-admin-events", "/admin/events"],
+  ["20-admin-api-keys", "/admin/api-keys"],
+  ["21-admin-ranks", "/admin/ranks"],
+  ["22-admin-assessments", "/admin/assessments"],
+  ["23-admin-content", "/admin/content"],
+  ["24-admin-settings", "/admin/settings"],
 ];
 
 for (const [name, path] of pages) {
@@ -95,7 +102,7 @@ await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
 const profileLink = page.locator('a[href^="/profile/"]').first();
 if (await profileLink.count() > 0) {
   await page.goto(`${BASE_URL}${await profileLink.getAttribute("href")}`, { waitUntil: "networkidle" }).catch(() => {});
-  await shot("19-profile");
+  await shot("30-profile");
 }
 
 // First real team's detail page (exclude the "/teams/new" create-team link).
@@ -103,7 +110,7 @@ await page.goto(`${BASE_URL}/teams`, { waitUntil: "networkidle" });
 const teamLink = page.locator('a[href^="/teams/"]:not([href="/teams/new"])').first();
 if (await teamLink.count() > 0) {
   await page.goto(`${BASE_URL}${await teamLink.getAttribute("href")}`, { waitUntil: "networkidle" }).catch(() => {});
-  await shot("20-team-detail");
+  await shot("08b-team-detail");
 }
 
 // First challenge's detail page.
@@ -111,15 +118,16 @@ await page.goto(`${BASE_URL}/challenges`, { waitUntil: "networkidle" });
 const chLink = page.locator('a[href^="/challenges/"]').first();
 if (await chLink.count() > 0) {
   await page.goto(`${BASE_URL}${await chLink.getAttribute("href")}`, { waitUntil: "networkidle" }).catch(() => {});
-  await shot("21-challenge-detail");
+  await shot("02b-challenge-detail");
 }
 
-// First assessment's detail page.
+// First assessment's detail page (under /admin/assessments/<id>, hence "admin" in
+// the name so it groups with demo-admin.gif rather than demo.gif).
 await page.goto(`${BASE_URL}/admin/assessments`, { waitUntil: "networkidle" });
 const aLink = page.locator('a[href^="/admin/assessments/"]').first();
 if (await aLink.count() > 0) {
   await page.goto(`${BASE_URL}${await aLink.getAttribute("href")}`, { waitUntil: "networkidle" }).catch(() => {});
-  await shot("22-assessment-detail");
+  await shot("22b-admin-assessment-detail");
 }
 
 await browser.close();
