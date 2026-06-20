@@ -7,6 +7,7 @@
   <h2 class="center" style="border:0;justify-content:center">Sign in</h2>
   {% if error %}<div class="alert alert-bad">{{ error }}</div>{% endif %}
   <form method="POST">
+    <input type="hidden" name="next" value="{{ next }}">
     <label>Username</label>
     <input type="text" name="username" autocomplete="off">
     <label>Password</label>

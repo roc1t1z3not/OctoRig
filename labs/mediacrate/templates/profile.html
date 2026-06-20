@@ -15,5 +15,9 @@
 <table class="kv" style="margin-top:1.4rem">
   <tr><th>Username</th><td>{{ user.username }}</td></tr>
   <tr><th>Role</th><td>{{ user.role }}</td></tr>
+  <tr><th>Coins</th><td>{{ user.coins }}</td></tr>
 </table>
+
+<h3 style="margin-top:1.4rem">Developer API token</h3>
+<p class="muted">GET <code>/api/v1/auth/token</code> while signed in to issue a Bearer JWT for the <code>/api/v1/*</code> API, then call it with <code>Authorization: Bearer &lt;token&gt;</code>.</p>
 {% endblock %}

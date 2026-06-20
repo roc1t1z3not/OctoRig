@@ -6,6 +6,21 @@
   <span>Subscribers: {{ channel.subscriber_count }}</span>
   {% if channel.is_verified %}<span class="badge badge-nominal">Verified</span>{% endif %}
 </p>
+{% if channel.banner_path %}
+<p><a class="btn btn-sm btn-ghost" href="{{ url_for('uploaded_banner', channel_id=channel.id, filename=channel.banner_path) }}">View banner</a></p>
+{% endif %}
+{% set u = current_user() %}
+{% if u and u.id == channel.owner_id %}
+<p><a class="btn btn-sm btn-ghost" href="{{ url_for('channel_banner', channel_id=channel.id) }}">Manage banner</a></p>
+{% else %}
+<form method="POST" action="{{ url_for('channel_tip', channel_id=channel.id) }}" class="inline-form">
+  <div>
+    <label>Send a tip (coins)</label>
+    <input type="text" name="amount" placeholder="e.g. 50">
+  </div>
+  <button class="btn btn-sm btn-amber" type="submit">Tip this channel</button>
+</form>
+{% endif %}
 {% if videos %}
 <div class="mc-video-grid">
   {% for v in videos %}

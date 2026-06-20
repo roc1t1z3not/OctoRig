@@ -5,6 +5,7 @@ from db import init_db, close_db
 from helpers import current_user
 import routes.auth, routes.dashboard, routes.videos
 import routes.channels, routes.admin, routes.api
+import routes.uploads, routes.wallet, routes.notifications, routes.playlists
 
 app = Flask(__name__)
 app.secret_key = 'mediacrate-streaming-2026-Hx7mNp'
@@ -17,6 +18,10 @@ routes.videos.init(app)
 routes.channels.init(app)
 routes.admin.init(app)
 routes.api.init(app)
+routes.uploads.init(app)
+routes.wallet.init(app)
+routes.notifications.init(app)
+routes.playlists.init(app)
 
 
 @app.route('/robots.txt')
@@ -25,7 +30,8 @@ def robots_txt():
         "User-agent: *\n"
         "Disallow: /admin\n"
         "Disallow: /admin/stream-keys\n"
-        "Disallow: /api/internal\n\n"
+        "Disallow: /api/internal\n"
+        "Disallow: /api/v1/admin\n\n"
         "# MediaCrate — CommonHuman-Lab\n"
         "# Deliberately vulnerable — do not upload real content.\n",
         mimetype='text/plain'

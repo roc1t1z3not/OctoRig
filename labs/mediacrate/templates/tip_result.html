@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Tip sent</h2>
+{% if flag %}
+<div class="alert alert-flag">Tip processed with no CSRF protection: {{ flag }}</div>
+{% else %}
+<div class="alert alert-bad">Tip could not be processed.</div>
+{% endif %}
+<p class="muted">{{ amount }} coins sent to {{ channel.name }}.</p>
+<a class="btn btn-sm" href="{{ url_for('channel_detail', channel_id=channel.id) }}">Back to channel</a>
+{% endblock %}

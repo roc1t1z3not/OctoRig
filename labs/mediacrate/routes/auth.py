@@ -2,7 +2,8 @@
 # Copyright (c) 2026 CommonHuman-Lab
 import hashlib
 from datetime import datetime
-from flask import request, render_template, session, redirect, url_for
+from urllib.parse import urlparse
+from flask import request, render_template, session, redirect, url_for, make_response
 from db import get_db
 
 
@@ -28,6 +29,7 @@ def init(app):
     @app.route('/login', methods=['GET', 'POST'])
     def login():
         error = None
+        next_url = request.values.get('next', '')
         if request.method == 'POST':
             username = request.form.get('username', '')
             password = request.form.get('password', '')
@@ -37,9 +39,18 @@ def init(app):
             ).fetchone()
             if row:
                 session['user_id'] = row['id']
-                return redirect(url_for('dashboard'))
+                # VULN: open redirect — `next` is trusted without checking
+                # that it points back at this host, so a crafted login link
+                # can land a victim on an attacker-controlled domain right
+                # after they authenticate.
+                target = next_url or url_for('dashboard')
+                resp = make_response(redirect(target))
+                parsed = urlparse(target)
+                if parsed.netloc and parsed.netloc != request.host:
+                    resp.headers['X-Redirect-Flag'] = 'FLAG{mc_open_redirect_login_next}'
+                return resp
             error = 'Invalid username or password.'
-        return render_template('login.html', error=error)
+        return render_template('login.html', error=error, next=next_url)
 
     @app.route('/register', methods=['GET', 'POST'])
     def register():

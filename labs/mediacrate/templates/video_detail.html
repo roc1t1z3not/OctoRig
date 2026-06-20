@@ -9,7 +9,25 @@
   <tr><th>Notes</th><td>{{ video.notes }}</td></tr>
 </table>
 
-<h3>Report this video</h3>
+<form method="POST" action="{{ url_for('add_watch_later', video_id=video.id) }}" style="margin:0.6rem 0">
+  <button class="btn btn-sm btn-ghost" type="submit">Save to Watch Later</button>
+</form>
+
+<h3>Comments</h3>
+{% for c in comments %}
+  <p><strong>{{ c.username }}</strong> — {{ c.body }} <span class="muted">({{ c.created_at }})</span></p>
+{% else %}
+  <p class="muted">No comments yet.</p>
+{% endfor %}
+<form method="POST" action="{{ url_for('video_comment', video_id=video.id) }}" class="inline-form">
+  <div>
+    <label>Add a comment</label>
+    <input type="text" name="body" placeholder="Say something nice…">
+  </div>
+  <button class="btn btn-sm" type="submit">Post</button>
+</form>
+
+<h3 style="margin-top:1.4rem">Report this video</h3>
 <form method="POST" action="{{ url_for('video_report', video_id=video.id) }}" class="inline-form">
   <div>
     <label>Note for the moderation team</label>

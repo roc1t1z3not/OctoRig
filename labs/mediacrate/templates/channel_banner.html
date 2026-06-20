@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Channel banner — {{ channel.name }}</h2>
+{% if error %}<div class="alert alert-bad">{{ error }}</div>{% endif %}
+{% if channel.banner_path %}
+<p class="muted">Current banner: <code>{{ channel.banner_path }}</code></p>
+<p><a class="btn btn-sm" href="{{ url_for('uploaded_banner', channel_id=channel.id, filename=channel.banner_path) }}">View current banner</a></p>
+{% endif %}
+<form method="POST" enctype="multipart/form-data" class="card" style="max-width:480px">
+  <label>Upload a new banner image</label>
+  <input type="file" name="banner">
+  <button class="btn" type="submit" style="margin-top:1rem">Upload</button>
+</form>
+<a class="btn btn-sm btn-ghost" style="margin-top:1rem" href="{{ url_for('channel_detail', channel_id=channel.id) }}">Back to channel</a>
+{% endblock %}

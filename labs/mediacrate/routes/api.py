@@ -1,15 +1,54 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2026 CommonHuman-Lab
+import base64
+import hashlib
+import hmac
+import json
 import subprocess
 import requests as _requests
 from flask import request, session, jsonify
 from db import get_db
+
+JWT_SECRET = 'mc-dev-secret-2026'
 
 
 def _require_login_json():
     if not session.get('user_id'):
         return jsonify({'error': 'login required'}), 401
     return None
+
+
+def _b64url_encode(data):
+    return base64.urlsafe_b64encode(data).rstrip(b'=').decode()
+
+
+def _b64url_decode(s):
+    return base64.urlsafe_b64decode(s + '=' * (-len(s) % 4))
+
+
+def _issue_jwt(claims):
+    header_b64 = _b64url_encode(json.dumps({'alg': 'HS256', 'typ': 'JWT'}).encode())
+    payload_b64 = _b64url_encode(json.dumps(claims).encode())
+    sig = hmac.new(JWT_SECRET.encode(), f'{header_b64}.{payload_b64}'.encode(), hashlib.sha256).digest()
+    return f'{header_b64}.{payload_b64}.{_b64url_encode(sig)}'
+
+
+# VULN: JWT / weak auth — the verifier trusts the client-supplied "alg"
+# header to decide *whether* to check the signature at all. A forged token
+# with header {"alg":"none"} and an empty signature segment sails through
+# with whatever claims (e.g. role: admin) the attacker put in the payload.
+def _verify_jwt(token):
+    header_b64, payload_b64, sig_b64 = token.split('.')
+    header = json.loads(_b64url_decode(header_b64))
+    payload = json.loads(_b64url_decode(payload_b64))
+    alg = header.get('alg', '')
+    if alg == 'HS256':
+        expected = hmac.new(JWT_SECRET.encode(), f'{header_b64}.{payload_b64}'.encode(), hashlib.sha256).digest()
+        if not hmac.compare_digest(expected, _b64url_decode(sig_b64)):
+            raise ValueError('bad signature')
+    elif alg != 'none':
+        raise ValueError('unsupported alg')
+    return payload
 
 
 def init(app):
@@ -70,3 +109,42 @@ def init(app):
         except subprocess.CalledProcessError as e:
             output = e.output.decode(errors='replace')
         return jsonify({'transcode': output, 'job_token': 'FLAG{mc_ssrf_internal_transcode}'})
+
+    # "Developer API token" — issues a JWT for the signed-in user, meant to
+    # be used as a Bearer token against the /api/v1/* endpoints below.
+    @app.route('/api/v1/auth/token')
+    def api_auth_token():
+        err = _require_login_json()
+        if err:
+            return err
+        db = get_db()
+        user = db.execute("SELECT * FROM users WHERE id = ?", (session['user_id'],)).fetchone()
+        token = _issue_jwt({'user_id': user['id'], 'username': user['username'], 'role': user['role']})
+        return jsonify({'token': token})
+
+    @app.route('/api/v1/me')
+    def api_me():
+        auth = request.headers.get('Authorization', '')
+        if not auth.startswith('Bearer '):
+            return jsonify({'error': 'token required'}), 401
+        try:
+            claims = _verify_jwt(auth[len('Bearer '):])
+        except Exception:
+            return jsonify({'error': 'invalid token'}), 401
+        return jsonify(claims)
+
+    # VULN target — admin-only by JWT claim, not by re-checking the DB. An
+    # alg=none forged token with role=admin reaches this without ever
+    # holding an admin session.
+    @app.route('/api/v1/admin/secrets')
+    def api_admin_secrets():
+        auth = request.headers.get('Authorization', '')
+        if not auth.startswith('Bearer '):
+            return jsonify({'error': 'token required'}), 401
+        try:
+            claims = _verify_jwt(auth[len('Bearer '):])
+        except Exception:
+            return jsonify({'error': 'invalid token'}), 401
+        if claims.get('role') != 'admin':
+            return jsonify({'error': 'admin only'}), 403
+        return jsonify({'secret': 'platform master switch token', 'flag': 'FLAG{mc_jwt_alg_none_admin}'})

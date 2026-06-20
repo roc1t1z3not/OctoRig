@@ -188,7 +188,11 @@ INSERT OR IGNORE INTO users VALUES
   (53,'alan.c',         '0d107d09f5bbe40cade3de5c71e9e9b7','alan.c@mail.example',         'Alan Collins',     0,  0.00,'2026-05-14 13:00:00'),
   (54,'barbara.s',      'e65c8afc9951f94fed8873a4c1e31a63','barbara.s@mail.example',      'Barbara Stewart',  0, 42.00,'2026-05-14 14:00:00'),
   (55,'carl.s',         'cc25c0f861a83f5efadc6e1ba9d1269e','carl.s@mail.example',         'Carl Sanchez',     0, 17.00,'2026-05-14 15:00:00'),
-  (56,'diane.m',        'b696aef7776367787253dc2acdd10279','diane.m@mail.example',        'Diane Morris',     0,  0.00,'2026-05-14 16:00:00');
+  (56,'diane.m',        'b696aef7776367787253dc2acdd10279','diane.m@mail.example',        'Diane Morris',     0,  0.00,'2026-05-14 16:00:00'),
+  -- Cross-lab credential-reuse pivot target (added for MediaCrate's
+  -- mc-credential-reuse-pivot challenge) — pure addition, no existing row
+  -- touched. Reused password leaked via MediaCrate's video id=11 notes.
+  (57,'nova.lee',       'Popcorn21!','nova@mediacrate.local',        'Nova Lee — FLAG{mc_credential_reuse_pivot}', 0, 15.00,'2026-06-01 12:00:00');
 
 INSERT OR IGNORE INTO bookings VALUES
   (6, 7, 1,'C5,C6',    17.00,'2026-05-22 12:00:00','LML-00006'),

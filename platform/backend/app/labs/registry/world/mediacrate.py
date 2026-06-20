@@ -273,6 +273,137 @@ MEDIACRATE_LAB: LabDefinition = {
             ],
         },
         {
+            "slug": "mc-lfi-banner-traversal",
+            "title": "Outside The Frame",
+            "description": (
+                "Creators can upload a channel banner image. The server "
+                "trusts the filename you send it on the way in — and trusts "
+                "it again on the way back out when it serves the file. "
+                "Walking that filename somewhere it shouldn't go reaches "
+                "things that were never meant to be public.\n\n"
+                "**Target:** `http://{container_ip}`"
+            ),
+            "challenge_type": "flag",
+            "difficulty": "hard",
+            "category": "web",
+            "tags": ["file-upload", "path-traversal", "lfi"],
+            "skills": ["unrestricted file upload", "path traversal", "local file read"],
+            "points": 300,
+            "estimated_minutes": 30,
+            "flags": [
+                {"value": "FLAG{mc_path_traversal_legal_hold}", "flag_type": "static", "case_sensitive": False}
+            ],
+            "hints": [
+                {"order_num": 1, "content": "Log in, open your own channel page, and find the banner upload form (only the channel owner sees it).", "cost": 0},
+                {"order_num": 2, "content": "Uploaded banners are served from /uploads/<channel_id>/<filename>. The filename isn't sanitized on either the upload or the serve side.", "cost": 50},
+                {"order_num": 3, "content": "GET /uploads/<your_channel_id>/../../../data/.private/legal_takedowns.txt — count the ../ until you land outside the upload directory entirely.", "cost": 100},
+            ],
+        },
+        {
+            "slug": "mc-csrf-tip-drain",
+            "title": "Generous By Accident",
+            "description": (
+                "Viewers can tip a creator's channel straight from their "
+                "coin balance. The tip endpoint trusts any POST that arrives "
+                "with a valid session — it never checks where the request "
+                "actually came from.\n\n"
+                "**Target:** `http://{container_ip}`"
+            ),
+            "challenge_type": "flag",
+            "difficulty": "medium",
+            "category": "web",
+            "tags": ["csrf", "state-changing", "wallet"],
+            "skills": ["CSRF", "auto-submitting forms"],
+            "points": 200,
+            "estimated_minutes": 20,
+            "flags": [
+                {"value": "FLAG{mc_csrf_tip_drained}", "flag_type": "static", "case_sensitive": False}
+            ],
+            "hints": [
+                {"order_num": 1, "content": "POST /channels/<id>/tip takes just an `amount` form field. Check what protects it from a forged cross-site request — nothing does.", "cost": 0},
+                {"order_num": 2, "content": "Host an auto-submitting HTML form targeting that endpoint and have a logged-in session (yours is fine) open it. A successful cross-channel tip returns the flag inline.", "cost": 50},
+            ],
+        },
+        {
+            "slug": "mc-open-redirect-login",
+            "title": "See You On The Other Side",
+            "description": (
+                "After signing in, MediaCrate sends you wherever you asked "
+                "to go via a `next` parameter on the login page. It never "
+                "checks that 'wherever' is still MediaCrate.\n\n"
+                "**Target:** `http://{container_ip}/login`"
+            ),
+            "challenge_type": "flag",
+            "difficulty": "easy",
+            "category": "web",
+            "tags": ["open-redirect", "auth"],
+            "skills": ["open redirect", "phishing-flow analysis"],
+            "points": 100,
+            "estimated_minutes": 10,
+            "flags": [
+                {"value": "FLAG{mc_open_redirect_login_next}", "flag_type": "static", "case_sensitive": False}
+            ],
+            "hints": [
+                {"order_num": 1, "content": "The login form posts a hidden `next` field. Try setting it to a full external URL before logging in.", "cost": 0},
+                {"order_num": 2, "content": "POST /login with next=http://evil.example.com and valid credentials. Check the response headers on the redirect.", "cost": 25},
+            ],
+        },
+        {
+            "slug": "mc-jwt-alg-none-admin",
+            "title": "Trust, But Don't Verify",
+            "description": (
+                "Your profile can mint a developer API token — a JWT — for "
+                "scripting against the `/api/v1/` endpoints. The verifier on "
+                "the other end decides whether to check the signature based "
+                "on what the token's own header claims its algorithm is.\n\n"
+                "**Target:** `http://{container_ip}/api/v1/admin/secrets`"
+            ),
+            "challenge_type": "flag",
+            "difficulty": "hard",
+            "category": "web",
+            "tags": ["jwt", "broken-auth", "alg-none"],
+            "skills": ["JWT forging", "alg=none attack", "Bearer auth"],
+            "points": 350,
+            "estimated_minutes": 30,
+            "flags": [
+                {"value": "FLAG{mc_jwt_alg_none_admin}", "flag_type": "static", "case_sensitive": False}
+            ],
+            "hints": [
+                {"order_num": 1, "content": "GET /api/v1/auth/token while logged in to see a legitimate token's shape: header.payload.signature, each base64url.", "cost": 0},
+                {"order_num": 2, "content": "Decode the header and payload. Try rebuilding a token with {\"alg\":\"none\"} in the header, a payload claiming role: admin, and an empty signature segment.", "cost": 75},
+                {"order_num": 3, "content": "Send it as `Authorization: Bearer <header>.<payload>.` (trailing dot, empty third segment) to /api/v1/admin/secrets.", "cost": 100},
+            ],
+        },
+        {
+            "slug": "mc-credential-reuse-pivot",
+            "title": "One Password, Two Platforms",
+            "description": (
+                "Sequential ids are still sequential past the ones you've "
+                "already found. An unlisted personal vlog from creator id 2 "
+                "(Nova Plays) admits to a habit that doesn't stay contained "
+                "to MediaCrate.\n\n"
+                "This challenge is **cross-lab**: it only pays off if "
+                "Limelight (lab id 7) is also running. Start it with "
+                "`./octorig.sh start limelight` alongside MediaCrate.\n\n"
+                "**Target:** `http://{container_ip}/videos/11`"
+            ),
+            "challenge_type": "flag",
+            "difficulty": "hard",
+            "category": "web",
+            "tags": ["cross-lab", "idor", "credential-reuse"],
+            "skills": ["IDOR enumeration", "credential reuse", "cross-application pivoting"],
+            "points": 300,
+            "estimated_minutes": 30,
+            "flags": [
+                {"value": "FLAG{mc_credential_reuse_pivot}", "flag_type": "static", "case_sensitive": False}
+            ],
+            "hints": [
+                {"order_num": 1, "content": "You already know /videos/<id> has no visibility check. Keep enumerating past the ids you've already found.", "cost": 0},
+                {"order_num": 2, "content": "Video 11's notes mention a password reused on a Limelight bookings account. Start the Limelight lab (id 7) and try logging in with it there.", "cost": 50},
+                {"order_num": 3, "content": "Username nova.lee, password Popcorn21! on Limelight. Check that account's own profile after logging in.", "cost": 75},
+            ],
+        },
+        {
             "slug": "mc-insane-chain-rce",
             "title": "Total Platform Compromise",
             "description": (

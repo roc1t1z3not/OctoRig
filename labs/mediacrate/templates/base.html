@@ -28,6 +28,9 @@
   <nav class="mc-nav-links">
     {% if u %}
       <a href="{{ url_for('dashboard') }}" class="mc-navlink {{ 'active' if ep == 'dashboard' else '' }}">Dashboard</a>
+      <a href="{{ url_for('playlists') }}" class="mc-navlink {{ 'active' if ep == 'playlists' else '' }}">Watch Later</a>
+      <a href="{{ url_for('wallet') }}" class="mc-navlink {{ 'active' if ep == 'wallet' else '' }}">Wallet</a>
+      <a href="{{ url_for('notifications') }}" class="mc-navlink {{ 'active' if ep == 'notifications' else '' }}">Notifications</a>
       <a href="{{ url_for('profile') }}" class="mc-navlink {{ 'active' if ep == 'profile' else '' }}">Profile</a>
       {% if u.is_admin or u.role == 'admin' %}
         <a href="{{ url_for('admin_index') }}" class="mc-navlink {{ 'active' if ep == 'admin_index' else '' }}">Users</a>

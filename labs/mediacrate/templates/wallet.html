@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Wallet</h2>
+<table class="kv">
+  <tr><th>Coin balance</th><td>{{ user.coins }}</td></tr>
+</table>
+
+<p class="muted" style="margin-top:1.4rem">Tip jars live on each creator's channel page — visit a channel and use the tip box there.</p>
+
+<h3 style="margin-top:1.4rem">Recent tips sent</h3>
+<table class="data">
+  <thead><tr><th>Channel</th><th>Amount</th><th>When</th></tr></thead>
+  <tbody>
+  {% for t in tips %}
+    <tr><td>{{ t.channel_name }}</td><td>{{ t.amount }}</td><td>{{ t.created_at }}</td></tr>
+  {% else %}
+    <tr><td colspan="3" class="muted">No tips sent yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

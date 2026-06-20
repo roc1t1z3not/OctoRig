@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Watch Later</h2>
+{% if items %}
+<div class="mc-video-grid">
+  {% for v in items %}
+  <a class="mc-video-card" href="{{ url_for('video_detail', video_id=v.id) }}">
+    <div class="mc-thumb">
+      <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg>
+    </div>
+    <div class="mc-video-card-body">
+      <div class="mc-video-title">{{ v.title }}</div>
+      <div class="mc-video-meta">{{ v.views }} views</div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<p class="muted">Nothing saved yet — use "Watch later" on a video to add it here.</p>
+{% endif %}
+{% endblock %}

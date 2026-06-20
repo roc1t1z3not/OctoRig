@@ -27,7 +27,28 @@ def init(app):
         if not video:
             return render_template('404.html'), 404
         channel = db.execute("SELECT * FROM channels WHERE id = ?", (video['channel_id'],)).fetchone()
-        return render_template('video_detail.html', video=video, channel=channel)
+        comments = db.execute(
+            "SELECT c.*, u.username FROM comments c JOIN users u ON u.id = c.user_id "
+            "WHERE c.video_id = ? ORDER BY c.id",
+            (video_id,),
+        ).fetchall()
+        return render_template('video_detail.html', video=video, channel=channel, comments=comments)
+
+    # Public comments — escaped on render (contrast with the admin review
+    # queue's unescaped notes, which is the deliberate stored-XSS sink).
+    @app.route('/videos/<int:video_id>/comment', methods=['POST'])
+    def video_comment(video_id):
+        redir = _require_login()
+        if redir:
+            return redir
+        body = request.form.get('body', '').strip()
+        if body:
+            get_db().execute(
+                "INSERT INTO comments (video_id, user_id, body, created_at) VALUES (?, ?, ?, ?)",
+                (video_id, session['user_id'], body, datetime.utcnow().isoformat(sep=' ', timespec='seconds')),
+            )
+            get_db().commit()
+        return redirect(url_for('video_detail', video_id=video_id))
 
     # VULN: SQLi — search term interpolated straight into a LIKE clause.
     @app.route('/videos/search')

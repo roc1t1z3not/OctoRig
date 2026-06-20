@@ -36,11 +36,17 @@ RUN mkdir -p /srv/ftp/pub && \
 COPY vsftpd.conf /etc/vsftpd.conf
 COPY supervisord.conf /etc/supervisor/conf.d/mediacrate.conf
 COPY . .
-RUN mkdir -p /data && \
+RUN mkdir -p /data /app/uploads && \
     printf "MediaCrate Nightly Backup Manifest\n===================================\nDatabase: /data/mediacrate.db\nAdmin API token: mc-admin-7f2e9b1a\nDefault mc-ops SSH password: creator2026\nFLAG{mc_recon_ftp_backup_leak}\n" \
       > /srv/ftp/pub/mediacrate_backup.txt && \
     chown ftp:ftp /srv/ftp/pub/mediacrate_backup.txt && \
     chmod 644 /srv/ftp/pub/mediacrate_backup.txt
+
+# Legal/DMCA holds — outside the web root and upload tree entirely. Only
+# reachable via the banner-serving path traversal bug in routes/uploads.py.
+RUN mkdir -p /data/.private && \
+    printf "MediaCrate Legal Holds — DMCA & Takedown Queue\n===============================================\nCase #4471: pending counter-notice review.\nCase #4488: escalated to trust & safety.\nFLAG{mc_path_traversal_legal_hold}\n" \
+      > /data/.private/legal_takedowns.txt
 
 EXPOSE 80 21 22 30000-30009
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
