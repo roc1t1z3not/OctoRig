@@ -1,0 +1,79 @@
+"use client";
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 CommonHuman-Lab
+import { useState } from "react";
+import { Plus, X } from "lucide-react";
+import { useEscapeKey } from "@/hooks/useEscapeKey";
+
+interface NewTeamSheetProps {
+  open: boolean;
+  createMutation: {
+    mutate: (data: { name: string; description?: string }) => void;
+    isPending: boolean;
+  };
+  onClose: () => void;
+}
+
+export function NewTeamSheet({ open, createMutation, onClose }: NewTeamSheetProps) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+
+  function handleClose() {
+    setName("");
+    setDescription("");
+    onClose();
+  }
+
+  useEscapeKey(handleClose, open);
+
+  if (!open) return null;
+
+  return (
+    <>
+      <div className="g-backdrop" onClick={handleClose} />
+      <div className="ev-sheet">
+        <div className="ev-sheet-header">
+          <h2 style={{ margin: 0, fontSize: "1rem", fontWeight: 700 }}>New Team</h2>
+          <button className="g-btn g-btn-ghost g-btn-sm" onClick={handleClose}>
+            <X size={14} />
+          </button>
+        </div>
+
+        <div className="ev-sheet-body">
+          <label className="ev-field">
+            <span className="ev-label">Team Name</span>
+            <input
+              className="g-input"
+              placeholder="e.g. Red Team Alpha"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoFocus
+            />
+          </label>
+          <label className="ev-field">
+            <span className="ev-label">Description (optional)</span>
+            <textarea
+              className="g-input"
+              placeholder="What does this team do?"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+            />
+          </label>
+        </div>
+
+        <div className="ev-sheet-footer">
+          <button className="g-btn g-btn-ghost" onClick={handleClose}>Cancel</button>
+          <button
+            className="g-btn g-btn-primary"
+            disabled={!name.trim() || createMutation.isPending}
+            onClick={() => createMutation.mutate({ name, description: description || undefined })}
+          >
+            <Plus size={13} />
+            {createMutation.isPending ? "Creating…" : "Create Team"}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}

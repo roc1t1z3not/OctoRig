@@ -6,6 +6,7 @@ import {
   type CtfEvent, type EventVisibility, type EventScoringMode,
 } from "@/lib/api/events";
 import { MarkdownEditor } from "@/components/ui/MarkdownEditor";
+import { useEscapeKey } from "@/hooks/useEscapeKey";
 
 export interface SheetState {
   open: boolean;
@@ -45,6 +46,8 @@ interface EventFormSheetProps {
 }
 
 export function EventFormSheet({ sheet, form, onChange, onClose, saveMutation }: EventFormSheetProps) {
+  useEscapeKey(onClose, sheet.open);
+
   if (!sheet.open) return null;
 
   return (

@@ -7,6 +7,7 @@ import { Palette, X } from "lucide-react";
 import { clsx } from "clsx";
 import { THEMES, type ThemeId } from "@/lib/themes";
 import { useThemeStore } from "@/stores/theme.store";
+import { useEscapeKey } from "@/hooks/useEscapeKey";
 
 export function ThemeModal() {
   const [open, setOpen] = useState(false);
@@ -16,6 +17,8 @@ export function ThemeModal() {
     setTheme(id);
     setOpen(false);
   }
+
+  useEscapeKey(() => setOpen(false), open);
 
   return (
     <>

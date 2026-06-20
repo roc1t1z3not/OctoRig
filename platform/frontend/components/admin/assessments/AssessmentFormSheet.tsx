@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Save, X } from "lucide-react";
 import { type LabTemplate } from "@/lib/api/labs";
 import { type Assessment, type CreateAssessmentPayload } from "@/lib/api/assessments";
+import { useEscapeKey } from "@/hooks/useEscapeKey";
 
 const BLANK_FORM = {
   name: "",
@@ -61,6 +62,8 @@ export function AssessmentFormSheet({
   useEffect(() => {
     if (open) setForm(initialValues ? assessmentToForm(initialValues) : BLANK_FORM);
   }, [open, initialValues]);
+
+  useEscapeKey(onClose, open);
 
   if (!open) return null;
 

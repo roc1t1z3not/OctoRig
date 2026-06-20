@@ -8,6 +8,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateMyProfile, type ProfileUpdatePayload, type UserProfile } from "@/lib/api/profiles";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { ProfileForm } from "@/components/profile/ProfileForm";
+import { useEscapeKey } from "@/hooks/useEscapeKey";
 
 export function EditProfileSheet({
   open,
@@ -44,6 +45,8 @@ export function EditProfileSheet({
     },
     onError: () => push("error", "Failed to save profile"),
   });
+
+  useEscapeKey(onClose, open);
 
   if (!open) return null;
 

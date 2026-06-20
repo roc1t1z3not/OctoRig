@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { Save, X } from "lucide-react";
 import { type PlatformRole, type PlatformRoleCreate, type PlatformRoleUpdate } from "@/lib/api/admin";
+import { useEscapeKey } from "@/hooks/useEscapeKey";
 
 const PERMISSION_GROUPS = [
   {
@@ -76,6 +77,8 @@ export function RoleFormSheet({ open, initialValues, saveMutation, onClose }: Ro
   useEffect(() => {
     if (open) setForm(initialValues ? roleToForm(initialValues) : BLANK_FORM);
   }, [open, initialValues]);
+
+  useEscapeKey(onClose, open);
 
   if (!open) return null;
 

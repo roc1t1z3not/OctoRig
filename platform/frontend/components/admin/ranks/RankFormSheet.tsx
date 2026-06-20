@@ -6,6 +6,7 @@ import { Save, X } from "lucide-react";
 import type { Rank } from "@/lib/api/ranks";
 import { RankChip } from "@/components/ui/RankChip";
 import { EmojiPicker } from "@/components/ui/EmojiPicker";
+import { useEscapeKey } from "@/hooks/useEscapeKey";
 
 const BLANK_FORM = { name: "", min_points: 0, icon: "", color: "#6b7280" };
 export type RankFormState = typeof BLANK_FORM;
@@ -32,6 +33,8 @@ export function RankFormSheet({ open, initialValues, saveMutation, onToggleActiv
   useEffect(() => {
     if (open) setForm(initialValues ? rankToForm(initialValues) : BLANK_FORM);
   }, [open, initialValues]);
+
+  useEscapeKey(onClose, open);
 
   if (!open) return null;
 

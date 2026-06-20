@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Save, X } from "lucide-react";
 import { listRoles } from "@/lib/api/admin";
+import { useEscapeKey } from "@/hooks/useEscapeKey";
 
 export function CreateUserForm({
   open,
@@ -27,6 +28,8 @@ export function CreateUserForm({
     queryKey: ["admin-roles"],
     queryFn: listRoles,
   });
+
+  useEscapeKey(onClose, open);
 
   if (!open) return null;
 

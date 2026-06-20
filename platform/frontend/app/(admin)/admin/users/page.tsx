@@ -20,6 +20,7 @@ import { useConfirmStore } from "@/stores/confirm.store";
 import { useUserStore } from "@/stores/user.store";
 import { UsersTable } from "@/components/admin/users/UsersTable";
 import { CreateUserForm } from "@/components/admin/users/CreateUserForm";
+import { useEscapeKey } from "@/hooks/useEscapeKey";
 
 export default function AdminUsersPage() {
   const qc = useQueryClient();
@@ -85,6 +86,9 @@ export default function AdminUsersPage() {
     },
     onError: () => push("error", "Failed to reset points"),
   });
+
+  useEscapeKey(() => setShowReset(false), showReset);
+  useEscapeKey(() => setShowRoles(false), showRoles);
 
   return (
     <div className="page">

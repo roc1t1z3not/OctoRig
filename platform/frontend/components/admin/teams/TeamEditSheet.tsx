@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { Save, X } from "lucide-react";
 import { type AdminTeam } from "@/lib/api/admin";
+import { useEscapeKey } from "@/hooks/useEscapeKey";
 
 interface TeamEditSheetProps {
   open: boolean;
@@ -18,6 +19,8 @@ export function TeamEditSheet({ open, team, saveMutation, onClose }: TeamEditShe
   useEffect(() => {
     if (open) setName(team?.name ?? "");
   }, [open, team]);
+
+  useEscapeKey(onClose, open);
 
   if (!open || !team) return null;
 

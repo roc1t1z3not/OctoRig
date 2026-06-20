@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (c) 2026 CommonHuman-Lab
 import { addHours } from "@/lib/utils/date";
+import { useEscapeKey } from "@/hooks/useEscapeKey";
 
 const PRESETS: { label: string; hours: number }[] = [
   { label: "2 h", hours: 2 },
@@ -26,6 +27,8 @@ export function ScheduleDestroyModal({
   onClose,
   isPending,
 }: ScheduleDestroyModalProps) {
+  useEscapeKey(onClose, true);
+
   return (
     <div className="g-backdrop" onClick={onClose}>
       <div className="g-modal" onClick={(e) => e.stopPropagation()}>

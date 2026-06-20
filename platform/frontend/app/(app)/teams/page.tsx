@@ -3,10 +3,14 @@
 // Copyright (c) 2026 CommonHuman-Lab
 import "./teams.css";
 
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, Users, Crown, Shield, Eye } from "lucide-react";
-import { getTeams, type TeamRole } from "@/lib/api/teams";
+import { getTeams, createTeam, type TeamRole } from "@/lib/api/teams";
+import { NewTeamSheet } from "@/components/teams/NewTeamSheet";
+import { useNotificationsStore } from "@/stores/notifications.store";
 
 const ROLE_LABEL: Record<TeamRole, { label: string; icon: React.ReactNode }> = {
   owner:   { label: "Owner",   icon: <Crown   size={11} /> },
@@ -16,19 +20,37 @@ const ROLE_LABEL: Record<TeamRole, { label: string; icon: React.ReactNode }> = {
 };
 
 export default function TeamsPage() {
+  const router = useRouter();
+  const qc = useQueryClient();
+  const { push } = useNotificationsStore();
+  const [sheetOpen, setSheetOpen] = useState(false);
+
   const { data: teams = [], isLoading } = useQuery({
     queryKey: ["teams"],
     queryFn: getTeams,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data: { name: string; description?: string }) => createTeam(data),
+    onSuccess: (team) => {
+      qc.invalidateQueries({ queryKey: ["teams"] });
+      push("success", `Team "${team.name}" created`);
+      setSheetOpen(false);
+      router.push(`/teams/${team.id}`);
+    },
+    onError: (err: any) => {
+      push("error", err?.response?.data?.detail ?? "Failed to create team");
+    },
   });
 
   return (
     <div className="page">
       <div className="page-header">
         <h1 className="page-title font-mono">Teams</h1>
-        <Link href="/teams/new" className="g-btn g-btn-primary">
+        <button className="g-btn g-btn-primary" onClick={() => setSheetOpen(true)}>
           <Plus size={14} />
           New Team
-        </Link>
+        </button>
       </div>
 
       {isLoading ? (
@@ -37,9 +59,9 @@ export default function TeamsPage() {
         <div className="g-panel empty-state">
           <Users size={32} className="text-muted" />
           <p className="text-muted text-sm mt-2">No teams yet.</p>
-          <Link href="/teams/new" className="g-btn g-btn-primary mt-2">
+          <button className="g-btn g-btn-primary mt-2" onClick={() => setSheetOpen(true)}>
             Create your first team
-          </Link>
+          </button>
         </div>
       ) : (
         <div className="team-grid">
@@ -70,6 +92,12 @@ export default function TeamsPage() {
           })}
         </div>
       )}
+
+      <NewTeamSheet
+        open={sheetOpen}
+        createMutation={createMutation}
+        onClose={() => setSheetOpen(false)}
+      />
     </div>
   );
 }

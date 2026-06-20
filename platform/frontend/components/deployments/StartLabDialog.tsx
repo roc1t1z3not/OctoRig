@@ -10,6 +10,7 @@ import { startDeployment } from "@/lib/api/deployments";
 import { getTeams } from "@/lib/api/teams";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { usePendingLabsStore } from "@/stores/pending-labs.store";
+import { useEscapeKey } from "@/hooks/useEscapeKey";
 
 interface Props {
   lab: LabTemplate;
@@ -58,6 +59,8 @@ export function StartLabDialog({ lab, open, onClose }: Props) {
       setErrorMsg(err.response?.data?.detail ?? "Failed to start lab");
     }
   }
+
+  useEscapeKey(onClose, open);
 
   if (!open) return null;
 
