@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="nightfall" suppressHydrationWarning>
+    <html lang="en" data-theme="nord" suppressHydrationWarning>
       <head>
         {/* FOUC prevention — apply stored theme before first paint */}
         <script

@@ -29,7 +29,7 @@
   --g-text:           #f0fff8;
   --g-text-secondary: #9bbfb0;
   --g-text-body:      var(--g-text-secondary);
-  --g-text-muted:     #4e7568;
+  --g-text-muted:     #638f80;
   --g-text-dim:       rgba(16, 185, 129, 0.22);
 
   /* Status */
@@ -121,7 +121,7 @@
   --g-accent-glow:    rgba(244, 63, 94, 0.55);
   --g-text:           #fff1f2;
   --g-text-secondary: #fecdd3;
-  --g-text-muted:     #881337;
+  --g-text-muted:     #c4546c;
   --g-text-dim:       rgba(244, 63, 94, 0.20);
   --g-success:        #34d399;
   --g-success-bg:     rgba(52, 211, 153, 0.07);
@@ -157,7 +157,7 @@
   --g-accent-glow:    rgba(34, 197, 94, 0.60);
   --g-text:           #f0fdf4;
   --g-text-secondary: #86efac;
-  --g-text-muted:     #15803d;
+  --g-text-muted:     #1ba349;
   --g-text-dim:       rgba(34, 197, 94, 0.20);
   --g-success:        #22c55e;
   --g-success-bg:     rgba(34, 197, 94, 0.09);
@@ -193,7 +193,7 @@
   --g-accent-glow:    rgba(136, 192, 208, 0.42);
   --g-text:           #eceff4;
   --g-text-secondary: #c5d5e4;
-  --g-text-muted:     #5e7290;
+  --g-text-muted:     #7690b0;
   --g-text-dim:       rgba(136, 192, 208, 0.18);
   --g-success:        #a3be8c;
   --g-success-bg:     rgba(163, 190, 140, 0.09);
