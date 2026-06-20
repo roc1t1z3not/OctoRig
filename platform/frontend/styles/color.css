@@ -4,6 +4,7 @@
 /* ── Text colors ──────────────────────────────────────────────────────────── */
 .text-primary   { color: var(--g-text); }
 .text-secondary { color: var(--g-text-secondary); }
+.text-body      { color: var(--g-text-body); }
 .text-muted     { color: var(--g-text-muted); }
 .text-dim       { color: var(--g-text-dim); }
 .text-accent    { color: var(--g-accent); }

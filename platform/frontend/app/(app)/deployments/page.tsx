@@ -6,7 +6,7 @@ import "./deployments.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Square, RotateCcw, Play, Trash2 } from "lucide-react";
+import { Square, RotateCcw, Play, Trash2, Rocket } from "lucide-react";
 import {
   getDeployments, stopDeployment, resetDeployment, restartDeployment, removeDeployment,
 } from "@/lib/api/deployments";
@@ -77,7 +77,10 @@ export default function DeploymentsPage() {
 
   return (
     <div className="page">
-      <h1 className="page-title font-mono">Deployments</h1>
+      <h1 className="page-title font-mono">
+        <Rocket size={18} style={{ display: "inline", marginRight: "0.5rem", verticalAlign: "middle" }} />
+        Deployments
+      </h1>
 
       {isLoading ? (
         <div className="text-muted text-sm">Loading…</div>

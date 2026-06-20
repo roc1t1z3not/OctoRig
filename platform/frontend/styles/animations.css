@@ -53,9 +53,10 @@
 }
 
 @keyframes u-sparkle {
-  0%, 100% { transform: scale(1)   rotate(0deg);   opacity: 0.7; }
-  33%       { transform: scale(1.3) rotate(120deg); opacity: 1.0; }
-  66%       { transform: scale(0.9) rotate(240deg); opacity: 0.8; }
+  0%   { transform: scale(1)   rotate(0deg);   opacity: 0.7; }
+  33%  { transform: scale(1.3) rotate(120deg); opacity: 1.0; }
+  66%  { transform: scale(0.9) rotate(240deg); opacity: 0.8; }
+  100% { transform: scale(1)   rotate(360deg); opacity: 0.7; }
 }
 
 /* ── Animation utilities ──────────────────────────────────────────────────── */

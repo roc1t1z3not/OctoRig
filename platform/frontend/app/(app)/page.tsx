@@ -6,7 +6,7 @@ import "./dashboard.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, LayoutDashboard } from "lucide-react";
 import { getDeployments, stopDeployment } from "@/lib/api/deployments";
 import { getHealth, getContainers } from "@/lib/api/system";
 import { getLabs, type LabTemplate } from "@/lib/api/labs";
@@ -88,7 +88,10 @@ export default function Dashboard() {
 
   return (
     <div className="page">
-      <h1 className="page-title font-mono">Dashboard</h1>
+      <h1 className="page-title font-mono">
+        <LayoutDashboard size={18} style={{ display: "inline", marginRight: "0.5rem", verticalAlign: "middle" }} />
+        Dashboard
+      </h1>
 
       {/* Stat cards */}
       <div className="stat-row">

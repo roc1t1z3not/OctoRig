@@ -5,7 +5,7 @@ import "./creator.css";
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Plus, PenTool } from "lucide-react";
 import { getMySubmissions } from "@/lib/api/content";
 import { CreateModal } from "@/components/creator/CreateModal";
 import { SubmissionRow } from "@/components/creator/SubmissionRow";
@@ -21,7 +21,10 @@ export default function CreatorPage() {
   return (
     <div className="page">
       <div className="creator-header page-header">
-        <h1 className="page-title font-mono">Content Creator</h1>
+        <h1 className="page-title font-mono">
+          <PenTool size={18} style={{ display: "inline", marginRight: "0.5rem", verticalAlign: "middle" }} />
+          Content Creator
+        </h1>
         <button className="g-btn g-btn-primary" onClick={() => setShowCreate(true)}>
           <Plus size={14} />
           New Draft

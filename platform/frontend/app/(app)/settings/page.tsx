@@ -5,7 +5,7 @@ import "./settings.css";
 
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Palette, User, Shield, FlaskConical } from "lucide-react";
+import { Palette, User, Shield, FlaskConical, Settings as SettingsIcon } from "lucide-react";
 import { changePassword, getMe } from "@/lib/api/auth";
 import { updateMyProfile } from "@/lib/api/profiles";
 import { useThemeStore } from "@/stores/theme.store";
@@ -30,7 +30,10 @@ export default function SettingsPage() {
 
   return (
     <div className="page">
-      <h1 className="page-title font-mono">Settings</h1>
+      <h1 className="page-title font-mono">
+        <SettingsIcon size={18} style={{ display: "inline", marginRight: "0.5rem", verticalAlign: "middle" }} />
+        Settings
+      </h1>
 
       <div className="settings-layout">
         <nav className="settings-nav g-panel">

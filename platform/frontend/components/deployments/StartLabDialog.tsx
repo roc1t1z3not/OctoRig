@@ -84,7 +84,7 @@ export function StartLabDialog({ lab, open, onClose }: Props) {
 
           {phase === "confirm" && (
             <>
-              <p className="text-secondary text-sm mb-1">{lab.description}</p>
+              <p className="text-body text-sm mb-1">{lab.description}</p>
               <p className="text-muted text-11">
                 A private subnet and IP will be assigned to this lab when it starts.
               </p>

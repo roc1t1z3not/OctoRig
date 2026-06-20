@@ -5,7 +5,7 @@ import "./api-keys.css";
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Plus, KeyRound } from "lucide-react";
 import { getApiKeys, createApiKey, revokeApiKey, type ApiKeyCreated } from "@/lib/api/apiKeys";
 import { useNotificationsStore } from "@/stores/notifications.store";
 import { KeyReveal } from "@/components/api-keys/KeyReveal";
@@ -46,7 +46,10 @@ export default function ApiKeysPage() {
   return (
     <div className="page">
       <div className="page-header">
-        <h1 className="page-title font-mono">API Keys</h1>
+        <h1 className="page-title font-mono">
+          <KeyRound size={18} style={{ display: "inline", marginRight: "0.5rem", verticalAlign: "middle" }} />
+          API Keys
+        </h1>
         <button
           className="g-btn g-btn-primary"
           onClick={() => { setShowCreate(true); setCreatedKey(null); }}

@@ -5,7 +5,7 @@ import "./labs.css";
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search } from "lucide-react";
+import { Search, FlaskConical } from "lucide-react";
 import { getLabs } from "@/lib/api/labs";
 import { stopDeployment, resetDeployment } from "@/lib/api/deployments";
 import { LabCard } from "@/components/labs/LabCard";
@@ -58,7 +58,10 @@ export default function LabsPage() {
 
   return (
     <div className="page">
-      <h1 className="page-title font-mono">Lab Catalog</h1>
+      <h1 className="page-title font-mono">
+        <FlaskConical size={18} style={{ display: "inline", marginRight: "0.5rem", verticalAlign: "middle" }} />
+        Lab Catalog
+      </h1>
 
       {/* Filter bar */}
       <div className="filter-bar">

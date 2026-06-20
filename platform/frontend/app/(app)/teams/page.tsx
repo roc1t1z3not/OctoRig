@@ -46,7 +46,10 @@ export default function TeamsPage() {
   return (
     <div className="page">
       <div className="page-header">
-        <h1 className="page-title font-mono">Teams</h1>
+        <h1 className="page-title font-mono">
+          <Users size={18} style={{ display: "inline", marginRight: "0.5rem", verticalAlign: "middle" }} />
+          Teams
+        </h1>
         <button className="g-btn g-btn-primary" onClick={() => setSheetOpen(true)}>
           <Plus size={14} />
           New Team

@@ -40,7 +40,7 @@
 .tracking-wide     { letter-spacing: 0.025em; }
 .tracking-wider    { letter-spacing: 0.05em; }
 .tracking-widest   { letter-spacing: 0.1em; }
-.tracking-brand    { letter-spacing: 0.2em; }   /* GLOOMPROXY brand */
+.tracking-brand    { letter-spacing: 0.2em; }   /* wordmark tracking */
 .tracking-section  { letter-spacing: 0.15em; }  /* section headers */
 
 /* ── Text alignment ───────────────────────────────────────────────────────── */

@@ -28,6 +28,7 @@
   /* Text */
   --g-text:           #f0fff8;
   --g-text-secondary: #9bbfb0;
+  --g-text-body:      var(--g-text-secondary);
   --g-text-muted:     #4e7568;
   --g-text-dim:       rgba(16, 185, 129, 0.22);
 
@@ -228,7 +229,8 @@
   --g-accent-glow:    rgba(217, 70, 239, 0.52);
   --g-text:           #fae8ff;
   --g-text-secondary: #e879f9;
-  --g-text-muted:     #a21caf;
+  --g-text-body:      #d9aee0;
+  --g-text-muted:     #a684af;
   --g-text-dim:       rgba(217, 70, 239, 0.24);
   --g-success:        #34d399;
   --g-success-bg:     rgba(52, 211, 153, 0.09);

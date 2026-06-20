@@ -6,7 +6,7 @@ import "./challenges.css";
 import { useState } from "react";
 import Link from "next/link";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { Search, CheckCircle2, Clock, Target } from "lucide-react";
+import { Search, CheckCircle2, Clock, Target, Swords } from "lucide-react";
 import { getChallenges, type ChallengeListItem, type ChallengeDifficulty } from "@/lib/api/challenges";
 import { getLabs, type LabTemplate } from "@/lib/api/labs";
 import { PageSpinner } from "@/components/ui/Spinner";
@@ -132,7 +132,10 @@ export default function ChallengesPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <h1 className="page-title font-mono">Challenges</h1>
+          <h1 className="page-title font-mono">
+            <Swords size={18} style={{ display: "inline", marginRight: "0.5rem", verticalAlign: "middle" }} />
+            Challenges
+          </h1>
           {!isLoading && (
             <p className="page-sub">{solved}/{total} solved</p>
           )}

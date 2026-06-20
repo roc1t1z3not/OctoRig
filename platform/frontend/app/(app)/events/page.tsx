@@ -6,7 +6,7 @@ import "./events.css";
 import { useState } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Calendar, Clock, Trophy, Users, Lock, Globe, Eye, Plus } from "lucide-react";
+import { Calendar, Clock, Trophy, Users, Lock, Globe, Eye, Plus, Flag } from "lucide-react";
 import {
   getEvents,
   createEvent,
@@ -127,7 +127,10 @@ export default function EventsPage() {
   return (
     <div className="page">
       <div className="page-header">
-        <h1 className="page-title font-mono">CTF Events</h1>
+        <h1 className="page-title font-mono">
+          <Flag size={18} style={{ display: "inline", marginRight: "0.5rem", verticalAlign: "middle" }} />
+          CTF Events
+        </h1>
         {isAdmin && (
           <button
             className="g-btn g-btn-primary"

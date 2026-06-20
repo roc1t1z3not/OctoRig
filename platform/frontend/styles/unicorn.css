@@ -35,14 +35,14 @@
   opacity: 0.6;
 }
 
-/* GLOOMPROXY brand → rainbow gradient text */
-[data-theme="unicorn"] .brand-gloom {
+/* Brand wordmark → rainbow gradient text */
+[data-theme="unicorn"] .brand-gradient {
   background: linear-gradient(90deg, #f472b6, #a78bfa, #38bdf8, #34d399, #facc15, #fb923c, #f472b6);
-  background-size: 200% auto;
+  background-size: 300% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: u-rainbow-shift 5s linear infinite;
+  animation: header-border-shift 5s linear infinite;
 }
 
 /* Topbar — rainbow bottom border */
@@ -55,9 +55,9 @@
   position: absolute;
   bottom: 0; left: 0; right: 0;
   height: 1.5px;
-  background: linear-gradient(90deg, #f472b6 0%, #a78bfa 20%, #38bdf8 40%, #34d399 60%, #facc15 80%, #fb923c 100%);
-  background-size: 200% auto;
-  animation: u-rainbow-shift 6s linear infinite;
+  background: linear-gradient(90deg, #f472b6 0%, #a78bfa 16.66%, #38bdf8 33.33%, #34d399 50%, #facc15 66.66%, #fb923c 83.33%, #f472b6 100%);
+  background-size: 300% auto;
+  animation: header-border-shift 6s linear infinite;
 }
 
 /* Sidebar footer — rainbow top border */
@@ -97,6 +97,35 @@
 /* Online dot (emerald) sparkle */
 [data-theme="unicorn"] .g-dot-success {
   animation: u-sparkle 2.5s ease infinite;
+}
+
+/* Page titles & challenge titles — gradient text
+   display: inline-block shrinks the box to the text so the gradient
+   spans the visible glyphs, not the full-width block it'd otherwise sit in. */
+[data-theme="unicorn"] .page-title,
+[data-theme="unicorn"] .ch-title {
+  display: inline-block;
+  background: linear-gradient(90deg, #f472b6, #c084fc, #38bdf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Difficulty badges — soft glow matching their own color */
+[data-theme="unicorn"] .diff-easy   { box-shadow: 0 0 8px rgba(52,211,153,0.35); }
+[data-theme="unicorn"] .diff-medium { box-shadow: 0 0 8px rgba(251,191,36,0.35); }
+[data-theme="unicorn"] .diff-hard   { box-shadow: 0 0 8px rgba(251,146,60,0.35); }
+[data-theme="unicorn"] .diff-insane { box-shadow: 0 0 8px rgba(251,113,133,0.40); }
+
+/* Points value — subtle glow */
+[data-theme="unicorn"] .ch-points {
+  text-shadow: 0 0 10px rgba(217,70,239,0.45);
+}
+
+/* Tag chips — brighter glow on hover */
+[data-theme="unicorn"] .ch-tag:hover {
+  background: rgba(217,70,239,0.22);
+  box-shadow: 0 0 6px rgba(217,70,239,0.30);
 }
 
 /* ── Per-theme animated header borders ─────────────────────────────────────── *

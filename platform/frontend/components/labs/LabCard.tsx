@@ -43,7 +43,7 @@ export function LabCard({ lab, onStop, onReset }: Props) {
           {deployment && <DeploymentStatusBadge status={deployment.status} />}
         </div>
 
-        <p className="text-secondary text-12 mt-1 mb-2">{lab.description}</p>
+        <p className="text-body text-12 mt-1 mb-2">{lab.description}</p>
 
         <div className="flex flex-wrap gap-1 mb-3">{portChips}</div>
 
