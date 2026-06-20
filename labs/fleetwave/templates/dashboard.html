@@ -5,10 +5,22 @@
 <h2>Operations Dashboard</h2>
 
 <div class="kpi-row">
-  <div class="kpi k-blue"><div class="n">{{ counts.in_transit }}</div><div class="l">In transit</div></div>
-  <div class="kpi k-amber"><div class="n">{{ counts.out_for_delivery }}</div><div class="l">Out for delivery</div></div>
-  <div class="kpi k-green"><div class="n">{{ counts.delivered }}</div><div class="l">Delivered</div></div>
-  <div class="kpi k-red"><div class="n">{{ counts.exception }}</div><div class="l">Exceptions</div></div>
+  <div class="kpi k-blue">
+    <div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6h11v9H1z"/><path d="M12 9h5l4 3v3h-9z"/><circle cx="5" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></div>
+    <div class="n">{{ counts.in_transit }}</div><div class="l">In transit</div>
+  </div>
+  <div class="kpi k-amber">
+    <div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6M12 22v-4"/><circle cx="12" cy="13" r="5"/></svg></div>
+    <div class="n">{{ counts.out_for_delivery }}</div><div class="l">Out for delivery</div>
+  </div>
+  <div class="kpi k-green">
+    <div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <div class="n">{{ counts.delivered }}</div><div class="l">Delivered</div>
+  </div>
+  <div class="kpi k-red">
+    <div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+    <div class="n">{{ counts.exception }}</div><div class="l">Exceptions</div>
+  </div>
 </div>
 
 <div class="card" style="padding:0;overflow:hidden">

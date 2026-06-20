@@ -4,8 +4,11 @@
 {% block content %}
 <section class="narrow">
   <div class="card">
-    <h2>Operator sign in</h2>
-    <p class="muted" style="margin-top:-.5rem">Access the FleetWave dispatch console</p>
+    <div style="width:48px;height:48px;border-radius:14px;display:grid;place-items:center;margin:0 auto .8rem;background:var(--grad-teal);box-shadow:0 6px 16px rgba(16,166,163,.4)">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h13v13H1z"/><path d="M14 8h5l3 3v5h-8z"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg>
+    </div>
+    <h2 style="justify-content:center">Operator sign in</h2>
+    <p class="muted center" style="margin-top:-.5rem">Access the FleetWave dispatch console</p>
     {% if error %}<div class="alert alert-bad">{{ error }}</div>{% endif %}
     <form method="post" action="{{ url_for('login') }}">
       <label>Username<input type="text" name="username" autofocus autocomplete="off"></label>
