@@ -321,11 +321,7 @@ export const DEMO_NOTIFICATIONS = [
   },
 ];
 
-// ─── Deployments ──────────────────────────────────────────────────────────────
-// Real lab ids/slugs/names from app/labs/registry/{world,firerange}.py. Real
-// container naming convention from app/services/deployment_provisioning.py
-// is "{template container name}-{deployment id}".
-
+// Lab ids/slugs/names are real; container naming follows "{template container name}-{deployment id}"
 export const DEMO_DEPLOYMENTS = [
   {
     id: 1001,
@@ -466,11 +462,7 @@ export const DEMO_HEALTH = {
   total_containers: 5,
 };
 
-// Shape matches ContainerInfo { name, status, image, created } exactly.
-// First four mirror DEMO_DEPLOYMENTS containers (tracked); the last one has
-// no deployment row — a lab started directly via octorig.sh, which keeps its
-// base name (no per-deployment suffix), demonstrating the "Externally
-// Managed" dashboard section.
+// Last entry has no deployment row — demonstrates the "Externally Managed" dashboard section
 export const DEMO_CONTAINERS = [
   { name: "octorig-breachsql-db-1001",  status: "running", image: "mysql:8.0",                       created: "2026-06-16T10:00:00Z" },
   { name: "octorig-breachsql-pg-1001",  status: "running", image: "postgres:16-alpine",               created: "2026-06-16T10:00:00Z" },
@@ -566,12 +558,7 @@ export const DEMO_ADMIN_SETTINGS = {
   updated_at: "2026-06-01T10:00:00Z",
 };
 
-// ─── Content creator / review queue ────────────────────────────────────────────
-// These are usage records (drafts an author wrote), not seeded catalog data —
-// there's no real-backend equivalent to mirror, so plausible fixtures are fine.
-// They reference real lab slugs/categories for the "which lab does this attach
-// to" context.
-
+// Plausible fixtures (no real-backend equivalent), but reference real lab slugs/categories
 export const DEMO_CONTENT_MINE = [
   {
     id: 301,
@@ -747,12 +734,7 @@ export const DEMO_ASSESSMENT_FLAGS: Array<{
   { challenge_slug: "hb-idor-accounts", challenge_title: "Everyone's Balance", points: 250, solved_at: "2026-06-10T14:10:00Z" },
 ];
 
-// ─── Augmentation helpers (applied to real API responses) ─────────────────────
-// These overlay fake personal/social state (solve_count, solved_by_me, earned)
-// on top of catalog data that always comes from the real backend, so the
-// catalog itself (labs/challenges/badges) can never drift from app/labs and
-// app/badge_catalog.
-
+// Overlays fake personal/social state onto real-backend catalog data, so the catalog can't drift
 const DEMO_USERNAMES = [
   "vx_phantom", "r0otkit", "nullderef", "idor_detective", "sqli_witch",
   "xss_reaper", "packet_surgeon", "redteam_rook", "byte_bandit",

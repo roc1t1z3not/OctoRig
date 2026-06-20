@@ -114,27 +114,7 @@ def init_db():
         INSERT OR IGNORE INTO _flags VALUES ('sqli-search', 'FLAG{sv_sqli_search_union}');
     """)
 
-    # MD5 hashes — plaintext passwords (all in rockyou.txt):
-    #  1:admin         commonhuman-lab → 36b809e24478355e344545720ea7e090
-    #  2:mod_alice      password1       → 7c6a180b36896a0a8c02787eeafb0e4c
-    #  3:mod_bob        letmein         → 0d107d09f5bbe40cade3de5c71e9e9b7
-    #  4:cipher_dev     sunshine1       → d5c0607301ad5d5c1528962a83992ac8
-    #  5:rootkit_rose   baseball99      → e65c8afc9951f94fed8873a4c1e31a63
-    #  6:nullptr_       iloveyou        → f25a2fc72690b780b2a14e140ef6a9e0
-    #  7:hexdump_hero   monkey123       → cc25c0f861a83f5efadc6e1ba9d1269e
-    #  8:ghost_signal   dragon99        → b696aef7776367787253dc2acdd10279
-    #  9:terminal_kai   hacktheplanet   → 1b3231655cebb7a1f783eddf27d254ca
-    # 10:sudo_sarah     qwerty123       → 865d6c4a566268abf14e5da76c71bff9
-    # 11:packet_pete    password        → 5f4dcc3b5aa765d61d8327deb882cf99
-    # 12:devsec_dia     123456          → e10adc3949ba59abbe56e057f20f883e
-    # 13:shellcode_sam  master          → 9a0364b9e99bb480dd25e1f0284c8555
-    # 14:xor_xena       princess        → 8afa847f50a716e64932d995c8e7435a
-    # 15:fuzzr_felix    dragon          → 8621ffdbc5698829397d97767ac13db3
-    # 16:netcat_neo     abc123          → e99a18c428cb38d5f260853678922e03
-    # 17:bytesmith      monkey          → d0763edaa9d9bd2a9516280e9044d885
-    # 18:vuln_viv       shadow          → 67aeea294e1cb515236c73ac6e6eaa93
-    # 19:traceroute_ty  qwerty          → d8578edf8458ce06fbc5bb76a58c5ca4
-    # 20:asm_archer     superman        → 84d961568a65073a3bcf0eb216b2a576
+    # password_hash values below are MD5, all crackable via rockyou.txt
     db.executescript("""
         INSERT OR IGNORE INTO users (id, username, email, password_hash, role, karma, bio, created_at) VALUES
           (1,  'admin',         'admin@subverse.local',          '36b809e24478355e344545720ea7e090', 'admin',      9999, 'Site administrator. I keep the lights on.',                              '2025-01-01 00:00:00'),
@@ -482,10 +462,7 @@ def init_db():
           (10, 2, 2, 'pin_post',        33,  'High-quality heap exploitation research — pinned.',        '2025-05-03 10:05:00');
     """)
 
-    # ── CommonHuman easter egg layer ──────────────────────────────────────────
-    # User 21: commonhuman_ — password "octopus" (MD5: fcf1eed8596699624167416a1e7e122e)
-    # Karma 1337. Bio hints at /commonhuman. Discoverable via SQLi, IDOR, or
-    # robots.txt → /community/hidden → post 52.
+    # CommonHuman easter egg: user 21, discoverable via SQLi/IDOR or robots.txt → post 52
     db.executescript("""
         INSERT OR IGNORE INTO users (id, username, email, password_hash, role, karma, bio, created_at) VALUES
           (21, 'commonhuman_', 'lab@commonhuman.example',
@@ -504,10 +481,7 @@ def init_db():
           (21, 7, 'moderator', '2025-01-01 00:00:00');
     """)
 
-    # Posts 51-53: the in-app easter egg content
-    # Post 51: sv/security — public post explaining OctoRig (the "CommonHuman-Lab game" equivalent)
-    # Post 52: sv/hidden  — internal staff note (IDOR target, discoverable via robots.txt hint)
-    # Post 53: sv/offtopic — humorous wink at the player
+    # Posts 51-53: easter egg content (52 is the IDOR target)
     db.executescript("""
         INSERT OR IGNORE INTO posts (id, title, body, user_id, community_id, score, status, flair, created_at) VALUES
           (51,

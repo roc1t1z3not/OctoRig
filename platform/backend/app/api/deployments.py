@@ -39,10 +39,7 @@ def _to_response(d: Deployment, db: Session) -> DeploymentWithTemplate:
     user = db.get(User, d.started_by_id)
     team = db.get(Team, d.team_id) if d.team_id else None
     base = DeploymentResponse.model_validate(d).model_dump()
-    # Legacy rows created before per-deployment network isolation have no
-    # access_info of their own — the template's static defaults are an
-    # unrendered {container_ip} placeholder with no specific deployment to
-    # point at, so this always renders as "not running".
+    # Legacy rows predate per-deployment network isolation and have no access_info
     if not base.get("access_info") and template is not None:
         base["access_info"] = render_access_info(template.access_info or [])
     return DeploymentWithTemplate(
@@ -186,12 +183,8 @@ def create_deployment(
     if lab_def is None:
         raise bad_request("Lab definition missing from registry")
 
-    # Conflict check — per-user for challenge instances and personal labs, per-team
-    # for team labs. Different users/teams may now run the same lab concurrently;
-    # this only stops a single actor from double-starting their own duplicate.
-    # The SELECT FOR UPDATE above serializes concurrent requests; these checks are
-    # race-free. The DB partial unique indexes (uq_one_active_deployment_per_template_*)
-    # provide a second line of defence.
+    # Conflict check is per-user (challenges/personal labs) or per-team (team labs);
+    # race-free under the SELECT FOR UPDATE above, backed by the DB partial unique indexes.
     if challenge_id is not None:
         existing = (
             db.query(Deployment)
@@ -405,10 +398,7 @@ def _resolve_container_name(deployment: Deployment, template: Optional[LabTempla
         return template.container_names[0] if template else ""
     if len(dep_names) == 1 or template is None:
         return dep_names[0]
-    # template.container_names and deployment.container_names are generated
-    # 1:1 in the same order — match the role by position via the template's
-    # static names (which still carry the "-{role}" suffix), then return the
-    # deployment's name at that same index.
+    # template/deployment container_names are generated 1:1 in the same order
     for i, name in enumerate(template.container_names):
         if name.endswith(f"-{role}") and i < len(dep_names):
             return dep_names[i]
