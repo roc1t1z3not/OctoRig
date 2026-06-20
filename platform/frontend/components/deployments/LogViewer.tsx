@@ -34,10 +34,7 @@ export function LogViewer({ deploymentId, containerNames }: Props) {
     ? lines.filter((l) => l.toLowerCase().includes(filterText.toLowerCase()))
     : lines;
 
-  // Auto-scroll to bottom on new lines, unless a filter is active or user scrolled up.
-  // block/inline: "nearest" keeps this confined to the log panel's own scrollbar —
-  // the default "start" alignment also nudges ancestor scroll containers (the page
-  // itself) toward the target, causing the whole page to jump on every new line.
+  // block/inline: "nearest" avoids "start" alignment scrolling the whole page on every new line
   useEffect(() => {
     if (!filterText && !userScrolledUp.current) {
       bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });

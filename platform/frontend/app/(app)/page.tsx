@@ -74,15 +74,11 @@ export default function Dashboard() {
       c.name !== "octorig-socket-proxy"
   );
 
-  // Container names are now per-deployment (e.g. "octorig-rewindrange-42"), so
-  // match orphan containers to a lab template by base-name prefix rather than
-  // exact equality — this is only a best-effort label for untracked containers.
+  // Best-effort label for untracked containers: match by base-name prefix (names are per-deployment)
   const getLabUrl = (containerName: string) => {
     const lab = labs.find((l) => l.container_names.some((cn) => containerName.startsWith(`${cn}-`)));
     const url = lab?.access_info.find((a) => a.key === "URL")?.value ?? null;
-    // The template's access_info is just a "not running" placeholder unless
-    // it belongs to a real deployment, which this orphan-container lookup
-    // can't establish — only show it if it's an actual clickable URL.
+    // Template access_info is just a placeholder unless tied to a real deployment
     return url && url.startsWith("http") ? url : null;
   };
 

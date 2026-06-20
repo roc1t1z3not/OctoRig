@@ -450,9 +450,7 @@ def stop_all_deployments(
     )
 
 
-# Restart "octorig-platform-api" last — it's the container serving this very
-# request, so its sibling services get restarted first regardless of whether
-# this process survives long enough to issue its own restart.
+# "octorig-platform-api" restarts last since it's the container serving this request
 _PLATFORM_CONTAINERS = [
     "octorig-platform-worker",
     "octorig-platform-beat",

@@ -16,9 +16,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       })
   );
 
-  // Silent token restore: user metadata is persisted in localStorage but the access token
-  // lives only in memory. On every page load, if we have user data but no token, hit
-  // /auth/refresh — the browser sends the HttpOnly cookie automatically.
+  // Access token lives only in memory; restore it via /auth/refresh's HttpOnly cookie on load
   useEffect(() => {
     const { user, accessToken, setAccessToken, clearSession, setIsRestoringToken } =
       useUserStore.getState();

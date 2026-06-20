@@ -51,9 +51,7 @@ _COOKIE_NAME = "octorig_refresh_token"
 _COOKIE_PATH = "/api/v1/auth"
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
+# --- Helpers ---
 
 def _compute_status(invite: AssessmentInvite) -> InviteStatus:
     if invite.is_revoked:
@@ -143,9 +141,7 @@ def _set_refresh_cookie(response: Response, token: str) -> None:
     )
 
 
-# ---------------------------------------------------------------------------
-# Admin — CRUD
-# ---------------------------------------------------------------------------
+# --- Admin — CRUD ---
 
 @admin_router.get("/", response_model=list[AssessmentResponse])
 def list_assessments(
@@ -249,9 +245,7 @@ def delete_assessment(
     db.commit()
 
 
-# ---------------------------------------------------------------------------
-# Admin — Invites
-# ---------------------------------------------------------------------------
+# --- Admin — Invites ---
 
 @admin_router.get("/{assessment_id}/invites", response_model=list[AssessmentInviteResponse])
 def list_invites(
@@ -426,9 +420,7 @@ def get_candidate_progress(
     )
 
 
-# ---------------------------------------------------------------------------
-# Candidate — public invite landing
-# ---------------------------------------------------------------------------
+# --- Candidate — public invite landing ---
 
 @candidate_router.get("/invite/{token}", response_model=InviteLandingResponse)
 def get_invite_landing(
@@ -456,9 +448,7 @@ def get_invite_landing(
     )
 
 
-# ---------------------------------------------------------------------------
-# Candidate — accept invite (register or link existing account)
-# ---------------------------------------------------------------------------
+# --- Candidate — accept invite (register or link existing account) ---
 
 @candidate_router.post("/invite/{token}/accept", response_model=TokenResponse, status_code=201)
 def accept_invite(
@@ -516,9 +506,7 @@ def accept_invite(
     )
 
 
-# ---------------------------------------------------------------------------
-# Candidate — start assessment (deploy labs, set timer)
-# ---------------------------------------------------------------------------
+# --- Candidate — start assessment (deploy labs, set timer) ---
 
 @candidate_router.post("/me/start", response_model=CandidateAssessmentStatus)
 def start_assessment(
@@ -580,9 +568,7 @@ def start_assessment(
     return _build_candidate_status(invite, db)
 
 
-# ---------------------------------------------------------------------------
-# Candidate — workspace status
-# ---------------------------------------------------------------------------
+# --- Candidate — workspace status ---
 
 @candidate_router.get("/me", response_model=CandidateAssessmentStatus)
 def get_assessment_status(
@@ -659,9 +645,7 @@ def _build_candidate_status(invite: AssessmentInvite, db: Session) -> CandidateA
     )
 
 
-# ---------------------------------------------------------------------------
-# Candidate — report submission
-# ---------------------------------------------------------------------------
+# --- Candidate — report submission ---
 
 @candidate_router.post("/me/report", response_model=ReportResponse)
 def submit_report(
@@ -702,9 +686,7 @@ def submit_report(
     )
 
 
-# ---------------------------------------------------------------------------
-# Candidate — finish early
-# ---------------------------------------------------------------------------
+# --- Candidate — finish early ---
 
 @candidate_router.post("/me/complete", response_model=CandidateAssessmentStatus)
 def complete_assessment(

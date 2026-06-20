@@ -38,9 +38,7 @@ class DockerRuntimeService:
             self._client = docker.from_env(timeout=120)
         return self._client
 
-    # ------------------------------------------------------------------ #
-    # Health                                                               #
-    # ------------------------------------------------------------------ #
+    # --- Health ---
 
     def ping(self) -> bool:
         try:
@@ -48,9 +46,7 @@ class DockerRuntimeService:
         except DockerException:
             return False
 
-    # ------------------------------------------------------------------ #
-    # Network                                                              #
-    # ------------------------------------------------------------------ #
+    # --- Network ---
 
     def ensure_network(self, name: str, subnet: str, internal: bool = True) -> None:
         """Idempotent bridge network creation — matches ensure_network() in _common.sh.
@@ -80,9 +76,7 @@ class DockerRuntimeService:
         except (NotFound, DockerException):
             pass
 
-    # ------------------------------------------------------------------ #
-    # Volumes                                                              #
-    # ------------------------------------------------------------------ #
+    # --- Volumes ---
 
     def ensure_volume(self, name: str) -> None:
         try:
@@ -97,9 +91,7 @@ class DockerRuntimeService:
         except (NotFound, DockerException):
             pass
 
-    # ------------------------------------------------------------------ #
-    # Images                                                               #
-    # ------------------------------------------------------------------ #
+    # --- Images ---
 
     @circuit(failure_threshold=5, recovery_timeout=30, expected_exception=DockerException)
     def build_image(self, tag: str, context_path: str) -> None:
@@ -121,9 +113,7 @@ class DockerRuntimeService:
             pass
         self._get_client().images.pull(image)
 
-    # ------------------------------------------------------------------ #
-    # Containers                                                           #
-    # ------------------------------------------------------------------ #
+    # --- Containers ---
 
     def _force_remove_container(self, name: str) -> None:
         """Matches ensure_container_gone() in _common.sh."""
@@ -213,9 +203,7 @@ class DockerRuntimeService:
         result = container.exec_run(command, demux=False)
         return result.exit_code, result.output or b""
 
-    # ------------------------------------------------------------------ #
-    # Status                                                               #
-    # ------------------------------------------------------------------ #
+    # --- Status ---
 
     def get_container_status(self, name: str) -> str:
         """Returns 'running' | 'exited' | 'not_found' | other Docker state string."""
@@ -238,9 +226,7 @@ class DockerRuntimeService:
             })
         return result
 
-    # ------------------------------------------------------------------ #
-    # Port polling                                                         #
-    # ------------------------------------------------------------------ #
+    # --- Port polling ---
 
     def wait_for_port(self, host: str, port: int, timeout: int = 60) -> bool:
         """Poll until TCP port is open or timeout expires. Returns True on success."""
@@ -253,9 +239,7 @@ class DockerRuntimeService:
                 time.sleep(1)
         return False
 
-    # ------------------------------------------------------------------ #
-    # Log streaming                                                        #
-    # ------------------------------------------------------------------ #
+    # --- Log streaming ---
 
     async def stream_logs(
         self,

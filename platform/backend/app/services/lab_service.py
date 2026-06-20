@@ -26,9 +26,7 @@ from app.services.docker_runtime import docker_service
 from app.ws.manager import emit as ws_emit
 
 
-# ------------------------------------------------------------------ #
-# Registry sync                                                        #
-# ------------------------------------------------------------------ #
+# --- Registry sync ---
 
 def sync_registry(db: Session) -> None:
     """
@@ -169,9 +167,7 @@ def sync_registry(db: Session) -> None:
     db.commit()
 
 
-# ------------------------------------------------------------------ #
-# Active deployment lookup                                             #
-# ------------------------------------------------------------------ #
+# --- Active deployment lookup ---
 
 def get_active_deployment(
     db: Session,
@@ -197,9 +193,7 @@ def get_active_deployment(
     return q.first()
 
 
-# ------------------------------------------------------------------ #
-# Lab lifecycle — called as BackgroundTasks                           #
-# ------------------------------------------------------------------ #
+# --- Lab lifecycle — called as BackgroundTasks ---
 
 def start_lab(deployment_id: int, user_id: int) -> None:
     """
@@ -489,9 +483,7 @@ def reset_lab(deployment_id: int, user_id: int) -> None:
     start_lab(new_deployment.id, user_id)
 
 
-# ------------------------------------------------------------------ #
-# Helpers                                                              #
-# ------------------------------------------------------------------ #
+# --- Helpers ---
 
 def _get_challenge_slug(db: Session, challenge_id: int) -> str:
     from app.models.challenge import Challenge

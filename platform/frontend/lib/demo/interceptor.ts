@@ -68,15 +68,7 @@ function withMock(data: unknown, config: InternalAxiosRequestConfig, status = 20
   config.adapter = () => mockResponse(data, config, status);
 }
 
-// ─── Route matching helpers ───────────────────────────────────────────────────
-//
-// Catalog data — labs, challenges, badges, ranks — is intentionally NOT
-// matched/mocked here. Those requests pass through to the real backend so
-// they can never drift from app/labs/registry, app/badge_catalog, and
-// app/services/rank_service.py; only the personal/social overlay
-// (solve_count, solved_by_me, earned, my rank) is faked, via the augment*
-// helpers in data.ts applied in onResponse below.
-
+// Catalog routes pass through to the real backend unmocked; only the personal/social overlay is faked
 const SEG = "[^/]+";
 
 const RE = {

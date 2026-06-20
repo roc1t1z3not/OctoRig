@@ -8,9 +8,7 @@ from pydantic import BaseModel, Field
 from app.models.deployment import DeploymentStatus
 
 
-# ---------------------------------------------------------------------------
-# Assessment
-# ---------------------------------------------------------------------------
+# --- Assessment ---
 
 class AssessmentCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
@@ -56,9 +54,7 @@ class AssessmentResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-# ---------------------------------------------------------------------------
-# AssessmentInvite
-# ---------------------------------------------------------------------------
+# --- AssessmentInvite ---
 
 InviteStatus = Literal["pending", "accepted", "active", "completed", "expired", "revoked"]
 
@@ -100,9 +96,7 @@ class AssessmentInviteWithProgress(AssessmentInviteResponse):
     report_content: Optional[str] = None
 
 
-# ---------------------------------------------------------------------------
-# Candidate-facing
-# ---------------------------------------------------------------------------
+# --- Candidate-facing ---
 
 class InviteLandingResponse(BaseModel):
     """Public info shown on the invite landing page — no internal slugs exposed."""
@@ -138,9 +132,7 @@ class CandidateAssessmentStatus(BaseModel):
     report_content: Optional[str]
 
 
-# ---------------------------------------------------------------------------
-# Report
-# ---------------------------------------------------------------------------
+# --- Report ---
 
 class ReportSubmit(BaseModel):
     content: str = Field(..., min_length=1)
@@ -154,9 +146,7 @@ class ReportResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-# ---------------------------------------------------------------------------
-# Invite accept (registration flow)
-# ---------------------------------------------------------------------------
+# --- Invite accept (registration flow) ---
 
 class InviteAcceptRegister(BaseModel):
     username: str = Field(..., min_length=3, max_length=64)

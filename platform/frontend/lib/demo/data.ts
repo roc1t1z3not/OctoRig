@@ -1,12 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (c) 2026 CommonHuman-Lab
-// Demo mode fixture data — static records only (users, teams, deployments, admin
-// records). Catalog data that lives in the real backend (labs, challenges,
-// badges, ranks) is intentionally left to pass through to the live API in
-// interceptor.ts and is only lightly augmented here — see augment* below —
-// so it can never drift out of sync with app/labs/registry, app/badge_catalog,
-// and app/services/rank_service.py.
-// Dates are relative to 2026-06-16 (today when this was written).
+// Demo mode fixture data. Catalog data (labs/challenges/badges/ranks) passes through to the
+// live API in interceptor.ts and is only lightly augmented here, so it can't drift out of sync.
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 // Real platform role slugs (app/services/role_service.py ROLE_SEED): admin, creator, player, viewer.
@@ -27,10 +22,7 @@ export const DEMO_ME = {
   ],
 };
 
-// ─── Profile ──────────────────────────────────────────────────────────────────
-// Badge slugs/names/icons below are real entries from app/badge_catalog/*.
-// Challenge slugs/titles/points are real entries from app/labs/registry/world.py.
-
+// Badge and challenge slugs/names below are real entries from app/badge_catalog and app/labs/registry/world.py
 export const DEMO_PROFILE_ME = {
   user_id: 1,
   username: "octorig_admin",
@@ -652,10 +644,7 @@ export const DEMO_CONTENT_APPROVED = [
   },
 ];
 
-// ─── Client assessments ─────────────────────────────────────────────────────────
-// Also usage records (a creator bundles real labs into a timed take-home
-// assessment for a candidate) — lab_slugs below are real registry slugs.
-
+// Usage records (creator bundles real labs into a take-home assessment); lab_slugs are real
 export const DEMO_ASSESSMENTS = [
   {
     id: 401,
@@ -762,9 +751,7 @@ export function augmentChallengeDetail<T extends {
   solved_by_me: boolean;
   first_blood_user: string | null;
 }>(challenge: T, index?: number): T {
-  // Default to the same index this challenge would occupy in the list (id
-  // is 1-based and sequential), so a challenge's solved/solve_count state
-  // is consistent whether viewed from the list or the detail page.
+  // id is 1-based and sequential, so this keeps solved state consistent between list and detail views
   const i = index ?? Math.max(0, challenge.id - 1);
   return {
     ...challenge,

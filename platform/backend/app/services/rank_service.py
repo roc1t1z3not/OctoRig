@@ -29,9 +29,7 @@ RANK_SEED = [
     {"name": "Apex",         "min_points": 5_000_000,  "icon": "🚀",  "color": "#0891b2"},
 ]
 
-# Pre-emoji seed used lucide icon names. Ranks created by an older version of
-# this seed still have these stored — backfill them to the new emoji on
-# startup, but only when untouched by an admin (icon still matches exactly).
+# Backfilled to emoji on startup for ranks still untouched by an admin (old seed used lucide names)
 _LEGACY_ICONS = {
     "Recruit": "user", "Trainee": "shield", "Novice": "target", "Apprentice": "key",
     "Explorer": "compass", "Initiate": "unlock", "Hacker": "terminal", "Specialist": "code-2",

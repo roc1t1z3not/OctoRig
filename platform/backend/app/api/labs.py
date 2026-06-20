@@ -24,9 +24,7 @@ def _enrich(template: LabTemplate, db: Session, current_user: User) -> LabTempla
     current = DeploymentSummary.model_validate(active) if active else None
     data = LabTemplateResponse.model_validate(template)
     data.current_deployment = current
-    # Template-level access_info is just a static default with an unrendered
-    # {container_ip} placeholder — there's no specific deployment to point at
-    # here, so it always renders as "not running".
+    # Template-level access_info has no deployment to point at, so it always renders as "not running"
     data.access_info = render_access_info(data.access_info)
     if get_settings(db).hide_lab_ports and not is_privileged(current_user, db):
         data.exposed_ports = {}

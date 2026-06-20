@@ -32,10 +32,7 @@ def upgrade() -> None:
         ["auto_destroy_at", "status"],
     )
 
-    # --- Partial unique index to prevent duplicate active deployments ---
-    # Only one deployment per lab_template_id may be in 'starting' or 'running' state
-    # at a time. PostgreSQL partial unique indexes enforce this at the DB level, closing
-    # the TOCTOU window between the application-level conflict check and the INSERT.
+    # Partial unique index closes the TOCTOU window between the app-level conflict check and INSERT
     op.execute(
         """
         CREATE UNIQUE INDEX uq_one_active_deployment_per_template

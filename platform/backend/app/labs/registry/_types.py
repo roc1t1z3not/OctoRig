@@ -53,9 +53,7 @@ class LabDefinition(TypedDict):
     build_contexts: dict[str, str]  # role → path relative to OctoRig repo root
     start_order: list[str]  # roles in the order containers must start
     exposed_ports: dict[str, int]   # service name → port number
-    # [{"key": "URL", "value": "..."}] — "{container_ip}" is substituted at
-    # deployment time with the per-deployment allocated IP (see
-    # app/services/deployment_provisioning.py:_scoped_access_info).
+    # [{"key": "URL", "value": "..."}]; "{container_ip}" substituted per-deployment, see _scoped_access_info
     access_info: list[dict[str, str]]
     volume_names: list[str]
     env_vars: dict[str, str]

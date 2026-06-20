@@ -49,10 +49,7 @@ def client():
     )
     Base.metadata.create_all(test_engine)
 
-    # Reconfigure the *existing* sessionmaker in place (rather than swapping
-    # the module attribute) so every module that already holds a reference
-    # to it — even ones imported at module scope, like lab_service — picks
-    # up the new bind too.
+    # Reconfigure in place so modules already holding a reference (e.g. lab_service) pick up the new bind
     SessionLocal.configure(bind=test_engine)
 
     limiter.reset()

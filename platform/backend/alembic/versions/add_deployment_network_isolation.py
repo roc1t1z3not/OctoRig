@@ -43,9 +43,7 @@ def upgrade() -> None:
     )
     op.execute("INSERT INTO network_allocation_locks (id) VALUES (1)")
 
-    # Any deployments active at migration time were created under the old
-    # fixed-naming scheme and won't match the new per-deployment names —
-    # they must be stopped (via admin "stop all") before this migration runs.
+    # Active deployments predate per-deployment naming and won't match it, so force-stop them
     op.execute(
         """
         UPDATE deployments SET status = 'stopped', stopped_at = now()
