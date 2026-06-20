@@ -25,6 +25,7 @@ coverage.xml
 *.key
 *.crt
 secrets/
+memory
 
 # ── Alembic ──────────────────────────────────────────────────────────────────
 # keep migrations in git; ignore the compiled bytecode already caught above
