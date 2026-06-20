@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}{{ shipment.tracking_no }}{% endblock %}
+{% block content %}
+{% set stages = ['booked','in_transit','out_for_delivery','delivered'] %}
+{% set cur = 'delivered' if shipment.status == 'delivered' else ('out_for_delivery' if shipment.status == 'out_for_delivery' else 'in_transit') %}
+{% set cidx = stages.index(cur) %}
+
+<h2>Shipment <code>{{ shipment.tracking_no }}</code>
+  <span class="st st-{{ shipment.status }}" style="vertical-align:middle">{{ shipment.status.replace('_',' ') }}</span>
+</h2>
+
+<div class="grid-2">
+  <div class="card">
+    <h3 style="margin-top:0">Consignment</h3>
+    <table class="kv">
+      <tr><th>Recipient</th><td>{{ shipment.recipient }}</td></tr>
+      <tr><th>Address</th><td>{{ shipment.address }}</td></tr>
+      <tr><th>Origin</th><td>{{ shipment.origin }}</td></tr>
+      <tr><th>Destination</th><td>{{ shipment.destination }}</td></tr>
+      <tr><th>Weight</th><td>{{ '%.1f'|format(shipment.weight_kg) }} kg</td></tr>
+      <tr><th>Freight cost</th><td>${{ '%.2f'|format(shipment.cost) }}</td></tr>
+      <tr><th>Manifest notes</th><td>{{ shipment.notes }}</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Tracking</h3>
+    <ul class="timeline">
+      {% for st in stages %}
+        <li class="tl-step {{ 'done' if loop.index0 < cidx else ('current' if loop.index0 == cidx else '') }}">
+          <div class="t">{{ st.replace('_',' ') | title }}</div>
+          <div class="d">{% if loop.index0 < cidx %}Completed{% elif loop.index0 == cidx %}Current stage{% else %}Pending{% endif %}</div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<div class="card" style="margin-top:1.1rem">
+  <h3 style="margin-top:0">Report a delivery issue</h3>
+  <p class="muted" style="font-size:13px">Your note is forwarded to the operations review queue.</p>
+  <form method="post" action="{{ url_for('shipment_feedback', shipment_id=shipment.id) }}" class="inline-form">
+    <input type="text" name="note" placeholder="Describe the issue…" style="flex:1;min-width:260px">
+    <button class="btn btn-sm" type="submit">Submit report</button>
+  </form>
+</div>
+
+<p style="margin-top:1rem"><a href="{{ url_for('shipments') }}">&larr; All shipments</a></p>
+{% endblock %}

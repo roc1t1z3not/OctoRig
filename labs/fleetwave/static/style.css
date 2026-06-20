@@ -1,0 +1,226 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later
+   Copyright (c) 2026 CommonHuman-Lab
+   Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not
+   FleetWave — logistics WMS "ops board": light theme, two-row masthead
+   (teal command bar + white tab strip), data-dense tables, status pills,
+   KPI tiles, and a vertical tracking-timeline stepper. Deliberately a
+   different structural language from the HUD/sidebar and media-grid labs. */
+
+:root {
+  --bg:      #eef1f6;
+  --surface: #ffffff;
+  --ink:     #1b2a32;
+  --muted:   #6b7c86;
+  --line:    #dde3ea;
+  --teal:    #0b7285;
+  --teal-d:  #084c59;
+  --teal-l:  #e2f1f3;
+  --amber:   #f59f00;
+  --green:   #2f9e44;
+  --blue:    #1c7ed6;
+  --red:     #e03131;
+  --radius:  10px;
+  --shadow:  0 1px 2px rgba(16,40,50,.06), 0 4px 16px rgba(16,40,50,.06);
+  --font:    "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+a { color: var(--teal); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { font-family: var(--mono); font-size: .9em; color: var(--teal-d); background: var(--teal-l);
+  padding: 1px 5px; border-radius: 4px; }
+.muted { color: var(--muted); }
+.center { text-align: center; }
+
+/* ---------- masthead: teal command bar ---------- */
+.fw-mast {
+  background: linear-gradient(180deg, var(--teal), var(--teal-d));
+  color: #eafafb;
+  display: flex; align-items: center; gap: 1.2rem;
+  padding: 0 1.6rem; height: 60px;
+}
+.fw-brand { display: flex; align-items: center; gap: .6rem; font-weight: 800;
+  letter-spacing: .3px; font-size: 19px; color: #fff; }
+.fw-brand:hover { text-decoration: none; }
+.fw-brand .mark {
+  width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px;
+  background: rgba(255,255,255,.14); color: #fff;
+}
+.fw-brand .mark svg { width: 18px; height: 18px; }
+.fw-brand b { color: var(--amber); font-weight: 800; }
+
+.fw-track {
+  margin-left: .5rem; flex: 1; max-width: 460px; display: flex; align-items: center;
+  background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.18);
+  border-radius: 999px; padding: 0 .8rem; height: 38px;
+}
+.fw-track svg { width: 16px; height: 16px; stroke: #cdeef0; flex: 0 0 auto; }
+.fw-track input {
+  flex: 1; background: transparent; border: none; outline: none; color: #fff;
+  font-size: 14px; padding: 0 .5rem; font-family: var(--mono);
+}
+.fw-track input::placeholder { color: #bfe3e6; }
+
+.fw-user { margin-left: auto; display: flex; align-items: center; gap: .8rem; }
+.fw-user .who { font-size: 13px; color: #d6f1f3; }
+.fw-user .who b { color: #fff; }
+.fw-avatar {
+  width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--amber); color: #3a2800; font-weight: 800; font-size: 14px;
+}
+
+/* ---------- tab strip (second header row) ---------- */
+.fw-tabs {
+  background: var(--surface); border-bottom: 1px solid var(--line);
+  display: flex; gap: .2rem; padding: 0 1.6rem;
+  box-shadow: var(--shadow); position: sticky; top: 0; z-index: 20;
+}
+.fw-tab {
+  padding: .85rem 1rem; font-size: 14px; font-weight: 600; color: var(--muted);
+  border-bottom: 3px solid transparent; display: inline-flex; align-items: center; gap: .4rem;
+}
+.fw-tab:hover { color: var(--ink); text-decoration: none; }
+.fw-tab.active { color: var(--teal-d); border-bottom-color: var(--teal); }
+.fw-tab.admin { color: var(--amber); }
+.fw-tab.admin.active { border-bottom-color: var(--amber); }
+
+/* ---------- main ---------- */
+.fw-main { max-width: 1120px; margin: 1.8rem auto; padding: 0 1.6rem; }
+
+h1 { font-size: 1.9rem; margin: 0 0 .5rem; }
+h2 { font-size: 1.4rem; margin: 0 0 1rem; }
+h3 { font-size: 1.05rem; margin: 1.6rem 0 .6rem; color: var(--teal-d); }
+
+/* ---------- cards ---------- */
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 1.2rem 1.3rem; box-shadow: var(--shadow);
+}
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.1rem; }
+@media (max-width: 760px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+/* ---------- KPI tiles ---------- */
+.kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin: 1.2rem 0; }
+@media (max-width: 760px) { .kpi-row { grid-template-columns: 1fr 1fr; } }
+.kpi {
+  background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--teal);
+  border-radius: var(--radius); padding: .9rem 1.1rem; box-shadow: var(--shadow);
+}
+.kpi.k-blue   { border-left-color: var(--blue); }
+.kpi.k-amber  { border-left-color: var(--amber); }
+.kpi.k-green  { border-left-color: var(--green); }
+.kpi.k-red    { border-left-color: var(--red); }
+.kpi .n { font-size: 1.8rem; font-weight: 800; font-family: var(--mono); }
+.kpi .l { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+
+/* ---------- hero (landing) ---------- */
+.hero { text-align: center; padding: 3rem 1rem 1.5rem; }
+.hero .eyebrow { font-size: 12px; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--teal); font-weight: 700; }
+.hero h1 { font-size: 2.4rem; margin: .6rem 0; }
+.hero p { color: var(--muted); max-width: 600px; margin: .4rem auto 0; font-size: 1.05rem; }
+.hero-actions { margin-top: 1.6rem; }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; gap: .4rem; cursor: pointer;
+  background: var(--teal); color: #fff; font-weight: 600; font-size: 14px;
+  padding: .58rem 1.1rem; border: none; border-radius: 8px; box-shadow: var(--shadow);
+}
+.btn:hover { background: var(--teal-d); text-decoration: none; color: #fff; }
+.btn-sm { padding: .35rem .75rem; font-size: 13px; box-shadow: none; }
+.btn-amber { background: var(--amber); color: #3a2800; }
+.btn-amber:hover { background: #e08e00; color: #3a2800; }
+.btn-ghost { background: transparent; color: #eafafb; border: 1px solid rgba(255,255,255,.4); box-shadow: none; }
+.btn-ghost:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+/* ---------- tables ---------- */
+table.data { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.data thead th {
+  text-align: left; padding: .6rem .8rem; font-size: 11px; text-transform: uppercase;
+  letter-spacing: .6px; color: var(--teal-d); background: var(--teal-l);
+  border-bottom: 1px solid var(--line);
+}
+table.data tbody td { padding: .65rem .8rem; border-bottom: 1px solid var(--line); }
+table.data tbody tr:nth-child(even) td { background: #f7f9fc; }
+table.data tbody tr:hover td { background: var(--teal-l); }
+.card > table.data { margin: -.3rem 0; }
+
+table.kv { border-collapse: collapse; }
+table.kv th, table.kv td { text-align: left; padding: .4rem 1.2rem .4rem 0; vertical-align: top; }
+table.kv th { color: var(--muted); font-weight: 600; white-space: nowrap; }
+
+/* ---------- status pills ---------- */
+.st {
+  display: inline-flex; align-items: center; gap: .35rem; font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .4px; padding: .16rem .55rem; border-radius: 999px;
+}
+.st::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.st-in_transit       { color: var(--blue);  background: #e7f1fb; }
+.st-out_for_delivery { color: var(--amber); background: #fdf2dd; }
+.st-delivered        { color: var(--green); background: #e6f5ea; }
+.st-exception        { color: var(--red);   background: #fce9e9; }
+
+.badge { display: inline-block; font-size: 11px; font-weight: 700; padding: .15rem .55rem;
+  border-radius: 6px; background: var(--teal-l); color: var(--teal-d); }
+.badge-admin { background: #fdf2dd; color: #92670a; }
+
+/* ---------- tracking timeline (stepper) ---------- */
+.timeline { list-style: none; margin: .5rem 0; padding: 0; }
+.tl-step { position: relative; padding: 0 0 1.1rem 1.7rem; border-left: 2px solid var(--line); }
+.tl-step:last-child { border-left-color: transparent; padding-bottom: 0; }
+.tl-step::before {
+  content: ""; position: absolute; left: -7px; top: 2px; width: 12px; height: 12px;
+  border-radius: 50%; background: var(--surface); border: 2px solid var(--line);
+}
+.tl-step.done::before { background: var(--teal); border-color: var(--teal); }
+.tl-step.current::before { background: var(--amber); border-color: var(--amber); box-shadow: 0 0 0 4px #fdf2dd; }
+.tl-step .t { font-weight: 600; }
+.tl-step .d { font-size: 12px; color: var(--muted); }
+
+/* ---------- forms ---------- */
+label { display: block; font-size: 13px; color: var(--muted); margin-top: .7rem; font-weight: 600; }
+input, select {
+  width: 100%; background: #fff; border: 1px solid var(--line); color: var(--ink);
+  padding: .55rem .7rem; border-radius: 8px; font-size: 14px; margin-top: .25rem; font-family: inherit;
+}
+input:focus, select:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-l); }
+.inline-form { display: flex; gap: .6rem; align-items: flex-end; flex-wrap: wrap; }
+.inline-form input, .inline-form select { width: auto; }
+.narrow { max-width: 420px; margin: 2.5rem auto; }
+
+/* ---------- console / preview ---------- */
+.console {
+  background: #0b2027; color: #8fe3d8; font-family: var(--mono); font-size: 13px;
+  border-radius: 8px; padding: 1rem; white-space: pre-wrap; word-break: break-word; overflow-x: auto;
+}
+
+/* ---------- alerts ---------- */
+.alert {
+  background: var(--teal-l); border: 1px solid #bfe0e4; border-left: 4px solid var(--teal);
+  padding: .7rem 1rem; border-radius: 8px; margin: 1rem 0; color: var(--teal-d);
+}
+.alert-bad { background: #fce9e9; border-color: #f3bcbc; border-left-color: var(--red); color: #a82424; }
+.alert-flag {
+  background: #fff8e8; border-color: #f3dca0; border-left-color: var(--amber); color: #8a5a00;
+  font-family: var(--mono); font-weight: 600;
+}
+
+/* ---------- footer ---------- */
+.fw-footer {
+  margin-top: 3rem; padding: 1.4rem; text-align: center; color: var(--muted); font-size: 12px;
+  border-top: 1px solid var(--line);
+}
+.fw-footer a { color: var(--teal); }

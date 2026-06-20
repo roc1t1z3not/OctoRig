@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}Request an account{% endblock %}
+{% block content %}
+<section class="narrow">
+  <div class="card">
+    <h2>Request a dispatcher account</h2>
+    {% if error %}<div class="alert alert-bad">{{ error }}</div>{% endif %}
+    <form method="post" action="{{ url_for('register') }}">
+      <label>Username<input type="text" name="username" autofocus autocomplete="off"></label>
+      <label>Email<input type="email" name="email" autocomplete="off"></label>
+      <label>Password<input type="password" name="password" autocomplete="off"></label>
+      <button class="btn" type="submit" style="margin-top:1rem;width:100%;justify-content:center">Create account</button>
+    </form>
+    <p class="muted" style="margin-top:1rem;font-size:13px">Already onboarded? <a href="{{ url_for('login') }}">Sign in</a></p>
+  </div>
+</section>
+{% endblock %}

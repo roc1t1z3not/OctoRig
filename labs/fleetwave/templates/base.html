@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<!-- Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}FleetWave{% endblock %} — Fleet &amp; Delivery Ops</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% set u = current_user() %}
+{% set ep = request.endpoint %}
+
+<header class="fw-mast">
+  <a class="fw-brand" href="{{ url_for('index') }}">
+    <span class="mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h13v13H1z"/><path d="M14 8h5l3 3v5h-8z"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg>
+    </span>
+    Fleet<b>Wave</b>
+  </a>
+
+  {% if u %}
+  <form class="fw-track" method="GET" action="{{ url_for('shipment_search') }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" name="q" placeholder="Track shipment or recipient…" autocomplete="off">
+  </form>
+  {% endif %}
+
+  <div class="fw-user">
+    {% if u %}
+      <span class="who">Signed in as <b>{{ u.username }}</b></span>
+      <span class="fw-avatar" title="{{ u.username }}">{{ u.username[0] | upper }}</span>
+      <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm">Sign out</a>
+    {% else %}
+      <a href="{{ url_for('login') }}" class="btn btn-ghost btn-sm">Sign in</a>
+    {% endif %}
+  </div>
+</header>
+
+{% if u %}
+<nav class="fw-tabs">
+  <a class="fw-tab {{ 'active' if ep == 'dashboard' else '' }}" href="{{ url_for('dashboard') }}">Dashboard</a>
+  <a class="fw-tab {{ 'active' if ep in ['shipments','shipment_detail','shipment_search'] else '' }}" href="{{ url_for('shipments') }}">Shipments</a>
+  <a class="fw-tab {{ 'active' if ep in ['depots','depot_detail'] else '' }}" href="{{ url_for('depots') }}">Depots</a>
+  <a class="fw-tab {{ 'active' if ep == 'billing' else '' }}" href="{{ url_for('billing') }}">Freight Credits</a>
+  <a class="fw-tab {{ 'active' if ep == 'profile' else '' }}" href="{{ url_for('profile') }}">Profile</a>
+  {% if u.is_admin or u.role == 'admin' %}
+    <a class="fw-tab admin {{ 'active' if ep == 'admin_index' else '' }}" href="{{ url_for('admin_index') }}">Users</a>
+    <a class="fw-tab admin {{ 'active' if ep == 'admin_driver_roster' else '' }}" href="{{ url_for('admin_driver_roster') }}">Drivers</a>
+    <a class="fw-tab admin {{ 'active' if ep == 'admin_review' else '' }}" href="{{ url_for('admin_review') }}">Review</a>
+  {% endif %}
+</nav>
+{% endif %}
+
+<main class="fw-main">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="fw-footer">
+  FleetWave — Fleet &amp; Delivery Management Platform &middot;
+  Lab author: <a href="https://github.com/roc1t1z3not" target="_blank">roc1t1z3not</a> &middot;
+  Made with <a href="https://github.com/CommonHuman-Lab" target="_blank">CommonHuman-Lab</a>
+</footer>
+<!--
+     ___
+    /   \     CommonHuman-Lab
+   | o_o |    Security Training Labs
+    \___/     Lab: FleetWave
+   /|   |\    Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not
+  (_)   (_)
+-->
+<script>console.log('%c\u{1F419} OctoRig By CommonHuman | Lab: FleetWave | Author: roc1t1z3not | Happy hacking!','color:#0b7285;font-size:14px;font-weight:bold;');</script>
+</body>
+</html>

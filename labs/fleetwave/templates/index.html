@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{# Author of this lab : roc1t1z3not <-> https://github.com/roc1t1z3not #}
+{% block title %}FleetWave — Logistics Control{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="eyebrow">Fleet &amp; Delivery Operations</div>
+  <h1>Move every parcel with <span style="color:var(--teal)">FleetWave</span></h1>
+  <p>The internal control plane for dispatchers, depot managers, and last-mile drivers — live shipment tracking, depot manifests, driver rosters, freight-credit billing, and carrier status checks in one console.</p>
+  <div class="hero-actions">
+    <a href="{{ url_for('login') }}" class="btn">Sign in to the ops board &rarr;</a>
+  </div>
+</section>
+
+<section class="grid-3" style="margin-top:2rem">
+  <div class="card"><h3>Live Tracking</h3><p class="muted">Every shipment, status, and exception across all depots in real time.</p></div>
+  <div class="card"><h3>Depot Manifests</h3><p class="muted">Cross-dock schedules, capacity, and bonded-cargo handling per depot.</p></div>
+  <div class="card"><h3>Freight Credits</h3><p class="muted">Demand-response billing and inter-account freight-credit settlement.</p></div>
+</section>
+
+<p class="muted center" style="margin-top:2rem;font-family:var(--mono);font-size:12px">FLEETWAVE WMS v4.1 &middot; AUTHORISED OPERATORS ONLY</p>
+{% endblock %}
