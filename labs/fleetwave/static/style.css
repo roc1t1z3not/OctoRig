@@ -68,7 +68,7 @@ code { font-family: var(--mono); font-size: .88em; color: var(--navy);
     radial-gradient(circle at 88% 20%, rgba(22,182,177,.35), transparent 38%),
     repeating-linear-gradient(125deg, transparent 0 26px, rgba(255,255,255,.04) 26px 27px);
 }
-.fw-brand { position: relative; z-index: 1; display: flex; align-items: center; gap: .7rem;
+.fw-brand { position: relative; z-index: 1; flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: .7rem;
   font-weight: 800; font-size: 20px; letter-spacing: .2px; color: #fff; }
 .fw-brand:hover { color: #fff; }
 .fw-brand .mark {
@@ -81,7 +81,7 @@ code { font-family: var(--mono); font-size: .88em; color: var(--navy);
   color: #8fd6d6; display: block; margin-top: -2px; }
 
 .fw-track {
-  position: relative; z-index: 1; margin-left: 1rem; flex: 1; max-width: 440px;
+  position: relative; z-index: 1; margin: 0 1rem; flex: 0 1 440px; max-width: 440px;
   display: flex; align-items: center; gap: .5rem; height: 42px; padding: 0 1rem;
   background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
   border-radius: 999px; backdrop-filter: blur(6px); transition: background .15s, border-color .15s;
@@ -92,7 +92,7 @@ code { font-family: var(--mono); font-size: .88em; color: var(--navy);
   font-size: 14px; font-family: var(--mono); }
 .fw-track input::placeholder { color: #a9d6d6; }
 
-.fw-user { position: relative; z-index: 1; margin-left: auto; display: flex; align-items: center; gap: .85rem; }
+.fw-user { position: relative; z-index: 1; flex: 1 1 0; justify-content: flex-end; display: flex; align-items: center; gap: .85rem; }
 .fw-user .who { font-size: 13px; color: #cfeaea; }
 .fw-user .who b { color: #fff; }
 .fw-avatar {
