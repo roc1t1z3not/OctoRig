@@ -112,9 +112,7 @@ export default function LabDetailPage() {
   const deployment = lab.current_deployment;
   const isRunning = deployment?.status === "running" || deployment?.status === "starting";
   const accessInfo = deployment?.access_info.length ? deployment.access_info : lab.access_info;
-  // Subnet/IP/container names are allocated fresh per deployment now — the
-  // template's values are just static defaults that no longer match any
-  // running container, so only show them once a deployment actually exists.
+  // Subnet/IP/container names are per-deployment; only show them once a deployment exists
   const subnet = deployment?.subnet ?? null;
   const appIp = deployment?.app_ip ?? null;
   const containerNames = deployment?.container_names?.length ? deployment.container_names : null;

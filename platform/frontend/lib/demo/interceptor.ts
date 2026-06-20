@@ -208,9 +208,7 @@ function onRequest(config: InternalAxiosRequestConfig): InternalAxiosRequestConf
     return config;
   }
 
-  // Ranks — only /ranks/me and /ranks/users/:id (personal, computed) are
-  // mocked. The /ranks/ catalog and /admin/ranks/ pass through to the real
-  // backend untouched.
+  // Only personal rank lookups are mocked; the ranks catalog passes through to the real backend
   if (/^\/ranks\/me$/.test(u)) { withMock(DEMO_MY_RANK, config); return config; }
   if (RE.rankUser.test(u)) {
     const id = parseInt(u.split("/").pop() ?? "0");

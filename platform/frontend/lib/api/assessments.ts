@@ -85,9 +85,7 @@ export interface InviteLandingResponse {
   status: InviteStatus;
 }
 
-// ---------------------------------------------------------------------------
-// Admin — Assessment CRUD
-// ---------------------------------------------------------------------------
+// --- Admin — Assessment CRUD ---
 
 export interface CreateAssessmentPayload {
   name: string;
@@ -128,9 +126,7 @@ export async function deleteAssessment(id: number): Promise<void> {
   await apiClient.delete(`/admin/assessments/${id}`);
 }
 
-// ---------------------------------------------------------------------------
-// Admin — Invite management
-// ---------------------------------------------------------------------------
+// --- Admin — Invite management ---
 
 export interface CreateInvitePayload {
   email: string;
@@ -178,9 +174,7 @@ export async function getCandidateProgress(
   return data;
 }
 
-// ---------------------------------------------------------------------------
-// Candidate
-// ---------------------------------------------------------------------------
+// --- Candidate ---
 
 export async function getInviteLanding(token: string): Promise<InviteLandingResponse> {
   const { data } = await apiClient.get<InviteLandingResponse>(
